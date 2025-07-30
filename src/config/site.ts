@@ -1,83 +1,20 @@
-export type SiteConfig = typeof siteConfig;
-
+// SEO: Core site configuration for metadata
 export const siteConfig = {
-  name: "Judyseide",
-  description: "Jwellery website",
-  navItems: [
-    {
-      label: "New In",
-      href: "/new-in",
-    },
-    {
-      label: "Earrings",
-      href: "/earrings",
-    },
-    {
-      label: "Bracelets",
-      href: "/bracelets",
-    },
-    {
-      label: "Necklaces",
-      href: "/necklaces",
-    },
-    {
-      label: "Rings",
-      href: "/rings",
-    },
+  name: "KhushbuWaala",
+  url: "https://khushbuwaala.com",
+  description:
+    "Discover KhushbuWaala's exquisite collection of premium perfumes, oriental attars, and natural fragrances. Authentic quality with fast delivery across Bangladesh.",
+  keywords: "perfume, attar, fragrance, KhushbuWaala, oriental perfume, natural attar, Bangladesh perfume",
+  authors: [{ name: "KhushbuWaala" }],
+  creator: "KhushbuWaala",
+  publisher: "KhushbuWaala",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "white" },
+    { media: "(prefers-color-scheme: dark)", color: "black" },
   ],
-  topItems: [
-    {
-      label: "Blog",
-      href: "/blog",
-    },
-    {
-      label: "About us",
-      href: "/about",
-    },
-    {
-      label: "Help",
-      href: "/contact",
-    },
-  ],
-  navMenuItems: [
-    {
-      label: "Profile",
-      href: "/profile",
-    },
-    {
-      label: "Dashboard",
-      href: "/dashboard",
-    },
-    {
-      label: "Projects",
-      href: "/projects",
-    },
-    {
-      label: "Team",
-      href: "/team",
-    },
-    {
-      label: "Calendar",
-      href: "/calendar",
-    },
-    {
-      label: "Settings",
-      href: "/settings",
-    },
-    {
-      label: "Help & Feedback",
-      href: "/help-feedback",
-    },
-    {
-      label: "Logout",
-      href: "/logout",
-    },
-  ],
-  links: {
-    github: "https://github.com/heroui-inc/heroui",
-    twitter: "https://twitter.com/hero_ui",
-    docs: "https://heroui.com",
-    discord: "https://discord.gg/9b6yyZKmH4",
-    sponsor: "https://patreon.com/jrgarciadev",
+  ogImage: "/images/og-image.jpg", // Default Open Graph image
+  twitterImage: "/images/twitter-image.jpg", // Default Twitter image
+  verification: {
+    google: "your-google-verification-code", // Replace with your actual Google verification code
   },
-};
+}
