@@ -86,7 +86,7 @@ export const Footer = () => {
         },
         {
           label: "Customer Support",
-          href: "/contact",
+          href: "/contact#",
           icon: <Users className="h-4 w-4" />,
           badge: "24/7",
           description: "We're here to help",

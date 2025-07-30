@@ -4,6 +4,7 @@ import { Inter } from "next/font/google" // Assuming fontSans and fontSerif are 
 import "./globals.css"
 import { siteConfig } from "@/config/site" // Import the re-introduced siteConfig
 import { Providers } from "@/lib/Providers" // Your client-side providers wrapper
+import Head from "next/head"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -75,23 +76,25 @@ export default function RootLayout({
       className={`${inter.variable}`} // Using inter.variable as a placeholder
     >
       {/* SEO: Structured Data for Website - Server-side rendered */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            name: siteConfig.name,
-            url: siteConfig.url,
-            description: siteConfig.description,
-            potentialAction: {
-              "@type": "SearchAction",
-              target: `${siteConfig.url}/search?q={search_term_string}`,
-              "query-input": "required name=search_term_string",
-            },
-          }),
-        }}
-      />
+      <Head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: siteConfig.name,
+              url: siteConfig.url,
+              description: siteConfig.description,
+              potentialAction: {
+                "@type": "SearchAction",
+                target: `${siteConfig.url}/search?q={search_term_string}`,
+                "query-input": "required name=search_term_string",
+              },
+            }),
+          }}
+        />
+      </Head>
       <body className={`min-h-screen text-foreground bg-background font-sans antialiased ${inter.className}`}>
         <Providers>{children}</Providers>
       </body>

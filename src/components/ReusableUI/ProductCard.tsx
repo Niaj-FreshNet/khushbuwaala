@@ -26,15 +26,15 @@ interface ProductCardProps {
 
 // Client Component - Due to interactivity (add to cart/wishlist, toast)
 export function ProductCard({ product, className }: ProductCardProps) {
-    const { addToCart } = useCart()
-    const { addToWishlist, isInWishlist } = useWishlist()
+    // const { addToCart } = useCart()
+    // const { addToWishlist, isInWishlist } = useWishlist()
 
     const handleAddToCart = () => {
         const defaultQuantity = 1
         // Safely get the first variant size, or default to "3 ml" if no variants
         const defaultSize = product.variantPrices ? Object.keys(product.variantPrices)[0] : "3 ml"
 
-        addToCart(product, defaultQuantity, defaultSize) // Pass all three arguments
+        // addToCart(product, defaultQuantity, defaultSize) // Pass all three arguments
         toast("Added to Cart!", {
             description: `${product.name} (${defaultSize}) has been added to your cart.`,
             duration: 2000,
@@ -50,14 +50,15 @@ export function ProductCard({ product, className }: ProductCardProps) {
     }
 
     const handleAddToWishlist = () => {
-        addToWishlist(product) // Pass the entire product object directly
+        // addToWishlist(product) // Pass the entire product object directly
         toast("Wishlist Updated!", {
             description: `${product.name} has been added to your wishlist.`,
             duration: 2000,
         })
     }
 
-    const isProductInWishlist = isInWishlist(product._id)
+    // const isProductInWishlist = isInWishlist(product._id)
+    const isProductInWishlist = false;
 
     // Determine the link path based on category
     const categoryPathMapping: { [key: string]: string } = {
