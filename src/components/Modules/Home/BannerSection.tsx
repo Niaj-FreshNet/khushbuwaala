@@ -26,17 +26,19 @@ export function BannerSection({ heading, text, buttonText, link, bannerMobile, b
           priority // Prioritize banner images
         />
       </picture>
-      <div className="absolute inset-0 bg-black bg-opacity-60 flex flex-col justify-center items-center text-center p-6">
+      <div className="absolute inset-0 bg-gradient-to-br from-red-800/70 via-pink-800/60 to-purple-800/70 flex flex-col justify-center items-center text-center p-6">
         <h2
           id="banner-heading"
-          className="text-white text-3xl md:text-5xl font-extrabold tracking-wide leading-tight drop-shadow-lg mb-4"
+          className="text-white text-3xl md:text-5xl font-extrabold tracking-wide leading-tight drop-shadow-lg mb-4 animate-in fade-in slide-in-from-top-10 duration-700"
         >
           {heading}
         </h2>
-        <p className="text-white text-md md:text-lg mt-2 max-w-2xl drop-shadow-md mb-6">{text}</p>
+        <p className="text-white text-md md:text-lg mt-2 max-w-2xl drop-shadow-md mb-6 animate-in fade-in slide-in-from-bottom-10 duration-700 delay-200">
+          {text}
+        </p>
         <Button
           asChild
-          className="px-8 py-3 bg-red-600 text-white font-semibold transition-transform duration-200 ease-in-out hover:scale-105 hover:bg-red-700 rounded-lg"
+          className="px-8 py-3 bg-white text-red-600 font-semibold transition-transform duration-200 ease-in-out hover:scale-105 hover:bg-gray-100 rounded-full shadow-lg animate-in fade-in zoom-in-95 duration-700 delay-300"
         >
           <Link href={link} aria-label={`Shop now for ${heading}`}>
             {buttonText}

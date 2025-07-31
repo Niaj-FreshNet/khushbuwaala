@@ -2,6 +2,7 @@ import { getProducts, type Product } from "@/lib/Data/data"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Suspense } from "react"
+import type React from "react"
 import { SectionTitle } from "./SectionTitle"
 import { ProductCard } from "@/components/ReusableUI/ProductCard"
 
@@ -10,13 +11,49 @@ interface ProductCarouselSectionProps {
   category?: string
   section?: string
   linkPath?: string
+  titleVariant?: "default" | "gradient" | "elegant" | "modern" | "premium"
+  titleSubtitle?: string
+  titleIcon?: React.ReactNode
+  titleUnderlineWidth?: string
+  titleAnimated?: boolean
+  titleShowDecorations?: boolean
+  titleUnderlineVariant?: "default" | "wide" | "full" // New prop
 }
 
 // Client Component for the Carousel functionality
-function ProductCarouselClient({ products, title }: { products: Product[]; title: string }) {
+function ProductCarouselClient({
+  products,
+  title,
+  titleVariant = "default",
+  titleSubtitle,
+  titleIcon,
+  titleUnderlineWidth,
+  titleAnimated = true,
+  titleShowDecorations = true,
+  titleUnderlineVariant = "default", // Default to "default"
+}: {
+  products: Product[]
+  title: string
+  titleVariant?: "default" | "gradient" | "elegant" | "modern" | "premium"
+  titleSubtitle?: string
+  titleIcon?: React.ReactNode
+  titleUnderlineWidth?: string
+  titleAnimated?: boolean
+  titleShowDecorations?: boolean
+  titleUnderlineVariant?: "default" | "wide" | "full"
+}) {
   return (
     <div className="container mx-auto py-8">
-      <SectionTitle title={title} />
+      <SectionTitle
+        title={title}
+        subtitle={titleSubtitle}
+        variant={titleVariant}
+        icon={titleIcon}
+        underlineWidth={titleUnderlineWidth}
+        animated={titleAnimated}
+        showDecorations={titleShowDecorations}
+        underlineVariant={titleUnderlineVariant} // Pass the new prop
+      />
       <Carousel
         opts={{
           align: "start",
@@ -38,28 +75,97 @@ function ProductCarouselClient({ products, title }: { products: Product[]; title
 }
 
 // Server Component for data fetching and rendering the client carousel
-export async function ProductCarouselSection({ title, category, section, linkPath }: ProductCarouselSectionProps) {
+export async function ProductCarouselSection({
+  title,
+  category,
+  section,
+  linkPath,
+  titleVariant = "default",
+  titleSubtitle,
+  titleIcon,
+  titleUnderlineWidth,
+  titleAnimated = true,
+  titleShowDecorations = true,
+  titleUnderlineVariant = "default", // Default to "default"
+}: ProductCarouselSectionProps) {
   const products = await getProducts(category, section)
 
   return (
-    <Suspense fallback={<ProductCarouselSkeleton title={title} />}>
-      <ProductCarouselClient products={products} title={title} />
+    <Suspense
+      fallback={
+        <ProductCarouselSkeleton
+          title={title}
+          titleVariant={titleVariant}
+          titleSubtitle={titleSubtitle}
+          titleIcon={titleIcon}
+          titleUnderlineWidth={titleUnderlineWidth}
+          titleAnimated={titleAnimated}
+          titleShowDecorations={titleShowDecorations}
+          titleUnderlineVariant={titleUnderlineVariant} // Pass the new prop
+        />
+      }
+    >
+      <ProductCarouselClient
+        products={products}
+        title={title}
+        titleVariant={titleVariant}
+        titleSubtitle={titleSubtitle}
+        titleIcon={titleIcon}
+        titleUnderlineWidth={titleUnderlineWidth}
+        titleAnimated={titleAnimated}
+        titleShowDecorations={titleShowDecorations}
+        titleUnderlineVariant={titleUnderlineVariant} // Pass the new prop
+      />
     </Suspense>
   )
 }
 
-// Skeleton Loader for Product Carousel
-function ProductCarouselSkeleton({ title }: { title: string }) {
+// Enhanced Skeleton Loader for Product Carousel
+function ProductCarouselSkeleton({
+  title,
+  titleVariant = "default",
+  titleSubtitle,
+  titleIcon,
+  titleUnderlineWidth,
+  titleAnimated = true,
+  titleShowDecorations = true,
+  titleUnderlineVariant = "default", // Default to "default"
+}: {
+  title: string
+  titleVariant?: "default" | "gradient" | "elegant" | "modern" | "premium"
+  titleSubtitle?: string
+  titleIcon?: React.ReactNode
+  titleUnderlineWidth?: string
+  titleAnimated?: boolean
+  titleShowDecorations?: boolean
+  titleUnderlineVariant?: "default" | "wide" | "full"
+}) {
   return (
     <div className="container mx-auto py-8">
-      <SectionTitle title={title} />
+      <SectionTitle
+        title={title}
+        subtitle={titleSubtitle}
+        variant={titleVariant}
+        icon={titleIcon}
+        underlineWidth={titleUnderlineWidth}
+        animated={titleAnimated}
+        showDecorations={titleShowDecorations}
+        underlineVariant={titleUnderlineVariant} // Pass the new prop
+      />
       <div className="flex space-x-4 overflow-hidden">
         {[...Array(4)].map((_, i) => (
           <div key={i} className="min-w-[calc(50%-1rem)] md:min-w-[calc(33%-1rem)] lg:min-w-[calc(25%-1rem)] p-2">
-            <Skeleton className="w-full h-64 rounded-lg mb-4" />
-            <Skeleton className="h-6 w-3/4 mb-2" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-10 w-full mt-4" />
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <Skeleton className="w-full h-64 rounded-t-xl" />
+              <div className="p-4 space-y-3">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <div className="flex gap-2 pt-2">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <Skeleton className="h-10 flex-1 rounded-lg" />
+                </div>
+              </div>
+            </div>
           </div>
         ))}
       </div>

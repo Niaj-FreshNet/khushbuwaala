@@ -1,25 +1,12 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import {
-  Search,
-  Heart,
-  ShoppingCart,
-  MapPin,
-  Menu,
-  ChevronDown,
-  Sparkles,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import Image from "next/image";
-import { NavbarClientWrapper } from "./NavbarClientWrapper";
+import Link from "next/link"
+import { Search, Heart, ShoppingCart, MapPin, Menu, ChevronDown, Sparkles } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
+import { NavbarClientWrapper } from "./NavbarClientWrapper"
+import Image from "next/image"
 
 // SEO: Structured Data for Navigation
 const navigationStructuredData = {
@@ -61,7 +48,7 @@ const navigationStructuredData = {
         "Perfect gift sets and perfume packages for special occasions",
     },
   ],
-};
+}
 
 // Server Component - Main Navbar
 export function Navbar() {
@@ -115,16 +102,13 @@ export function Navbar() {
             <div className="bg-gradient-to-r from-red-600 to-pink-600 text-white text-center py-2 px-4">
               <div className="flex items-center justify-center gap-2 text-sm font-medium">
                 <Sparkles className="h-4 w-4" />
-                <span>
-                  Free shipping on orders over ৳1000 • Premium quality
-                  guaranteed
-                </span>
+                <span>Free shipping on orders over ৳1000 • Premium quality guaranteed</span>
                 <Sparkles className="h-4 w-4" />
               </div>
             </div>
 
             <nav
-              className="mx-auto px-4 lg:px-8 h-20 flex items-center justify-between"
+              className="mx-auto px-4 lg:px-8 h-20 flex items-center justify-between gap-4"
               role="navigation"
               aria-label="Main navigation"
             >
@@ -138,9 +122,7 @@ export function Navbar() {
                   onClick={handlers.toggleDrawer}
                 >
                   <Menu className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
-                  {drawerOpen && (
-                    <div className="absolute inset-0 bg-red-100 rounded-xl animate-pulse"></div>
-                  )}
+                  {drawerOpen && <div className="absolute inset-0 bg-red-100 rounded-xl animate-pulse"></div>}
                 </Button>
               </div>
 
@@ -148,13 +130,13 @@ export function Navbar() {
               <div className="hidden lg:block">
                 <Link
                   href="/"
-                  className="group relative transition-all duration-300 hover:scale-105"
+                  className="group relative transition-all duration-300 hover:scale-105 flex-shrink-0"
                   title="KhushbuWaala - Premium Perfumes and Attars"
                   aria-label="KhushbuWaala homepage"
                 >
                   <div className="absolute -inset-2 bg-gradient-to-r from-red-600 to-pink-600 rounded-xl blur opacity-0 group-hover:opacity-20 transition duration-500"></div>
                   <Image
-                    src="/images/khushbuwaala-logo.webp"
+                    src="/images/khushbuwaala.webp"
                     alt="KhushbuWaala - Premium Perfumes"
                     className="relative h-12 w-auto transition-all duration-300"
                     width={140}
@@ -184,93 +166,123 @@ export function Navbar() {
 
               {/* Enhanced Desktop Navigation */}
               <div className="hidden lg:flex flex-grow justify-center">
-                <ul className="flex space-x-6 text-black font-semibold text-sm uppercase">
-                  <li>
+                <ul
+                  className="flex items-center justify-center flex-grow space-x-8 text-gray-800 font-semibold text-sm"
+                  role="menubar"
+                >
+                  <li role="none">
                     <Link
                       href="/"
-                      className="hover:text-red-600 transition-colors duration-300 px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-red-600"
+                      className="relative px-4 py-2 hover:text-red-600 transition-all duration-300 rounded-xl group"
+                      role="menuitem"
                       title="KhushbuWaala homepage"
                     >
-                      Home
+                      <span className="relative z-10">HOME</span>
+                      <div className="absolute inset-0 bg-red-50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
                     </Link>
                   </li>
-                  <li>
+                  <li role="none">
                     <Link
                       href="/new-arrivals"
-                      className="hover:text-red-600 transition-colors duration-300 px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-red-600"
+                      className="relative px-4 py-2 hover:text-red-600 transition-all duration-300 rounded-xl group flex items-center gap-2"
+                      role="menuitem"
                       title="Latest perfume arrivals"
                     >
-                      New In
+                      <span className="relative z-10">NEW IN</span>
+                      <Badge
+                        variant="secondary"
+                        className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full"
+                      >
+                        Hot
+                      </Badge>
+                      <div className="absolute inset-0 bg-red-50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
                     </Link>
                   </li>
-                  <li>
+                  <li role="none">
                     <Link
                       href="/shop"
-                      className="hover:text-red-600 transition-colors duration-300 px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-red-600"
+                      className="relative px-4 py-2 hover:text-red-600 transition-all duration-300 rounded-xl group"
+                      role="menuitem"
                       title="Browse all perfume collections"
                     >
-                      All Collection
+                      <span className="relative z-10">ALL COLLECTION</span>
+                      <div className="absolute inset-0 bg-red-50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
                     </Link>
                   </li>
-                  <li>
+                  <li role="none">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
-                          className="hover:text-red-600 transition-colors duration-300 font-semibold text-sm uppercase p-2"
+                          className="relative px-4 py-2 hover:text-red-600 transition-all duration-300 font-semibold text-sm rounded-xl group"
                           aria-label="Perfume categories menu"
+                          aria-haspopup="true"
                         >
-                          Menu
-                          <ChevronDown className="ml-1 h-4 w-4" />
+                          <span className="relative z-10 flex items-center gap-2">
+                            CATEGORIES
+                            <ChevronDown className="h-4 w-4 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                          </span>
+                          <div className="absolute inset-0 bg-red-50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-56 bg-white border border-gray-200 shadow-lg">
+                      <DropdownMenuContent className="w-72 bg-white/95 backdrop-blur-xl border border-red-100 shadow-2xl rounded-2xl p-2">
                         {menuItems.map((item) => (
                           <DropdownMenuItem key={item.href} asChild>
                             <Link
                               href={item.href}
-                              className="block px-4 py-2 text-black font-bold text-md hover:bg-gray-100 transition-colors duration-300"
+                              className="block px-4 py-3 text-gray-800 font-medium hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 hover:text-red-600 transition-all duration-300 rounded-xl group"
                               title={item.description}
                             >
-                              {item.label}
+                              <div className="flex flex-col">
+                                <span className="font-semibold">{item.label}</span>
+                                <span className="text-xs text-gray-500 group-hover:text-red-500 mt-1">
+                                  {item.description}
+                                </span>
+                              </div>
                             </Link>
                           </DropdownMenuItem>
                         ))}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </li>
-                  <li>
+                  <li role="none">
                     <Link
                       href="/womens-perfume"
-                      className="hover:text-red-600 transition-colors duration-300 px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-red-600"
+                      className="relative px-4 py-2 hover:text-red-600 transition-all duration-300 rounded-xl group"
+                      role="menuitem"
                       title="Exclusive perfumes for women"
                     >
-                      For Women
+                      <span className="relative z-10">FOR WOMEN</span>
+                      <div className="absolute inset-0 bg-red-50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
                     </Link>
                   </li>
-                  <li>
+                  <li role="none">
                     <Link
                       href="/gifts-and-packages"
-                      className="hover:text-red-600 transition-colors duration-300 px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-red-600"
+                      className="relative px-4 py-2 hover:text-red-600 transition-all duration-300 rounded-xl group"
+                      role="menuitem"
                       title="Perfect gift sets and packages"
                     >
-                      Gifts and Packages
+                      <span className="relative z-10">GIFTS</span>
+                      <div className="absolute inset-0 bg-red-50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
                     </Link>
                   </li>
-                  <li>
+                  <li role="none">
                     <Link
                       href="/contact"
-                      className="hover:text-red-600 transition-colors duration-300 px-2 py-1 rounded focus:outline-none focus:ring-2 focus:ring-red-600"
+                      className="relative px-4 py-2 hover:text-red-600 transition-all duration-300 rounded-xl group"
+                      role="menuitem"
                       title="Contact KhushbuWaala"
                     >
-                      Contact
+                      <span className="relative z-10">CONTACT</span>
+                      <div className="absolute inset-0 bg-red-50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
                     </Link>
                   </li>
                 </ul>
               </div>
 
               {/* Enhanced Desktop Icons */}
-              <div className="hidden lg:flex gap-3 items-center">
+              <div className="hidden lg:flex gap-3 items-center flex-shrink-0">
                 <Button
                   variant="ghost"
                   size="icon"

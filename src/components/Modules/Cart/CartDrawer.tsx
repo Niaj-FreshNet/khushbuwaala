@@ -10,6 +10,42 @@ import { Separator } from "@/components/ui/separator"
 import Image from "next/image"
 import { useCart } from "@/context/CartContext"
 
+
+const cartItems = [
+  {
+    _id: "1",
+    name: "Oud Wood Intense",
+    size: "50ml",
+    quantity: 2,
+    primaryImage: "/sample-product.jpg", // Add this image in your public folder or use placeholder
+    variantPrices: { "50ml": 1200 },
+  },
+  {
+    _id: "2",
+    name: "Amber & Spice",
+    size: "100ml",
+    quantity: 1,
+    primaryImage: "/sample-product-2.jpg",
+    variantPrices: { "100ml": 1800 },
+  },
+]
+
+const updateQuantity = (id: string, size: string, newQuantity: number) => {
+  console.log(`Updating ${id} (${size}) to quantity ${newQuantity}`)
+}
+
+const removeFromCart = (id: string, size: string) => {
+  console.log(`Removing ${id} (${size}) from cart`)
+}
+
+const calculateSubtotal = () =>
+  cartItems.reduce(
+    (acc, item) => acc + (item.variantPrices?.[item.size] || 0) * item.quantity,
+    0
+  )
+
+  
+
 interface CartDrawerProps {
   visible: boolean
   onClose: () => void

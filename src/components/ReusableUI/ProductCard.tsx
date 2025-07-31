@@ -58,6 +58,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
     }
 
     // const isProductInWishlist = isInWishlist(product._id)
+    const isProductInWishlist = false;
 
     // Determine the link path based on category
     const categoryPathMapping: { [key: string]: string } = {

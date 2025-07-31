@@ -11,6 +11,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
+import Image from "next/image"
 
 interface NavDrawerProps {
   open: boolean
@@ -132,8 +133,8 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
         <div className="p-6 border-b bg-gradient-to-r from-red-50 to-red-100">
           <Link href="/" onClick={onClose} className="flex items-center space-x-3 group">
             <div className="relative">
-              <img
-                src="/images/khushbuwaala-logo.webp"
+              <Image
+                src="/images/khushbuwaala.webp"
                 alt="KhushbuWaala"
                 className="h-10 w-auto transition-transform duration-300 group-hover:scale-110"
                 width={140}
