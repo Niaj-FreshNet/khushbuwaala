@@ -1,12 +1,12 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import type { Product } from "@/lib/Data/data" // Import Product interface
+import type { Product } from "@/lib/Data/data"
 
 interface CartItem extends Product {
   quantity: number
-  size: string // Added size to CartItem
-  variantPrices?: { [key: string]: number } // Explicitly added variantPrices to CartItem for clarity
+  size: string
+  variantPrices?: { [key: string]: number }
 }
 
 interface CartContextType {
@@ -27,7 +27,6 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
-    // Initialize from localStorage on client-side
     if (typeof window !== "undefined") {
       const savedCart = localStorage.getItem("cartItems")
       return savedCart ? JSON.parse(savedCart) : []
@@ -38,7 +37,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [checkoutItem, setCheckoutItem] = useState<CartItem | null>(null)
   const [checkoutMode, setCheckoutMode] = useState(false)
 
-  // Persist cartItems to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("cartItems", JSON.stringify(cartItems))
@@ -47,14 +45,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const addToCart = (product: Product, quantity: number, selectedSize: string) => {
     setCartItems((prev) => {
-      const existingProductIndex = prev.findIndex((item) => item._id === product._id && item.size === selectedSize)
-
-      if (existingProductIndex !== -1) {
-        const updatedCartItems = [...prev]
-        updatedCartItems[existingProductIndex].quantity += quantity
-        return updatedCartItems
+      const index = prev.findIndex((item) => item._id === product._id && item.size === selectedSize)
+      if (index !== -1) {
+        const updated = [...prev]
+        updated[index].quantity += quantity
+        return updated
       } else {
-        // Ensure variantPrices is copied from product if it exists
         return [...prev, { ...product, quantity, size: selectedSize, variantPrices: product.variantPrices }]
       }
     })
@@ -62,7 +58,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const updateQuantity = (productId: string, size: string, quantity: number) => {
     setCartItems((prev) =>
-      prev.map((item) => (item._id === productId && item.size === size ? { ...item, quantity } : item)),
+      prev.map((item) => (item._id === productId && item.size === size ? { ...item, quantity } : item))
     )
   }
 
@@ -72,7 +68,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const calculateSubtotal = () => {
     return cartItems.reduce((total, item) => {
-      // Ensure variantPrices and selected size exist before accessing
       const price = item.variantPrices?.[item.size] || item.price || 0
       return total + price * item.quantity
     }, 0)
@@ -80,17 +75,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const calculateTotal = () => {
     const subtotal = calculateSubtotal()
-    const taxes = subtotal * 0.0 // e.g., 0% tax rate
+    const taxes = subtotal * 0.0
     return subtotal + taxes
   }
 
   const setCheckoutOnlyItem = (product: Product, quantity: number, size: string) => {
     setCheckoutItem({ ...product, quantity, size, variantPrices: product.variantPrices })
-    setCheckoutMode(true) // Enable single-item checkout
+    setCheckoutMode(true)
   }
 
   const proceedToCartCheckout = () => {
-    setCheckoutMode(false) // Normal checkout mode for all cart items
+    setCheckoutMode(false)
   }
 
   const clearCart = () => {
@@ -120,8 +115,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
 export const useCart = () => {
   const context = useContext(CartContext)
-  if (!context) {
-    throw new Error("useCart must be used within CartProvider")
-  }
+  // if (!context) {
+  //   throw new Error("useCart must be used within CartProvider")
+  // }
   return context
 }

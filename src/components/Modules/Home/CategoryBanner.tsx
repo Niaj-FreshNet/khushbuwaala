@@ -1,6 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
 import { SectionTitle } from "./SectionTitle"
+import { Button } from "@/components/ui/button"
+import { ArrowRight } from "lucide-react"
 
 interface CategoryCardProps {
   CategoryName: string
@@ -14,7 +16,7 @@ function CategoryCard({ CategoryName, CategoryImage, CategoryLink, description }
   return (
     <Link
       href={CategoryLink}
-      className="block group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1"
+      className="block group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1"
       aria-label={`Explore ${CategoryName} category`}
       title={`Shop ${CategoryName}`}
     >
@@ -26,10 +28,20 @@ function CategoryCard({ CategoryName, CategoryImage, CategoryLink, description }
           sizes="(max-width: 768px) 50vw, 25vw"
           className="object-cover transition-transform duration-500 group-hover:scale-110"
         />
-        <div className="absolute inset-0 flex items-center justify-center text-center bg-black bg-opacity-20 transition-opacity duration-300 group-hover:bg-opacity-40">
-          <p className="text-2xl md:text-3xl font-bold text-white px-4 text-shadow transition-transform duration-300 group-hover:scale-105">
-            {CategoryName}
+        {/* Enhanced Overlay for Text and Button */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
+          <h3 className="text-white text-2xl md:text-3xl font-bold mb-2 drop-shadow-lg">{CategoryName}</h3>
+          <p className="text-gray-200 text-sm md:text-base mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+            {description}
           </p>
+          <Button
+            asChild
+            className="w-fit px-6 py-2 bg-white text-red-600 font-semibold rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-105"
+          >
+            <Link href={CategoryLink}>
+              Shop Now <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
         </div>
       </div>
     </Link>
@@ -41,34 +53,40 @@ export function CategoryBanner() {
   const categories = [
     {
       CategoryName: "Inspired Perfume Oil",
-      CategoryImage: "/placeholder.svg?height=256&width=300",
+      CategoryImage: "/images/inspired-category.jpg",
       CategoryLink: "/inspired-perfume-oil",
-      description: "High-quality inspired perfume oils",
+      description: "High-quality inspired perfume oils that capture the essence of luxury fragrances.",
     },
     {
       CategoryName: "Oriental & Arabian Attar",
-      CategoryImage: "/placeholder.svg?height=256&width=300",
+      CategoryImage: "/images/oriental-category.jpg",
       CategoryLink: "/oriental-attar",
-      description: "Authentic oriental and Arabian attar",
+      description: "Authentic oriental and Arabian attar, rich in tradition and exotic aromas.",
     },
     {
       CategoryName: "Artificial Oud",
-      CategoryImage: "/placeholder.svg?height=256&width=300",
+      CategoryImage: "/images/oud-category.jpg",
       CategoryLink: "/artificial-oud",
-      description: "Premium artificial oud fragrances",
+      description: "Premium artificial oud fragrances, offering deep and captivating woody notes.",
     },
     {
       CategoryName: "Natural Collections",
-      CategoryImage: "/placeholder.svg?height=256&width=300",
+      CategoryImage: "/images/natural-category.jpg",
       CategoryLink: "/natural-attar",
-      description: "Pure natural attar and organic fragrances",
+      description: "Pure natural attar and organic fragrances, crafted from the finest natural ingredients.",
     },
   ]
 
   return (
-    <section className="py-12 px-4" aria-labelledby="categories-heading">
-      <SectionTitle title="Shop by Categories" underlineWidth="w-48" className="mb-8" />
-      <div className="max-w-screen-xl mx-auto grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <section className="py-12 px-4 bg-gray-50" aria-labelledby="categories-heading">
+      <SectionTitle
+        title="Shop by Categories"
+        subtitle="Explore our diverse range of exquisite fragrances"
+        underlineWidth="w-48"
+        className="mb-8"
+        variant="modern"
+      />
+      <div className="max-w-screen-xl mx-auto grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {categories.map((category) => (
           <CategoryCard key={category.CategoryName} {...category} />
         ))}

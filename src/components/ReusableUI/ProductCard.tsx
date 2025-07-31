@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card"
 import { Heart, ShoppingCart } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useWishlist } from "@/context/wishlist.context"
-import { useCart } from "@/context/cart.context"
+// import { useWishlist } from "@/context/WishlistContext"
+// import { useCart } from "@/context/CartContext"
 import { toast } from "sonner"
 
 interface ProductCardProps {
@@ -115,12 +115,15 @@ export function ProductCard({ product, className }: ProductCardProps) {
                     size="icon"
                     className={cn(
                         "rounded-full transition-colors duration-200",
-                        isProductInWishlist ? "bg-red-100 text-red-600 hover:bg-red-200" : "hover:bg-gray-100",
+                        // isProductInWishlist ? "bg-red-100 text-red-600 hover:bg-red-200" : "hover:bg-gray-100",
+                        "bg-red-100 text-red-600 hover:bg-red-200",
                     )}
                     onClick={handleAddToWishlist}
-                    aria-label={isProductInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                    // aria-label={isProductInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                    aria-label="Remove from wishlist"
                 >
-                    <Heart className="h-5 w-5" fill={isProductInWishlist ? "currentColor" : "none"} />
+                    {/* <Heart className="h-5 w-5" fill={isProductInWishlist ? "currentColor" : "none"} /> */}
+                    <Heart className="h-5 w-5" fill="currentColor" />
                 </Button>
                 <Button
                     className="flex-1 bg-red-600 hover:bg-red-700 text-white transition-transform duration-200 transform hover:scale-105"
