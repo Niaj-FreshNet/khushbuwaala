@@ -57,6 +57,8 @@ export default function ShopPage() {
           mobile: "/images/n1.webp",
         }}
         altText="Banner displaying the best quality perfume oil collection"
+        variant="primary"
+        overlayPattern="gradient"
       />
 
       {/* Notice Bar */}

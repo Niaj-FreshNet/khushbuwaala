@@ -150,16 +150,16 @@ export function ShopProducts() {
     }[columns] || "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" // Default fallback
 
   return (
-    <section className="container mx-auto py-8 px-4" aria-labelledby="shop-products-heading">
+    <section className="container mx-auto py-8 px-4 relative" aria-labelledby="shop-products-heading">
       <h2 id="shop-products-heading" className="sr-only">
         All Products
       </h2>
 
-      {/* Controls: Filter, Sort, Column Layout */}
-      <div className="flex justify-between items-center bg-white py-3 px-2 rounded-lg shadow-sm mb-6 border border-gray-100">
+      {/* Enhanced Sticky Controls: Filter, Sort, Column Layout */}
+      <div className="sticky top-20 z-40 flex justify-between items-center bg-white/95 backdrop-blur-xl py-4 px-4 rounded-xl shadow-lg mb-8 border border-gray-200/50 transition-all duration-300">
         <Button
           variant="outline"
-          className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors bg-transparent"
+          className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-300 bg-transparent rounded-lg px-4 py-2 shadow-sm hover:shadow-md"
           onClick={() => setIsFilterSheetVisible(true)}
           aria-controls="filter-sheet"
           aria-expanded={isFilterSheetVisible}
@@ -167,12 +167,14 @@ export function ShopProducts() {
           <FilterIcon className="h-4 w-4" /> Filter
         </Button>
 
-        <div className="flex gap-2">
+        <div className="flex gap-1 bg-gray-50 p-1 rounded-lg">
           {/* Column Layout Buttons */}
           <Button
             variant="outline"
             size="icon"
-            className="hidden sm:flex h-9 w-9 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors bg-transparent"
+            className={`hidden sm:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+              columns === 1 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+            }`}
             onClick={() => handleColumnChange(1)}
             aria-label="Show products in 1 column"
           >
@@ -181,7 +183,9 @@ export function ShopProducts() {
           <Button
             variant="outline"
             size="icon"
-            className="h-9 w-9 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors bg-transparent"
+            className={`h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+              columns === 2 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+            }`}
             onClick={() => handleColumnChange(2)}
             aria-label="Show products in 2 columns"
           >
@@ -190,7 +194,9 @@ export function ShopProducts() {
           <Button
             variant="outline"
             size="icon"
-            className="hidden md:flex h-9 w-9 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors bg-transparent"
+            className={`hidden md:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+              columns === 3 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+            }`}
             onClick={() => handleColumnChange(3)}
             aria-label="Show products in 3 columns"
           >
@@ -199,7 +205,9 @@ export function ShopProducts() {
           <Button
             variant="outline"
             size="icon"
-            className="hidden lg:flex h-9 w-9 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors bg-transparent"
+            className={`hidden lg:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+              columns === 4 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+            }`}
             onClick={() => handleColumnChange(4)}
             aria-label="Show products in 4 columns"
           >
@@ -208,7 +216,9 @@ export function ShopProducts() {
           <Button
             variant="outline"
             size="icon"
-            className="hidden xl:flex h-9 w-9 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors bg-transparent"
+            className={`hidden xl:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+              columns === 5 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+            }`}
             onClick={() => handleColumnChange(5)}
             aria-label="Show products in 5 columns"
           >
@@ -218,7 +228,7 @@ export function ShopProducts() {
 
         <Button
           variant="outline"
-          className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors bg-transparent"
+          className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 bg-transparent rounded-lg px-4 py-2 shadow-sm hover:shadow-md"
           onClick={() => setIsSortSheetVisible(true)}
           aria-controls="sort-sheet"
           aria-expanded={isSortSheetVisible}
@@ -229,9 +239,9 @@ export function ShopProducts() {
 
       {/* Product List */}
       {isLoading ? (
-        <div className={`grid gap-4 ${gridColsClass}`}>
+        <div className={`grid gap-6 ${gridColsClass}`}>
           {Array.from({ length: 20 }).map((_, index) => (
-            <div key={index} className="border border-gray-100 rounded-xl shadow-sm overflow-hidden">
+            <div key={index} className="border border-gray-100 rounded-xl shadow-sm overflow-hidden bg-white">
               <Skeleton className="w-full h-64 rounded-t-xl" />
               <div className="p-4 space-y-3">
                 <Skeleton className="h-6 w-3/4" />
@@ -247,13 +257,18 @@ export function ShopProducts() {
       ) : (
         <>
           {displayedProducts.length > 0 ? (
-            <div className={`grid gap-4 ${gridColsClass}`}>
+            <div className={`grid gap-6 ${gridColsClass}`}>
               {displayedProducts.slice(0, visibleProductsCount).map((product) => (
-                <ProductCard key={product._id} product={product} />
+                <ProductCard 
+                  key={product._id} 
+                  product={product} 
+                  layout={columns === 1 ? "list" : "grid"}
+                  showDescription={columns === 1}
+                />
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center text-center py-16 bg-white rounded-lg shadow-md">
+            <div className="flex flex-col items-center justify-center text-center py-20 bg-white rounded-xl shadow-lg border border-gray-100">
               <FilterIcon className="h-16 w-16 text-gray-300 mb-4" />
               <h3 className="text-xl font-semibold text-gray-800 mb-2">No products found</h3>
               <p className="text-sm text-gray-600 max-w-sm">
@@ -267,11 +282,11 @@ export function ShopProducts() {
       {/* Load More Button */}
       {totalFilteredProducts > visibleProductsCount && (
         <div className="text-center mt-8">
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm text-gray-600 mb-6">
             You've viewed {Math.min(visibleProductsCount, totalFilteredProducts)} of {totalFilteredProducts} products
           </p>
           <Button
-            className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105"
+            className="px-10 py-4 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
             onClick={handleLoadMore}
             disabled={loadingMore}
           >
