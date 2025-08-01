@@ -1,39 +1,13 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
-import {
-  FilterIcon,
-  ListFilter,
-  Grid3X3,
-  Grid2X2,
-  LayoutGrid,
-  List,
-  Loader2,
-  SlidersHorizontal,
-  Eye,
-  TrendingUp,
-  Zap,
-} from "lucide-react"
-import { getProducts, type Product } from "@/lib/Data/data"
-import { cn } from "@/lib/utils"
-import { ProductCard } from "@/components/ReusableUI/ProductCard"
+import { FilterIcon, ListFilter, LayoutGrid, LayoutList, Loader2 } from "lucide-react"
+import { getProducts, type Product } from "@/lib/Data/data" // Assuming getProducts can fetch all products
 import { FilterSheet } from "./FilterSheet"
 import { SortSheet } from "./SortSheet"
-
-interface LayoutOption {
-  id: string
-  label: string
-  icon: React.ReactNode
-  columns: number
-  gridClass: string
-  cardSize: "small" | "medium" | "large"
-  showOn: string[]
-}
+import { ProductCard } from "@/components/ReusableUI/ProductCard"
 
 export function ShopProducts() {
   const [allProducts, setAllProducts] = useState<Product[]>([])
@@ -45,71 +19,25 @@ export function ShopProducts() {
     selectedSpecification: "all",
   })
   const [sortOption, setSortOption] = useState("new-to-old")
-  const [currentLayout, setCurrentLayout] = useState("grid-4")
-  const [visibleProductsCount, setVisibleProductsCount] = useState(20)
+  const [columns, setColumns] = useState(2) // Default column layout for mobile
+  const [visibleProductsCount, setVisibleProductsCount] = useState(20) // Initial number of products to show
   const [loadingMore, setLoadingMore] = useState(false)
+
   const [isFilterSheetVisible, setIsFilterSheetVisible] = useState(false)
   const [isSortSheetVisible, setIsSortSheetVisible] = useState(false)
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
 
-  // Enhanced layout options with better responsive design
-  const layoutOptions: LayoutOption[] = [
-    {
-      id: "list",
-      label: "List View",
-      icon: <List className="h-4 w-4" />,
-      columns: 1,
-      gridClass: "grid-cols-1",
-      cardSize: "large",
-      showOn: ["sm", "md", "lg", "xl"],
-    },
-    {
-      id: "grid-2",
-      label: "2 Columns",
-      icon: <Grid2X2 className="h-4 w-4" />,
-      columns: 2,
-      gridClass: "grid-cols-2",
-      cardSize: "medium",
-      showOn: ["all"],
-    },
-    {
-      id: "grid-3",
-      label: "3 Columns",
-      icon: <Grid3X3 className="h-4 w-4" />,
-      columns: 3,
-      gridClass: "grid-cols-2 md:grid-cols-3",
-      cardSize: "medium",
-      showOn: ["md", "lg", "xl"],
-    },
-    {
-      id: "grid-4",
-      label: "4 Columns",
-      icon: <LayoutGrid className="h-4 w-4" />,
-      columns: 4,
-      gridClass: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
-      cardSize: "small",
-      showOn: ["lg", "xl"],
-    },
-    {
-      id: "grid-5",
-      label: "5 Columns",
-      icon: <LayoutGrid className="h-4 w-4" />,
-      columns: 5,
-      gridClass: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
-      cardSize: "small",
-      showOn: ["xl"],
-    },
-  ]
-
-  // Fetch products
+  // Fetch all products on component mount
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true)
       try {
         const products = await getProducts()
-        setAllProducts(products)
+        // Sort alphabetically by default initially
+        const sortedAlphabetically = [...products].sort((a, b) => a.name.localeCompare(b.name))
+        setAllProducts(sortedAlphabetically)
       } catch (error) {
         console.error("Failed to fetch products:", error)
+        // Handle error state, e.g., show an error message
       } finally {
         setIsLoading(false)
       }
@@ -117,7 +45,7 @@ export function ShopProducts() {
     fetchProducts()
   }, [])
 
-  // Apply filters and sorting
+  // Apply filters and sort whenever dependencies change
   const displayedProducts = useMemo(() => {
     let filtered = allProducts.filter((product) => {
       const matchesPrice = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1]
@@ -156,6 +84,8 @@ export function ShopProducts() {
         filtered.sort((a, b) => b.price - a.price)
         break
       case "old-to-new":
+        // Assuming products have a createdAt or similar field for date sorting
+        // For now, using a simple ID comparison as a placeholder
         filtered.sort((a, b) => a._id.localeCompare(b._id))
         break
       case "new-to-old":
@@ -168,22 +98,19 @@ export function ShopProducts() {
   }, [allProducts, filters, sortOption])
 
   const totalFilteredProducts = displayedProducts.length
-  const currentLayoutOption = layoutOptions.find((option) => option.id === currentLayout) || layoutOptions[2]
 
   const handleApplyFilters = (newFilters: any) => {
     setFilters(newFilters)
-    setVisibleProductsCount(20)
+    setVisibleProductsCount(20) // Reset visible products on new filter
   }
 
   const handleSortChange = (newSortOption: string) => {
     setSortOption(newSortOption)
-    setVisibleProductsCount(20)
+    setVisibleProductsCount(20) // Reset visible products on new sort
   }
 
-  const handleLayoutChange = (layoutId: string) => {
-    setCurrentLayout(layoutId)
-    const layout = layoutOptions.find((option) => option.id === layoutId)
-    setViewMode(layout?.id === "list" ? "list" : "grid")
+  const handleColumnChange = (cols: number) => {
+    setColumns(cols)
   }
 
   const handleLoadMore = () => {
@@ -191,137 +118,137 @@ export function ShopProducts() {
     setTimeout(() => {
       setVisibleProductsCount((prev) => Math.min(prev + 20, totalFilteredProducts))
       setLoadingMore(false)
-    }, 1000)
+    }, 1000) // Simulate loading time
   }
 
-  // Auto-adjust layout on screen size change
+  // Effect to set initial columns based on screen size
   useEffect(() => {
     const handleResize = () => {
-      const width = window.innerWidth
-      if (width < 768 && currentLayout === "grid-5") {
-        setCurrentLayout("grid-2")
-      } else if (width < 1024 && (currentLayout === "grid-4" || currentLayout === "grid-5")) {
-        setCurrentLayout("grid-3")
+      if (window.innerWidth >= 1280) {
+        // lg breakpoint
+        setColumns(4)
+      } else if (window.innerWidth >= 768) {
+        // md breakpoint
+        setColumns(3)
+      } else {
+        // mobile
+        setColumns(2)
       }
     }
-
     handleResize()
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
-  }, [currentLayout])
+  }, [])
+
+  const gridColsClass =
+    {
+      1: "grid-cols-1",
+      2: "grid-cols-2",
+      3: "grid-cols-2 md:grid-cols-3",
+      4: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
+      5: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
+    }[columns] || "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" // Default fallback
 
   return (
-    <section className="container mx-auto py-8 px-4" aria-labelledby="shop-products-heading">
+    <section className="container mx-auto py-8 px-4 relative" aria-labelledby="shop-products-heading">
       <h2 id="shop-products-heading" className="sr-only">
         All Products
       </h2>
 
-      {/* Enhanced Controls Bar */}
-      <div className="bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-2xl shadow-lg shadow-gray-200/20 p-4 mb-8 sticky top-20 z-40">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          {/* Left Controls */}
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all duration-300 rounded-xl border-gray-200 bg-white/50 backdrop-blur-sm"
-              onClick={() => setIsFilterSheetVisible(true)}
-            >
-              <SlidersHorizontal className="h-4 w-4" />
-              <span className="hidden sm:inline">Filter</span>
-              {(filters.selectedCategories.length > 0 || filters.selectedSmells.length > 0) && (
-                <Badge variant="secondary" className="bg-red-100 text-red-700 text-xs">
-                  {filters.selectedCategories.length + filters.selectedSmells.length}
-                </Badge>
-              )}
-            </Button>
+      {/* Enhanced Sticky Controls: Filter, Sort, Column Layout */}
+      <div className="sticky top-0 z-40 flex justify-between items-center bg-white/95 backdrop-blur-xl py-4 px-4 rounded-xl shadow-lg mb-8 border border-gray-200/50 transition-all duration-300">
+        <Button
+          variant="outline"
+          className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-300 bg-transparent rounded-lg px-4 py-2 shadow-sm hover:shadow-md"
+          onClick={() => setIsFilterSheetVisible(true)}
+          aria-controls="filter-sheet"
+          aria-expanded={isFilterSheetVisible}
+        >
+          <FilterIcon className="h-4 w-4" /> Filter
+        </Button>
 
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-300 rounded-xl border-gray-200 bg-white/50 backdrop-blur-sm"
-              onClick={() => setIsSortSheetVisible(true)}
-            >
-              <ListFilter className="h-4 w-4" />
-              <span className="hidden sm:inline">Sort</span>
-            </Button>
-          </div>
-
-          {/* Center - Product Count */}
-          <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50/80 px-3 py-2 rounded-lg backdrop-blur-sm">
-            <Eye className="h-4 w-4" />
-            <span className="font-medium">{totalFilteredProducts}</span>
-            <span>products</span>
-            {totalFilteredProducts !== allProducts.length && (
-              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                filtered
-              </Badge>
-            )}
-          </div>
-
-          {/* Right - Layout Controls */}
-          <div className="flex items-center gap-1 bg-gray-50/80 p-1 rounded-xl backdrop-blur-sm">
-            {layoutOptions.map((option) => {
-              const shouldShow =
-                option.showOn.includes("all") ||
-                (window.innerWidth >= 640 && option.showOn.includes("sm")) ||
-                (window.innerWidth >= 768 && option.showOn.includes("md")) ||
-                (window.innerWidth >= 1024 && option.showOn.includes("lg")) ||
-                (window.innerWidth >= 1280 && option.showOn.includes("xl"))
-
-              if (!shouldShow) return null
-
-              return (
-                <Button
-                  key={option.id}
-                  variant="ghost"
-                  size="sm"
-                  className={cn(
-                    "h-9 w-9 p-0 transition-all duration-300 rounded-lg",
-                    currentLayout === option.id
-                      ? "bg-white text-blue-600 shadow-sm border border-blue-200"
-                      : "text-gray-500 hover:text-gray-700 hover:bg-white/50",
-                  )}
-                  onClick={() => handleLayoutChange(option.id)}
-                  title={option.label}
-                >
-                  {option.icon}
-                </Button>
-              )
-            })}
-          </div>
+        <div className="flex gap-1 bg-gray-50 p-1 rounded-lg">
+          {/* Column Layout Buttons */}
+          <Button
+            variant="outline"
+            size="icon"
+            className={`hidden sm:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+              columns === 1 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+            }`}
+            onClick={() => handleColumnChange(1)}
+            aria-label="Show products in 1 column"
+          >
+            <LayoutList className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className={`h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+              columns === 2 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+            }`}
+            onClick={() => handleColumnChange(2)}
+            aria-label="Show products in 2 columns"
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className={`hidden md:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+              columns === 3 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+            }`}
+            onClick={() => handleColumnChange(3)}
+            aria-label="Show products in 3 columns"
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className={`hidden lg:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+              columns === 4 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+            }`}
+            onClick={() => handleColumnChange(4)}
+            aria-label="Show products in 4 columns"
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className={`hidden xl:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+              columns === 5 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+            }`}
+            onClick={() => handleColumnChange(5)}
+            aria-label="Show products in 5 columns"
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
         </div>
 
-        {/* Active Filters Display */}
-        {(filters.selectedCategories.length > 0 || filters.selectedSmells.length > 0) && (
-          <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200/50">
-            <span className="text-xs font-medium text-gray-500">Active filters:</span>
-            {filters.selectedCategories.map((category: string) => (
-              <Badge key={category} variant="secondary" className="bg-red-50 text-red-700 text-xs">
-                {category}
-              </Badge>
-            ))}
-            {filters.selectedSmells.map((smell: string) => (
-              <Badge key={smell} variant="secondary" className="bg-blue-50 text-blue-700 text-xs">
-                {smell}
-              </Badge>
-            ))}
-          </div>
-        )}
+        <Button
+          variant="outline"
+          className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 bg-transparent rounded-lg px-4 py-2 shadow-sm hover:shadow-md"
+          onClick={() => setIsSortSheetVisible(true)}
+          aria-controls="sort-sheet"
+          aria-expanded={isSortSheetVisible}
+        >
+          <ListFilter className="h-4 w-4" /> Sort
+        </Button>
       </div>
 
-      {/* Enhanced Product Grid */}
+      {/* Product List */}
       {isLoading ? (
-        <div className={`grid gap-6 ${currentLayoutOption.gridClass} transition-all duration-500`}>
+        <div className={`grid gap-6 ${gridColsClass}`}>
           {Array.from({ length: 20 }).map((_, index) => (
-            <div key={index} className="group">
-              <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300">
-                <Skeleton className="w-full h-64 rounded-t-2xl" />
-                <div className="p-4 space-y-3">
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <div className="flex gap-2 pt-2">
-                    <Skeleton className="h-10 w-10 rounded-full" />
-                    <Skeleton className="h-10 flex-1 rounded-lg" />
-                  </div>
+            <div key={index} className="border border-gray-100 rounded-xl shadow-sm overflow-hidden bg-white">
+              <Skeleton className="w-full h-64 rounded-t-xl" />
+              <div className="p-4 space-y-3">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <div className="flex gap-2 pt-2">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <Skeleton className="h-10 flex-1 rounded-lg" />
                 </div>
               </div>
             </div>
@@ -330,93 +257,47 @@ export function ShopProducts() {
       ) : (
         <>
           {displayedProducts.length > 0 ? (
-            <div
-              className={cn(
-                "grid gap-6 transition-all duration-500",
-                currentLayoutOption.gridClass,
-                viewMode === "list" && "grid-cols-1",
-              )}
-            >
-              {displayedProducts.slice(0, visibleProductsCount).map((product, index) => (
-                <div
-                  key={product._id}
-                  className="group animate-in fade-in slide-in-from-bottom-4 duration-700"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <ProductCard
-                    product={product}
-                    className={cn(
-                      "h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-xl",
-                      viewMode === "list" && "flex flex-row items-center max-w-none",
-                    )}
-                  />
-                </div>
+            <div className={`grid gap-6 ${gridColsClass}`}>
+              {displayedProducts.slice(0, visibleProductsCount).map((product) => (
+                <ProductCard 
+                  key={product._id} 
+                  product={product} 
+                  layout={columns === 1 ? "list" : "grid"}
+                  showDescription={columns === 1}
+                />
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center text-center py-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border border-gray-200">
-              <div className="w-24 h-24 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center mb-6">
-                <FilterIcon className="h-12 w-12 text-gray-400" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-3">No products found</h3>
-              <p className="text-gray-600 max-w-md mb-6 leading-relaxed">
-                We couldn't find any products matching your current filters. Try adjusting your search criteria or
-                browse our full collection.
+            <div className="flex flex-col items-center justify-center text-center py-20 bg-white rounded-xl shadow-lg border border-gray-100">
+              <FilterIcon className="h-16 w-16 text-gray-300 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">No products found</h3>
+              <p className="text-sm text-gray-600 max-w-sm">
+                Try adjusting your filters or sorting options to find what you're looking for.
               </p>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setFilters({
-                    priceRange: [100, 5000],
-                    selectedCategories: [],
-                    selectedSmells: [],
-                    selectedSpecification: "all",
-                  })
-                  setSortOption("new-to-old")
-                }}
-                className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700 rounded-xl px-6 py-3"
-              >
-                Clear all filters
-              </Button>
             </div>
           )}
         </>
       )}
 
-      {/* Enhanced Load More Section */}
+      {/* Load More Button */}
       {totalFilteredProducts > visibleProductsCount && (
-        <div className="text-center mt-12 space-y-6">
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-6 border border-gray-200">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
-              <span className="text-lg font-semibold text-gray-800">
-                Showing {Math.min(visibleProductsCount, totalFilteredProducts)} of {totalFilteredProducts} products
+        <div className="text-center mt-8">
+          <p className="text-sm text-gray-600 mb-6">
+            You've viewed {Math.min(visibleProductsCount, totalFilteredProducts)} of {totalFilteredProducts} products
+          </p>
+          <Button
+            className="px-10 py-4 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+          >
+            {loadingMore ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" /> Loading More...
               </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-              <div
-                className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${(visibleProductsCount / totalFilteredProducts) * 100}%` }}
-              />
-            </div>
-            <Button
-              className="px-10 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-2xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-              onClick={handleLoadMore}
-              disabled={loadingMore}
-            >
-              {loadingMore ? (
-                <span className="flex items-center gap-3">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Loading more amazing products...
-                </span>
-              ) : (
-                <span className="flex items-center gap-3">
-                  <Zap className="h-5 w-5" />
-                  Load More Products
-                </span>
-              )}
-            </Button>
-          </div>
+            ) : (
+              "Load More"
+            )}
+          </Button>
         </div>
       )}
 
