@@ -3,10 +3,10 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { ListFilter, X } from "lucide-react"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { ListFilter, X } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface SortSheetProps {
   visible: boolean

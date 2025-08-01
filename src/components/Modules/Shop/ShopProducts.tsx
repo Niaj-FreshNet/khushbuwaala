@@ -4,9 +4,9 @@ import { useState, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { FilterIcon, ListFilter, LayoutGrid, LayoutList, Loader2 } from "lucide-react"
+import { getProducts, type Product } from "@/lib/Data/data" // Assuming getProducts can fetch all products
 import { FilterSheet } from "./FilterSheet"
 import { SortSheet } from "./SortSheet"
-import { getProducts, type Product } from "@/lib/Data/data" // Assuming getProducts can fetch all products
 import { ProductCard } from "@/components/ReusableUI/ProductCard"
 
 export function ShopProducts() {
