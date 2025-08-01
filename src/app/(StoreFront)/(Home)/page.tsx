@@ -8,14 +8,6 @@ import { ServicesSection } from "@/components/Modules/Home/ServiceSection"
 import { SubscribeSection } from "@/components/Modules/Home/SubscribeSection"
 import { Crown, Gem, Sparkles, Star } from "lucide-react"
 
-// Image assets for banners (using placeholder queries)
-const InspiredBannerDesktop = "/placeholder.svg?height=480&width=1920"
-const InspiredBannerMobile = "/placeholder.svg?height=300&width=768"
-const OrientalBannerDesktop = "/placeholder.svg?height=480&width=1920"
-const OrientalBannerMobile = "/placeholder.svg?height=300&width=768"
-const OudBannerDesktop = "/placeholder.svg?height=480&width=1920"
-const OudBannerMobile = "/placeholder.svg?height=300&width=768"
-
 // SEO: Page-specific Metadata for the homepage
 export const metadata: Metadata = {
   title: "Home", // This will be combined with the template from root layout
@@ -59,21 +51,25 @@ export default function HomePage() {
           titleVariant="premium"
           titleSubtitle="Discover our most loved fragrances"
           titleIcon={<Crown className="h-6 w-6" />}
-          titleUnderlineVariant="full" // Added this line
+          // titleUnderlineVariant="full"
         />
       </div>
 
       {/* Category Banner Section */}
       <CategoryBanner />
 
-      {/* Inspired Perfume Banner */}
+      {/* Enhanced Inspired Perfume Banner with Art Direction */}
       <BannerSection
         heading="Premium Inspired Perfume Oils"
         text="Get The Best Perfume Oil Editions Inspired From Designer Perfumes"
         buttonText="Shop Now"
         link="/inspired-perfume-oil"
-        bannerMobile={InspiredBannerMobile}
-        bannerDesktop={InspiredBannerDesktop}
+        images={{
+          mobile: "/images/banner1-mobile.webp", // 768x400 - portrait crop
+          tablet: "/images/banner1-tablet.webp", // 1024x500 - landscape crop
+          desktop: "/images/banner1.webp", // 1920x600 - wide landscape
+        }}
+        variant="primary"
       />
 
       {/* Inspired Perfume Products Section with gradient variant */}
@@ -88,14 +84,17 @@ export default function HomePage() {
         />
       </div>
 
-      {/* Oriental Fragrances Banner */}
+      {/* Enhanced Oriental Fragrances Banner */}
       <BannerSection
         heading="Explore Oriental Fragrances"
         text="Choose Your Desired Perfume Oil from Oriental & Arabian Attar Collections"
         buttonText="Shop Now"
         link="/oriental-attar"
-        bannerMobile={OrientalBannerMobile}
-        bannerDesktop={OrientalBannerDesktop}
+        images={{
+          mobile: "/images/banner2-mobile.webp",
+          desktop: "/images/banner2.webp", // Tablet will fallback to desktop
+        }}
+        variant="secondary"
       />
 
       {/* Oriental Products Section with elegant variant */}
@@ -110,14 +109,17 @@ export default function HomePage() {
         />
       </div>
 
-      {/* Artificial Oud Banner */}
+      {/* Enhanced Artificial Oud Banner */}
       <BannerSection
         heading="Best Artificial Editions Of Oud Oils"
         text="Choose The Royal Fragrances From Artificial Oud Collection"
         buttonText="Shop Now"
         link="/artificial-oud"
-        bannerMobile={OudBannerMobile}
-        bannerDesktop={OudBannerDesktop}
+        images={{
+          mobile: "/images/banner3-mobile.webp",
+          desktop: "/images/banner3.webp",
+        }}
+        variant="tertiary"
       />
 
       {/* Artificial Oud Products Section with modern variant */}
