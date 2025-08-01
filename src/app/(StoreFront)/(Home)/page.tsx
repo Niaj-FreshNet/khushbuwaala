@@ -51,7 +51,7 @@ export default function HomePage() {
           titleVariant="premium"
           titleSubtitle="Discover our most loved fragrances"
           titleIcon={<Crown className="h-6 w-6" />}
-          // titleUnderlineVariant="full"
+          titleUnderlineVariant="full"
         />
       </div>
 
