@@ -10,7 +10,7 @@ import {
   LayoutList,
   Loader2,
 } from "lucide-react";
-import { getProducts, type Product } from "@/lib/Data/data"; // Assuming getProducts can fetch all products
+import { getProducts, type Product } from "@/lib/Data/data";
 import { FilterSheet } from "./FilterSheet";
 import { SortSheet } from "./SortSheet";
 import { ProductCard } from "@/components/ReusableUI/ProductCard";

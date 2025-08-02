@@ -291,8 +291,8 @@ export function Navbar() {
                   aria-label="Search perfumes"
                   title="Search our perfume collection"
                 >
-                  <Search className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300 opacity-0 group-hover:opacity-100"></div>
+                  <Search className="h-5 w-5 transition-transform duration-300 group-hover:scale-110 z-10" />
+                  <div className="absolute inset-0 bg-gradient-to-r z-5 from-blue-100 to-indigo-100 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300 opacity-0 group-hover:opacity-100"></div>
                 </Button>
 
                 <Link href="/wishlist">
@@ -303,13 +303,13 @@ export function Navbar() {
                     aria-label={`Wishlist (${counts.wishlist} items)`}
                     title="View your wishlist"
                   >
-                    <Heart className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
+                    <Heart className="h-5 w-5 transition-transform duration-300 group-hover:scale-110 z-10" />
                     {counts.wishlist > 0 && (
-                      <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs h-6 w-6 flex items-center justify-center p-0 rounded-full shadow-lg animate-pulse">
+                      <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 z-10 text-white text-xs h-6 w-6 flex items-center justify-center p-0 rounded-full shadow-lg animate-pulse">
                         {counts.wishlist}
                       </Badge>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-r from-pink-100 to-red-100 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300 opacity-0 group-hover:opacity-100"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-pink-100 to-red-100 z-5 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300 opacity-0 group-hover:opacity-100"></div>
                   </Button>
                 </Link>
 
@@ -321,11 +321,11 @@ export function Navbar() {
                   aria-label={`Shopping cart (${counts.cart} items)`}
                   title="View your shopping cart"
                 >
-                  <ShoppingCart className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
-                  <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs h-6 w-6 flex items-center justify-center p-0 rounded-full shadow-lg">
+                  <ShoppingCart className="h-5 w-5 transition-transform duration-300 group-hover:scale-110 z-10" />
+                  <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-green-500 to-emerald-500 z-10 text-white text-xs h-6 w-6 flex items-center justify-center p-0 rounded-full shadow-lg">
                     {counts.cart}
                   </Badge>
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300 opacity-0 group-hover:opacity-100"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-100 to-emerald-100 z-5 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300 opacity-0 group-hover:opacity-100"></div>
                 </Button>
 
                 <Link href="/track-order">
@@ -336,8 +336,8 @@ export function Navbar() {
                     aria-label="Track your order"
                     title="Track your order status"
                   >
-                    <MapPin className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-100 to-violet-100 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300 opacity-0 group-hover:opacity-100"></div>
+                    <MapPin className="h-5 w-5 transition-transform duration-300 group-hover:scale-110 z-10" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-100 to-violet-100 z-5 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300 opacity-0 group-hover:opacity-100"></div>
                   </Button>
                 </Link>
               </div>

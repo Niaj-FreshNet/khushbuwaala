@@ -91,9 +91,9 @@ const shopStructuredData = {
   },
 };
 
-export default function InspiredPerfumeOilsPage() {
+export default function ArtificialOudPage() {
 
-  const category = "inspiredPerfumeOil";
+  const category = "artificialOud";
 
   const notices = [
     "🚚 Free Nationwide Shipping on Orders Over ৳1000",
@@ -107,10 +107,10 @@ export default function InspiredPerfumeOilsPage() {
     <div className="w-full mx-auto">
       {/* Shop Banner */}
       <ShopBanner
-        heading="Explore Inspired Perfume Oils"
-        text="Choose Your Desired Perfume Oil from Inspired Perfume Oil Collections"
+                    heading="The Best Artificial Editions Of Oud Oils"
+                    text="Choose The Royal Fragrances From Artificial Oud Collection"
         buttonText={"Shop Now"}
-        link={"/oriental-collection"}
+        link={"/artificial-oud"}
         images={{
           desktop: "/images/n111.png",
           mobile: "/images/n1.webp",
@@ -122,7 +122,7 @@ export default function InspiredPerfumeOilsPage() {
       {/* Enhanced Notice Bar */}
       <div className="py-8 bg-gradient-to-r from-gray-50 via-white to-gray-50">
         <NoticeBar
-          heading="Inspired Perfume Oils"
+                    heading="Artificial Oud"
           notices={notices}
           interval={4500}
         />

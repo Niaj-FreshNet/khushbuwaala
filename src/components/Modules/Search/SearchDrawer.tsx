@@ -1,33 +1,30 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
-import { Search, X, TagIcon, TrendingUp, Clock } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Separator } from "@/components/ui/separator"
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { Search, X, TagIcon, TrendingUp, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
+import { getProducts, Product } from "@/lib/Data/data";
 
 interface SearchDrawerProps {
-  visible: boolean
-  onClose: () => void
+  visible: boolean;
+  onClose: () => void;
 }
-
-interface Product {
-  _id: string
-  name: string
-  category: string
-  price: number
-  primaryImage: string
-  smell: string[]
-}
-
-const trendingSearches = ["Dior Sauvage", "Oud", "Rose", "Vanilla", "Musk"]
-const recentSearches = ["Axe Signature", "Prada Candy", "Oriental Attar"]
+const trendingSearches = ["Dior Sauvage", "Oud", "Rose", "Vanilla", "Musk"];
+const recentSearches = ["Axe Signature", "Prada Candy", "Oriental Attar"];
 
 const smellTypes = [
   "Corporate",
@@ -58,53 +55,112 @@ const smellTypes = [
   "Longetive",
   "Synthetic",
   "Organic",
-]
+];
 
 export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
-  const router = useRouter()
-  const searchInputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter();
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const [searchValue, setSearchValue] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [isLoading, setIsLoading] = useState(false)
-  const [products, setProducts] = useState<Product[]>([])
-  const [searchPerformed, setSearchPerformed] = useState(false)
+  const [searchValue, setSearchValue] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [isLoading, setIsLoading] = useState(false);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [searchPerformed, setSearchPerformed] = useState(false);
 
+  // Fetch all products once on mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      try {
+        const prods = await getProducts();
+        const sortedProds = prods.sort((a, b) => a.name.localeCompare(b.name));
+        setAllProducts(sortedProds);
+        setProducts(sortedProds); // Initially show all products
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  // Focus search input when drawer opens
   useEffect(() => {
     if (visible && searchInputRef.current) {
       setTimeout(() => {
-        searchInputRef.current?.focus()
-      }, 300)
+        searchInputRef.current?.focus();
+      }, 300);
     }
-  }, [visible])
+  }, [visible]);
 
+  // Filter products when search value or category changes
   useEffect(() => {
-    if (searchValue || selectedCategory !== "all") {
-      setIsLoading(true)
-      setTimeout(() => {
-        setProducts([])
-        setIsLoading(false)
-        setSearchPerformed(true)
-      }, 500)
+    // If no search & category all, show all products and reset searchPerformed
+    if (!searchValue && selectedCategory === "all") {
+      setProducts(allProducts);
+      setSearchPerformed(false);
+      return;
     }
-  }, [searchValue, selectedCategory])
+
+    setIsLoading(true);
+
+    // Simulate some delay (e.g. debounce, api request simulation)
+    setTimeout(() => {
+  const lowerSearch = searchValue.toLowerCase();
+
+  const filtered = allProducts.filter((product) => {
+    // Category filter
+    const matchesCategory =
+      selectedCategory === "all" || product.category === selectedCategory;
+
+    // Search filtering: check these fields:
+    // - name (string)
+    // - smell (string array)
+    // - notes (string)
+    // - description (string)
+    // - brand (string)
+
+    const matchesSearch =
+      !searchValue ||
+      product.name.toLowerCase().includes(lowerSearch) ||
+      (product.smell &&
+        product.smell.some((smellTag) =>
+          smellTag.toLowerCase().includes(lowerSearch)
+        )) ||
+      (product.notes &&
+        product.notes.toLowerCase().includes(lowerSearch)) ||
+      (product.description &&
+        product.description.toLowerCase().includes(lowerSearch)) ||
+      (product.brand &&
+        product.brand.toLowerCase().includes(lowerSearch));
+
+    return matchesCategory && matchesSearch;
+  });
+
+  setProducts(filtered);
+  setIsLoading(false);
+  setSearchPerformed(true);
+}, 400);
+  }, [searchValue, selectedCategory, allProducts]);
 
   const handleSearch = (value: string) => {
-    setSearchValue(value)
-    setSearchPerformed(true)
-  }
+    setSearchValue(value);
+    setSearchPerformed(true);
+  };
 
   const handleTagClick = (tag: string) => {
-    setSearchValue(tag)
-    handleSearch(tag)
-  }
+    setSearchValue(tag);
+    setSearchPerformed(true);
+  };
 
   return (
     <Sheet open={visible} onOpenChange={onClose}>
       <SheetContent
         side="right"
-        className="w-[450px] sm:w-[550px] flex flex-col p-0 bg-gradient-to-b from-white to-gray-50"
-      >
+  className="w-[450px] sm:w-[550px] flex flex-col p-0 bg-gradient-to-b from-white to-gray-50 h-full"      
+  >
         <SheetHeader className="px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
           <SheetTitle className="flex items-center gap-3 text-xl">
             <div className="p-2 bg-blue-100 rounded-full">
@@ -112,15 +168,16 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
             </div>
             <div className="flex flex-col items-start">
               <span>Search Products</span>
-              <span className="text-sm font-normal text-gray-600">Find your perfect fragrance</span>
+              <span className="text-sm font-normal text-gray-600">
+                Find your perfect fragrance
+              </span>
             </div>
           </SheetTitle>
         </SheetHeader>
 
-        <div className="flex flex-col h-full">
-          {/* Enhanced Search Controls */}
+  <div className="flex flex-col h-full">
+          {/* Search Controls */}
           <div className="p-6 space-y-6 border-b">
-            {/* Search Input with enhanced styling */}
             <div className="relative group">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-300" />
               <Input
@@ -138,13 +195,13 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                   size="sm"
                   className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 rounded-full hover:bg-gray-100"
                   onClick={() => setSearchValue("")}
+                  aria-label="Clear search input"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               )}
             </div>
 
-            {/* Enhanced Category Filter */}
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className="h-12 border-2 border-gray-200 rounded-xl bg-white">
                 <SelectValue placeholder="All Categories" />
@@ -203,7 +260,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
               </div>
             )}
 
-            {/* Enhanced Quick Search Tags */}
+            {/* Quick search tags when searching */}
             {searchValue && (
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
@@ -226,8 +283,8 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
             )}
           </div>
 
-          {/* Enhanced Search Results */}
-          <div className="flex-1 flex flex-col">
+          {/* Search Results */}
+    <div className="flex-1 flex flex-col">
             <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
               <div className="flex justify-between items-center">
                 <div>
@@ -242,7 +299,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
 
             <ScrollArea className="flex-1 px-6 py-4">
               {isLoading ? (
-                <div className="space-y-4">
+                <div className="space-y-4" aria-busy="true" aria-label="Loading search results">
                   {[1, 2, 3].map((i) => (
                     <div key={i} className="flex gap-4 p-4 border rounded-xl">
                       <Skeleton className="w-20 h-24 rounded-lg" />
@@ -264,7 +321,9 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                       >
                         <div className="w-20 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 group-hover:shadow-md transition-shadow duration-300">
                           <img
-                            src={product.primaryImage || "/placeholder.svg?height=96&width=80"}
+                            src={
+                              product.primaryImage || "/placeholder.svg?height=96&width=80"
+                            }
                             alt={product.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
@@ -274,7 +333,9 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                             {product.name}
                           </h4>
                           <p className="text-xs text-gray-500">3 ml starting price</p>
-                          <p className="text-lg font-bold text-red-600">৳{product.price} BDT</p>
+                          <p className="text-lg font-bold text-red-600">
+                            ৳{product.price} BDT
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -289,11 +350,17 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                         <X className="h-3 w-3 text-red-500" />
                       </div>
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      No products found
+                    </h3>
                     <p className="text-sm text-gray-500 mb-4 max-w-sm">
                       Try adjusting your search terms or browse our categories
                     </p>
-                    <Button variant="outline" onClick={() => setSearchValue("")} className="rounded-full px-6">
+                    <Button
+                      variant="outline"
+                      onClick={() => setSearchValue("")}
+                      className="rounded-full px-6"
+                    >
                       Clear Search
                     </Button>
                   </div>
@@ -303,7 +370,9 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                   <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-6">
                     <Search className="h-10 w-10 text-blue-500" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Start your search</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Start your search
+                  </h3>
                   <p className="text-sm text-gray-500 max-w-sm">
                     Enter a product name, brand, or scent type to find your perfect fragrance
                   </p>
@@ -314,5 +383,5 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

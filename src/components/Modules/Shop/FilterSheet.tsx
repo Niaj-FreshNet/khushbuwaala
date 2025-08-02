@@ -178,7 +178,7 @@ export function FilterSheet({
                     <h5 className="text-md font-semibold text-gray-800 mb-0 capitalize">
                       {groupName.replace(/([A-Z])/g, " $1")}
                     </h5>
-                    <div className="h-1 w-64 mb-4 rounded-full bg-gradient-to-r from-pink-500 via-pink-600 to-purple-600" />
+                    <div className="h-1 w-64 lg:w-72 mb-4 rounded-full bg-gradient-to-r from-pink-500 via-pink-600 to-purple-600" />
                     <div className="grid grid-cols-2 gap-2">
                       {smells.map((smell) => (
                         <div

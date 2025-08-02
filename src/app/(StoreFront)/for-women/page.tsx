@@ -91,7 +91,7 @@ const shopStructuredData = {
   },
 };
 
-export default function InspiredPerfumeOilsPage() {
+export default function ForWomenPage() {
 
   const category = "inspiredPerfumeOil";
 
@@ -107,22 +107,22 @@ export default function InspiredPerfumeOilsPage() {
     <div className="w-full mx-auto">
       {/* Shop Banner */}
       <ShopBanner
-        heading="Explore Inspired Perfume Oils"
-        text="Choose Your Desired Perfume Oil from Inspired Perfume Oil Collections"
+                    heading="Premium Fragrances Suit For Women"
+                    text="Choose Your Desired Perfume Oil for Girls and Women"
         buttonText={"Shop Now"}
         link={"/oriental-collection"}
         images={{
           desktop: "/images/n111.png",
           mobile: "/images/n1.webp",
         }}
-        altText="Banner displaying inspired perfume oil collection"
+                    altText="Banner displaying the best quality perfume oil collection"
         variant="premium"
       />
 
       {/* Enhanced Notice Bar */}
       <div className="py-8 bg-gradient-to-r from-gray-50 via-white to-gray-50">
         <NoticeBar
-          heading="Inspired Perfume Oils"
+                    heading="Womens Perfume Oil"
           notices={notices}
           interval={4500}
         />

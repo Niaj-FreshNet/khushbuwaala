@@ -91,9 +91,9 @@ const shopStructuredData = {
   },
 };
 
-export default function InspiredPerfumeOilsPage() {
+export default function NaturalCollectionPage() {
 
-  const category = "inspiredPerfumeOil";
+  const category = "natural";
 
   const notices = [
     "🚚 Free Nationwide Shipping on Orders Over ৳1000",
@@ -107,22 +107,22 @@ export default function InspiredPerfumeOilsPage() {
     <div className="w-full mx-auto">
       {/* Shop Banner */}
       <ShopBanner
-        heading="Explore Inspired Perfume Oils"
-        text="Choose Your Desired Perfume Oil from Inspired Perfume Oil Collections"
+                    heading="Explore Natural and Authentic Attar"
+                    text="Choose The Best Quality Natural & Authentic Attar"
         buttonText={"Shop Now"}
-        link={"/oriental-collection"}
+        link={"/natural-collection"}
         images={{
           desktop: "/images/n111.png",
           mobile: "/images/n1.webp",
         }}
-        altText="Banner displaying inspired perfume oil collection"
+                    altText="Banner displaying the best quality natural & authentic attar"
         variant="premium"
       />
 
       {/* Enhanced Notice Bar */}
       <div className="py-8 bg-gradient-to-r from-gray-50 via-white to-gray-50">
         <NoticeBar
-          heading="Inspired Perfume Oils"
+                    heading="Natural Attar"
           notices={notices}
           interval={4500}
         />

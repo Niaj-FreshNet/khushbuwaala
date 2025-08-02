@@ -91,9 +91,9 @@ const shopStructuredData = {
   },
 };
 
-export default function InspiredPerfumeOilsPage() {
+export default function GiftsAndPackagesPage() {
 
-  const category = "inspiredPerfumeOil";
+  const category = "giftsAndPackages";
 
   const notices = [
     "🚚 Free Nationwide Shipping on Orders Over ৳1000",
@@ -107,22 +107,22 @@ export default function InspiredPerfumeOilsPage() {
     <div className="w-full mx-auto">
       {/* Shop Banner */}
       <ShopBanner
-        heading="Explore Inspired Perfume Oils"
-        text="Choose Your Desired Perfume Oil from Inspired Perfume Oil Collections"
+                    heading="Perfume Packages and Gift Boxes"
+                    text="Choose Your Desired Perfume Oil Packages and Gifts for The Season"
         buttonText={"Shop Now"}
-        link={"/oriental-collection"}
+        link={"/gifts-and-packages"}
         images={{
           desktop: "/images/n111.png",
           mobile: "/images/n1.webp",
         }}
-        altText="Banner displaying inspired perfume oil collection"
+                    altText="Banner displaying the best quality perfume oil collection"
         variant="premium"
       />
 
       {/* Enhanced Notice Bar */}
       <div className="py-8 bg-gradient-to-r from-gray-50 via-white to-gray-50">
         <NoticeBar
-          heading="Inspired Perfume Oils"
+                    heading="Gifts & Packages"
           notices={notices}
           interval={4500}
         />
