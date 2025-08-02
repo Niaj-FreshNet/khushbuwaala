@@ -17,6 +17,8 @@ import { ProductCard } from "@/components/ReusableUI/ProductCard";
 
 interface ShopProductProps {
   category?: string;
+  specification?: string;
+  section?: string;
 }
 
 export function ShopProducts({ category }: ShopProductProps) {
@@ -60,11 +62,22 @@ export function ShopProducts({ category }: ShopProductProps) {
   // Apply filters and sort whenever dependencies change
   const displayedProducts = useMemo(() => {
     let filtered = allProducts.filter((product) => {
-      // If category prop is provided, enforce it
+      // Enforce category prop if provided
       const matchesCategoryProp = category
         ? product.category === category
         : true;
 
+      // Enforce specification prop if provided
+      const matchesSpecificationProp = specification
+        ? product.specification === specification
+        : true;
+
+      // Enforce section prop if provided
+      const matchesSectionProp = section ? product.section === section : true;
+
+      // Existing filters (price, selectedCategories, selectedSmells, selectedSpecification) still apply as before
+
+      // Example:
       const matchesPrice =
         product.price >= filters.priceRange[0] &&
         product.price <= filters.priceRange[1];
@@ -80,16 +93,19 @@ export function ShopProducts({ category }: ShopProductProps) {
             product.smell.includes(smell)
           ));
 
-      const matchesSpecification =
+      const matchesSpecificationFilter =
         filters.selectedSpecification === "all" ||
         product.specification === filters.selectedSpecification;
 
+      // Return true only if all conditions pass
       return (
         matchesCategoryProp &&
+        matchesSpecificationProp &&
+        matchesSectionProp &&
         matchesPrice &&
         matchesCategoryFilter &&
         matchesSmell &&
-        matchesSpecification
+        matchesSpecificationFilter
       );
     });
 
@@ -139,9 +155,9 @@ export function ShopProducts({ category }: ShopProductProps) {
     setFilters(newFilters);
     setVisibleProductsCount(20); // Reset visible products on new filter
 
-  setTimeout(() => {
-    setIsLoading(false);
-  }, 300);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
   };
 
   const handleSortChange = (newSortOption: string) => {
@@ -149,9 +165,9 @@ export function ShopProducts({ category }: ShopProductProps) {
     setSortOption(newSortOption);
     setVisibleProductsCount(20); // Reset visible products on new sort
 
-  setTimeout(() => {
-    setIsLoading(false);
-  }, 300);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
   };
 
   const handleColumnChange = (cols: number) => {
