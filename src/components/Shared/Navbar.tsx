@@ -55,8 +55,8 @@ export function Navbar() {
   // SEO: Menu items with structured data
   const menuItems = [
     {
-      label: "Inspired Perfume Oil",
-      href: "/inspired-perfume-oil",
+      label: "Inspired Perfume Oils",
+      href: "/inspired-perfume-oils",
       description:
         "High-quality inspired perfume oils with long-lasting fragrance",
     },

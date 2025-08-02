@@ -3,7 +3,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles, Star, Zap, Crown } from "lucide-react"
 
-interface EnhancedShopBannerProps {
+interface ShopBannerProps {
   heading: string
   text: string
   buttonText: string
@@ -24,7 +24,7 @@ export function ShopBanner({
   images,
   altText,
   variant = "primary",
-}: EnhancedShopBannerProps) {
+}: ShopBannerProps) {
   const getVariantStyles = () => {
     switch (variant) {
       case "premium":

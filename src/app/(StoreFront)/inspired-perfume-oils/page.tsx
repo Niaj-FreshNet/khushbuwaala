@@ -1,7 +1,7 @@
-import { NoticeBar } from "@/components/Modules/Shop/NoticeBar"
-import { ShopBanner } from "@/components/Modules/Shop/ShopBanner"
-import { ShopProducts } from "@/components/Modules/Shop/ShopProducts"
-import type { Metadata } from "next"
+import { NoticeBar } from "@/components/Modules/Shop/NoticeBar";
+import { ShopBanner } from "@/components/Modules/Shop/ShopBanner";
+import { ShopProducts } from "@/components/Modules/Shop/ShopProducts";
+import type { Metadata } from "next";
 
 // SEO: Enhanced page-specific metadata
 export const metadata: Metadata = {
@@ -42,7 +42,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Shop Premium Perfume Oils | KhushbuWaala",
-    description: "Discover authentic fragrances with free shipping on orders over ৳1000",
+    description:
+      "Discover authentic fragrances with free shipping on orders over ৳1000",
     images: ["/images/n111.webp"],
   },
   robots: {
@@ -56,14 +57,15 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-}
+};
 
 // Enhanced structured data for the shop page
 const shopStructuredData = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
   name: "Premium Perfume Oil Collection",
-  description: "Explore KhushbuWaala's curated collection of world-class perfume oils and fragrances",
+  description:
+    "Explore KhushbuWaala's curated collection of world-class perfume oils and fragrances",
   url: "https://khushbuwaala.com/shop",
   mainEntity: {
     "@type": "ItemList",
@@ -87,42 +89,49 @@ const shopStructuredData = {
       },
     ],
   },
-}
+};
 
-export default function ShopPage() {
+export default function InspiredPerfumeOilsPage() {
+
+  const category = "inspiredPerfumeOil";
+
   const notices = [
     "🚚 Free Nationwide Shipping on Orders Over ৳1000",
     "🔥 Up to 50% Off on Selected Premium Items",
     "✨ Authentic Quality Guaranteed - 100% Original Products",
     "🏪 Visit Our Banasree Outlet for In-Person Experience",
     "💝 Special Gift Wrapping Available for All Orders",
-  ]
+  ];
 
   return (
     <div className="w-full mx-auto">
       {/* Shop Banner */}
       <ShopBanner
-        heading={"Best Quality Perfume Oil Collection"}
-        text={"Choose Your Desired Perfume Oil from Worlds Best Perfume Oil Collection"}
+        heading="Explore Inspired Perfume Oils"
+        text="Choose Your Desired Perfume Oil from Inspired Perfume Oil Collections"
         buttonText={"Shop Now"}
         link={"/shop"}
         images={{
           desktop: "/images/n111.png",
           mobile: "/images/n1.webp",
         }}
-        altText="Banner displaying the best quality perfume oil collection"
+        altText="Banner displaying inspired perfume oil collection"
         variant="premium"
       />
 
-        {/* Enhanced Notice Bar */}
-        <div className="py-8 bg-gradient-to-r from-gray-50 via-white to-gray-50">
-          <NoticeBar heading="World's Finest Perfume Oils" notices={notices} interval={4500} />
-        </div>
-
-        {/* Enhanced Shop Products Section */}
-        <div id="products" className="bg-white pt-0 pb-8">
-          <ShopProducts />
-        </div>
+      {/* Enhanced Notice Bar */}
+      <div className="py-8 bg-gradient-to-r from-gray-50 via-white to-gray-50">
+        <NoticeBar
+          heading="Inspired Perfume Oils"
+          notices={notices}
+          interval={4500}
+        />
       </div>
-  )
+
+      {/* Enhanced Shop Products Section */}
+      <div id="products" className="bg-white pt-0 pb-8">
+        <ShopProducts category={category} />
+      </div>
+    </div>
+  );
 }
