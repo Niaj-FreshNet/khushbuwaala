@@ -156,7 +156,7 @@ export function ShopProducts() {
       </h2>
 
       {/* Enhanced Sticky Controls: Filter, Sort, Column Layout */}
-      <div className="sticky top-20 z-40 flex justify-between items-center bg-white/95 backdrop-blur-xl py-4 px-4 rounded-xl shadow-lg mb-8 border border-gray-200/50 transition-all duration-300">
+      <div className="sticky top-0 z-40 flex justify-between items-center bg-white/95 backdrop-blur-xl py-4 px-4 rounded-b-xl shadow-lg mb-8 border border-gray-200/50 transition-all duration-300">
         <Button
           variant="outline"
           className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-300 bg-transparent rounded-lg px-4 py-2 shadow-sm hover:shadow-md"
@@ -260,6 +260,7 @@ export function ShopProducts() {
             <div className={`grid gap-6 ${gridColsClass}`}>
               {displayedProducts.slice(0, visibleProductsCount).map((product) => (
                 <ProductCard 
+                className="pt-0"
                   key={product._id} 
                   product={product} 
                   layout={columns === 1 ? "list" : "grid"}

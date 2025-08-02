@@ -44,9 +44,9 @@ export function SortSheet({ visible, onClose, onSortChange }: SortSheetProps) {
               <ListFilter className="h-6 w-6 text-blue-600" />
               Sort By
             </div>
-            <Button variant="ghost" size="icon" onClick={() => onClose(false)} aria-label="Close sort options">
+            {/* <Button variant="ghost" size="icon" onClick={() => onClose(false)} aria-label="Close sort options">
               <X className="h-5 w-5" />
-            </Button>
+            </Button> */}
           </SheetTitle>
         </SheetHeader>
 

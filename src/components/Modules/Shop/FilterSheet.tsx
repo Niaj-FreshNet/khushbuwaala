@@ -72,9 +72,9 @@ export function FilterSheet({ visible, onClose, onApplyFilters }: FilterSheetPro
               <FilterIcon className="h-6 w-6 text-red-600" />
               Filter Products
             </div>
-            <Button variant="ghost" size="icon" onClick={() => onClose(false)} aria-label="Close filters">
+            {/* <Button variant="ghost" size="icon" onClick={() => onClose(false)} aria-label="Close filters">
               <X className="h-5 w-5" />
-            </Button>
+            </Button> */}
           </SheetTitle>
         </SheetHeader>
 
