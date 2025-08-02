@@ -21,7 +21,7 @@ interface ShopProductProps {
   section?: string;
 }
 
-export function ShopProducts({ category }: ShopProductProps) {
+export function ShopProducts({ category, specification, section }: ShopProductProps) {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<any>({
@@ -146,7 +146,7 @@ export function ShopProducts({ category }: ShopProductProps) {
         break;
     }
     return filtered;
-  }, [category, allProducts, filters, sortOption]);
+  }, [category, specification, section, allProducts, filters, sortOption]);
 
   const totalFilteredProducts = displayedProducts.length;
 
