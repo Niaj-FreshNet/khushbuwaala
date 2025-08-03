@@ -39,7 +39,9 @@ function CategoryCard({ CategoryName, CategoryImage, CategoryLink, description }
             className="w-fit px-6 py-2 bg-white text-red-600 font-semibold rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-105"
           >
             <Link href={CategoryLink}>
-              Shop Now <ArrowRight className="ml-2 h-4 w-4" />
+              <div className="flex items-center">
+                Shop Now <ArrowRight className="ml-2 h-4 w-4" />
+              </div>
             </Link>
           </Button>
         </div>

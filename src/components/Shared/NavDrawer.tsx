@@ -163,30 +163,32 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                           className="w-full justify-between h-14 px-4 text-left font-medium hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 hover:text-red-600 transition-all duration-300 rounded-xl group"
                           aria-expanded={openSubmenu === item.key}
                         >
-                          <div className="flex items-center space-x-4">
-                            <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-red-100 transition-colors duration-300">
-                              {item.icon}
+                          <div className="flex items-center justify-between w-full">
+                            <div className="flex items-center space-x-4">
+                              <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-red-100 transition-colors duration-300">
+                                {item.icon}
+                              </div>
+                              <div className="flex flex-col items-start">
+                                <span className="font-semibold">{item.label}</span>
+                                {item.description && (
+                                  <span className="text-xs text-gray-500 group-hover:text-red-500">
+                                    {item.description}
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                            <div className="flex flex-col items-start">
-                              <span className="font-semibold">{item.label}</span>
-                              {item.description && (
-                                <span className="text-xs text-gray-500 group-hover:text-red-500">
-                                  {item.description}
-                                </span>
+                            <div className="flex items-center space-x-2">
+                              {item.badge && (
+                                <Badge variant="secondary" className="text-xs bg-red-100 text-red-700">
+                                  {item.badge}
+                                </Badge>
                               )}
+                              <ChevronRight
+                                className={`h-4 w-4 transition-transform duration-300 ${
+                                  openSubmenu === item.key ? "rotate-90" : ""
+                                }`}
+                              />
                             </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            {item.badge && (
-                              <Badge variant="secondary" className="text-xs bg-red-100 text-red-700">
-                                {item.badge}
-                              </Badge>
-                            )}
-                            <ChevronRight
-                              className={`h-4 w-4 transition-transform duration-300 ${
-                                openSubmenu === item.key ? "rotate-90" : ""
-                              }`}
-                            />
                           </div>
                         </Button>
                       </CollapsibleTrigger>

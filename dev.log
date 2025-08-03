@@ -1,0 +1,23 @@
+
+> khushbuwaala@0.1.0 dev
+> next dev --turbopack
+
+   ▲ Next.js 15.4.4 (Turbopack)
+   - Local:        http://localhost:3000
+   - Network:      http://172.30.0.2:3000
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+ ✓ Starting...
+ ✓ Ready in 826ms
+ ○ Compiling /for-women ...
+ ✓ Compiled /for-women in 3s
+ ⨯ [Error: React.Children.only expected to receive a single React element child.] {
+  digest: '19471802'
+}
+ ⚠ metadataBase property in metadata export is not set for resolving social open graph or twitter images, using "http://localhost:3000". See https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadatabase
+ ⨯ [Error: React.Children.only expected to receive a single React element child.] {
+  digest: '4124659065'
+}
+ GET /for-women 500 in 3925ms
+[?25h
