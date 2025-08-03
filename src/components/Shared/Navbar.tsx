@@ -123,11 +123,13 @@ export function Navbar() {
                   aria-label="Open navigation menu"
                   onClick={handlers.toggleDrawer}
                 >
-                  <Menu className={`h-6 w-6 transition-all duration-300 ${drawerOpen ? 'rotate-90 scale-110' : 'group-hover:scale-110'}`} />
-                  {drawerOpen && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-red-100 to-pink-100 rounded-xl animate-pulse"></div>
-                  )}
-                  <div className="absolute inset-0 bg-red-50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                  <div className="relative w-full h-full">
+                    <Menu className={`h-6 w-6 transition-all duration-300 ${drawerOpen ? 'rotate-90 scale-110' : 'group-hover:scale-110'}`} />
+                    {drawerOpen && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-red-100 to-pink-100 rounded-xl animate-pulse"></div>
+                    )}
+                    <div className="absolute inset-0 bg-red-50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                  </div>
                 </Button>
               </div>
 
