@@ -1,220 +1,325 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Maximize2, RotateCw, Sparkles, Search, X } from "lucide-react";
-import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
+import { ChevronLeft, ChevronRight, Maximize2, ZoomIn, ZoomOut, RotateCw, Share2, Heart, X } from "lucide-react";
+import { Dialog, DialogContent, DialogOverlay } from "@radix-ui/react-dialog";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface ProductGalleryProps {
   product: {
     name: string;
     primaryImage: string;
+    secondaryImage?: string;
     moreImages?: string[];
+    _id: string;
   };
 }
 
 export default function ProductGallery({ product }: ProductGalleryProps) {
-  const images = [product.primaryImage, ...(product.moreImages || [])];
+  const images = [
+    product.primaryImage,
+    ...(product.secondaryImage ? [product.secondaryImage] : []),
+    ...(product.moreImages || [])
+  ].filter(Boolean);
+
   const [activeIdx, setActiveIdx] = useState(0);
-  const [lightbox, setLightbox] = useState(false);
-  const [isRotating, setIsRotating] = useState(false);
-  const [zoom, setZoom] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [isLoading, setIsLoading] = useState<{ [key: number]: boolean }>({});
+  const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [rotation, setRotation] = useState(0);
+  
+  const mainImageRef = useRef<HTMLDivElement>(null);
+  const zoomImageRef = useRef<HTMLImageElement>(null);
 
-  // Auto-rotate simulation for 360° effect
+  // Preload images for better UX
   useEffect(() => {
-    if (!isRotating || images.length < 2) return;
-    
-    const interval = setInterval(() => {
-      setActiveIdx(prev => (prev + 1) % images.length);
-    }, 800);
+    images.forEach((src, index) => {
+      const img = new window.Image();
+      img.onload = () => {
+        setIsLoading(prev => ({ ...prev, [index]: false }));
+      };
+      img.onerror = () => {
+        setImageErrors(prev => ({ ...prev, [index]: true }));
+        setIsLoading(prev => ({ ...prev, [index]: false }));
+      };
+      setIsLoading(prev => ({ ...prev, [index]: true }));
+      img.src = src;
+    });
+  }, [images]);
 
-    return () => clearInterval(interval);
-  }, [isRotating, images.length]);
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!lightboxOpen) return;
+      
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          goToPrevious();
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          goToNext();
+          break;
+        case 'Escape':
+          e.preventDefault();
+          setLightboxOpen(false);
+          break;
+        case '+':
+        case '=':
+          e.preventDefault();
+          zoomIn();
+          break;
+        case '-':
+          e.preventDefault();
+          zoomOut();
+          break;
+      }
+    };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!zoom) return;
-    
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setMousePosition({ x, y });
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [lightboxOpen]);
+
+  const goToNext = useCallback(() => {
+    setActiveIdx(prev => (prev + 1) % images.length);
+    resetZoom();
+  }, [images.length]);
+
+  const goToPrevious = useCallback(() => {
+    setActiveIdx(prev => (prev - 1 + images.length) % images.length);
+    resetZoom();
+  }, [images.length]);
+
+  const resetZoom = () => {
+    setZoomLevel(1);
+    setIsZoomed(false);
+    setRotation(0);
   };
 
-  const nextImage = () => setActiveIdx((prev) => (prev + 1) % images.length);
-  const prevImage = () => setActiveIdx((prev) => (prev - 1 + images.length) % images.length);
+  const zoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 0.5, 3));
+    setIsZoomed(true);
+  };
 
-  const toggleRotation = () => {
-    setIsRotating(!isRotating);
-    if (images.length < 2) {
-      // Simulate rotation with single image by adding visual effects
-      setActiveIdx(0);
+  const zoomOut = () => {
+    setZoomLevel(prev => {
+      const newLevel = Math.max(prev - 0.5, 1);
+      if (newLevel === 1) setIsZoomed(false);
+      return newLevel;
+    });
+  };
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    if (!isZoomed) {
+      zoomIn();
+    } else {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      
+      if (zoomImageRef.current) {
+        zoomImageRef.current.style.transformOrigin = `${x}% ${y}%`;
+      }
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setTouchStart({ x: touch.clientX, y: touch.clientY });
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart) return;
+    
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStart.x;
+    const deltaY = touch.clientY - touchStart.y;
+    
+    // Swipe detection
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+      if (deltaX > 0) {
+        goToPrevious();
+      } else {
+        goToNext();
+      }
+    }
+    
+    setTouchStart(null);
+  };
+
+  const shareProduct = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product.name,
+          text: `Check out this amazing perfume: ${product.name}`,
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.log('Share failed:', err);
+      }
+    } else {
+      // Fallback to copying URL
+      navigator.clipboard.writeText(window.location.href);
     }
   };
 
   return (
-    <section className="space-y-6" aria-label="Product gallery">
-      {/* Main Image Container */}
-      <div className="relative group">
-        {/* Perfume Showcase Background */}
-        <div 
-          className="relative rounded-3xl p-4 bg-gradient-to-br from-white via-pink-50/30 to-amber-50/20 shadow-2xl border border-pink-100/50 backdrop-blur-sm aspect-[4/5] min-h-[420px] flex items-center justify-center cursor-pointer overflow-hidden"
-          onClick={() => setLightbox(true)}
-          onMouseMove={handleMouseMove}
-          onMouseEnter={() => setZoom(true)}
-          onMouseLeave={() => setZoom(false)}
-          aria-label="Open product image lightbox"
-          style={{ minHeight: 420 }}
-        >
-          {/* Ambient Background Effects */}
-          <div className="absolute inset-0 bg-gradient-to-r from-pink-200/10 via-transparent to-amber-200/10 rounded-3xl"></div>
-          <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-radial from-pink-300/20 to-transparent rounded-full blur-xl"></div>
-          <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-radial from-amber-300/20 to-transparent rounded-full blur-xl"></div>
-          
-          {/* Main Product Image */}
-          <div className="relative w-full h-full flex items-center justify-center">
-            <Image
-              src={images[activeIdx]}
-              alt={`${product.name} - Premium perfume bottle`}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className={`object-contain transition-all duration-500 ${
-                zoom ? 'scale-150' : 'scale-100'
-              } ${isRotating ? 'animate-pulse' : ''}`}
-              style={zoom ? {
-                transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`
-              } : {}}
-              priority
-              loading="eager"
-            />
+    <section className="space-y-6" aria-label="Product image gallery">
+      {/* Main Image Display */}
+      <div 
+        ref={mainImageRef}
+        className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 shadow-2xl group cursor-pointer"
+        onClick={() => setLightboxOpen(true)}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        aria-label="Main product image, click to open gallery"
+      >
+        {/* Loading State */}
+        {isLoading[activeIdx] && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
           </div>
+        )}
 
-          {/* Image Counter Badge */}
-          {images.length > 1 && (
-            <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm">
-              {activeIdx + 1} / {images.length}
+        {/* Error State */}
+        {imageErrors[activeIdx] && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+            <div className="text-center text-gray-500">
+              <div className="text-4xl mb-2">📷</div>
+              <div>Image not available</div>
             </div>
-          )}
-
-          {/* Control Buttons */}
-          <div className="absolute top-4 right-4 flex gap-2">
-            {/* 360° Rotation Button */}
-            {images.length > 1 && (
-              <button
-                className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${
-                  isRotating 
-                    ? 'bg-pink-600 text-white shadow-lg' 
-                    : 'bg-black/60 text-white hover:bg-pink-600/80'
-                }`}
-                onClick={(e) => { 
-                  e.stopPropagation(); 
-                  toggleRotation(); 
-                }}
-                aria-label="Toggle 360° view"
-                title="360° View"
-              >
-                <RotateCw size={18} className={isRotating ? 'animate-spin' : ''} />
-              </button>
-            )}
-            
-            {/* Zoom Button */}
-            <button
-              className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${
-                zoom 
-                  ? 'bg-blue-600 text-white shadow-lg' 
-                  : 'bg-black/60 text-white hover:bg-blue-600/80'
-              }`}
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                setZoom(!zoom); 
-              }}
-              aria-label="Toggle zoom"
-              title="Zoom In/Out"
-            >
-              <Search size={18} />
-            </button>
-
-            {/* Expand Button */}
-            <button
-              className="p-2 bg-black/60 text-white rounded-full hover:bg-black/80 transition-all duration-300 backdrop-blur-sm"
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                setLightbox(true); 
-              }}
-              aria-label="Expand image"
-              title="Full Screen"
-            >
-              <Maximize2 size={18} />
-            </button>
           </div>
+        )}
 
-          {/* Navigation Arrows for Mobile */}
+        {/* Main Image */}
+        {!isLoading[activeIdx] && !imageErrors[activeIdx] && (
+          <Image
+            src={images[activeIdx]}
+            alt={`${product.name} - view ${activeIdx + 1}`}
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover transition-all duration-700 group-hover:scale-105"
+            priority={activeIdx === 0}
+            quality={90}
+          />
+        )}
+
+        {/* Overlay Controls */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300">
+          {/* Navigation Arrows */}
           {images.length > 1 && (
             <>
-              <button
-                className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-black/60 text-white rounded-full hover:bg-black/80 transition-all lg:opacity-0 lg:group-hover:opacity-100"
-                onClick={(e) => { e.stopPropagation(); prevImage(); }}
+              <Button
+                variant="outline"
+                size="icon"
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white border-0 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToPrevious();
+                }}
                 aria-label="Previous image"
               >
-                <ChevronLeft size={20} />
-              </button>
-              <button
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black/60 text-white rounded-full hover:bg-black/80 transition-all lg:opacity-0 lg:group-hover:opacity-100"
-                onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="icon"
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white border-0 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToNext();
+                }}
                 aria-label="Next image"
               >
-                <ChevronRight size={20} />
-              </button>
+                <ChevronRight className="h-5 w-5" />
+              </Button>
             </>
           )}
 
-          {/* Sparkle Effects */}
-          <div className="absolute top-1/4 right-1/4 w-2 h-2 bg-yellow-400 rounded-full animate-ping opacity-60"></div>
-          <div className="absolute bottom-1/3 left-1/4 w-1 h-1 bg-pink-400 rounded-full animate-ping opacity-40" style={{ animationDelay: '1s' }}></div>
-          
-          {/* Zoom Instruction */}
-          {zoom && (
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-3 py-1 rounded-full text-xs">
-              Move mouse to zoom
+          {/* Top Controls */}
+          <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Button
+              variant="outline"
+              size="icon"
+              className="bg-white/90 hover:bg-white border-0 shadow-lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                shareProduct();
+              }}
+              aria-label="Share product"
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="icon"
+              className="bg-white/90 hover:bg-white border-0 shadow-lg"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxOpen(true);
+              }}
+              aria-label="Open lightbox"
+            >
+              <Maximize2 className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Image Counter */}
+          {images.length > 1 && (
+            <div className="absolute bottom-3 left-3 bg-black/60 text-white px-3 py-1 rounded-full text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              {activeIdx + 1} / {images.length}
             </div>
           )}
         </div>
-
-        {/* Premium Badge */}
-        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-400 to-yellow-500 text-black px-4 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
-          <Sparkles size={12} />
-          Premium Quality
-        </div>
       </div>
 
-      {/* Thumbnail Gallery */}
+      {/* Thumbnail Navigation */}
       {images.length > 1 && (
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {images.map((src, idx) => (
             <button
               key={idx}
-              className={`relative flex-shrink-0 rounded-xl overflow-hidden border-3 transition-all duration-300 w-20 h-20 ${
+              className={cn(
+                "relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-300",
                 activeIdx === idx
-                  ? "border-pink-500 ring-4 ring-pink-300/50 scale-110 shadow-lg"
-                  : "border-gray-200 hover:border-pink-300 hover:scale-105"
-              }`}
+                  ? "border-red-600 ring-2 ring-red-600/30 scale-105 shadow-lg"
+                  : "border-gray-200 hover:border-red-300 hover:scale-102"
+              )}
               onClick={() => {
                 setActiveIdx(idx);
-                setIsRotating(false);
+                resetZoom();
               }}
-              aria-label={`Show image ${idx + 1}`}
+              aria-label={`View image ${idx + 1}`}
               type="button"
             >
-              <Image
-                src={src}
-                alt={`${product.name} thumbnail ${idx + 1}`}
-                width={80}
-                height={80}
-                className="object-cover w-full h-full"
-                loading="lazy"
-              />
+              {/* Loading state for thumbnails */}
+              {isLoading[idx] && (
+                <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
+              )}
+              
+              {!isLoading[idx] && !imageErrors[idx] && (
+                <Image
+                  src={src}
+                  alt={`${product.name} thumbnail ${idx + 1}`}
+                  width={80}
+                  height={80}
+                  className="object-cover w-full h-full"
+                  loading="lazy"
+                />
+              )}
+              
+              {/* Active indicator */}
               {activeIdx === idx && (
-                <div className="absolute inset-0 bg-pink-500/20 flex items-center justify-center">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                <div className="absolute inset-0 bg-red-600/20 flex items-center justify-center">
+                  <div className="w-2 h-2 bg-red-600 rounded-full"></div>
                 </div>
               )}
             </button>
@@ -222,84 +327,111 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
         </div>
       )}
 
-      {/* Lightbox Modal */}
-      <Dialog open={lightbox} onOpenChange={setLightbox}>
-        <DialogContent className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4">
-          <DialogTitle className="sr-only">
-            {product.name} - Full size image {activeIdx + 1} of {images.length}
-          </DialogTitle>
-          
-          {/* Close Button */}
-          <button
-            className="absolute top-4 right-4 z-10 p-2 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
-            onClick={() => setLightbox(false)}
-            aria-label="Close lightbox"
-          >
-            <X size={24} />
-          </button>
+      {/* Enhanced Lightbox */}
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <DialogOverlay className="fixed inset-0 bg-black/95 backdrop-blur-sm" />
+        <DialogContent className="fixed inset-0 flex items-center justify-center p-4">
+          <div className="relative max-w-6xl max-h-[90vh] w-full h-full flex items-center justify-center">
+            {/* Close Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4 z-50 text-white hover:bg-white/20"
+              onClick={() => setLightboxOpen(false)}
+              aria-label="Close lightbox"
+            >
+              <X className="h-6 w-6" />
+            </Button>
 
-          {/* Image Counter */}
-          <div className="absolute top-4 left-4 z-10 bg-black/60 text-white px-4 py-2 rounded-full text-sm font-medium">
-            {activeIdx + 1} / {images.length}
-          </div>
-
-          {/* Navigation Buttons */}
-          {images.length > 1 && (
-            <>
-              <button
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-3 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors disabled:opacity-50"
-                disabled={activeIdx === 0}
-                onClick={prevImage}
-                aria-label="Previous image"
+            {/* Lightbox Controls */}
+            <div className="absolute top-4 left-4 z-50 flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-white/20"
+                onClick={zoomIn}
+                disabled={zoomLevel >= 3}
+                aria-label="Zoom in"
               >
-                <ChevronLeft size={32} />
-              </button>
-              <button
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-3 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors disabled:opacity-50"
-                disabled={activeIdx === images.length - 1}
-                onClick={nextImage}
-                aria-label="Next image"
+                <ZoomIn className="h-5 w-5" />
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-white/20"
+                onClick={zoomOut}
+                disabled={zoomLevel <= 1}
+                aria-label="Zoom out"
               >
-                <ChevronRight size={32} />
-              </button>
-            </>
-          )}
-
-          {/* Main Lightbox Image */}
-          <div className="relative max-w-4xl max-h-[90vh] w-full h-full flex items-center justify-center">
-            <Image
-              src={images[activeIdx]}
-              alt={`${product.name} - Full size view`}
-              width={800}
-              height={800}
-              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
-              priority
-            />
-          </div>
-
-          {/* Thumbnail Navigation in Lightbox */}
-          {images.length > 1 && (
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 max-w-sm overflow-x-auto">
-              {images.map((src, idx) => (
-                <button
-                  key={idx}
-                  className={`flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
-                    activeIdx === idx ? 'border-white' : 'border-transparent opacity-60 hover:opacity-100'
-                  }`}
-                  onClick={() => setActiveIdx(idx)}
-                  aria-label={`Jump to image ${idx + 1}`}
-                >
-                  <Image
-                    src={src}
-                    alt={`Thumbnail ${idx + 1}`}
-                    width={48}
-                    height={48}
-                    className="object-cover w-full h-full"
-                  />
-                </button>
-              ))}
+                <ZoomOut className="h-5 w-5" />
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-white/20"
+                onClick={() => setRotation(prev => prev + 90)}
+                aria-label="Rotate image"
+              >
+                <RotateCw className="h-5 w-5" />
+              </Button>
             </div>
-          )}
+
+            {/* Navigation in Lightbox */}
+            {images.length > 1 && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 z-40"
+                  onClick={goToPrevious}
+                  disabled={activeIdx === 0}
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="h-8 w-8" />
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 z-40"
+                  onClick={goToNext}
+                  disabled={activeIdx === images.length - 1}
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="h-8 w-8" />
+                </Button>
+              </>
+            )}
+
+            {/* Lightbox Image */}
+            <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+              <Image
+                ref={zoomImageRef}
+                src={images[activeIdx]}
+                alt={`${product.name} - detailed view ${activeIdx + 1}`}
+                width={800}
+                height={800}
+                className={cn(
+                  "max-w-full max-h-full object-contain transition-all duration-300 cursor-zoom-in",
+                  isZoomed && "cursor-zoom-out"
+                )}
+                style={{
+                  transform: `scale(${zoomLevel}) rotate(${rotation}deg)`,
+                }}
+                onClick={handleImageClick}
+                priority
+              />
+            </div>
+
+            {/* Lightbox Image Counter */}
+            {images.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white px-4 py-2 rounded-full text-sm font-medium">
+                {activeIdx + 1} of {images.length}
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 

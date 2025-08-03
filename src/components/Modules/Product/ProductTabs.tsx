@@ -1,7 +1,6 @@
 "use client";
-
 import React, { useState } from "react";
-import { Star, ThumbsUp, MessageCircle, Truck, Shield, Info, Sparkles } from "lucide-react";
+import { Star, User, ThumbsUp, MessageCircle, Truck, Shield, Info, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 

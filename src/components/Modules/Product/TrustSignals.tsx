@@ -1,5 +1,3 @@
-"use client";
-
 import React from 'react';
 import { Shield, Truck, RotateCcw, Award, Clock, HeartHandshake, CheckCircle, Star } from 'lucide-react';
 

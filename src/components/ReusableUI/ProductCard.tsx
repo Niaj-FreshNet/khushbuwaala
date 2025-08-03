@@ -376,7 +376,7 @@ export function ProductCard({
           <span className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
             {formatPrice(product.price)}
           </span>
-          <span className="text-xs text-gray-500 flex items-center justify-center gap-1">
+          <span className="text-xs text-gray-500 block flex items-center justify-center gap-1">
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
             Starting from 3ml
           </span>
