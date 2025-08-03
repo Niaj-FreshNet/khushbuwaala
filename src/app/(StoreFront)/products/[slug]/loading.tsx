@@ -26,21 +26,21 @@ export default function Loading() {
                   {/* Perfume Bottle Shape */}
                   <div className="w-16 h-32 bg-gradient-to-b from-gray-400 to-gray-500 rounded-t-lg rounded-b-3xl mx-auto animate-pulse">
                     {/* Bottle Cap */}
-                    <div className="w-12 h-6 bg-gray-500 rounded-t-lg mx-auto -mb-1 animate-bounce" style={{ animationDelay: '0.5s' }}></div>
+                    <div className="w-12 h-6 bg-gray-500 rounded-t-lg mx-auto -mb-1 animate-bounce delay-500"></div>
                     {/* Spray Nozzle */}
-                    <div className="w-8 h-3 bg-gray-600 rounded-full mx-auto -mt-1 animate-bounce" style={{ animationDelay: '0.8s' }}></div>
+                    <div className="w-8 h-3 bg-gray-600 rounded-full mx-auto -mt-1 animate-bounce delay-700"></div>
                   </div>
                   {/* Fragrance Mist Effect */}
                   <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
-                    <div className="w-2 h-2 bg-pink-300 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
-                    <div className="w-1 h-1 bg-pink-200 rounded-full animate-ping absolute -top-2 left-1" style={{ animationDelay: '1.2s' }}></div>
-                    <div className="w-1 h-1 bg-pink-200 rounded-full animate-ping absolute -top-3 right-1" style={{ animationDelay: '1.4s' }}></div>
+                    <div className="w-2 h-2 bg-pink-300 rounded-full animate-ping delay-1000"></div>
+                    <div className="w-1 h-1 bg-pink-200 rounded-full animate-ping absolute -top-2 left-1 delay-[1200ms]"></div>
+                    <div className="w-1 h-1 bg-pink-200 rounded-full animate-ping absolute -top-3 right-1 delay-[1400ms]"></div>
                   </div>
                 </div>
               </div>
               
               {/* Shimmer Effect */}
-              <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+              <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent shimmer"></div>
             </div>
           </div>
           
@@ -61,31 +61,31 @@ export default function Loading() {
           {/* Product Title */}
           <div className="space-y-3">
             <div className="h-12 bg-gray-300 rounded-lg animate-pulse"></div>
-            <div className="h-8 w-3/4 bg-gray-300 rounded-lg animate-pulse" style={{ animationDelay: '0.1s' }}></div>
+            <div className="h-8 w-3/4 bg-gray-300 rounded-lg animate-pulse delay-100"></div>
           </div>
 
           {/* Price */}
           <div className="flex items-center gap-4">
-            <div className="h-10 w-32 bg-gray-300 rounded-lg animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-            <div className="h-8 w-20 bg-green-200 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+            <div className="h-10 w-32 bg-gray-300 rounded-lg animate-pulse delay-200"></div>
+            <div className="h-8 w-20 bg-green-200 rounded-full animate-pulse delay-300"></div>
           </div>
 
           {/* Description */}
           <div className="space-y-2">
-            <div className="h-4 bg-gray-300 rounded animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-            <div className="h-4 bg-gray-300 rounded animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-            <div className="h-4 w-2/3 bg-gray-300 rounded animate-pulse" style={{ animationDelay: '0.6s' }}></div>
+            <div className="h-4 bg-gray-300 rounded animate-pulse delay-[400ms]"></div>
+            <div className="h-4 bg-gray-300 rounded animate-pulse delay-500"></div>
+            <div className="h-4 w-2/3 bg-gray-300 rounded animate-pulse delay-[600ms]"></div>
           </div>
 
           {/* Size Options */}
           <div className="space-y-2">
-            <div className="h-6 w-16 bg-gray-300 rounded animate-pulse" style={{ animationDelay: '0.7s' }}></div>
+            <div className="h-6 w-16 bg-gray-300 rounded animate-pulse delay-700"></div>
             <div className="flex gap-3">
               {[1, 2, 3, 4].map((i) => (
                 <div 
                   key={i} 
                   className="h-10 w-16 bg-gray-300 rounded-lg animate-pulse"
-                  style={{ animationDelay: `${0.8 + i * 0.1}s` }}
+                  style={{ animationDelay: `${800 + i * 100}ms` }}
                 ></div>
               ))}
             </div>
@@ -93,33 +93,33 @@ export default function Loading() {
 
           {/* Quantity */}
           <div className="flex items-center gap-4">
-            <div className="h-6 w-20 bg-gray-300 rounded animate-pulse" style={{ animationDelay: '1.2s' }}></div>
-            <div className="h-12 w-32 bg-gray-300 rounded-xl animate-pulse" style={{ animationDelay: '1.3s' }}></div>
+            <div className="h-6 w-20 bg-gray-300 rounded animate-pulse delay-[1200ms]"></div>
+            <div className="h-12 w-32 bg-gray-300 rounded-xl animate-pulse delay-[1300ms]"></div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex gap-5">
-            <div className="h-14 w-40 bg-gradient-to-r from-gray-300 to-gray-400 rounded-lg animate-pulse" style={{ animationDelay: '1.4s' }}></div>
-            <div className="h-14 w-32 bg-gray-300 rounded-lg animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+            <div className="h-14 w-40 bg-gradient-to-r from-gray-300 to-gray-400 rounded-lg animate-pulse delay-[1400ms]"></div>
+            <div className="h-14 w-32 bg-gray-300 rounded-lg animate-pulse delay-[1500ms]"></div>
           </div>
 
           {/* Accordion Skeletons */}
           <div className="space-y-4 mt-12">
-            <div className="h-14 bg-gradient-to-r from-red-100 to-pink-100 rounded-xl animate-pulse" style={{ animationDelay: '1.6s' }}></div>
-            <div className="h-14 bg-gradient-to-r from-yellow-100 to-pink-100 rounded-xl animate-pulse" style={{ animationDelay: '1.7s' }}></div>
+            <div className="h-14 bg-gradient-to-r from-red-100 to-pink-100 rounded-xl animate-pulse delay-[1600ms]"></div>
+            <div className="h-14 bg-gradient-to-r from-yellow-100 to-pink-100 rounded-xl animate-pulse delay-[1700ms]"></div>
           </div>
         </div>
       </div>
 
       {/* Related Products Skeleton */}
       <div className="mt-20 px-4 lg:px-8">
-        <div className="h-8 w-48 bg-gray-300 rounded mb-8 animate-pulse" style={{ animationDelay: '1.8s' }}></div>
+        <div className="h-8 w-48 bg-gray-300 rounded mb-8 animate-pulse delay-[1800ms]"></div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-7">
           {[1, 2, 3, 4].map((i) => (
             <div 
               key={i} 
               className="rounded-2xl shadow-lg overflow-hidden border border-gray-200 bg-white animate-pulse"
-              style={{ animationDelay: `${1.9 + i * 0.1}s` }}
+              style={{ animationDelay: `${1900 + i * 100}ms` }}
             >
               <div className="w-full aspect-[3/4] bg-gray-300"></div>
               <div className="p-5 space-y-2">
@@ -135,22 +135,11 @@ export default function Loading() {
       <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border">
         <div className="flex items-center space-x-3">
           <div className="w-4 h-4 bg-pink-500 rounded-full animate-bounce"></div>
-          <div className="w-4 h-4 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-          <div className="w-4 h-4 bg-yellow-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+          <div className="w-4 h-4 bg-red-500 rounded-full animate-bounce delay-200"></div>
+          <div className="w-4 h-4 bg-yellow-500 rounded-full animate-bounce delay-[400ms]"></div>
           <span className="text-gray-700 font-medium ml-2">Loading fragrance details...</span>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes shimmer {
-          0% { transform: translateX(-100%) skewX(-12deg); }
-          100% { transform: translateX(300%) skewX(-12deg); }
-        }
-        
-        .animate-shimmer {
-          animation: shimmer 2s infinite;
-        }
-      `}</style>
     </div>
   );
 }

@@ -381,6 +381,23 @@
     overflow: hidden;
   }
 
+  /* Animation delay utilities */
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-500 { animation-delay: 500ms; }
+  .delay-700 { animation-delay: 700ms; }
+  .delay-1000 { animation-delay: 1000ms; }
+  .delay-\[400ms\] { animation-delay: 400ms; }
+  .delay-\[600ms\] { animation-delay: 600ms; }
+  .delay-\[1200ms\] { animation-delay: 1200ms; }
+  .delay-\[1300ms\] { animation-delay: 1300ms; }
+  .delay-\[1400ms\] { animation-delay: 1400ms; }
+  .delay-\[1500ms\] { animation-delay: 1500ms; }
+  .delay-\[1600ms\] { animation-delay: 1600ms; }
+  .delay-\[1700ms\] { animation-delay: 1700ms; }
+  .delay-\[1800ms\] { animation-delay: 1800ms; }
+
   /* Gradient backgrounds for perfume aesthetics */
   .bg-gradient-radial {
     background: radial-gradient(ellipse at center, var(--tw-gradient-stops));
