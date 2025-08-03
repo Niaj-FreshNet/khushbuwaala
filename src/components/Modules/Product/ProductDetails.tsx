@@ -281,12 +281,14 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               onClick={() => setSelectedSize(size)}
               aria-pressed={selectedSize === size}
             >
-              <span className="relative z-10">{size}</span>
-              {selectedSize === size && (
-                <div className="absolute top-1 right-1">
-                  <CheckCircle className="w-4 h-4 text-white" />
-                </div>
-              )}
+              <div className="relative w-full h-full flex items-center justify-center">
+                <span className="relative z-10">{size}</span>
+                {selectedSize === size && (
+                  <div className="absolute top-1 right-1">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                )}
+              </div>
             </Button>
           ))}
         </div>
