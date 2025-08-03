@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Plus, Minus, Star, MessageCircle, Shield, Award, Truck, CheckCircle, ThumbsUp, Verified } from "lucide-react";
+import { Plus, Minus, Star, MessageCircle, Shield, Award, Truck, CheckCircle, ThumbsUp, Calendar, Verified } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Product } from "@/lib/Data/data";
@@ -477,7 +477,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
                     </p>
                     <p className="flex items-start gap-2">
                       <CheckCircle size={16} className="mt-1 flex-shrink-0" />
-                      <span>7-day return policy - no questions asked if you&apos;re not satisfied</span>
+                      <span>7-day return policy - no questions asked if you're not satisfied</span>
                     </p>
                     <p className="flex items-start gap-2">
                       <CheckCircle size={16} className="mt-1 flex-shrink-0" />
