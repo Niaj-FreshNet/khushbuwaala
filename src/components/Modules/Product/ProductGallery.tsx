@@ -64,13 +64,13 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
       <div className="relative group">
         {/* Perfume Showcase Background */}
         <div 
-          className="relative rounded-3xl p-4 bg-gradient-to-br from-white via-pink-50/30 to-amber-50/20 shadow-2xl border border-pink-100/50 backdrop-blur-sm aspect-[4/5] min-h-[420px] flex items-center justify-center cursor-pointer overflow-hidden"
+          className="relative rounded-3xl p-6 bg-gradient-to-br from-white via-pink-50/40 to-amber-50/30 shadow-2xl border border-pink-100/50 backdrop-blur-sm aspect-[4/5] min-h-[480px] flex items-center justify-center cursor-pointer overflow-hidden"
           onClick={() => setLightbox(true)}
           onMouseMove={handleMouseMove}
           onMouseEnter={() => setZoom(true)}
           onMouseLeave={() => setZoom(false)}
           aria-label="Open product image lightbox"
-          style={{ minHeight: 420 }}
+          style={{ minHeight: 480 }}
         >
           {/* Ambient Background Effects */}
           <div className="absolute inset-0 bg-gradient-to-r from-pink-200/10 via-transparent to-amber-200/10 rounded-3xl"></div>
@@ -195,14 +195,14 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
 
       {/* Thumbnail Gallery */}
       {images.length > 1 && (
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
           {images.map((src, idx) => (
             <button
               key={idx}
-              className={`relative flex-shrink-0 rounded-xl overflow-hidden border-3 transition-all duration-300 w-20 h-20 ${
+              className={`relative flex-shrink-0 rounded-2xl overflow-hidden border-3 transition-all duration-300 w-24 h-24 ${
                 activeIdx === idx
-                  ? "border-pink-500 ring-4 ring-pink-300/50 scale-110 shadow-lg"
-                  : "border-gray-200 hover:border-pink-300 hover:scale-105"
+                  ? "border-pink-500 ring-4 ring-pink-300/50 scale-110 shadow-xl"
+                  : "border-gray-200 hover:border-pink-300 hover:scale-105 hover:shadow-lg"
               }`}
               onClick={() => {
                 setActiveIdx(idx);
@@ -214,14 +214,14 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
               <Image
                 src={src}
                 alt={`${product.name} thumbnail ${idx + 1}`}
-                width={80}
-                height={80}
+                width={96}
+                height={96}
                 className="object-cover w-full h-full"
                 loading="lazy"
               />
               {activeIdx === idx && (
-                <div className="absolute inset-0 bg-pink-500/20 flex items-center justify-center">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-500/30 to-purple-500/30 flex items-center justify-center">
+                  <div className="w-3 h-3 bg-white rounded-full shadow-lg"></div>
                 </div>
               )}
             </button>

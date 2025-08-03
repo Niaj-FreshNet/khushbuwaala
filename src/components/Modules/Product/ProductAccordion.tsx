@@ -226,11 +226,13 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
           aria-expanded={active === "desc"}
           className="w-full flex justify-between items-center py-6 px-6 font-semibold text-lg bg-gradient-to-r from-pink-50 to-purple-50 text-gray-900 border-0 hover:from-pink-100 hover:to-purple-100 rounded-none"
         >
-          <span className="flex items-center gap-3">
-            <MessageCircle size={20} />
-            Fragrance Description & Details
-          </span>
-          {active === "desc" ? <Minus size={20} /> : <Plus size={20} />}
+          <div className="flex items-center justify-between w-full">
+            <span className="flex items-center gap-3">
+              <MessageCircle size={20} />
+              Fragrance Description & Details
+            </span>
+            {active === "desc" ? <Minus size={20} /> : <Plus size={20} />}
+          </div>
         </Button>
         <AnimatePresence>
           {active === "desc" && (
@@ -336,15 +338,17 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
           aria-expanded={active === "reviews"}
           className="w-full flex justify-between items-center py-6 px-6 font-semibold text-lg bg-gradient-to-r from-yellow-50 to-orange-50 text-gray-900 border-0 hover:from-yellow-100 hover:to-orange-100 rounded-none"
         >
-          <span className="flex items-center gap-3">
-            <Star size={20} />
-            Customer Reviews ({reviews.length})
-            <div className="flex items-center gap-1 ml-2">
-              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-              <span className="text-sm text-gray-600">{averageRating.toFixed(1)}</span>
-            </div>
-          </span>
-          {active === "reviews" ? <Minus size={20} /> : <Plus size={20} />}
+          <div className="flex items-center justify-between w-full">
+            <span className="flex items-center gap-3">
+              <Star size={20} />
+              Customer Reviews ({reviews.length})
+              <div className="flex items-center gap-1 ml-2">
+                <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                <span className="text-sm text-gray-600">{averageRating.toFixed(1)}</span>
+              </div>
+            </span>
+            {active === "reviews" ? <Minus size={20} /> : <Plus size={20} />}
+          </div>
         </Button>
         <AnimatePresence>
           {active === "reviews" && (
@@ -430,11 +434,13 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
           aria-expanded={active === "trust"}
           className="w-full flex justify-between items-center py-6 px-6 font-semibold text-lg bg-gradient-to-r from-green-50 to-blue-50 text-gray-900 border-0 hover:from-green-100 hover:to-blue-100 rounded-none"
         >
-          <span className="flex items-center gap-3">
-            <Shield size={20} />
-            Trust & Guarantee
-          </span>
-          {active === "trust" ? <Minus size={20} /> : <Plus size={20} />}
+          <div className="flex items-center justify-between w-full">
+            <span className="flex items-center gap-3">
+              <Shield size={20} />
+              Trust & Guarantee
+            </span>
+            {active === "trust" ? <Minus size={20} /> : <Plus size={20} />}
+          </div>
         </Button>
         <AnimatePresence>
           {active === "trust" && (
@@ -477,7 +483,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
                     </p>
                     <p className="flex items-start gap-2">
                       <CheckCircle size={16} className="mt-1 flex-shrink-0" />
-                      <span>7-day return policy - no questions asked if you're not satisfied</span>
+                      <span>7-day return policy - no questions asked if you&apos;re not satisfied</span>
                     </p>
                     <p className="flex items-start gap-2">
                       <CheckCircle size={16} className="mt-1 flex-shrink-0" />
