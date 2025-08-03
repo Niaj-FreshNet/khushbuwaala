@@ -51,14 +51,15 @@ export function ProductCard({
 
   const isProductInWishlist = false
 
-  const categoryPathMapping: { [key: string]: string } = {
-    inspiredPerfumeOil: "inspired-perfume-oil",
-    oriental: "oriental-attar",
-    artificialOud: "artificial-oud",
-    natural: "natural-attar",
-  }
+  // const categoryPathMapping: { [key: string]: string } = {
+  //   inspiredPerfumeOil: "inspired-perfume-oil",
+  //   oriental: "oriental-attar",
+  //   artificialOud: "artificial-oud",
+  //   natural: "natural-attar",
+  // }
   const productSlug = product.name.toLowerCase().replace(/ /g, "-")
-  const productLink = `/${categoryPathMapping[product.category] || "products"}/${productSlug}`
+  // const productLink = `/${categoryPathMapping[product.category] || "products"}/${productSlug}`
+  const productLink = `/products/${productSlug}`
 
   // --- LIST LAYOUT ---
   if (layout === "list") {

@@ -107,22 +107,22 @@ export default function ForWomenPage() {
     <div className="w-full mx-auto">
       {/* Shop Banner */}
       <ShopBanner
-                    heading="Premium Fragrances Suit For Women"
-                    text="Choose Your Desired Perfume Oil for Girls and Women"
+        heading="Get The Latest Perfume Oil Editions"
+        text="Choose Your Desired Perfume Oil from New Arrivals"
         buttonText={"Shop Now"}
         link={"/oriental-collection"}
         images={{
           desktop: "/images/n111.png",
           mobile: "/images/n1.webp",
         }}
-                    altText="Banner displaying the best quality perfume oil collection"
+        altText="Banner displaying the best quality perfume oil collection"
         variant="premium"
       />
 
       {/* Enhanced Notice Bar */}
       <div className="py-8 bg-gradient-to-r from-gray-50 via-white to-gray-50">
         <NoticeBar
-                    heading="Womens Perfume Oil"
+          heading="Womens Perfume Oil"
           notices={notices}
           interval={4500}
         />
