@@ -97,10 +97,10 @@ function Button({
       {...props}
     >
       {loading ? (
-        <>
+        <div className="flex items-center gap-2">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
           <span className="opacity-70">Loading...</span>
-        </>
+        </div>
       ) : (
         children
       )}

@@ -40,12 +40,14 @@ export default function FooterCollapsible ({ section }: FooterCollapsibleProps) 
           aria-expanded={isOpen}
           aria-controls={`${section.id}-content`}
         >
-          <div className="flex flex-col items-start">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">{section.title}</h3>
-            <div className={`h-0.5 ${section.underlineWidth} bg-gradient-to-r from-red-500 to-red-600 rounded-full`} />
-          </div>
-          <div className="transition-transform duration-300 group-data-[state=open]:rotate-180">
-            {isOpen ? <Minus className="h-5 w-5 text-gray-500" /> : <Plus className="h-5 w-5 text-gray-500" />}
+          <div className="flex items-start justify-between w-full">
+            <div className="flex flex-col items-start">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{section.title}</h3>
+              <div className={`h-0.5 ${section.underlineWidth} bg-gradient-to-r from-red-500 to-red-600 rounded-full`} />
+            </div>
+            <div className="transition-transform duration-300 group-data-[state=open]:rotate-180">
+              {isOpen ? <Minus className="h-5 w-5 text-gray-500" /> : <Plus className="h-5 w-5 text-gray-500" />}
+            </div>
           </div>
         </Button>
       </CollapsibleTrigger>
