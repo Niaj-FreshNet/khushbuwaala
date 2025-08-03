@@ -272,8 +272,10 @@ export function BannerSection({
               hapticFeedback
             >
               <Link href={link}>
-                <span className="relative z-10">{buttonText}</span>
-                <ArrowRight className="h-5 w-5 ml-2 transition-transform duration-300 group-hover/button:translate-x-1" />
+                <div className="flex items-center">
+                  <span className="relative z-10">{buttonText}</span>
+                  <ArrowRight className="h-5 w-5 ml-2 transition-transform duration-300 group-hover/button:translate-x-1" />
+                </div>
               </Link>
             </Button>
 

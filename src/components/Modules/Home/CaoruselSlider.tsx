@@ -68,7 +68,10 @@ export function CarouselSlider() {
                       className="px-8 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white font-semibold transition-all duration-300 ease-in-out hover:scale-105 hover:from-red-700 hover:to-pink-700 rounded-full shadow-lg animate-in fade-in zoom-in-95 duration-700 delay-300"
                     >
                       <Link href={slide.buttonLink} aria-label={slide.buttonText}>
-                        {slide.buttonText} <ArrowRight className="ml-2 h-4 w-4" />
+                        <div className="flex items-center">
+                          <span>{slide.buttonText}</span>
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </div>
                       </Link>
                     </Button>
                   )}

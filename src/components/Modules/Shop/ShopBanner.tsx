@@ -190,22 +190,24 @@ export function ShopBanner({
             className={`group relative px-12 py-6 text-lg font-bold transition-all duration-500 ease-out hover:scale-110 hover:shadow-2xl rounded-2xl ${styles.buttonStyle} border border-white/20 backdrop-blur-md ${styles.glowColor} overflow-hidden`}
           >
             <Link href={link} aria-label={`Shop now for ${heading}`}>
-              {/* Button content */}
-              <span className="relative z-10 flex items-center">
-                {buttonText}
-                <ArrowRight className="ml-3 h-6 w-6 transition-transform duration-300 group-hover:translate-x-3" />
-              </span>
+              <div className="relative w-full h-full">
+                {/* Button content */}
+                <span className="relative z-10 flex items-center">
+                  {buttonText}
+                  <ArrowRight className="ml-3 h-6 w-6 transition-transform duration-300 group-hover:translate-x-3" />
+                </span>
 
-              {/* Enhanced button effects */}
-              <div
-                className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${styles.accent} opacity-0 group-hover:opacity-40 transition-opacity duration-500 blur-xl`}
-              ></div>
-              <div
-                className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${styles.accent} opacity-0 group-hover:opacity-20 transition-opacity duration-500`}
-              ></div>
+                {/* Enhanced button effects */}
+                <div
+                  className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${styles.accent} opacity-0 group-hover:opacity-40 transition-opacity duration-500 blur-xl`}
+                ></div>
+                <div
+                  className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${styles.accent} opacity-0 group-hover:opacity-20 transition-opacity duration-500`}
+                ></div>
 
-              {/* Shimmer effect */}
-              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"></div>
+                {/* Shimmer effect */}
+                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"></div>
+              </div>
             </Link>
           </Button>
         </div>

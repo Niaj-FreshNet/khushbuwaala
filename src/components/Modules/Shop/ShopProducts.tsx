@@ -377,13 +377,16 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
             onClick={handleLoadMore}
             disabled={loadingMore}
           >
-            {loadingMore ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" /> Loading More...
-              </span>
-            ) : (
-              "Load More"
-            )}
+            <div className="flex items-center gap-2">
+              {loadingMore ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Loading More...</span>
+                </>
+              ) : (
+                <span>Load More</span>
+              )}
+            </div>
           </Button>
         </div>
       )}

@@ -270,17 +270,19 @@ export function ProductCard({
                 disabled={isAddingToCart}
                 aria-label={`Add ${product.name} to cart`}
               >
-                {isAddingToCart ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Adding...
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart className="h-5 w-5 mr-2" />
-                    Add to Cart
-                  </>
-                )}
+                <div className="flex items-center justify-center">
+                  {isAddingToCart ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      <span>Adding...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-5 w-5 mr-2" />
+                      <span>Add to Cart</span>
+                    </>
+                  )}
+                </div>
               </Button>
             </div>
           </div>
@@ -414,17 +416,19 @@ export function ProductCard({
           disabled={isAddingToCart}
           aria-label={`Add ${product.name} to cart`}
         >
-          {isAddingToCart ? (
-            <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              Adding...
-            </>
-          ) : (
-            <>
-              <ShoppingCart className="h-5 w-5 mr-2" />
-              Add to Cart
-            </>
-          )}
+          <div className="flex items-center justify-center">
+            {isAddingToCart ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                <span>Adding...</span>
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="h-5 w-5 mr-2" />
+                <span>Add to Cart</span>
+              </>
+            )}
+          </div>
         </Button>
       </CardFooter>
     </Card>
