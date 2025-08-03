@@ -162,60 +162,30 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               {product.name}
             </h1>
             
-            {/* Brand and Origin */}
-            <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
-              {product.brand && (
-                <span className="flex items-center gap-1">
-                  <Award className="w-4 h-4" />
-                  {product.brand}
-                </span>
-              )}
-              {product.origin && (
-                <span className="flex items-center gap-1">
-                  <Sparkles className="w-4 h-4" />
-                  Origin: {product.origin}
-                </span>
-              )}
-            </div>
-
-            {/* Fragrance Family */}
-            {product.smell && product.smell.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {product.smell.map((scent, index) => (
-                  <span 
-                    key={index}
-                    className="px-3 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 rounded-full text-sm font-medium border border-purple-200"
-                  >
-                    {scent}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Stock Status */}
-          <div className="flex flex-col items-end">
-            <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-              product.stock === "0" 
-                ? 'bg-red-100 text-red-700 border border-red-200' 
-                : 'bg-green-100 text-green-700 border border-green-200'
-            }`}>
+            {/* Stock Status */}
+            <div className="flex items-center gap-4 mt-2">
+              <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                product.stock === "0" 
+                  ? 'bg-red-100 text-red-700 border border-red-200' 
+                  : 'bg-green-100 text-green-700 border border-green-200'
+              }`}>
               {product.stock === "0" ? 'Out of Stock' : 'In Stock'}
-            </div>
-            
-            {/* Rating Display */}
-            <div className="flex items-center gap-1 mt-2">
-              {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
-                  className={`w-4 h-4 ${
-                    i < Math.floor(longevityInfo.rating) 
-                      ? 'text-yellow-400 fill-current' 
-                      : 'text-gray-300'
-                  }`} 
-                />
-              ))}
-              <span className="text-sm text-gray-600 ml-1">({longevityInfo.rating})</span>
+              </div>
+              
+              {/* Rating Display */}
+              <div className="flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star 
+                    key={i} 
+                    className={`w-4 h-4 ${
+                      i < Math.floor(longevityInfo.rating) 
+                        ? 'text-yellow-400 fill-current' 
+                        : 'text-gray-300'
+                    }`} 
+                  />
+                ))}
+                <span className="text-sm text-gray-600 ml-1">({longevityInfo.rating})</span>
+              </div>
             </div>
           </div>
         </div>
@@ -420,43 +390,15 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
         )}
       </div>
 
-      {/* Trust Signals */}
-      <TrustBadges />
-
-      {/* Additional Information */}
-      <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-        <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Shield className="w-5 h-5 text-green-600" />
-          Why Choose KhushbuWaala?
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-          <div className="flex items-start gap-3">
-            <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <div className="font-medium text-gray-900">100% Authentic</div>
-              <div className="text-gray-600">Genuine fragrances only</div>
-            </div>
+      {/* Quick Trust Note */}
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-4 border border-green-100">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+            <Shield className="w-5 h-5 text-green-600" />
           </div>
-          <div className="flex items-start gap-3">
-            <Truck className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <div className="font-medium text-gray-900">Fast Delivery</div>
-              <div className="text-gray-600">2-3 days across Bangladesh</div>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <Award className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <div className="font-medium text-gray-900">Premium Quality</div>
-              <div className="text-gray-600">Carefully curated collection</div>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <CheckCircle className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <div className="font-medium text-gray-900">Easy Returns</div>
-              <div className="text-gray-600">7-day return policy</div>
-            </div>
+          <div>
+            <div className="font-semibold text-gray-900">Authentic & Secure</div>
+            <div className="text-sm text-gray-600">100% genuine products with fast delivery</div>
           </div>
         </div>
       </div>
