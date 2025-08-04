@@ -88,6 +88,30 @@ function Button({
     }
   }
 
+  // When asChild is true, we can't use loading state, ripple effects, or event handlers
+  // as Slot expects exactly one child and event handlers can't be passed to Client Components
+  if (asChild) {
+    // Extract event handlers from props to avoid passing them to Slot
+    const { 
+      onClick: propsOnClick, 
+      onMouseEnter, 
+      onMouseLeave, 
+      onFocus, 
+      onBlur,
+      disabled,
+      ...restProps 
+    } = props
+    return (
+      <Comp
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }))}
+        {...restProps}
+      >
+        {children}
+      </Comp>
+    )
+  }
+
   return (
     <Comp
       data-slot="button"

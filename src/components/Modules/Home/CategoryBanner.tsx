@@ -14,12 +14,7 @@ interface CategoryCardProps {
 // Server Component - Purely presentational
 function CategoryCard({ CategoryName, CategoryImage, CategoryLink, description }: CategoryCardProps) {
   return (
-    <Link
-      href={CategoryLink}
-      className="block group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1"
-      aria-label={`Explore ${CategoryName} category`}
-      title={`Shop ${CategoryName}`}
-    >
+    <div className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1">
       <div className="relative w-full h-48 md:h-64">
         <Image
           src={CategoryImage || "/placeholder.svg"}
@@ -38,13 +33,17 @@ function CategoryCard({ CategoryName, CategoryImage, CategoryLink, description }
             asChild
             className="w-fit px-6 py-2 bg-white text-red-600 font-semibold rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-105"
           >
-            <Link href={CategoryLink}>
+            <Link 
+              href={CategoryLink}
+              aria-label={`Explore ${CategoryName} category`}
+              title={`Shop ${CategoryName}`}
+            >
               Shop Now <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </div>
       </div>
-    </Link>
+    </div>
   )
 }
 

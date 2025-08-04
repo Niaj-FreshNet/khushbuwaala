@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Heart, Tag, Shield, Truck, Clock, Star, Award, Sparkles, Zap, CheckCircle } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { ShoppingCart, Heart, Tag, Shield, Truck, Clock, Star, Award, Sparkles, Zap, CheckCircle, Minus, Plus, Info, Gift, Crown, FileCheck, Phone, MessageSquare } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface ProductDetailsProps {
   product: {
@@ -23,387 +23,368 @@ interface ProductDetailsProps {
   };
 }
 
-function truncate(text: string, length: number) {
-  if (text.length <= length) return text;
-  return text.slice(0, length) + "...";
-}
+export default function ProductDetails({ product }: ProductDetailsProps) {
+  const [selectedSize, setSelectedSize] = useState<string>("3ml");
+  const [quantity, setQuantity] = useState<number>(1);
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
-// Perfume longevity mapping
-const getLongevityInfo = (category: string, measurement?: string) => {
-  if (measurement === 'ml') {
-    return {
-      duration: '6-8 hours',
-      projection: 'Moderate to Strong',
-      sillage: 'Good',
-      rating: 4.5
-    };
-  }
-  return {
-    duration: '4-6 hours', 
-    projection: 'Moderate',
-    sillage: 'Moderate',
-    rating: 4.0
+  // Available sizes based on measurement type
+  const availableSizes = product.measurement === "ml" 
+    ? ["3ml", "6ml", "12ml", "25ml"]
+    : ["3gm", "6gm", "12gm"];
+
+  // Get current price
+  const getCurrentPrice = () => {
+    return product.variantPrices?.[selectedSize] || product.price;
   };
-};
 
-// Trust badges for perfume authenticity
-const TrustBadges = () => (
-  <div className="grid grid-cols-2 gap-3 mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-100">
-    <div className="flex items-center gap-2 text-sm">
-      <Shield className="w-4 h-4 text-green-600" />
-      <span className="text-green-700 font-medium">Authentic Quality</span>
-    </div>
-    <div className="flex items-center gap-2 text-sm">
-      <Truck className="w-4 h-4 text-blue-600" />
-      <span className="text-blue-700 font-medium">Fast Delivery</span>
-    </div>
-    <div className="flex items-center gap-2 text-sm">
-      <Award className="w-4 h-4 text-purple-600" />
-      <span className="text-purple-700 font-medium">Premium Brand</span>
-    </div>
-    <div className="flex items-center gap-2 text-sm">
-      <CheckCircle className="w-4 h-4 text-indigo-600" />
-      <span className="text-indigo-700 font-medium">7 Day Return</span>
-    </div>
-  </div>
-);
+  const currentPrice = getCurrentPrice();
+  const discountedPrice = product.discount 
+    ? currentPrice - (currentPrice * product.discount) / 100
+    : currentPrice;
 
-// Fragrance strength indicator
-const FragranceStrength = ({ measurement }: { measurement?: string }) => {
-  const strength = measurement === 'ml' ? 4 : 3;
-  const maxStrength = 5;
+  const handleQuantityChange = (type: "increment" | "decrement") => {
+    if (type === "increment") {
+      setQuantity(prev => Math.min(prev + 1, 10));
+    } else {
+      setQuantity(prev => Math.max(prev - 1, 1));
+    }
+  };
+
+  const toggleWishlist = () => {
+    setIsWishlisted(!isWishlisted);
+  };
+
+  const isOutOfStock = product.stock === "0";
   
   return (
-    <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-100">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-semibold text-amber-800">Fragrance Intensity</span>
-        <span className="text-sm text-amber-700">{strength}/5</span>
-      </div>
-      <div className="flex gap-1">
-        {[...Array(maxStrength)].map((_, i) => (
-          <div 
-            key={i}
-            className={`h-2 flex-1 rounded ${
-              i < strength 
-                ? 'bg-gradient-to-r from-amber-400 to-orange-400' 
-                : 'bg-gray-200'
-            }`}
-          />
-        ))}
-      </div>
-      <p className="text-xs text-amber-700 mt-1">
-        {strength >= 4 ? 'Strong & Long-lasting' : 'Moderate & Balanced'}
-      </p>
-    </div>
-  );
-};
-
-export default function ProductDetails({ product }: ProductDetailsProps) {
-  const [selectedSize, setSelectedSize] = useState<string>("");
-  const [quantity, setQuantity] = useState(1);
-  const [showFullDesc, setShowFullDesc] = useState(false);
-  const [addedToWishlist, setAddedToWishlist] = useState(false);
-
-  const sizes =
-    product.measurement === "ml"
-      ? ["3 ml", "6 ml", "12 ml", "25 ml"]
-      : product.measurement === "gm"
-      ? ["3 gm", "6 gm", "12 gm"]
-      : ["1 piece"];
-
-  const basePrice = product.price;
-  const variantPrice = selectedSize
-    ? product.variantPrices?.[selectedSize] ?? basePrice
-    : basePrice;
-
-  const discountedPrice = product.discount
-    ? variantPrice - (variantPrice * product.discount) / 100
-    : variantPrice;
-
-  const longevityInfo = getLongevityInfo(product.measurement || '', product.measurement);
-  const savings = product.discount ? variantPrice - discountedPrice : 0;
-
-  // Mobile sticky add to cart bar
-  const mobileBar = (
-    <div className="fixed bottom-0 left-0 md:hidden right-0 z-50 bg-white/95 backdrop-blur-md shadow-2xl border-t border-pink-100 p-4">
-      <div className="flex justify-between items-center">
-        <div className="flex-1 mr-4">
-          <div className="font-bold text-gray-900 truncate text-lg">{product.name}</div>
-          <div className="flex items-center gap-2">
-            <span className="text-pink-600 font-bold text-xl">{discountedPrice.toFixed(0)} BDT</span>
+    <div className="space-y-6 lg:space-y-8">
+      {/* Header Section */}
+      <div className="space-y-4">
+        {/* Brand and Category */}
+        <div className="flex items-center gap-3 flex-wrap">
+          {product.brand && (
+            <Badge variant="secondary" className="bg-purple-100 text-purple-700 border-purple-200 px-3 py-1">
+              <Crown className="w-3 h-3 mr-1" />
+              {product.brand}
+            </Badge>
+          )}
+          {product.specification && (
+            <Badge variant="outline" className="border-gray-300 text-gray-600 px-3 py-1">
+              For {product.specification === 'male' ? 'Men' : 'Women'}
+            </Badge>
+          )}
             {product.discount && (
-              <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full font-medium">
+            <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 animate-pulse">
+              <Tag className="w-3 h-3 mr-1" />
                 {product.discount}% OFF
-              </span>
+            </Badge>
             )}
           </div>
-        </div>
-        <Button
-          className="bg-gradient-to-r from-pink-600 via-red-500 to-orange-400 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-          onClick={() => window.scrollTo({top: 0, left: 0, behavior: "smooth"})}
-        >
-          <ShoppingCart className="mr-2 w-5 h-5" />
-          Add to Cart
-        </Button>
-      </div>
-    </div>
-  );
 
-  return (
-    <section aria-labelledby="product-name" className="space-y-8 pb-24 md:pb-0">
-      {/* Sticky mobile add-to-cart bar */}
-      {mobileBar}
-      
-      {/* Product Header */}
-      <div className="space-y-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h1 id="product-name" className="text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight leading-tight">
+        {/* Product Name */}
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight tracking-tight">
               {product.name}
             </h1>
             
-            {/* Stock Status */}
-            <div className="flex items-center gap-4 mt-2">
-              <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                product.stock === "0" 
-                  ? 'bg-red-100 text-red-700 border border-red-200' 
-                  : 'bg-green-100 text-green-700 border border-green-200'
-              }`}>
-              {product.stock === "0" ? 'Out of Stock' : 'In Stock'}
-              </div>
-              
-              {/* Rating Display */}
-              <div className="flex items-center gap-1">
+        {/* Rating and Stock Status */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex">
                 {[...Array(5)].map((_, i) => (
-                  <Star 
-                    key={i} 
-                    className={`w-4 h-4 ${
-                      i < Math.floor(longevityInfo.rating) 
-                        ? 'text-yellow-400 fill-current' 
-                        : 'text-gray-300'
-                    }`} 
-                  />
-                ))}
-                <span className="text-sm text-gray-600 ml-1">({longevityInfo.rating})</span>
+                <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+              ))}
               </div>
+            <span className="text-sm text-gray-600">(4.5) • 127 reviews</span>
             </div>
+          <div className="flex items-center gap-2 text-sm text-green-600">
+            <CheckCircle className="w-4 h-4" />
+            <span className="font-medium">In Stock</span>
           </div>
         </div>
 
-        {/* Pricing Section */}
-        <div className="bg-gradient-to-r from-gray-50 to-pink-50 p-6 rounded-2xl border border-pink-100">
-          <div className="flex items-center gap-4 mb-2">
-            {product.discount ? (
-              <>
-                <span className="text-2xl text-gray-400 line-through font-medium">{variantPrice} BDT</span>
-                <span className="text-4xl font-bold text-red-600">{discountedPrice.toFixed(0)} BDT</span>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 px-4 py-2 bg-red-500 text-white font-bold rounded-full text-sm shadow-lg">
-                    <Tag size={16} /> 
-                    SAVE {product.discount}%
+        {/* Price Section */}
+        <div className="space-y-3 p-6 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-3xl border border-blue-100 shadow-sm">
+          <div className="flex items-center gap-4">
+            <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
+              ৳{discountedPrice.toLocaleString()}
+            </span>
+            {product.discount && (
+              <span className="text-xl text-gray-500 line-through">
+                ৳{currentPrice.toLocaleString()}
                   </span>
-                </div>
-              </>
-            ) : (
-              <span className="text-4xl font-bold text-gray-900">{variantPrice} BDT</span>
             )}
           </div>
-          
-          {savings > 0 && (
-            <p className="text-green-700 font-medium text-sm">
-              You save {savings.toFixed(0)} BDT with this offer!
-            </p>
+          {product.discount && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-green-600 font-medium">
+                You save ৳{(currentPrice - discountedPrice).toLocaleString()}
+              </span>
+              <Badge className="bg-green-100 text-green-700 border-green-200">
+                {product.discount}% OFF
+              </Badge>
+            </div>
           )}
-
-          {/* Performance Indicators */}
-          <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-pink-200">
-            <div className="text-center">
-              <Clock className="w-5 h-5 text-blue-600 mx-auto mb-1" />
-              <div className="text-xs text-gray-600">Longevity</div>
-              <div className="font-semibold text-sm">{longevityInfo.duration}</div>
-            </div>
-            <div className="text-center">
-              <Zap className="w-5 h-5 text-purple-600 mx-auto mb-1" />
-              <div className="text-xs text-gray-600">Projection</div>
-              <div className="font-semibold text-sm">{longevityInfo.projection}</div>
-            </div>
-            <div className="text-center">
-              <Sparkles className="w-5 h-5 text-pink-600 mx-auto mb-1" />
-              <div className="text-xs text-gray-600">Sillage</div>
-              <div className="font-semibold text-sm">{longevityInfo.sillage}</div>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Product Description */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-semibold text-gray-900">About This Fragrance</h2>
-        <div className="text-gray-700 text-base leading-relaxed">
-          {showFullDesc ? product.description : truncate(product.description, 180)}
-          {!showFullDesc && product.description.length > 180 && (
-            <button
-              onClick={() => setShowFullDesc(true)}
-              className="text-pink-600 hover:text-pink-700 underline font-semibold ml-2 transition-colors"
-            >
-              Read more
-            </button>
-          )}
+      {/* Fragrance Notes */}
+      {product.smell && product.smell.length > 0 && (
+        <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-3xl border border-purple-100 shadow-sm">
+          <h3 className="font-semibold text-purple-800 mb-4 flex items-center gap-2 text-lg">
+            <Sparkles className="w-5 h-5" />
+            Fragrance Notes
+          </h3>
+          <div className="flex flex-wrap gap-3">
+            {product.smell.map((note, index) => (
+              <span 
+                key={index}
+                className="px-4 py-2 bg-white/70 text-purple-700 rounded-full text-sm font-medium border border-purple-200 hover:bg-purple-100 transition-colors duration-200 cursor-default"
+              >
+                {note}
+              </span>
+            ))}
         </div>
-        
-        {/* Fragrance Notes */}
-        {product.notes && (
-          <div className="mt-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
-            <h3 className="font-semibold text-indigo-900 mb-2">Fragrance Notes</h3>
-            <p className="text-indigo-700 text-sm leading-relaxed">{product.notes}</p>
           </div>
         )}
-      </div>
 
       {/* Size Selection */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900 text-lg">Size Options</h3>
-          <span className="text-sm text-gray-600">Choose your preferred size</span>
-        </div>
-        
-        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3">
-          {sizes.map((size) => (
-            <Button
+        <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <Gift className="w-5 h-5 text-blue-600" />
+          Choose Size
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {availableSizes.map((size) => (
+            <button
               key={size}
-              type="button"
-              variant={selectedSize === size ? "default" : "outline"}
-              className={`relative overflow-hidden transition-all duration-300 h-14 ${
-                selectedSize === size
-                  ? "bg-gradient-to-r from-pink-500 via-red-500 to-orange-400 text-white font-bold scale-105 shadow-lg ring-4 ring-pink-300/50"
-                  : "text-gray-900 hover:text-pink-700 border-2 border-gray-300 bg-white hover:border-pink-300 hover:shadow-md"
-              }`}
               onClick={() => setSelectedSize(size)}
-              aria-pressed={selectedSize === size}
+              className={`p-4 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 ${
+                selectedSize === size
+                  ? "border-blue-500 bg-blue-50 text-blue-700 shadow-lg scale-105 ring-2 ring-blue-200"
+                  : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50 hover:shadow-md"
+              }`}
             >
-              <div className="relative w-full h-full flex items-center justify-center">
-                <span className="relative z-10">{size}</span>
-                {selectedSize === size && (
-                  <div className="absolute top-1 right-1">
-                    <CheckCircle className="w-4 h-4 text-white" />
+              <div className="text-center">
+                <div className="font-bold text-base">{size}</div>
+                {product.variantPrices?.[size] && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    ৳{product.variantPrices[size].toLocaleString()}
                   </div>
                 )}
               </div>
-            </Button>
+            </button>
           ))}
         </div>
-        
-        {selectedSize && (
-          <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-            Selected: <span className="font-semibold">{selectedSize}</span> - Perfect for {
-              selectedSize.includes('3') ? 'trying out the fragrance' :
-              selectedSize.includes('6') ? 'travel and daily touch-ups' :
-              selectedSize.includes('12') ? 'regular daily use' :
-              'extended use and best value'
-            }
-          </p>
-        )}
       </div>
 
       {/* Quantity Selection */}
-      <div className="flex items-center gap-6">
-        <h3 className="font-semibold text-gray-900">Quantity</h3>
-        <div className="flex items-center bg-gray-50 border-2 border-gray-200 rounded-xl overflow-hidden shadow-sm hover:border-pink-300 transition-colors">
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900">Quantity</h3>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center border-2 border-gray-300 rounded-2xl bg-white shadow-sm">
           <button
-            type="button"
-            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-            className="px-4 py-3 text-xl hover:bg-gray-100 text-gray-700 transition-colors font-bold"
-            aria-label="Decrease quantity"
-          >
-            –
+              onClick={() => handleQuantityChange("decrement")}
+              disabled={quantity <= 1}
+              className="p-4 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              <Minus className="w-5 h-5" />
           </button>
-          <Input
-            id="quantity"
-            type="number"
-            min={1}
-            value={quantity}
-            onChange={(e) =>
-              setQuantity(Math.max(1, parseInt(e.target.value) || 1))
-            }
-            className="w-16 text-center border-none focus:outline-none bg-transparent text-xl font-semibold py-3"
-            aria-live="polite"
-          />
+            <span className="px-6 py-4 font-bold text-gray-900 min-w-[4rem] text-center text-lg">
+              {quantity}
+            </span>
           <button
-            type="button"
-            onClick={() => setQuantity((q) => q + 1)}
-            className="px-4 py-3 text-xl hover:bg-gray-100 text-gray-700 transition-colors font-bold"
-            aria-label="Increase quantity"
-          >
-            +
+              onClick={() => handleQuantityChange("increment")}
+              disabled={quantity >= 10}
+              className="p-4 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              <Plus className="w-5 h-5" />
           </button>
+          </div>
+          <div className="text-right">
+            <div className="text-sm text-gray-600">Total Price</div>
+            <div className="text-2xl font-bold text-gray-900">৳{(discountedPrice * quantity).toLocaleString()}</div>
+          </div>
         </div>
       </div>
 
-      {/* Fragrance Strength Indicator */}
-      <FragranceStrength measurement={product.measurement} />
+      {/* Fragrance Performance */}
+      <div className="p-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 rounded-3xl border border-amber-100 shadow-sm">
+        <div className="flex items-center gap-2 mb-6">
+          <Award className="w-6 h-6 text-amber-600" />
+          <h3 className="text-lg font-semibold text-amber-800">Fragrance Performance</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="text-center p-4 bg-white/50 rounded-2xl">
+            <div className="text-2xl font-bold text-amber-700 mb-1">8-12hrs</div>
+            <div className="text-sm text-amber-600 font-medium">Longevity</div>
+            <div className="w-full bg-amber-200 rounded-full h-2 mt-2">
+              <div className="bg-gradient-to-r from-amber-400 to-orange-400 h-2 rounded-full w-[85%] transition-all duration-500"></div>
+            </div>
+          </div>
+          <div className="text-center p-4 bg-white/50 rounded-2xl">
+            <div className="text-2xl font-bold text-amber-700 mb-1">Moderate</div>
+            <div className="text-sm text-amber-600 font-medium">Projection</div>
+            <div className="w-full bg-amber-200 rounded-full h-2 mt-2">
+              <div className="bg-gradient-to-r from-amber-400 to-orange-400 h-2 rounded-full w-[75%] transition-all duration-500"></div>
+            </div>
+          </div>
+          <div className="text-center p-4 bg-white/50 rounded-2xl">
+            <div className="text-2xl font-bold text-amber-700 mb-1">Good</div>
+            <div className="text-sm text-amber-600 font-medium">Sillage</div>
+            <div className="w-full bg-amber-200 rounded-full h-2 mt-2">
+              <div className="bg-gradient-to-r from-amber-400 to-orange-400 h-2 rounded-full w-[80%] transition-all duration-500"></div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center mt-6 gap-2">
+          <div className="flex">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className={`w-4 h-4 ${i < 4 ? 'text-amber-400 fill-current' : 'text-amber-200'}`} />
+            ))}
+          </div>
+          <span className="text-sm font-bold text-amber-700 ml-2">4.5 Overall Rating</span>
+        </div>
+      </div>
+
+      {/* Trust Indicators */}
+      <div className="grid grid-cols-2 gap-4 p-6 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 rounded-3xl border border-emerald-100 shadow-sm">
+        <div className="flex items-center gap-3 p-3 bg-white/60 rounded-2xl">
+          <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center shadow-sm">
+            <Shield className="w-6 h-6 text-emerald-600" />
+          </div>
+          <div>
+            <div className="font-semibold text-emerald-800 text-sm">100% Authentic</div>
+            <div className="text-xs text-emerald-600">Guaranteed Original</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 p-3 bg-white/60 rounded-2xl">
+          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center shadow-sm">
+            <Truck className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <div className="font-semibold text-blue-800 text-sm">Fast Delivery</div>
+            <div className="text-xs text-blue-600">2-3 Days</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 p-3 bg-white/60 rounded-2xl">
+          <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center shadow-sm">
+            <FileCheck className="w-6 h-6 text-purple-600" />
+          </div>
+          <div>
+            <div className="font-semibold text-purple-800 text-sm">Premium Quality</div>
+            <div className="text-xs text-purple-600">Best Ingredients</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 p-3 bg-white/60 rounded-2xl">
+          <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center shadow-sm">
+            <CheckCircle className="w-6 h-6 text-indigo-600" />
+          </div>
+          <div>
+            <div className="font-semibold text-indigo-800 text-sm">7 Day Return</div>
+            <div className="text-xs text-indigo-600">Easy Returns</div>
+          </div>
+        </div>
+      </div>
 
       {/* Action Buttons */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4">
+        {/* Primary CTA */}
+        <Button
+          size="xl"
+          disabled={isOutOfStock}
+          className={`w-full h-16 text-xl font-bold shadow-2xl transform transition-all duration-300 hover:scale-105 ${
+            isOutOfStock 
+              ? "bg-gray-400 cursor-not-allowed" 
+              : "bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white border-0 shadow-blue-500/30 hover:shadow-blue-600/40"
+          }`}
+        >
+          <ShoppingCart className="w-6 h-6 mr-3" />
+          {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+        </Button>
+
+        {/* Secondary Actions */}
+        <div className="grid grid-cols-2 gap-4">
           <Button
+            variant="outline"
             size="lg"
-            disabled={product.stock === "0"}
-            className="flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-pink-600 via-red-500 to-orange-400 hover:from-pink-700 hover:via-red-600 hover:to-orange-500 text-white font-bold rounded-xl px-8 py-4 text-lg shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Add to cart"
-            onClick={() => alert("Added to Cart!")}
+            onClick={toggleWishlist}
+            className={`h-14 text-lg font-bold border-2 transition-all duration-300 transform hover:scale-105 ${
+              isWishlisted
+                ? "border-red-500 bg-red-50 text-red-700 hover:bg-red-100"
+                : "border-gray-300 bg-white text-gray-700 hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+            }`}
           >
-            <ShoppingCart className="w-6 h-6" />
-            {product.stock === "0" ? "Out of Stock" : "Add to Cart"}
+            <Heart className={`w-5 h-5 mr-2 ${isWishlisted ? "fill-current" : ""}`} />
+            {isWishlisted ? "Saved" : "Wishlist"}
           </Button>
           
           <Button
             variant="outline"
             size="lg"
-            className={`flex items-center justify-center gap-3 border-2 rounded-xl px-6 py-4 shadow-md transition-all duration-300 ${
-              addedToWishlist
-                ? "border-pink-500 bg-pink-50 text-pink-700 hover:bg-pink-100"
-                : "border-pink-300 text-pink-700 bg-white hover:bg-pink-50 hover:border-pink-400"
-            }`}
-            aria-label="Add to wishlist"
-            onClick={() => setAddedToWishlist(!addedToWishlist)}
+            asChild
+            className="h-14 text-lg font-bold border-2 border-green-300 bg-white text-green-700 hover:border-green-400 hover:bg-green-50 hover:text-green-800 transition-all duration-300 transform hover:scale-105"
           >
-            <Heart className={`w-5 h-5 ${addedToWishlist ? 'fill-current' : ''}`} />
-            {addedToWishlist ? "Added to Wishlist" : "Add to Wishlist"}
+            <a href="https://wa.me/8801566395807" target="_blank" rel="noopener noreferrer">
+              <MessageSquare className="w-5 h-5 mr-2" />
+              Ask Expert
+            </a>
+          </Button>
+        </div>
+
+        {/* Buy Now Button */}
+        <Button
+          size="xl"
+          disabled={isOutOfStock}
+          className="w-full h-16 text-xl font-bold bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white shadow-2xl shadow-orange-500/30 hover:shadow-orange-600/40 transform transition-all duration-300 hover:scale-105 border-0"
+        >
+          <Zap className="w-6 h-6 mr-3" />
+          Buy Now - Express Checkout
           </Button>
         </div>
         
-        {/* Total Price Display */}
-        {quantity > 1 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-            <div className="flex justify-between items-center">
-              <span className="text-blue-800 font-medium">
-                Total for {quantity} items:
-              </span>
-              <span className="text-2xl font-bold text-blue-900">
-                {(discountedPrice * quantity).toFixed(0)} BDT
-              </span>
-            </div>
-            {product.discount && (
-              <div className="text-sm text-blue-700 mt-1">
-                You save {(savings * quantity).toFixed(0)} BDT in total!
-              </div>
-            )}
-          </div>
-        )}
+      {/* Product Description */}
+      <div className="p-6 bg-gray-50 rounded-3xl border border-gray-200 shadow-sm">
+        <div className="flex items-center gap-3 mb-4">
+          <Info className="w-5 h-5 text-gray-600" />
+          <h3 className="text-lg font-semibold text-gray-900">Product Description</h3>
+        </div>
+        <p className="text-gray-700 leading-relaxed text-base">
+          {product.description || "Experience the luxury of premium fragrances with this exquisite perfume. Crafted with the finest ingredients, this fragrance offers a captivating blend of notes that will leave a lasting impression. Perfect for those who appreciate the finer things in life."}
+        </p>
       </div>
 
-      {/* Quick Trust Note */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-4 border border-green-100">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-            <Shield className="w-5 h-5 text-green-600" />
+      {/* Delivery Information */}
+      <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-3xl border border-blue-100 shadow-sm">
+        <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center gap-2">
+          <Truck className="w-5 h-5" />
+          Delivery & Returns
+        </h3>
+        <div className="space-y-3 text-blue-700">
+          <div className="flex items-center gap-3 p-3 bg-white/50 rounded-2xl">
+            <Clock className="w-5 h-5 flex-shrink-0" />
+            <span className="font-medium">Free delivery within 2-3 days inside Dhaka</span>
           </div>
-          <div>
-            <div className="font-semibold text-gray-900">Authentic & Secure</div>
-            <div className="text-sm text-gray-600">100% genuine products with fast delivery</div>
+          <div className="flex items-center gap-3 p-3 bg-white/50 rounded-2xl">
+            <Truck className="w-5 h-5 flex-shrink-0" />
+            <span className="font-medium">৳60 delivery charge outside Dhaka (3-5 days)</span>
+            </div>
+          <div className="flex items-center gap-3 p-3 bg-white/50 rounded-2xl">
+            <CheckCircle className="w-5 h-5 flex-shrink-0" />
+            <span className="font-medium">7-day return policy for unused products</span>
+              </div>
+          </div>
+      </div>
+
+      {/* Urgency Indicator */}
+      <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl border border-red-200 shadow-sm">
+        <div className="flex items-center justify-center gap-2 text-red-700">
+          <Clock className="w-5 h-5 animate-pulse" />
+          <span className="font-bold text-center">🔥 Only 3 left in stock - Order now!</span>
           </div>
         </div>
       </div>
-    </section>
   );
 }

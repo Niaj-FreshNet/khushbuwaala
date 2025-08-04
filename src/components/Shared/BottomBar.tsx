@@ -156,22 +156,21 @@ export default function BottomBar() {
               
               return (
                 <div key={item.label} className="relative flex-1 flex justify-center">
-                  <Button
-                    variant="ghost"
-                    className={cn(
-                      "relative flex flex-col items-center justify-center h-14 w-14 rounded-2xl transition-all duration-300 group",
-                      "hover:bg-red-50/80 active:scale-95",
-                      isActive 
-                        ? "bg-red-50/80 text-red-600 shadow-lg shadow-red-500/20" 
-                        : "text-gray-600 hover:text-red-600",
-                      item.isSpecial && "bg-blue-50/80 hover:bg-blue-100/80"
-                    )}
-                    onClick={item.onClick ? item.onClick : () => handleNavigation(item.path!)}
-                    asChild={!item.onClick} // Use asChild only if it's a Link
-                    aria-label={item.ariaLabel}
-                    title={item.ariaLabel}
-                  >
-                    {item.path ? (
+                  {item.path ? (
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "relative flex flex-col items-center justify-center h-14 w-14 rounded-2xl transition-all duration-300 group",
+                        "hover:bg-red-50/80 active:scale-95",
+                        isActive 
+                          ? "bg-red-50/80 text-red-600 shadow-lg shadow-red-500/20" 
+                          : "text-gray-600 hover:text-red-600",
+                        item.isSpecial && "bg-blue-50/80 hover:bg-blue-100/80"
+                      )}
+                      asChild
+                      aria-label={item.ariaLabel}
+                      title={item.ariaLabel}
+                    >
                       <Link href={item.path} className="flex flex-col items-center justify-center relative">
                         {/* Icon with enhanced animations */}
                         <div className={cn(
@@ -208,7 +207,20 @@ export default function BottomBar() {
                           <div className="absolute -bottom-1 w-1 h-1 bg-red-500 rounded-full animate-pulse" />
                         )}
                       </Link>
-                    ) : (
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "relative flex flex-col items-center justify-center h-14 w-14 rounded-2xl transition-all duration-300 group",
+                        "hover:bg-red-50/80 active:scale-95",
+                        "text-gray-600 hover:text-red-600",
+                        item.isSpecial && "bg-blue-50/80 hover:bg-blue-100/80"
+                      )}
+                      onClick={item.onClick}
+                      aria-label={item.ariaLabel}
+                      title={item.ariaLabel}
+                    >
                       <div className="flex flex-col items-center justify-center relative">
                         {/* Icon with enhanced animations */}
                         <div className={cn(
@@ -228,8 +240,8 @@ export default function BottomBar() {
                           {item.label}
                         </span>
                       </div>
-                    )}
-                  </Button>
+                    </Button>
+                  )}
                   
                   {/* Ripple effect on touch */}
                   <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">

@@ -1,119 +1,180 @@
 import React from 'react';
-import { Shield, Truck, RotateCcw, Award, Clock, HeartHandshake, CheckCircle, Star } from 'lucide-react';
+import { Shield, Truck, RotateCcw, Award, Clock, Star, CheckCircle, Phone, MessageSquare } from 'lucide-react';
 
-export default function TrustSignals() {
-  const trustSignals = [
+const TrustSignals = () => {
+  const trustFeatures = [
     {
-      icon: <Shield className="h-5 w-5" />,
+      icon: Shield,
       title: "100% Authentic",
-      description: "Original quality guaranteed",
-      color: "text-green-600 bg-green-50 border-green-200"
+      description: "Genuine products only",
+      color: "emerald",
+      bgColor: "bg-emerald-50",
+      iconColor: "text-emerald-600",
+      borderColor: "border-emerald-200"
     },
     {
-      icon: <Truck className="h-5 w-5" />,
-      title: "Free Shipping",
-      description: "On orders over ৳1000",
-      color: "text-blue-600 bg-blue-50 border-blue-200"
+      icon: Truck,
+      title: "Fast Delivery",
+      description: "2-3 days in Dhaka",
+      color: "blue",
+      bgColor: "bg-blue-50",
+      iconColor: "text-blue-600",
+      borderColor: "border-blue-200"
     },
     {
-      icon: <RotateCcw className="h-5 w-5" />,
-      title: "7-Day Return",
-      description: "Easy returns & refunds",
-      color: "text-purple-600 bg-purple-50 border-purple-200"
+      icon: RotateCcw,
+      title: "Easy Returns",
+      description: "7-day return policy",
+      color: "purple",
+      bgColor: "bg-purple-50",
+      iconColor: "text-purple-600",
+      borderColor: "border-purple-200"
+    },
+    {
+      icon: Award,
+      title: "Premium Quality",
+      description: "Long-lasting fragrances",
+      color: "amber",
+      bgColor: "bg-amber-50",
+      iconColor: "text-amber-600",
+      borderColor: "border-amber-200"
+    },
+    {
+      icon: Phone,
+      title: "24/7 Support",
+      description: "Always here to help",
+      color: "indigo",
+      bgColor: "bg-indigo-50",
+      iconColor: "text-indigo-600",
+      borderColor: "border-indigo-200"
+    },
+    {
+      icon: CheckCircle,
+      title: "Secure Payment",
+      description: "Safe & secure checkout",
+      color: "green",
+      bgColor: "bg-green-50",
+      iconColor: "text-green-600",
+      borderColor: "border-green-200"
     }
   ];
 
-  const qualityBadges = [
+  const customerStats = [
     {
-      icon: <Award className="h-4 w-4" />,
-      text: "Premium Quality",
-      description: "Tested & Certified"
+      number: "50,000+",
+      label: "Happy Customers",
+      icon: Star,
+      color: "text-yellow-600"
     },
     {
-      icon: <Clock className="h-4 w-4" />,
-      text: "Long Lasting",
-      description: "8-12 Hours Duration"
+      number: "15,000+",
+      label: "Products Sold",
+      icon: Award,
+      color: "text-purple-600"
     },
     {
-      icon: <HeartHandshake className="h-4 w-4" />,
-      text: "Customer Care",
-      description: "24/7 Support"
+      number: "4.8/5",
+      label: "Customer Rating",
+      icon: CheckCircle,
+      color: "text-green-600"
+    },
+    {
+      number: "99%",
+      label: "Satisfaction Rate",
+      icon: MessageSquare,
+      color: "text-blue-600"
     }
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Main Trust Signals */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {trustSignals.map((signal, index) => (
-          <div
-            key={index}
-            className={`p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-lg ${signal.color}`}
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex-shrink-0">
-                {signal.icon}
+    <div className="space-y-8">
+      {/* Trust Features Grid - Mobile Optimized */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+        {trustFeatures.map((feature, index) => {
+          const IconComponent = feature.icon;
+          return (
+            <div
+              key={index}
+              className={`${feature.bgColor} ${feature.borderColor} border rounded-2xl p-3 sm:p-4 text-center hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 touch-manipulation`}
+            >
+              <div className="flex justify-center mb-2 sm:mb-3">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 ${feature.bgColor} rounded-full flex items-center justify-center shadow-sm`}>
+                  <IconComponent className={`w-5 h-5 sm:w-6 sm:h-6 ${feature.iconColor}`} />
+                </div>
               </div>
-              <div>
-                <div className="font-semibold text-sm">{signal.title}</div>
-                <div className="text-xs opacity-80">{signal.description}</div>
-              </div>
+              <h3 className={`font-bold text-gray-900 text-xs sm:text-sm mb-1`}>
+                {feature.title}
+              </h3>
+              <p className="text-xs text-gray-600 leading-relaxed hidden sm:block">
+                {feature.description}
+              </p>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Quality Badges */}
-      <div className="border-t pt-6">
-        <div className="flex items-center justify-center gap-6 text-sm text-gray-600">
-          {qualityBadges.map((badge, index) => (
-            <div key={index} className="flex items-center gap-2 group">
-              <div className="text-red-600 group-hover:scale-110 transition-transform duration-200">
-                {badge.icon}
+      {/* Customer Statistics */}
+      <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-3xl p-8 text-white">
+        <div className="text-center mb-8">
+          <h3 className="text-2xl md:text-3xl font-bold mb-3">
+            Trusted by Thousands
+          </h3>
+          <p className="text-gray-300 max-w-2xl mx-auto">
+            Join our community of satisfied customers who trust KhushbuWaala for authentic, premium fragrances
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {customerStats.map((stat, index) => {
+            const IconComponent = stat.icon;
+            return (
+              <div key={index} className="text-center">
+                <div className="flex justify-center mb-3">
+                  <IconComponent className={`w-8 h-8 ${stat.color}`} />
+                </div>
+                <div className="text-2xl md:text-3xl font-bold mb-1">
+                  {stat.number}
+                </div>
+                <div className="text-sm text-gray-300">
+                  {stat.label}
+                </div>
               </div>
-              <div className="text-center">
-                <div className="font-medium">{badge.text}</div>
-                <div className="text-xs text-gray-500">{badge.description}</div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* Customer Satisfaction */}
-      <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-4">
-        <div className="flex items-center justify-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="flex">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className="h-4 w-4 text-yellow-500 fill-current" />
-              ))}
-            </div>
-            <span className="text-sm font-semibold">4.9/5</span>
-          </div>
-          <div className="h-4 w-px bg-gray-300"></div>
-          <div className="text-sm text-gray-600">
-            <span className="font-semibold">2,500+</span> Happy Customers
-          </div>
-          <div className="h-4 w-px bg-gray-300"></div>
-          <div className="flex items-center gap-1 text-sm text-green-600">
-            <CheckCircle className="h-4 w-4" />
-            <span>Verified Reviews</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Security Badge */}
-      <div className="text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm text-gray-600">
-          <Shield className="h-4 w-4 text-green-600" />
-          <span>Secure Checkout</span>
-          <div className="flex gap-1 ml-2">
-            <div className="w-6 h-4 bg-blue-600 rounded-sm flex items-center justify-center text-white text-xs font-bold">V</div>
-            <div className="w-6 h-4 bg-orange-500 rounded-sm flex items-center justify-center text-white text-xs font-bold">M</div>
+      {/* Contact Section */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
+        <div className="text-center">
+          <h3 className="text-xl font-bold text-gray-900 mb-3">
+            Need Help Choosing?
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Our fragrance experts are here to help you find the perfect scent
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <a
+              href="tel:+8801566395807"
+              className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors duration-200"
+            >
+              <Phone className="w-5 h-5 mr-2" />
+              Call Us Now
+            </a>
+            <a
+              href="https://wa.me/8801566395807"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors duration-200"
+            >
+              <MessageSquare className="w-5 h-5 mr-2" />
+              WhatsApp
+            </a>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default TrustSignals;

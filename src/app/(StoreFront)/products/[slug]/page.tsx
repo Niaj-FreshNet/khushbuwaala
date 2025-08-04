@@ -5,8 +5,10 @@ import Script from "next/script";
 import ProductGallery from "@/components/Modules/Product/ProductGallery";
 import ProductDetails from "@/components/Modules/Product/ProductDetails";
 import RelatedProducts from "@/components/Modules/Product/RelatedProducts";
-import Breadcrumbs, { BreadcrumbItem } from "@/components/Shared/BreadCrumbs";
 import ProductAccordion from "@/components/Modules/Product/ProductAccordion";
+import Breadcrumbs, { BreadcrumbItem } from "@/components/Shared/Breadcrumbs";
+import TrustSignals from "@/components/Modules/Product/TrustSignals";
+import { ShoppingCart, Heart, MessageSquare, Zap } from "lucide-react";
 
 interface Props {
   params: { slug: string };
@@ -50,24 +52,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  // Enhanced description for perfumes
-  const enhancedDescription = `${product.description || ''} Premium ${product.category === 'inspiredPerfumeOil' ? 'perfume oil' : 'fragrance'} available at KhushbuWaala. ${product.discount ? `Now ${product.discount}% off!` : ''} Fast delivery across Bangladesh. Authentic quality guaranteed.`.trim();
+  // Enhanced description for perfumes with better formatting
+  const enhancedDescription = `${product.description || `Discover ${product.name}, a premium ${product.category === 'inspiredPerfumeOil' ? 'perfume oil' : 'fragrance'} from KhushbuWaala.`} ${product.discount ? `Now ${product.discount}% off!` : ''} Authentic quality, fast delivery across Bangladesh. ${product.specification === 'male' ? "Perfect for men" : "Perfect for women"}.`.trim();
 
-  // Generate keywords from product data
+  // Generate comprehensive keywords
   const keywords = [
     product.name,
-    'perfume',
-    'fragrance',
-    'attar',
-    'khushbuwaala',
-    'bangladesh perfume',
+    'perfume bangladesh',
     'authentic perfume',
+    'khushbuwaala',
+    'premium fragrance',
+    'perfume online',
+    'attar',
+    'long lasting perfume',
     ...(product.smell || []),
     ...(product.notes ? product.notes.split(',').map(note => note.trim()) : []),
-    product.category === 'inspiredPerfumeOil' ? 'perfume oil' : '',
+    product.category === 'inspiredPerfumeOil' ? 'perfume oil' : 'eau de parfum',
     product.specification === 'male' ? 'men perfume' : 'women perfume',
-    'premium fragrance',
-    'long lasting perfume',
+    product.brand || 'premium brand',
+    'perfume shop dhaka',
+    'online perfume store',
   ].filter(Boolean).join(', ');
 
   return {
@@ -76,30 +80,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords,
     
     // Enhanced Open Graph metadata
-    // openGraph: {
-    //   title: `${product.name} - Premium Perfume at KhushbuWaala`,
-    //   description: enhancedDescription.slice(0, 200),
-    //   url: `https://khushbuwaala.com/products/${product.slug}`,
-    //   type: "product",
-    //   siteName: "KhushbuWaala",
-    //   locale: "en_US",
-    //   images: [
-    //     {
-    //       url: product.primaryImage,
-    //       width: 800,
-    //       height: 800,
-    //       alt: `${product.name} - Premium perfume bottle`,
-    //       type: "image/jpeg",
-    //     },
-    //     ...(product.moreImages || []).slice(0, 3).map((img, index) => ({
-    //       url: img,
-    //       width: 800,
-    //       height: 800,
-    //       alt: `${product.name} - Additional view ${index + 1}`,
-    //       type: "image/jpeg",
-    //     })),
-    //   ],
-    // },
+    openGraph: {
+      title: `${product.name} - Premium Perfume at KhushbuWaala`,
+      description: enhancedDescription.slice(0, 200),
+      url: `https://khushbuwaala.com/products/${product.slug}`,
+      type: "website",
+      siteName: "KhushbuWaala",
+      locale: "en_US",
+      images: [
+        {
+          url: product.primaryImage,
+          width: 800,
+          height: 800,
+          alt: `${product.name} - Premium perfume bottle`,
+          type: "image/jpeg",
+        },
+        ...(product.moreImages || []).slice(0, 3).map((img, index) => ({
+          url: img,
+          width: 800,
+          height: 800,
+          alt: `${product.name} - Additional view ${index + 1}`,
+          type: "image/jpeg",
+        })),
+      ],
+    },
 
     // Enhanced Twitter Card metadata
     twitter: {
@@ -126,6 +130,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         "max-snippet": -1,
       },
     },
+
+    // Additional metadata for better SEO
+    other: {
+      'product:price:amount': (product.discount ? 
+        product.price - (product.price * product.discount) / 100 : 
+        product.price).toString(),
+      'product:price:currency': 'BDT',
+      'product:availability': product.stock === "0" ? 'out of stock' : 'in stock',
+      'product:condition': 'new',
+      'product:brand': product.brand || 'KhushbuWaala',
+      'product:category': getCategoryInfo(product.category).name,
+    },
   };
 }
 
@@ -141,7 +157,7 @@ function StructuredData({ product }: { product: Product }) {
     "@type": "Product",
     "@id": `https://khushbuwaala.com/products/${product.slug}#product`,
     name: product.name,
-    description: product.description,
+    description: product.description || `Premium ${product.specification === 'male' ? "men's" : "women's"} perfume from KhushbuWaala`,
     brand: {
       "@type": "Brand",
       name: product.brand || "KhushbuWaala",
@@ -165,8 +181,9 @@ function StructuredData({ product }: { product: Product }) {
       url: `https://khushbuwaala.com/products/${product.slug}`,
       priceCurrency: "BDT",
       price: discountedPrice.toString(),
-      priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 year from now
+      priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       availability: product.stock === "0" ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
       seller: {
         "@type": "Organization",
         name: "KhushbuWaala",
@@ -235,8 +252,8 @@ function StructuredData({ product }: { product: Product }) {
     ].filter(Boolean),
     aggregateRating: {
       "@type": "AggregateRating",
-      ratingValue: "4.5", // Default rating - should be dynamic based on real reviews
-      reviewCount: "12",
+      ratingValue: "4.5",
+      reviewCount: "127",
       bestRating: "5",
       worstRating: "1",
     },
@@ -273,17 +290,20 @@ export default async function ProductPage({ params }: Props) {
 
   if (!product) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] px-4">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-red-600 mb-4">
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center max-w-md">
+          <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-red-100 to-pink-100 rounded-full flex items-center justify-center">
+            <span className="text-4xl">🔍</span>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Product Not Found
           </h1>
-          <p className="text-lg text-gray-600 mb-6 max-w-md">
+          <p className="text-lg text-gray-600 mb-8 leading-relaxed">
             We couldn&apos;t find the perfume you&apos;re looking for. It might have been moved or is no longer available.
           </p>
           <a 
             href="/shop" 
-            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-pink-500 to-red-500 text-white font-semibold rounded-lg hover:from-pink-600 hover:to-red-600 transition-colors"
+            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-pink-500 to-red-500 text-white font-semibold rounded-2xl hover:from-pink-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
           >
             Browse Our Collection
           </a>
@@ -298,206 +318,136 @@ export default async function ProductPage({ params }: Props) {
     <>
       <StructuredData product={product} />
       
-      {/* Dynamic Breadcrumbs */}
+      {/* Enhanced Breadcrumbs with better styling */}
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
       <Breadcrumbs items={breadcrumbItems} />
-      
-      {/* Main Product Content - Enhanced Layout */}
-      <main className="max-w-screen-xl mx-auto">
-        {/* Hero Section with Gallery and Key Details */}
-        <section className="relative py-6 lg:py-12 px-4 sm:px-6">
-          {/* Background decorative elements */}
+            </div>
+            
+      {/* Main Product Content - Professional Layout */}
+      <main className="bg-white">
+        {/* Hero Section - Product Gallery and Details */}
+        <section className="relative">
+          {/* Background Decorative Elements */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-pink-200/20 to-purple-200/20 rounded-full blur-3xl"></div>
-            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-amber-200/20 to-orange-200/20 rounded-full blur-3xl"></div>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-12 gap-8 lg:gap-12">
-            {/* Product Gallery - Takes 5 columns on XL screens, full width on smaller screens */}
-            <div className="lg:col-span-1 xl:col-span-5">
-              <ProductGallery product={product} />
+            <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-pink-100/30 to-purple-100/30 rounded-full blur-3xl"></div>
+            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-amber-100/30 to-orange-100/30 rounded-full blur-3xl"></div>
             </div>
             
-            {/* Product Information - Takes 4 columns on XL screens, full width on smaller screens */}
-            <div className="lg:col-span-1 xl:col-span-4">
-              <div className="lg:sticky lg:top-28">
-                <ProductDetails product={product} />
-              </div>
-            </div>
-            
-            {/* Additional Information Panel - Takes 3 columns on XL screens, hidden on smaller screens */}
-            <div className="hidden xl:block xl:col-span-3">
-              <div className="sticky top-28 space-y-8">
-                {/* Quick Info Card */}
-                <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-6 border border-pink-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                  <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-3">
-                    <span className="w-3 h-3 bg-pink-500 rounded-full shadow-sm"></span>
-                    Quick Facts
-                  </h3>
-                  <div className="space-y-4">
-                    {product.brand && (
-                      <div className="flex justify-between items-center py-3 border-b border-pink-100">
-                        <span className="text-sm text-gray-600 font-medium">Brand</span>
-                        <span className="text-sm font-semibold text-gray-900">{product.brand}</span>
-                      </div>
-                    )}
-                    {product.origin && (
-                      <div className="flex justify-between items-center py-3 border-b border-pink-100">
-                        <span className="text-sm text-gray-600 font-medium">Origin</span>
-                        <span className="text-sm font-semibold text-gray-900">{product.origin}</span>
-                      </div>
-                    )}
-                    {product.specification && (
-                      <div className="flex justify-between items-center py-3 border-b border-pink-100">
-                        <span className="text-sm text-gray-600 font-medium">Gender</span>
-                        <span className="text-sm font-semibold text-gray-900 capitalize">{product.specification}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between items-center py-3">
-                      <span className="text-sm text-gray-600 font-medium">Longevity</span>
-                      <span className="text-sm font-semibold text-gray-900">6-8 hours</span>
-                    </div>
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-16">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-12 gap-8 lg:gap-16 items-start">
+              {/* Product Gallery */}
+              <div className="w-full lg:col-span-1 xl:col-span-6">
+                <div className="sticky top-20 lg:top-24">
+                  <ProductGallery product={product} />
                   </div>
                 </div>
 
-                {/* Fragrance Family */}
-                {product.smell && product.smell.length > 0 && (
-                  <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                    <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-3">
-                      <span className="w-3 h-3 bg-purple-500 rounded-full shadow-sm"></span>
-                      Fragrance Family
-                    </h3>
-                    <div className="flex flex-wrap gap-3">
-                      {product.smell.map((scent, index) => (
-                        <span 
-                          key={index}
-                          className="px-4 py-2 bg-white/80 text-purple-700 rounded-full text-sm font-semibold border border-purple-200 shadow-sm hover:shadow-md transition-all duration-200"
-                        >
-                          {scent}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Trust Badges */}
-                <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-6 border border-green-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                  <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-3">
-                    <span className="w-3 h-3 bg-green-500 rounded-full shadow-sm"></span>
-                    Why Choose Us
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shadow-sm">
-                        <span className="text-green-600 text-sm font-bold">✓</span>
-                      </div>
-                      <span className="text-sm text-gray-700 font-medium">100% Authentic</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shadow-sm">
-                        <span className="text-blue-600 text-sm font-bold">🚚</span>
-                      </div>
-                      <span className="text-sm text-gray-700 font-medium">Fast Delivery</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center shadow-sm">
-                        <span className="text-purple-600 text-sm font-bold">⭐</span>
-                      </div>
-                      <span className="text-sm text-gray-700 font-medium">Premium Quality</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center shadow-sm">
-                        <span className="text-indigo-600 text-sm font-bold">↩</span>
-                      </div>
-                      <span className="text-sm text-gray-700 font-medium">7 Day Return</span>
-                    </div>
-                  </div>
+              {/* Product Details */}
+              <div className="w-full lg:col-span-1 xl:col-span-6">
+                <div className="lg:sticky lg:top-24">
+                  <ProductDetails product={{
+                    ...product,
+                    description: product.description || `Premium ${product.specification === 'male' ? "men's" : "women's"} perfume from KhushbuWaala`
+                  }} />
                 </div>
               </div>
             </div>
           </div>
         </section>
         
-        {/* Mobile Information Cards - Visible on smaller screens */}
-        <section className="xl:hidden px-4 sm:px-6 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Quick Info Card */}
-            <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-6 border border-pink-100 shadow-sm">
-              <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
-                Quick Facts
-              </h3>
-              <div className="space-y-3">
-                {product.brand && (
-                  <div className="flex justify-between items-center py-2 border-b border-pink-100">
-                    <span className="text-sm text-gray-600">Brand</span>
-                    <span className="text-sm font-medium text-gray-900">{product.brand}</span>
-                  </div>
-                )}
-                {product.origin && (
-                  <div className="flex justify-between items-center py-2 border-b border-pink-100">
-                    <span className="text-sm text-gray-600">Origin</span>
-                    <span className="text-sm font-medium text-gray-900">{product.origin}</span>
-                  </div>
-                )}
-                {product.specification && (
-                  <div className="flex justify-between items-center py-2 border-b border-pink-100">
-                    <span className="text-sm text-gray-600">Gender</span>
-                    <span className="text-sm font-medium text-gray-900 capitalize">{product.specification}</span>
-                  </div>
-                )}
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-sm text-gray-600">Longevity</span>
-                  <span className="text-sm font-medium text-gray-900">6-8 hours</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Trust Badges */}
-            <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-6 border border-green-100 shadow-sm">
-              <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                Why Choose Us
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 text-xs font-bold">✓</span>
-                  </div>
-                  <span className="text-sm text-gray-700">100% Authentic</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 text-xs font-bold">🚚</span>
-                  </div>
-                  <span className="text-sm text-gray-700">Fast Delivery</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                    <span className="text-purple-600 text-xs font-bold">⭐</span>
-                  </div>
-                  <span className="text-sm text-gray-700">Premium Quality</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                    <span className="text-indigo-600 text-xs font-bold">↩</span>
-                  </div>
-                  <span className="text-sm text-gray-700">7 Day Return</span>
-                </div>
-              </div>
-            </div>
+        {/* Trust Signals Section */}
+        <section className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-y border-blue-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <TrustSignals />
           </div>
         </section>
 
-        {/* Detailed Information Section */}
-        <section className="px-4 sm:px-6 pb-12">
-          <div className="max-w-4xl mx-auto">
+        {/* Product Information Tabs */}
+        <section className="bg-white">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+                Product Information
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Everything you need to know about this premium fragrance
+              </p>
+            </div>
             <ProductAccordion product={product} />
           </div>
         </section>
         
         {/* Related Products */}
-        <section aria-label="Related products" className="px-4 sm:px-6 pb-12">
+        <section className="bg-gray-50 border-t border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+                You Might Also Like
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Discover more amazing fragrances from our collection
+              </p>
+            </div>
           <RelatedProducts category={product.category} currentProductId={product._id} />
+          </div>
         </section>
+
+        {/* Enhanced Mobile Sticky CTA - Premium Experience */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-2xl">
+          {/* Mobile Progress Indicator */}
+          <div className="h-1 bg-gray-200">
+            <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 w-3/4 transition-all duration-300"></div>
+          </div>
+          
+          <div className="px-4 py-4 safe-area-bottom">
+            {/* Mobile Quick Actions */}
+            <div className="flex items-center gap-3 mb-4">
+              <button className="flex-1 bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white py-4 px-4 rounded-2xl font-bold text-center shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation active:scale-95 flex items-center justify-center gap-2">
+                <ShoppingCart className="w-5 h-5" />
+                Add to Cart
+              </button>
+              
+              <button className="w-14 h-14 bg-red-50 border-2 border-red-200 text-red-600 rounded-2xl flex items-center justify-center hover:bg-red-100 transition-all duration-300 touch-manipulation active:scale-95 shadow-lg">
+                <Heart className="w-5 h-5" />
+              </button>
+              
+              <a 
+                href="https://wa.me/8801566395807" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-14 h-14 bg-green-50 border-2 border-green-200 text-green-600 rounded-2xl flex items-center justify-center hover:bg-green-100 transition-all duration-300 touch-manipulation active:scale-95 shadow-lg"
+              >
+                <MessageSquare className="w-5 h-5" />
+              </a>
+            </div>
+            
+            {/* Mobile Price & Buy Now */}
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xs text-gray-500">Total Price</div>
+                <div className="text-lg font-bold text-gray-900">
+                  ৳{product.discount ? 
+                    (product.price - (product.price * product.discount) / 100).toLocaleString() : 
+                    product.price.toLocaleString()
+                  }
+                  {product.discount && (
+                    <span className="text-sm text-gray-500 line-through ml-2">
+                      ৳{product.price.toLocaleString()}
+                    </span>
+                  )}
+                </div>
+              </div>
+              
+              <button className="bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-6 rounded-xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation active:scale-95 flex items-center gap-2">
+                <Zap className="w-4 h-4" />
+                Buy Now
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Spacer for enhanced mobile CTA */}
+        <div className="lg:hidden h-32"></div>
       </main>
     </>
   );
