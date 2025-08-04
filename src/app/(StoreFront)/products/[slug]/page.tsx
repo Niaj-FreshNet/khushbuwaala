@@ -3,12 +3,13 @@ import { Metadata } from "next";
 import { getProductBySlug, Product } from "@/lib/Data/data";
 import Script from "next/script";
 import ProductGallery from "@/components/Modules/Product/ProductGallery";
-import ProductDetails from "@/components/Modules/Product/ProductDetails";
 import RelatedProducts from "@/components/Modules/Product/RelatedProducts";
 import ProductAccordion from "@/components/Modules/Product/ProductAccordion";
 import Breadcrumbs, { BreadcrumbItem } from "@/components/Shared/Breadcrumbs";
 import TrustSignals from "@/components/Modules/Product/TrustSignals";
-import { ShoppingCart, Heart, MessageSquare, Zap } from "lucide-react";
+import StickyCartObserver from "@/components/Modules/Product/StickyCartObserver";
+import { ShoppingCart, Heart, MessageSquare, Zap, Info, Sparkles } from "lucide-react";
+import ProductDetailSection from "@/components/Modules/Product/ProductDetailSection";
 
 interface Props {
   params: { slug: string };
@@ -25,14 +26,14 @@ const getCategoryInfo = (category: string) => {
     'giftsAndPackages': { name: 'Gifts & Packages', href: '/gifts-and-packages' },
     'newArrivals': { name: 'New Arrivals', href: '/new-arrivals' },
   };
-  
+
   return categoryMap[category] || { name: 'Shop', href: '/shop' };
 };
 
 // Generate dynamic breadcrumbs
 const generateBreadcrumbs = (product: Product): BreadcrumbItem[] => {
   const categoryInfo = getCategoryInfo(product.category);
-  
+
   return [
     { name: 'Home', href: '/' },
     { name: categoryInfo.name, href: categoryInfo.href },
@@ -78,7 +79,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${product.name} - Premium ${product.specification === 'male' ? "Men's" : "Women's"} Perfume | KhushbuWaala`,
     description: enhancedDescription.slice(0, 160),
     keywords,
-    
+
     // Enhanced Open Graph metadata
     openGraph: {
       title: `${product.name} - Premium Perfume at KhushbuWaala`,
@@ -118,7 +119,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: {
       canonical: `https://khushbuwaala.com/products/${product.slug}`,
     },
-    
+
     robots: {
       index: true,
       follow: true,
@@ -133,8 +134,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     // Additional metadata for better SEO
     other: {
-      'product:price:amount': (product.discount ? 
-        product.price - (product.price * product.discount) / 100 : 
+      'product:price:amount': (product.discount ?
+        product.price - (product.price * product.discount) / 100 :
         product.price).toString(),
       'product:price:currency': 'BDT',
       'product:availability': product.stock === "0" ? 'out of stock' : 'in stock',
@@ -148,8 +149,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 // Enhanced JSON-LD structured data for perfume products
 function StructuredData({ product }: { product: Product }) {
   const categoryInfo = getCategoryInfo(product.category);
-  const discountedPrice = product.discount 
-    ? product.price - (product.price * product.discount) / 100 
+  const discountedPrice = product.discount
+    ? product.price - (product.price * product.discount) / 100
     : product.price;
 
   const jsonLd = {
@@ -163,7 +164,7 @@ function StructuredData({ product }: { product: Product }) {
       name: product.brand || "KhushbuWaala",
     },
     manufacturer: {
-      "@type": "Organization", 
+      "@type": "Organization",
       name: "KhushbuWaala",
       url: "https://khushbuwaala.com",
     },
@@ -230,7 +231,7 @@ function StructuredData({ product }: { product: Product }) {
         value: product.specification === 'male' ? 'Men' : 'Women',
       }] : []),
       ...(product.measurement ? [{
-        "@type": "PropertyValue", 
+        "@type": "PropertyValue",
         name: "Size Available",
         value: product.measurement === 'ml' ? '3ml, 6ml, 12ml, 25ml' : '3gm, 6gm, 12gm',
       }] : []),
@@ -301,8 +302,8 @@ export default async function ProductPage({ params }: Props) {
           <p className="text-lg text-gray-600 mb-8 leading-relaxed">
             We couldn&apos;t find the perfume you&apos;re looking for. It might have been moved or is no longer available.
           </p>
-          <a 
-            href="/shop" 
+          <a
+            href="/shop"
             className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-pink-500 to-red-500 text-white font-semibold rounded-2xl hover:from-pink-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
           >
             Browse Our Collection
@@ -317,137 +318,220 @@ export default async function ProductPage({ params }: Props) {
   return (
     <>
       <StructuredData product={product} />
-      
-      {/* Enhanced Breadcrumbs with better styling */}
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
-      <Breadcrumbs items={breadcrumbItems} />
-            </div>
-            
-      {/* Main Product Content - Professional Layout */}
+      <StickyCartObserver />
+
+      {/* Breadcrumbs */}
+      <div className="bg-white">
+        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumbs items={breadcrumbItems} />
+        </div>
+      </div>
+
+      {/* Main Product Content */}
       <main className="bg-white">
         {/* Hero Section - Product Gallery and Details */}
-        <section className="relative">
-          {/* Background Decorative Elements */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-pink-100/30 to-purple-100/30 rounded-full blur-3xl"></div>
-            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-amber-100/30 to-orange-100/30 rounded-full blur-3xl"></div>
-            </div>
-            
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-16">
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-12 gap-8 lg:gap-16 items-start">
+        <section className="relative overflow-hidden">
+          {/* Subtle Background Elements */}
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-50/30 via-white to-blue-50/20 pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-50/40 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-purple-50/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="relative max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 xl:gap-20 items-start">
               {/* Product Gallery */}
-              <div className="w-full lg:col-span-1 xl:col-span-6">
-                <div className="sticky top-20 lg:top-24">
+              <div className="w-full order-1 lg:order-1">
+                <div className="sticky top-20 lg:top-16">
                   <ProductGallery product={product} />
-                  </div>
                 </div>
+              </div>
 
               {/* Product Details */}
-              <div className="w-full lg:col-span-1 xl:col-span-6">
-                <div className="lg:sticky lg:top-24">
-                  <ProductDetails product={{
-                    ...product,
-                    description: product.description || `Premium ${product.specification === 'male' ? "men's" : "women's"} perfume from KhushbuWaala`
-                  }} />
+              <div className="w-full order-2 lg:order-2">
+                <div className="lg:sticky lg:top-16">
+                  <ProductDetailSection product={product} />
                 </div>
               </div>
             </div>
           </div>
         </section>
-        
+
+        {/* Product Information Section */}
+        <section className="bg-white relative">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+            <div className="text-left mb-4 flex items-center gap-3">
+              {/* <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+              <Plus className="w-5 h-5 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900">Quantity</h3>
+          </div> */}
+              <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6">
+                <Info className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+                Product Details
+              </h2>
+              {/* <p className="text-lg text-gray-600 max-w-3xl leading-relaxed">
+                Everything you need to know about this premium fragrance, from ingredients to shipping
+              </p> */}
+            </div>
+            <div id="product-accordion">
+              <ProductAccordion product={product} />
+            </div>
+          </div>
+        </section>
+
+        {/* Related Products */}
+        <section className="bg-gradient-to-b from-gray-50 to-white relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-50/30 to-transparent pointer-events-none"></div>
+          {/* <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20"> */}
+          {/* <div className="text-center mb-16">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl mb-6">
+                <Sparkles className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+                You Might Also Love
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                Discover more exquisite fragrances from our carefully curated collection
+              </p>
+            </div> */}
+          <RelatedProducts category={product.category} currentProductId={product._id} />
+          {/* </div> */}
+        </section>
+
         {/* Trust Signals Section */}
-        <section className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-y border-blue-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <section className="relative bg-gradient-to-r from-slate-50 via-blue-50/50 to-indigo-50/30">
+          <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] pointer-events-none"></div>
+          <div className="relative max-w-full mx-auto px-4 sm:px-6 lg:px-8 pt-16 lg:pt-24">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+                Why Choose KhushbuWaala?
+              </h2>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                Your trusted partner for authentic, premium fragrances with exceptional service
+              </p>
+            </div>
             <TrustSignals />
           </div>
         </section>
 
-        {/* Product Information Tabs */}
-        <section className="bg-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-                Product Information
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Everything you need to know about this premium fragrance
-              </p>
-            </div>
-            <ProductAccordion product={product} />
-          </div>
-        </section>
-        
-        {/* Related Products */}
-        <section className="bg-gray-50 border-t border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-                You Might Also Like
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Discover more amazing fragrances from our collection
-              </p>
-            </div>
-          <RelatedProducts category={product.category} currentProductId={product._id} />
-          </div>
-        </section>
+        {/* Universal Sticky CTA */}
+        <div id="sticky-cart" className="fixed bottom-0 left-0 right-0 z-50 transform transition-transform duration-300 ease-in-out">
+          {/* Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/95 to-transparent backdrop-blur-xl"></div>
 
-        {/* Enhanced Mobile Sticky CTA - Premium Experience */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-2xl">
-          {/* Mobile Progress Indicator */}
-          <div className="h-1 bg-gray-200">
-            <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 w-3/4 transition-all duration-300"></div>
-          </div>
-          
-          <div className="px-4 py-4 safe-area-bottom">
-            {/* Mobile Quick Actions */}
-            <div className="flex items-center gap-3 mb-4">
-              <button className="flex-1 bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white py-4 px-4 rounded-2xl font-bold text-center shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation active:scale-95 flex items-center justify-center gap-2">
-                <ShoppingCart className="w-5 h-5" />
-                Add to Cart
-              </button>
-              
-              <button className="w-14 h-14 bg-red-50 border-2 border-red-200 text-red-600 rounded-2xl flex items-center justify-center hover:bg-red-100 transition-all duration-300 touch-manipulation active:scale-95 shadow-lg">
-                <Heart className="w-5 h-5" />
-              </button>
-              
-              <a 
-                href="https://wa.me/8801566395807" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-14 h-14 bg-green-50 border-2 border-green-200 text-green-600 rounded-2xl flex items-center justify-center hover:bg-green-100 transition-all duration-300 touch-manipulation active:scale-95 shadow-lg"
-              >
-                <MessageSquare className="w-5 h-5" />
-              </a>
-            </div>
-            
-            {/* Mobile Price & Buy Now */}
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs text-gray-500">Total Price</div>
-                <div className="text-lg font-bold text-gray-900">
-                  ৳{product.discount ? 
-                    (product.price - (product.price * product.discount) / 100).toLocaleString() : 
-                    product.price.toLocaleString()
-                  }
-                  {product.discount && (
-                    <span className="text-sm text-gray-500 line-through ml-2">
-                      ৳{product.price.toLocaleString()}
-                    </span>
-                  )}
+          {/* Shadow */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+
+          <div className="relative px-4 py-4 safe-area-bottom">
+            {/* Desktop/Tablet Layout */}
+            <div className="hidden md:block">
+              <div className="max-w-7xl mx-auto flex items-center justify-between">
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden border-2 border-gray-200">
+                      <img
+                        src={product.primaryImage}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-lg">{product.name}</h3>
+                      <div className="text-2xl font-bold text-gray-900">
+                        ৳{product.discount ?
+                          (product.price - (product.price * product.discount) / 100).toLocaleString() :
+                          product.price.toLocaleString()
+                        }
+                        {product.discount && (
+                          <span className="text-lg text-gray-500 line-through ml-2">
+                            ৳{product.price.toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <button className="flex items-center gap-2 bg-white border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-2xl font-semibold hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-all duration-300">
+                    <Heart className="w-5 h-5" />
+                    Wishlist
+                  </button>
+
+                  <a
+                    href="https://wa.me/8801566395807"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 bg-white border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-2xl font-semibold hover:border-green-300 hover:bg-green-50 hover:text-green-600 transition-all duration-300"
+                  >
+                    <MessageSquare className="w-5 h-5" />
+                    Ask Expert
+                  </a>
+
+                  <button className="flex items-center gap-3 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white py-4 px-8 rounded-2xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]">
+                    <ShoppingCart className="w-5 h-5" />
+                    Add to Cart
+                  </button>
+
+                  <button className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white py-4 px-8 rounded-2xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] flex items-center gap-2">
+                    <Zap className="w-5 h-5" />
+                    Buy Now
+                  </button>
                 </div>
               </div>
-              
-              <button className="bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-6 rounded-xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation active:scale-95 flex items-center gap-2">
-                <Zap className="w-4 h-4" />
-                Buy Now
-              </button>
+            </div>
+
+            {/* Mobile Layout */}
+            <div className="md:hidden">
+              <div className="flex items-center gap-3 mb-4">
+                <button className="flex-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white py-4 px-4 rounded-2xl font-bold text-center shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation active:scale-95 flex items-center justify-center gap-2">
+                  <ShoppingCart className="w-5 h-5" />
+                  Add to Cart
+                </button>
+
+                <button className="w-14 h-14 bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-200 text-red-600 rounded-2xl flex items-center justify-center hover:bg-red-100 transition-all duration-300 touch-manipulation active:scale-95 shadow-lg">
+                  <Heart className="w-5 h-5" />
+                </button>
+
+                <a
+                  href="https://wa.me/8801566395807"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-14 h-14 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 text-green-600 rounded-2xl flex items-center justify-center hover:bg-green-100 transition-all duration-300 touch-manipulation active:scale-95 shadow-lg"
+                >
+                  <MessageSquare className="w-5 h-5" />
+                </a>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="text-xs text-gray-500 font-medium">Total Price</div>
+                  <div className="text-xl font-bold text-gray-900">
+                    ৳{product.discount ?
+                      (product.price - (product.price * product.discount) / 100).toLocaleString() :
+                      product.price.toLocaleString()
+                    }
+                    {product.discount && (
+                      <span className="text-sm text-gray-500 line-through ml-2">
+                        ৳{product.price.toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <button className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white py-3 px-8 rounded-2xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation active:scale-95 flex items-center gap-2">
+                  <Zap className="w-5 h-5" />
+                  Buy Now
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Spacer for enhanced mobile CTA */}
-        <div className="lg:hidden h-32"></div>
+        {/* Spacer for sticky CTA */}
+        <div className="h-24 md:h-28"></div>
       </main>
     </>
   );

@@ -59,23 +59,23 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
   };
 
   return (
-    <section className="space-y-6" aria-label="Product gallery">
+    <section className="space-y-8" aria-label="Product gallery">
       {/* Main Image Container */}
       <div className="relative group">
-        {/* Perfume Showcase Background */}
+        {/* Enhanced Showcase Background */}
         <div 
-          className="relative rounded-3xl p-6 bg-gradient-to-br from-white via-pink-50/40 to-amber-50/30 shadow-2xl border border-pink-100/50 backdrop-blur-sm aspect-[4/5] min-h-[480px] flex items-center justify-center cursor-pointer overflow-hidden"
+          className="relative rounded-3xl p-8 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/20 shadow-2xl border border-blue-100/50 backdrop-blur-sm aspect-[4/5] min-h-[500px] flex items-center justify-center cursor-pointer overflow-hidden"
           onClick={() => setLightbox(true)}
           onMouseMove={handleMouseMove}
           onMouseEnter={() => setZoom(true)}
           onMouseLeave={() => setZoom(false)}
           aria-label="Open product image lightbox"
-          style={{ minHeight: 480 }}
+          style={{ minHeight: 500 }}
         >
-          {/* Ambient Background Effects */}
-          <div className="absolute inset-0 bg-gradient-to-r from-pink-200/10 via-transparent to-amber-200/10 rounded-3xl"></div>
-          <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-radial from-pink-300/20 to-transparent rounded-full blur-xl"></div>
-          <div className="absolute bottom-0 right-0 w-24 h-24 bg-gradient-radial from-amber-300/20 to-transparent rounded-full blur-xl"></div>
+          {/* Refined Background Effects */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-50/20 via-transparent to-purple-50/20 rounded-3xl"></div>
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-blue-200/15 to-transparent rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-purple-200/15 to-transparent rounded-full blur-3xl"></div>
           
           {/* Main Product Image */}
           <div className="relative w-full h-full flex items-center justify-center">
@@ -86,7 +86,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
               sizes="(max-width: 768px) 100vw, 50vw"
               className={`object-contain transition-all duration-500 ${
                 zoom ? 'scale-150' : 'scale-100'
-              } ${isRotating ? 'animate-pulse' : ''}`}
+              } ${isRotating ? 'animate-pulse' : ''} drop-shadow-2xl`}
               style={zoom ? {
                 transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`
               } : {}}
@@ -95,22 +95,22 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
             />
           </div>
 
-          {/* Image Counter Badge */}
+          {/* Enhanced Image Counter Badge */}
           {images.length > 1 && (
-            <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm">
+            <div className="absolute top-6 left-6 bg-gradient-to-r from-gray-900 to-gray-800 text-white px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm shadow-lg">
               {activeIdx + 1} / {images.length}
             </div>
           )}
 
-          {/* Control Buttons */}
-          <div className="absolute top-4 right-4 flex gap-2">
+          {/* Enhanced Control Buttons */}
+          <div className="absolute top-6 right-6 flex gap-3">
             {/* 360° Rotation Button */}
             {images.length > 1 && (
               <button
-                className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${
+                className={`p-3 rounded-full backdrop-blur-sm transition-all duration-300 shadow-lg ${
                   isRotating 
-                    ? 'bg-pink-600 text-white shadow-lg' 
-                    : 'bg-black/60 text-white hover:bg-pink-600/80'
+                    ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white' 
+                    : 'bg-white/90 text-gray-700 hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-600 hover:text-white border border-gray-200'
                 }`}
                 onClick={(e) => { 
                   e.stopPropagation(); 
@@ -119,16 +119,16 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
                 aria-label="Toggle 360° view"
                 title="360° View"
               >
-                <RotateCw size={18} className={isRotating ? 'animate-spin' : ''} />
+                <RotateCw size={20} className={isRotating ? 'animate-spin' : ''} />
               </button>
             )}
             
             {/* Zoom Button */}
             <button
-              className={`p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${
+              className={`p-3 rounded-full backdrop-blur-sm transition-all duration-300 shadow-lg ${
                 zoom 
-                  ? 'bg-blue-600 text-white shadow-lg' 
-                  : 'bg-black/60 text-white hover:bg-blue-600/80'
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white' 
+                  : 'bg-white/90 text-gray-700 hover:bg-gradient-to-r hover:from-blue-500 hover:to-indigo-600 hover:text-white border border-gray-200'
               }`}
               onClick={(e) => { 
                 e.stopPropagation(); 
@@ -137,12 +137,12 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
               aria-label="Toggle zoom"
               title="Zoom In/Out"
             >
-              <Search size={18} />
+              <Search size={20} />
             </button>
 
             {/* Expand Button */}
             <button
-              className="p-2 bg-black/60 text-white rounded-full hover:bg-black/80 transition-all duration-300 backdrop-blur-sm"
+              className="p-3 bg-white/90 text-gray-700 rounded-full hover:bg-gradient-to-r hover:from-green-500 hover:to-emerald-600 hover:text-white transition-all duration-300 backdrop-blur-sm shadow-lg border border-gray-200"
               onClick={(e) => { 
                 e.stopPropagation(); 
                 setLightbox(true); 
@@ -150,82 +150,94 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
               aria-label="Expand image"
               title="Full Screen"
             >
-              <Maximize2 size={18} />
+              <Maximize2 size={20} />
             </button>
           </div>
 
-          {/* Navigation Arrows for Mobile */}
+          {/* Enhanced Navigation Arrows */}
           {images.length > 1 && (
             <>
               <button
-                className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-black/60 text-white rounded-full hover:bg-black/80 transition-all lg:opacity-0 lg:group-hover:opacity-100"
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/90 text-gray-700 rounded-full hover:bg-gray-900 hover:text-white transition-all opacity-0 group-hover:opacity-100 shadow-lg border border-gray-200"
                 onClick={(e) => { e.stopPropagation(); prevImage(); }}
                 aria-label="Previous image"
               >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={24} />
               </button>
               <button
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black/60 text-white rounded-full hover:bg-black/80 transition-all lg:opacity-0 lg:group-hover:opacity-100"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/90 text-gray-700 rounded-full hover:bg-gray-900 hover:text-white transition-all opacity-0 group-hover:opacity-100 shadow-lg border border-gray-200"
                 onClick={(e) => { e.stopPropagation(); nextImage(); }}
                 aria-label="Next image"
               >
-                <ChevronRight size={20} />
+                <ChevronRight size={24} />
               </button>
             </>
           )}
 
-          {/* Sparkle Effects */}
-          <div className="absolute top-1/4 right-1/4 w-2 h-2 bg-yellow-400 rounded-full animate-ping opacity-60"></div>
-          <div className="absolute bottom-1/3 left-1/4 w-1 h-1 bg-pink-400 rounded-full animate-ping opacity-40" style={{ animationDelay: '1s' }}></div>
+          {/* Refined Decorative Elements */}
+          <div className="absolute top-1/4 right-1/5 w-2 h-2 bg-blue-400 rounded-full animate-ping opacity-60"></div>
+          <div className="absolute bottom-1/3 left-1/5 w-1.5 h-1.5 bg-purple-400 rounded-full animate-ping opacity-50" style={{ animationDelay: '1s' }}></div>
           
-          {/* Zoom Instruction */}
+          {/* Enhanced Zoom Instruction */}
           {zoom && (
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-3 py-1 rounded-full text-xs">
+            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-gray-900 to-gray-800 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
               Move mouse to zoom
             </div>
           )}
         </div>
 
-        {/* Premium Badge */}
-        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-400 to-yellow-500 text-black px-4 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
-          <Sparkles size={12} />
+        {/* Enhanced Premium Badge */}
+        <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-400 text-gray-900 px-6 py-2 rounded-full text-sm font-bold shadow-xl flex items-center gap-2 border-2 border-white">
+          <Sparkles size={14} />
           Premium Quality
         </div>
       </div>
 
-      {/* Thumbnail Gallery */}
+      {/* Enhanced Thumbnail Gallery */}
       {images.length > 1 && (
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-          {images.map((src, idx) => (
-            <button
-              key={idx}
-              className={`relative flex-shrink-0 rounded-2xl overflow-hidden border-3 transition-all duration-300 w-24 h-24 ${
-                activeIdx === idx
-                  ? "border-pink-500 ring-4 ring-pink-300/50 scale-110 shadow-xl"
-                  : "border-gray-200 hover:border-pink-300 hover:scale-105 hover:shadow-lg"
-              }`}
-              onClick={() => {
-                setActiveIdx(idx);
-                setIsRotating(false);
-              }}
-              aria-label={`Show image ${idx + 1}`}
-              type="button"
-            >
-              <Image
-                src={src}
-                alt={`${product.name} thumbnail ${idx + 1}`}
-                width={96}
-                height={96}
-                className="object-cover w-full h-full"
-                loading="lazy"
-              />
-              {activeIdx === idx && (
-                <div className="absolute inset-0 bg-gradient-to-br from-pink-500/30 to-purple-500/30 flex items-center justify-center">
-                  <div className="w-3 h-3 bg-white rounded-full shadow-lg"></div>
+        <div className="space-y-4">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Product Views</h3>
+            <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
+          </div>
+          
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide justify-center">
+            {images.map((src, idx) => (
+              <button
+                key={idx}
+                className={`relative flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all duration-300 w-20 h-20 md:w-24 md:h-24 ${
+                  activeIdx === idx
+                    ? "border-blue-500 ring-4 ring-blue-200/50 scale-110 shadow-xl"
+                    : "border-gray-300 hover:border-blue-400 hover:scale-105 hover:shadow-lg"
+                }`}
+                onClick={() => {
+                  setActiveIdx(idx);
+                  setIsRotating(false);
+                }}
+                aria-label={`Show image ${idx + 1}`}
+                type="button"
+              >
+                <Image
+                  src={src}
+                  alt={`${product.name} thumbnail ${idx + 1}`}
+                  width={96}
+                  height={96}
+                  className="object-cover w-full h-full"
+                  loading="lazy"
+                />
+                {activeIdx === idx && (
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+                    <div className="w-3 h-3 bg-white rounded-full shadow-lg border-2 border-blue-500"></div>
+                  </div>
+                )}
+                
+                {/* Thumbnail index */}
+                <div className="absolute bottom-1 right-1 bg-white/90 text-gray-700 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                  {idx + 1}
                 </div>
-              )}
-            </button>
-          ))}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

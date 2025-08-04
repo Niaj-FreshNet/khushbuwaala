@@ -227,7 +227,7 @@ export default function RelatedProducts({ category, currentProductId }: RelatedP
 
   if (loading) {
     return (
-      <section className="mt-20 max-w-screen-xl mx-auto px-4 lg:px-8">
+      <section className="mt-10 max-w-screen-full mx-auto px-4 lg:px-8">
         <div className="h-8 w-48 bg-gray-300 rounded mb-8 animate-pulse"></div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
@@ -253,7 +253,7 @@ export default function RelatedProducts({ category, currentProductId }: RelatedP
   return (
     <section
       aria-label="Related products"
-      className="mt-20 max-w-screen-xl mx-auto px-4 lg:px-8"
+      className="mt-10 max-w-screen-full mx-auto px-4 lg:px-8"
     >
       {/* Section Header */}
       <div className="flex items-center justify-between mb-8">
@@ -294,7 +294,7 @@ export default function RelatedProducts({ category, currentProductId }: RelatedP
       </div>
 
       {/* Enhanced Trust Section */}
-      <div className="mt-12 bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 rounded-2xl p-8 border border-pink-100">
+      {/* <div className="mt-12 bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 rounded-2xl p-8 border border-pink-100">
         <div className="text-center max-w-2xl mx-auto">
           <div className="flex justify-center mb-4">
             <div className="flex -space-x-2">
@@ -336,7 +336,7 @@ export default function RelatedProducts({ category, currentProductId }: RelatedP
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </section>
   );
 }

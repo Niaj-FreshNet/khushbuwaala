@@ -47,24 +47,29 @@ const dummyReviews = [
   }
 ];
 
-const AccordionItem = ({ 
-  title, 
-  children, 
-  icon: Icon, 
-  isOpen, 
-  onToggle,
-  badge 
-}: { 
+interface AccordionItemProps {
   title: string; 
   children: React.ReactNode; 
   icon: any; 
   isOpen: boolean; 
   onToggle: () => void;
   badge?: string;
-}) => (
+  'data-section'?: string;
+}
+
+const AccordionItem = ({ 
+  title, 
+  children, 
+  icon: Icon, 
+  isOpen, 
+  onToggle,
+  badge,
+  'data-section': dataSection
+}: AccordionItemProps) => (
   <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
     <button
       onClick={onToggle}
+      data-section={dataSection}
       className="w-full p-6 text-left flex items-center justify-between bg-white hover:bg-gray-50 transition-colors duration-200"
     >
       <div className="flex items-center gap-4">
@@ -114,13 +119,37 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
   const avgRating = dummyReviews.reduce((acc, review) => acc + review.rating, 0) / dummyReviews.length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Section Navigation */}
+      <div className="flex flex-wrap justify-center gap-2 p-2 bg-gray-50 rounded-2xl border border-gray-200">
+        {[
+          { id: 'description', label: 'Description', icon: Info },
+          { id: 'details', label: 'Details', icon: Package },
+          { id: 'reviews', label: 'Reviews', icon: Star },
+          { id: 'shipping', label: 'Shipping', icon: Truck }
+        ].map((section) => (
+          <button
+            key={section.id}
+            onClick={() => toggleSection(section.id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+              openSection === section.id
+                ? 'bg-white text-gray-900 shadow-md border border-gray-200'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+            }`}
+          >
+            <section.icon className="w-4 h-4" />
+            {section.label}
+          </button>
+        ))}
+      </div>
+
       {/* Description */}
       <AccordionItem
         title="Description & Notes"
         icon={Info}
         isOpen={openSection === "description"}
         onToggle={() => toggleSection("description")}
+        data-section="description"
       >
         <div className="space-y-6">
           <div>
@@ -236,37 +265,41 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
         onToggle={() => toggleSection("reviews")}
       >
         <div className="space-y-6">
-          {/* Rating Summary */}
-          <div className="bg-white rounded-xl p-6 border border-yellow-100">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Enhanced Rating Summary */}
+          <div className="bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-50 rounded-2xl p-8 border border-yellow-200 shadow-sm">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="text-center">
-                <div className="text-4xl font-bold text-gray-900 mb-2">{avgRating.toFixed(1)}</div>
-                <div className="flex justify-center mb-2">
+                <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full mb-4 shadow-lg">
+                  <span className="text-3xl font-bold text-white">{avgRating.toFixed(1)}</span>
+                </div>
+                <div className="flex justify-center mb-3">
                   {[...Array(5)].map((_, i) => (
                     <Star 
                       key={i} 
-                      className={`w-5 h-5 ${i < Math.floor(avgRating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                      className={`w-6 h-6 ${i < Math.floor(avgRating) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
                     />
                   ))}
                 </div>
-                <div className="text-sm text-gray-600">Based on {dummyReviews.length} reviews</div>
+                <div className="text-gray-700 font-medium">Based on {dummyReviews.length} verified reviews</div>
               </div>
               
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {[5, 4, 3, 2, 1].map((rating) => {
                   const count = dummyReviews.filter(r => r.rating === rating).length;
                   const percentage = (count / dummyReviews.length) * 100;
                   return (
-                    <div key={rating} className="flex items-center gap-3">
-                      <span className="text-sm w-3">{rating}</span>
-                      <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                    <div key={rating} className="flex items-center gap-4">
+                      <div className="flex items-center gap-1 w-14">
+                        <span className="text-sm font-medium">{rating}</span>
+                        <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                      </div>
+                      <div className="flex-1 bg-yellow-200 rounded-full h-3 overflow-hidden">
                         <div 
-                          className="bg-yellow-400 h-2 rounded-full transition-all duration-500"
+                          className="bg-gradient-to-r from-yellow-400 to-orange-500 h-3 rounded-full transition-all duration-700 ease-out"
                           style={{ width: `${percentage}%` }}
                         />
                       </div>
-                      <span className="text-sm text-gray-600 w-8">{count}</span>
+                      <span className="text-sm text-gray-600 w-8 text-right font-medium">{count}</span>
                     </div>
                   );
                 })}
@@ -275,34 +308,34 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
           </div>
 
           {/* Individual Reviews */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             {dummyReviews.map((review) => (
-              <div key={review.id} className="bg-white rounded-xl p-6 border border-gray-100">
+              <div key={review.id} className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
                       {review.name.charAt(0)}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h5 className="font-semibold text-gray-900">{review.name}</h5>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h5 className="font-bold text-gray-900 text-lg">{review.name}</h5>
                         {review.verified && (
-                          <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
+                          <Badge variant="secondary" className="text-xs bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border border-green-200">
                             <Verified className="w-3 h-3 mr-1" />
-                            Verified
+                            Verified Purchase
                           </Badge>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-3">
                         <div className="flex">
                           {[...Array(5)].map((_, i) => (
                             <Star 
                               key={i} 
-                              className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                              className={`w-5 h-5 ${i < review.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
                             />
                           ))}
                         </div>
-                        <span className="text-sm text-gray-500">{review.date}</span>
+                        <span className="text-sm text-gray-500 font-medium">{review.date}</span>
                       </div>
                     </div>
                   </div>
