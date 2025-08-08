@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Heart, Tag, Shield, Truck, Clock, Star, Award, Sparkles, Zap, CheckCircle, Minus, Plus, Info, Gift, Crown, FileCheck, Phone, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useCart } from "@/context/CartContext";
 
 interface ProductDetailsProps {
   product: {
@@ -25,14 +26,19 @@ interface ProductDetailsProps {
 }
 
 export default function ProductDetails({ product, onReadMore }: ProductDetailsProps) {
-  const [selectedSize, setSelectedSize] = useState<string>("3ml");
+  const cart = useCart()
+  const sizeKeys = product.variantPrices
+    ? Object.keys(product.variantPrices)
+    : product.measurement === "ml"
+      ? ["3 ml", "6 ml", "12 ml", "25 ml"]
+      : ["3 gm", "6 gm", "12 gm"]
+
+  const [selectedSize, setSelectedSize] = useState<string>(sizeKeys[0] || "3 ml");
   const [quantity, setQuantity] = useState<number>(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
-  // Available sizes based on measurement type
-  const availableSizes = product.measurement === "ml"
-    ? ["3ml", "6ml", "12ml", "25ml"]
-    : ["3gm", "6gm", "12gm"];
+  // Available sizes based on product data
+  const availableSizes = sizeKeys;
 
   // Get current price
   const getCurrentPrice = () => {
@@ -341,6 +347,11 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
             ? "bg-gray-400 cursor-not-allowed"
             : "bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-800 text-white border-0 shadow-blue-500/30 hover:shadow-blue-600/50"
             } rounded-2xl`}
+          onClick={() => {
+            if (!isOutOfStock) {
+              cart?.addToCart?.(product as any, quantity, selectedSize)
+            }
+          }}
         >
           <ShoppingCart className="w-6 h-6 mr-3" />
           {isOutOfStock ? "Out of Stock" : "Add to Cart"}
@@ -379,6 +390,12 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
           size="xl"
           disabled={isOutOfStock}
           className="w-full h-16 text-xl font-bold bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white shadow-2xl shadow-orange-500/30 hover:shadow-orange-600/50 transform transition-all duration-300 hover:scale-[1.02] border-0 rounded-2xl"
+          onClick={() => {
+            if (!isOutOfStock) {
+              cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize)
+              // Navigate to checkout is handled by pages that observe checkoutMode
+            }
+          }}
         >
           <Zap className="w-6 h-6 mr-3" />
           Buy Now - Express Checkout

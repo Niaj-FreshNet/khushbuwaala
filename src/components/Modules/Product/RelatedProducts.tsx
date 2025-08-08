@@ -4,6 +4,7 @@ import { getProducts, Product } from "@/lib/Data/data";
 import Link from "next/link";
 import Image from "next/image";
 import { Star, Heart, ShoppingCart, Sparkles, Tag, ArrowRight } from "lucide-react";
+import { useCart } from "@/context/CartContext";
 
 interface RelatedProductsProps {
   category: string;
@@ -40,6 +41,7 @@ const getSmartRelatedProducts = (allProducts: Product[], category: string, curre
 const ProductCard = ({ product }: { product: Product }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const cart = useCart()
   
   const discountedPrice = product.discount 
     ? product.price - (product.price * product.discount) / 100 
@@ -101,7 +103,10 @@ const ProductCard = ({ product }: { product: Product }) => {
               <button
                 onClick={(e) => {
                   e.preventDefault();
-                  alert('Added to cart!');
+                  // Choose default size: first variant key or fallback measurement-based default
+                  const sizeKeys = product.variantPrices ? Object.keys(product.variantPrices) : []
+                  const defaultSize = sizeKeys[0] || (product.measurement === 'ml' ? '3 ml' : '3 gm')
+                  cart?.addToCart?.(product, 1, defaultSize)
                 }}
                 className="p-3 bg-gradient-to-r from-pink-600 to-red-500 text-white rounded-full backdrop-blur-sm hover:from-pink-700 hover:to-red-600 transition-all duration-200 shadow-lg"
                 aria-label="Add to cart"

@@ -11,38 +11,7 @@ import Image from "next/image"
 import { useCart } from "@/context/CartContext"
 
 
-const cartItems = [
-  {
-    _id: "1",
-    name: "Oud Wood Intense",
-    size: "50ml",
-    quantity: 2,
-    primaryImage: "/sample-product.jpg", // Add this image in your public folder or use placeholder
-    variantPrices: { "50ml": 1200 },
-  },
-  {
-    _id: "2",
-    name: "Amber & Spice",
-    size: "100ml",
-    quantity: 1,
-    primaryImage: "/sample-product-2.jpg",
-    variantPrices: { "100ml": 1800 },
-  },
-]
-
-const updateQuantity = (id: string, size: string, newQuantity: number) => {
-  console.log(`Updating ${id} (${size}) to quantity ${newQuantity}`)
-}
-
-const removeFromCart = (id: string, size: string) => {
-  console.log(`Removing ${id} (${size}) from cart`)
-}
-
-const calculateSubtotal = () =>
-  cartItems.reduce(
-    (acc, item) => acc + (item.variantPrices?.[item.size] || 0) * item.quantity,
-    0
-  )
+// Use real cart from store
 
   
 
@@ -53,7 +22,16 @@ interface CartDrawerProps {
 
 export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
   const router = useRouter()
-  // const { cartItems, updateQuantity, removeFromCart, calculateSubtotal } = useCart()
+  const { cartItems, updateQuantity, removeFromCart, calculateSubtotal } = useCart() || {
+    cartItems: [],
+    updateQuantity: () => {},
+    removeFromCart: () => {},
+    calculateSubtotal: () => 0,
+  }
+
+  const totalItems = Array.isArray(cartItems)
+    ? cartItems.reduce((sum: number, item: any) => sum + (item?.quantity || 0), 0)
+    : 0
 
   const redirectToCart = () => {
     onClose()
@@ -78,15 +56,15 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
             </div>
             <div className="flex flex-col items-start">
               <span>Shopping Cart</span>
-              {cartItems.length > 0 && (
+              {totalItems > 0 && (
                 <span className="text-sm font-normal text-gray-600">
-                  {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
+                  {totalItems} {totalItems === 1 ? "item" : "items"}
                 </span>
               )}
             </div>
-            {cartItems.length > 0 && (
+            {totalItems > 0 && (
               <Badge variant="secondary" className="ml-auto bg-red-100 text-red-700">
-                {cartItems.length}
+                {totalItems}
               </Badge>
             )}
           </SheetTitle>
@@ -94,7 +72,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
 
         <div className="flex flex-col h-full">
           <ScrollArea className="flex-1 px-6 py-4">
-            {cartItems.length > 0 ? (
+            {totalItems > 0 ? (
               <div className="space-y-4">
                 {cartItems.map((item: any, index: number) => (
                   <div
@@ -107,7 +85,9 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
                         <Image
                           src={item.primaryImage || "/placeholder.svg?height=96&width=80"}
                           alt={item.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          fill
+                          sizes="80px"
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
@@ -128,6 +108,8 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
                               size="sm"
                               className="h-6 w-6 p-0 rounded-full hover:bg-red-50 hover:border-red-200 bg-transparent"
                               onClick={() => updateQuantity(item._id, item.size, Math.max(1, item.quantity - 1))}
+                              disabled={item.quantity <= 1}
+                              aria-label="Decrease quantity"
                             >
                               <Minus className="h-3 w-3" />
                             </Button>
@@ -137,18 +119,22 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
                               size="sm"
                               className="h-6 w-6 p-0 rounded-full hover:bg-red-50 hover:border-red-200 bg-transparent"
                               onClick={() => updateQuantity(item._id, item.size, item.quantity + 1)}
+                              aria-label="Increase quantity"
                             >
                               <Plus className="h-3 w-3" />
                             </Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <p className="font-bold text-red-600">৳{item.variantPrices?.[item.size]?.toFixed(2)} BDT</p>
+                          <p className="font-bold text-red-600">
+                            ৳{(((item?.variantPrices?.[item?.size]) || item?.price || 0) * (item?.quantity || 1)).toFixed(2)} BDT
+                          </p>
                           <Button
                             variant="ghost"
                             size="sm"
                             className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full p-2"
                             onClick={() => removeFromCart(item._id, item.size)}
+                            aria-label="Remove from cart"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -183,7 +169,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
           </ScrollArea>
 
           {/* Enhanced Cart Footer */}
-          {cartItems.length > 0 && (
+          {totalItems > 0 && (
             <div className="border-t bg-white p-6 space-y-4">
               <Separator />
 
@@ -191,7 +177,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
               <div className="flex justify-between items-center p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl">
                 <div className="flex flex-col">
                   <span className="text-sm text-gray-600">Subtotal</span>
-                  <span className="text-xs text-gray-500">{cartItems.length} items</span>
+                  <span className="text-xs text-gray-500">{totalItems} {totalItems === 1 ? "item" : "items"}</span>
                 </div>
                 <div className="text-right">
                   <span className="text-2xl font-bold text-red-600">৳{calculateSubtotal()?.toFixed(2)}</span>

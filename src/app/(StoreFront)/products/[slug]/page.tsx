@@ -382,9 +382,9 @@ export default async function ProductPage({ params }: Props) {
         </section>
 
         {/* Related Products */}
-        <section className="bg-gradient-to-b from-gray-50 to-white relative">
+        <section className="bg-gradient-to-b from-gray-50 to-white relative mb-16 lg:mb-24">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-50/30 to-transparent pointer-events-none"></div>
-          {/* <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20"> */}
+          <div className="relative max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
           {/* <div className="text-center mb-16">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl mb-6">
                 <Sparkles className="w-8 h-8 text-white" />
@@ -397,13 +397,13 @@ export default async function ProductPage({ params }: Props) {
               </p>
             </div> */}
           <RelatedProducts category={product.category} currentProductId={product._id} />
-          {/* </div> */}
+          </div>
         </section>
 
         {/* Trust Signals Section */}
         <section className="relative bg-gradient-to-r from-slate-50 via-blue-50/50 to-indigo-50/30">
           <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] pointer-events-none"></div>
-          <div className="relative max-w-full mx-auto px-4 sm:px-6 lg:px-8 pt-16 lg:pt-24">
+          <div className="relative max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
             <div className="text-center mb-12">
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
                 Why Choose KhushbuWaala?
