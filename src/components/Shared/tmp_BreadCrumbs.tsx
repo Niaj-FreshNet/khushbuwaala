@@ -1,5 +1,6 @@
 "use client";
 
+
 import React from 'react';
 import Link from 'next/link';
 import { ChevronRight, Home } from 'lucide-react';
@@ -41,7 +42,8 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
       {/* Visual Breadcrumbs */}
       <nav 
         aria-label="Breadcrumb navigation"
-        className="flex items-center space-x-2 text-sm text-gray-600 mb-6 px-4 sm:px-6 lg:px-8"
+        className="flex items-center space-x-2 text-sm text-gray-600 mb-2 px-4 sm:px-6 lg:px-8 pt-0"
+        style={{ paddingTop: 'calc(48px + 1rem)' }}
       >
         <ol className="flex items-center space-x-2" itemScope itemType="https://schema.org/BreadcrumbList">
           {items.map((item, index) => (
