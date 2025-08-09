@@ -2,11 +2,15 @@ import { configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import cartReducer from './features/cart/cartSlice'
 import { cartApi } from './features/cart/cartApi'
+import { ordersApi } from './features/orders/ordersApi'
+import ordersReducer from './features/orders/ordersSlice'
 
 export const store = configureStore({
   reducer: {
     cart: cartReducer,
     [cartApi.reducerPath]: cartApi.reducer,
+    [ordersApi.reducerPath]: ordersApi.reducer,
+    orders: ordersReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -18,7 +22,7 @@ export const store = configureStore({
           'persist/REGISTER',
         ],
       },
-    }).concat(cartApi.middleware),
+    }).concat(cartApi.middleware, ordersApi.middleware),
   devTools: process.env.NODE_ENV !== 'production',
 })
 

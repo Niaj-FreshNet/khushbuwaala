@@ -172,7 +172,7 @@ export function Navbar() {
               {/* Enhanced Desktop Navigation */}
               <div className="hidden lg:flex flex-grow justify-center">
                 <ul
-                  className="flex items-center justify-center flex-grow space-x-8 text-gray-800 font-semibold text-sm"
+                  className="flex items-center justify-center flex-grow space-x-6 text-gray-800 font-semibold text-sm"
                   role="menubar"
                 >
                   <li role="none">
@@ -292,12 +292,12 @@ export function Navbar() {
               </div>
 
               {/* Enhanced Desktop Icons */}
-              <div className="hidden lg:flex gap-2 items-center flex-shrink-0">
+              <div className="hidden lg:flex gap-2 items-center flex-shrink-0 relative overflow-visible">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handlers.openSearch}
-                  className="relative h-12 w-12 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-600 transition-all duration-300 rounded-xl group overflow-hidden"
+                  className="relative h-12 w-12 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-600 transition-all duration-300 rounded-xl group"
                   aria-label="Search perfumes"
                   title="Search our perfume collection"
                 >
@@ -312,7 +312,7 @@ export function Navbar() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="relative h-12 w-12 hover:bg-gradient-to-r hover:from-pink-50 hover:to-red-50 hover:text-red-600 transition-all duration-300 rounded-xl group overflow-hidden"
+                    className=" relative overflow-visible h-12 w-12 hover:bg-gradient-to-r hover:from-pink-50 hover:to-red-50 hover:text-red-600 transition-all duration-300 rounded-xl group"
                     aria-label={`Wishlist (${counts.wishlist} items)`}
                     title="View your wishlist"
                   >
@@ -333,7 +333,7 @@ export function Navbar() {
                   variant="ghost"
                   size="icon"
                   onClick={handlers.openCart}
-                  className="relative h-12 w-12 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-600 transition-all duration-300 rounded-xl group overflow-hidden"
+                  className="relative overflow-visible h-12 w-12 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-600 transition-all duration-300 rounded-xl group"
                   aria-label={`Shopping cart (${counts.cart} items)`}
                   title="View your shopping cart"
                 >
@@ -351,7 +351,7 @@ export function Navbar() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="relative h-12 w-12 hover:bg-gradient-to-r hover:from-purple-50 hover:to-violet-50 hover:text-purple-600 transition-all duration-300 rounded-xl group overflow-hidden"
+                    className="relative h-12 w-12 hover:bg-gradient-to-r hover:from-purple-50 hover:to-violet-50 hover:text-purple-600 transition-all duration-300 rounded-xl group"
                     aria-label="Track your order"
                     title="Track your order status"
                   >
@@ -370,7 +370,7 @@ export function Navbar() {
                   variant="ghost"
                   size="icon"
                   onClick={handlers.openSearch}
-                  className="relative h-11 w-11 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 rounded-xl group overflow-hidden"
+                  className="relative h-11 w-11 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 rounded-xl group"
                   aria-label="Search perfumes"
                 >
                   <Search className="h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 z-10" />
@@ -381,7 +381,7 @@ export function Navbar() {
                   variant="ghost"
                   size="icon"
                   onClick={handlers.openCart}
-                  className="relative h-11 w-11 hover:bg-green-50 hover:text-green-600 transition-all duration-300 rounded-xl group overflow-hidden"
+                  className="relative h-11 w-11 hover:bg-green-50 hover:text-green-600 transition-all duration-300 rounded-xl groupn"
                   aria-label={`Shopping cart (${counts.cart} items)`}
                 >
                   <ShoppingCart className="h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:-rotate-12 z-10" />

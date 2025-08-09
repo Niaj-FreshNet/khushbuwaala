@@ -1,27 +1,15 @@
 "use client";
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Heart, Tag, Shield, Truck, Clock, Star, Award, Sparkles, Zap, CheckCircle, Minus, Plus, Info, Gift, Crown, FileCheck, Phone, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/context/CartContext";
+import { Product } from "@/lib/Data/data";
+import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
 
 interface ProductDetailsProps {
-  product: {
-    _id: string;
-    name: string;
-    description: string;
-    price: number;
-    discount?: number;
-    variantPrices?: { [size: string]: number };
-    measurement?: string;
-    slug?: string;
-    smell?: string[];
-    notes?: string;
-    specification?: string;
-    origin?: string;
-    brand?: string;
-    stock?: string;
-  };
+  product: Product
   onReadMore?: () => void;
 }
 
@@ -33,9 +21,17 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
       ? ["3 ml", "6 ml", "12 ml", "25 ml"]
       : ["3 gm", "6 gm", "12 gm"]
 
-  const [selectedSize, setSelectedSize] = useState<string>(sizeKeys[0] || "3 ml");
-  const [quantity, setQuantity] = useState<number>(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const selection = useProductSelectionOptional();
+  const [fallbackSelectedSize, setFallbackSelectedSize] = useState<string>(sizeKeys[0] || "3 ml");
+  const [fallbackQuantity, setFallbackQuantity] = useState<number>(1);
+  const [fallbackIsWishlisted, setFallbackIsWishlisted] = useState(false);
+
+  const selectedSize = selection?.selectedSize ?? fallbackSelectedSize;
+  const setSelectedSize = selection?.setSelectedSize ?? setFallbackSelectedSize;
+  const quantity = selection?.quantity ?? fallbackQuantity;
+  const setQuantity = selection?.setQuantity ?? setFallbackQuantity;
+  const isWishlisted = selection?.isWishlisted ?? fallbackIsWishlisted;
+  const toggleWishlist = selection?.toggleWishlist ?? (() => setFallbackIsWishlisted(!fallbackIsWishlisted));
 
   // Available sizes based on product data
   const availableSizes = sizeKeys;
@@ -49,18 +45,17 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
   const discountedPrice = product.discount
     ? currentPrice - (currentPrice * product.discount) / 100
     : currentPrice;
+  const totalCurrent = currentPrice * quantity;
+  const totalDiscounted = discountedPrice * quantity;
 
   const handleQuantityChange = (type: "increment" | "decrement") => {
-    if (type === "increment") {
-      setQuantity(prev => Math.min(prev + 1, 10));
-    } else {
-      setQuantity(prev => Math.max(prev - 1, 1));
-    }
+    const next = type === "increment"
+      ? Math.min(quantity + 1, 10)
+      : Math.max(quantity - 1, 1);
+    setQuantity(next);
   };
 
-  const toggleWishlist = () => {
-    setIsWishlisted(!isWishlisted);
-  };
+  
 
   const isOutOfStock = product.stock === "0";
 
