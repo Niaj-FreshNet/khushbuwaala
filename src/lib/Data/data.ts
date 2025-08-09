@@ -23,6 +23,7 @@ export interface Product {
   discount?: number
   moreImages?: string[]
   relatedProducts?: string[]
+  slug?: string
 }
 
 export interface Review {
@@ -704,18 +705,39 @@ const mockReviews: Review[] = [
   },
 ]
 
-export async function getProducts(category?: string, section?: string): Promise<Product[]> {
-  // Simulate API call delay
-  await new Promise((resolve) => setTimeout(resolve, 500))
+// Util to generate slug from name
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '') // Remove non-word characters
+    .trim()
+    .replace(/\s+/g, '-');    // Replace spaces with hyphens
+}
 
-  let filteredProducts = realProducts
+// Return product by slug
+export async function getProductBySlug(slug: string): Promise<(Product & { slug: string }) | undefined> {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  const found = realProducts.find((product) => generateSlug(product.name) === slug);
+  return found ? { ...found, slug: generateSlug(found.name) } : undefined;
+}
+
+// Return all products (optionally filtered), each with a `slug`
+export async function getProducts(category?: string, section?: string): Promise<(Product & { slug: string })[]> {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  let filteredProducts = realProducts;
   if (category) {
-    filteredProducts = filteredProducts.filter((p) => p.category === category)
+    filteredProducts = filteredProducts.filter((p) => p.category === category);
   }
   if (section) {
-    filteredProducts = filteredProducts.filter((p) => p.section === section)
+    filteredProducts = filteredProducts.filter((p) => p.section === section);
   }
-  return filteredProducts
+
+  return filteredProducts.map((product) => ({
+    ...product,
+    slug: generateSlug(product.name),
+  }));
 }
 
 export async function getReviews(): Promise<Review[]> {

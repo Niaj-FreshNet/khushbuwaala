@@ -34,6 +34,26 @@ function Badge({
   VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "span"
 
+  // When asChild is true, we can't pass event handlers to Client Components
+  if (asChild) {
+    // Extract event handlers from props to avoid passing them to Slot
+    const { 
+      onClick, 
+      onMouseEnter, 
+      onMouseLeave, 
+      onFocus, 
+      onBlur,
+      ...restProps 
+    } = props
+    return (
+      <Comp
+        data-slot="badge"
+        className={cn(badgeVariants({ variant }), className)}
+        {...restProps}
+      />
+    )
+  }
+
   return (
     <Comp
       data-slot="badge"

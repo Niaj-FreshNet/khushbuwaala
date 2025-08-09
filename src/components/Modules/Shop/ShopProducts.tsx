@@ -1,144 +1,207 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useMemo } from "react"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { FilterIcon, ListFilter, LayoutGrid, LayoutList, Loader2 } from "lucide-react"
-import { getProducts, type Product } from "@/lib/Data/data" // Assuming getProducts can fetch all products
-import { FilterSheet } from "./FilterSheet"
-import { SortSheet } from "./SortSheet"
-import { ProductCard } from "@/components/ReusableUI/ProductCard"
+import { useState, useEffect, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  FilterIcon,
+  ListFilter,
+  LayoutGrid,
+  LayoutList,
+  Loader2,
+} from "lucide-react";
+import { getProducts, type Product } from "@/lib/Data/data";
+import { FilterSheet } from "./FilterSheet";
+import { SortSheet } from "./SortSheet";
+import { ProductCard } from "@/components/ReusableUI/ProductCard";
 
-export function ShopProducts() {
-  const [allProducts, setAllProducts] = useState<Product[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+interface ShopProductProps {
+  category?: string;
+  specification?: string;
+  section?: string;
+}
+
+export function ShopProducts({ category, specification, section }: ShopProductProps) {
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<any>({
     priceRange: [100, 5000],
     selectedCategories: [],
     selectedSmells: [],
     selectedSpecification: "all",
-  })
-  const [sortOption, setSortOption] = useState("new-to-old")
-  const [columns, setColumns] = useState(2) // Default column layout for mobile
-  const [visibleProductsCount, setVisibleProductsCount] = useState(20) // Initial number of products to show
-  const [loadingMore, setLoadingMore] = useState(false)
+  });
+  const [sortOption, setSortOption] = useState("new-to-old");
+  const [columns, setColumns] = useState(2); // Default column layout for mobile
+  const [visibleProductsCount, setVisibleProductsCount] = useState(20); // Initial number of products to show
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  const [isFilterSheetVisible, setIsFilterSheetVisible] = useState(false)
-  const [isSortSheetVisible, setIsSortSheetVisible] = useState(false)
+  const [isFilterSheetVisible, setIsFilterSheetVisible] = useState(false);
+  const [isSortSheetVisible, setIsSortSheetVisible] = useState(false);
 
   // Fetch all products on component mount
   useEffect(() => {
     const fetchProducts = async () => {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
-        const products = await getProducts()
+        const products = await getProducts();
         // Sort alphabetically by default initially
-        const sortedAlphabetically = [...products].sort((a, b) => a.name.localeCompare(b.name))
-        setAllProducts(sortedAlphabetically)
+        const sortedAlphabetically = [...products].sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+        setAllProducts(sortedAlphabetically);
       } catch (error) {
-        console.error("Failed to fetch products:", error)
+        console.error("Failed to fetch products:", error);
         // Handle error state, e.g., show an error message
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
-    fetchProducts()
-  }, [])
+    };
+    fetchProducts();
+  }, []);
 
   // Apply filters and sort whenever dependencies change
   const displayedProducts = useMemo(() => {
     let filtered = allProducts.filter((product) => {
-      const matchesPrice = product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1]
-      const matchesCategory =
-        filters.selectedCategories.length === 0 || filters.selectedCategories.includes(product.category)
+      // Enforce category prop if provided
+      const matchesCategoryProp = category
+        ? product.category === category
+        : true;
+
+      // Enforce specification prop if provided
+      const matchesSpecificationProp = specification
+        ? product.specification === specification
+        : true;
+
+      // Enforce section prop if provided
+      const matchesSectionProp = section ? product.section === section : true;
+
+      // Existing filters (price, selectedCategories, selectedSmells, selectedSpecification) still apply as before
+
+      // Example:
+      const matchesPrice =
+        product.price >= filters.priceRange[0] &&
+        product.price <= filters.priceRange[1];
+
+      const matchesCategoryFilter =
+        filters.selectedCategories.length === 0 ||
+        filters.selectedCategories.includes(product.category);
+
       const matchesSmell =
         filters.selectedSmells.length === 0 ||
-        (product.smell && filters.selectedSmells.some((smell: string) => product.smell.includes(smell)))
-      const matchesSpecification =
-        filters.selectedSpecification === "all" || product.specification === filters.selectedSpecification
+        (product.smell &&
+          filters.selectedSmells.every((smell: string) =>
+            product.smell.includes(smell)
+          ));
 
-      return matchesPrice && matchesCategory && matchesSmell && matchesSpecification
-    })
+      const matchesSpecificationFilter =
+        filters.selectedSpecification === "all" ||
+        product.specification === filters.selectedSpecification;
+
+      // Return true only if all conditions pass
+      return (
+        matchesCategoryProp &&
+        matchesSpecificationProp &&
+        matchesSectionProp &&
+        matchesPrice &&
+        matchesCategoryFilter &&
+        matchesSmell &&
+        matchesSpecificationFilter
+      );
+    });
 
     // Apply sorting
     switch (sortOption) {
       case "newArrival":
-        filtered = filtered.filter((item) => item.section === "newArrival")
-        break
+        filtered = filtered.filter((item) => item.section === "newArrival");
+        break;
       case "featured":
-        filtered = filtered.filter((item) => item.section === "featured")
-        break
+        filtered = filtered.filter((item) => item.section === "featured");
+        break;
       case "onSale":
-        filtered = filtered.filter((item) => item.discount && item.discount > 0)
-        break
+        filtered = filtered.filter(
+          (item) => item.discount && item.discount > 0
+        );
+        break;
       case "a-z":
-        filtered.sort((a, b) => a.name.localeCompare(b.name))
-        break
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+        break;
       case "z-a":
-        filtered.sort((a, b) => b.name.localeCompare(a.name))
-        break
+        filtered.sort((a, b) => b.name.localeCompare(a.name));
+        break;
       case "low-to-high":
-        filtered.sort((a, b) => a.price - b.price)
-        break
+        filtered.sort((a, b) => a.price - b.price);
+        break;
       case "high-to-low":
-        filtered.sort((a, b) => b.price - a.price)
-        break
+        filtered.sort((a, b) => b.price - a.price);
+        break;
       case "old-to-new":
         // Assuming products have a createdAt or similar field for date sorting
         // For now, using a simple ID comparison as a placeholder
-        filtered.sort((a, b) => a._id.localeCompare(b._id))
-        break
+        filtered.sort((a, b) => a._id.localeCompare(b._id));
+        break;
       case "new-to-old":
-        filtered.sort((a, b) => b._id.localeCompare(a._id))
-        break
+        filtered.sort((a, b) => b._id.localeCompare(a._id));
+        break;
       default:
-        break
+        break;
     }
-    return filtered
-  }, [allProducts, filters, sortOption])
+    return filtered;
+  }, [category, specification, section, allProducts, filters, sortOption]);
 
-  const totalFilteredProducts = displayedProducts.length
+  const totalFilteredProducts = displayedProducts.length;
 
   const handleApplyFilters = (newFilters: any) => {
-    setFilters(newFilters)
-    setVisibleProductsCount(20) // Reset visible products on new filter
-  }
+    setIsLoading(true);
+    setFilters(newFilters);
+    setVisibleProductsCount(20); // Reset visible products on new filter
+
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+  };
 
   const handleSortChange = (newSortOption: string) => {
-    setSortOption(newSortOption)
-    setVisibleProductsCount(20) // Reset visible products on new sort
-  }
+    setIsLoading(true);
+    setSortOption(newSortOption);
+    setVisibleProductsCount(20); // Reset visible products on new sort
+
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+  };
 
   const handleColumnChange = (cols: number) => {
-    setColumns(cols)
-  }
+    setColumns(cols);
+  };
 
   const handleLoadMore = () => {
-    setLoadingMore(true)
+    setLoadingMore(true);
     setTimeout(() => {
-      setVisibleProductsCount((prev) => Math.min(prev + 20, totalFilteredProducts))
-      setLoadingMore(false)
-    }, 1000) // Simulate loading time
-  }
+      setVisibleProductsCount((prev) =>
+        Math.min(prev + 20, totalFilteredProducts)
+      );
+      setLoadingMore(false);
+    }, 1000); // Simulate loading time
+  };
 
   // Effect to set initial columns based on screen size
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1280) {
         // lg breakpoint
-        setColumns(4)
+        setColumns(4);
       } else if (window.innerWidth >= 768) {
         // md breakpoint
-        setColumns(3)
+        setColumns(3);
       } else {
         // mobile
-        setColumns(2)
+        setColumns(2);
       }
-    }
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const gridColsClass =
     {
@@ -147,10 +210,13 @@ export function ShopProducts() {
       3: "grid-cols-2 md:grid-cols-3",
       4: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
       5: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
-    }[columns] || "grid-cols-2 md:grid-cols-3 lg:grid-cols-4" // Default fallback
+    }[columns] || "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"; // Default fallback
 
   return (
-    <section className="container mx-auto py-8 px-4 relative" aria-labelledby="shop-products-heading">
+    <section
+      className="container mx-auto py-8 px-4 relative"
+      aria-labelledby="shop-products-heading"
+    >
       <h2 id="shop-products-heading" className="sr-only">
         All Products
       </h2>
@@ -172,8 +238,10 @@ export function ShopProducts() {
           <Button
             variant="outline"
             size="icon"
-            className={`hidden sm:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
-              columns === 1 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+            className={`sm:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+              columns === 1
+                ? "bg-white text-blue-600 shadow-md"
+                : "bg-transparent"
             }`}
             onClick={() => handleColumnChange(1)}
             aria-label="Show products in 1 column"
@@ -184,7 +252,9 @@ export function ShopProducts() {
             variant="outline"
             size="icon"
             className={`h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
-              columns === 2 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+              columns === 2
+                ? "bg-white text-blue-600 shadow-md"
+                : "bg-transparent"
             }`}
             onClick={() => handleColumnChange(2)}
             aria-label="Show products in 2 columns"
@@ -195,7 +265,9 @@ export function ShopProducts() {
             variant="outline"
             size="icon"
             className={`hidden md:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
-              columns === 3 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+              columns === 3
+                ? "bg-white text-blue-600 shadow-md"
+                : "bg-transparent"
             }`}
             onClick={() => handleColumnChange(3)}
             aria-label="Show products in 3 columns"
@@ -206,7 +278,9 @@ export function ShopProducts() {
             variant="outline"
             size="icon"
             className={`hidden lg:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
-              columns === 4 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+              columns === 4
+                ? "bg-white text-blue-600 shadow-md"
+                : "bg-transparent"
             }`}
             onClick={() => handleColumnChange(4)}
             aria-label="Show products in 4 columns"
@@ -217,7 +291,9 @@ export function ShopProducts() {
             variant="outline"
             size="icon"
             className={`hidden xl:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
-              columns === 5 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+              columns === 5
+                ? "bg-white text-blue-600 shadow-md"
+                : "bg-transparent"
             }`}
             onClick={() => handleColumnChange(5)}
             aria-label="Show products in 5 columns"
@@ -239,9 +315,12 @@ export function ShopProducts() {
 
       {/* Product List */}
       {isLoading ? (
-        <div className={`grid gap-6 ${gridColsClass}`}>
-          {Array.from({ length: 20 }).map((_, index) => (
-            <div key={index} className="border border-gray-100 rounded-xl shadow-sm overflow-hidden bg-white">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[...Array(12)].map((_, i) => (
+            <div
+              key={i}
+              className="border border-gray-100 rounded-xl shadow-sm overflow-hidden"
+            >
               <Skeleton className="w-full h-64 rounded-t-xl" />
               <div className="p-4 space-y-3">
                 <Skeleton className="h-6 w-3/4" />
@@ -258,22 +337,27 @@ export function ShopProducts() {
         <>
           {displayedProducts.length > 0 ? (
             <div className={`grid gap-6 ${gridColsClass}`}>
-              {displayedProducts.slice(0, visibleProductsCount).map((product) => (
-                <ProductCard 
-                className="pt-0"
-                  key={product._id} 
-                  product={product} 
-                  layout={columns === 1 ? "list" : "grid"}
-                  showDescription={columns === 1}
-                />
-              ))}
+              {displayedProducts
+                .slice(0, visibleProductsCount)
+                .map((product) => (
+                  <ProductCard
+                    className="py-0"
+                    key={product._id}
+                    product={product}
+                    layout={columns === 1 ? "list" : "grid"}
+                    showDescription={columns === 1}
+                  />
+                ))}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center text-center py-20 bg-white rounded-xl shadow-lg border border-gray-100">
               <FilterIcon className="h-16 w-16 text-gray-300 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">No products found</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                No products found
+              </h3>
               <p className="text-sm text-gray-600 max-w-sm">
-                Try adjusting your filters or sorting options to find what you're looking for.
+                Try adjusting your filters or sorting options to find what
+                you're looking for.
               </p>
             </div>
           )}
@@ -284,7 +368,9 @@ export function ShopProducts() {
       {totalFilteredProducts > visibleProductsCount && (
         <div className="text-center mt-8">
           <p className="text-sm text-gray-600 mb-6">
-            You've viewed {Math.min(visibleProductsCount, totalFilteredProducts)} of {totalFilteredProducts} products
+            You've viewed{" "}
+            {Math.min(visibleProductsCount, totalFilteredProducts)} of{" "}
+            {totalFilteredProducts} products
           </p>
           <Button
             className="px-10 py-4 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
@@ -307,8 +393,13 @@ export function ShopProducts() {
         visible={isFilterSheetVisible}
         onClose={setIsFilterSheetVisible}
         onApplyFilters={handleApplyFilters}
+        initialFilters={{ category }}
       />
-      <SortSheet visible={isSortSheetVisible} onClose={setIsSortSheetVisible} onSortChange={handleSortChange} />
+      <SortSheet
+        visible={isSortSheetVisible}
+        onClose={setIsSortSheetVisible}
+        onSortChange={handleSortChange}
+      />
     </section>
-  )
+  );
 }

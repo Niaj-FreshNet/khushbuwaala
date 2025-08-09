@@ -26,8 +26,10 @@ interface NavbarClientWrapperProps {
 }
 
 export function NavbarClientWrapper({ children }: NavbarClientWrapperProps) {
-//   const { cartItems } = useCart()
-//   const { wishlistItems } = useWishlist()
+  const { cartItems } = useCart() || {
+    cartItems: [],
+  }
+  //   const { wishlistItems } = useWishlist()
 
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollTop, setLastScrollTop] = useState(0)
@@ -59,9 +61,9 @@ export function NavbarClientWrapper({ children }: NavbarClientWrapperProps) {
   }
 
   const counts = {
-    // cart: cartItems.length,
+    cart: cartItems.length,
     // wishlist: wishlistItems.length,
-    cart: 3,
+    // cart: 3,
     wishlist: 2,
   }
 
