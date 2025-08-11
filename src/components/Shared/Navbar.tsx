@@ -90,7 +90,7 @@ export function Navbar() {
       <NavbarClientWrapper>
         {({ handlers, counts, drawerOpen }) => (
           <header
-            className="backdrop-blur-xl bg-white/95 shadow-xl border-b border-red-100/50 transition-all duration-300 sticky top-0 z-50"
+            className="backdrop-blur-xl bg-white/95 shadow-md border-b border-red-100/50 transition-all duration-300 sticky top-0 z-50"
             role="banner"
             style={{
               backdropFilter: "blur(20px)",
