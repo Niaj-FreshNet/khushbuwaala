@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import type { Order } from './ordersSlice'
 
 interface CreateOrderResponse {
   orderId: string
@@ -9,6 +10,10 @@ export const ordersApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: '/api/orders' }),
   tagTypes: ['Order'],
   endpoints: (builder) => ({
+    getOrderById: builder.query<Order, string>({
+      query: (orderId) => `/${encodeURIComponent(orderId)}`,
+      providesTags: (result, error, id) => [{ type: 'Order' as const, id }],
+    }),
     createOrder: builder.mutation<CreateOrderResponse, any>({
       query: (order) => ({
         url: '',
@@ -20,6 +25,6 @@ export const ordersApi = createApi({
   }),
 })
 
-export const { useCreateOrderMutation } = ordersApi
+export const { useCreateOrderMutation, useLazyGetOrderByIdQuery, useGetOrderByIdQuery } = ordersApi
 
 

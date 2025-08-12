@@ -64,7 +64,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
       <div className="relative group">
         {/* Enhanced Showcase Background */}
         <div 
-          className="relative rounded-3xl p-8 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/20 shadow-2xl border border-blue-100/50 backdrop-blur-sm aspect-[4/5] min-h-[500px] flex items-center justify-center cursor-pointer overflow-hidden"
+          className="relative rounded-3xl p-0 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/20 shadow-2xl border border-blue-100/50 backdrop-blur-sm aspect-[4/5] min-h-[500px] flex items-center justify-center cursor-pointer overflow-hidden"
           onClick={() => setLightbox(true)}
           onMouseMove={handleMouseMove}
           onMouseEnter={() => setZoom(true)}
