@@ -5,6 +5,7 @@ import { Product } from "@/lib/Data/data";
 import { Heart, MessageSquare, ShoppingCart, Zap } from "lucide-react";
 import { useState } from "react";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 export default function ProductPageBottomBar({ product }: { product: Product }) {
     const cart = useCart()
@@ -15,6 +16,7 @@ export default function ProductPageBottomBar({ product }: { product: Product }) 
             : ["3 gm", "6 gm", "12 gm"]
 
     const selection = useProductSelectionOptional();
+    const wishlist = useWishlist();
     const [fallbackSelectedSize, setFallbackSelectedSize] = useState<string>(sizeKeys[0] || "3 ml");
     const [fallbackQuantity, setFallbackQuantity] = useState<number>(1);
     const [fallbackIsWishlisted, setFallbackIsWishlisted] = useState(false);
@@ -23,8 +25,19 @@ export default function ProductPageBottomBar({ product }: { product: Product }) 
     const setSelectedSize = selection?.setSelectedSize ?? setFallbackSelectedSize;
     const quantity = selection?.quantity ?? fallbackQuantity;
     const setQuantity = selection?.setQuantity ?? setFallbackQuantity;
-    const isWishlisted = selection?.isWishlisted ?? fallbackIsWishlisted;
-    const toggleWishlist = selection?.toggleWishlist ?? (() => setFallbackIsWishlisted(!fallbackIsWishlisted));
+    const isWishlisted = wishlist?.isInWishlist(product._id) ?? (selection?.isWishlisted ?? fallbackIsWishlisted);
+    const toggleWishlist = () => {
+        if (wishlist) {
+            if (wishlist.isInWishlist(product._id)) {
+                wishlist.removeFromWishlist(product._id)
+            } else {
+                wishlist.addToWishlist(product as any)
+            }
+            return
+        }
+        const toggle = selection?.toggleWishlist ?? (() => setFallbackIsWishlisted(!fallbackIsWishlisted))
+        toggle()
+    };
 
     // Available sizes based on product data
     const availableSizes = sizeKeys;

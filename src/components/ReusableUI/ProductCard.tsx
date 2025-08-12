@@ -7,6 +7,7 @@ import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card"
 import { Heart, ShoppingCart, Star, Eye, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useWishlist } from "@/context/WishlistContext"
 import { useState } from "react"
 
 interface ProductCardProps {
@@ -77,7 +78,8 @@ export function ProductCard({
   isLoading = false
 }: ProductCardProps) {
   const [imageError, setImageError] = useState(false)
-  const [isWishlisted, setIsWishlisted] = useState(false)
+  const wishlist = useWishlist()
+  const isWishlisted = !!wishlist?.isInWishlist(product._id)
   const [isAddingToCart, setIsAddingToCart] = useState(false)
 
   if (isLoading) {
@@ -98,11 +100,14 @@ export function ProductCard({
   }
 
   const handleAddToWishlist = () => {
-    setIsWishlisted(!isWishlisted)
-    toast.success(isWishlisted ? "Removed from Wishlist" : "Added to Wishlist!", {
-      description: `${product.name} has been ${isWishlisted ? 'removed from' : 'added to'} your wishlist.`,
-      duration: 2000,
-    })
+    if (!wishlist) return
+    if (isWishlisted) {
+      wishlist.removeFromWishlist(product._id)
+      toast.success("Removed from Wishlist", { description: `${product.name} removed from wishlist.`, duration: 1800 })
+    } else {
+      wishlist.addToWishlist(product as any)
+      toast.success("Added to Wishlist!", { description: `${product.name} added to wishlist.`, duration: 1800 })
+    }
   }
 
   const productSlug = product.name.toLowerCase().replace(/ /g, "-")

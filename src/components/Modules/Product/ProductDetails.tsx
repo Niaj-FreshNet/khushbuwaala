@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/context/CartContext";
 import { Product } from "@/lib/Data/data";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 interface ProductDetailsProps {
   product: Product
@@ -22,6 +23,7 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
       : ["3 gm", "6 gm", "12 gm"]
 
   const selection = useProductSelectionOptional();
+  const wishlist = useWishlist();
   const [fallbackSelectedSize, setFallbackSelectedSize] = useState<string>(sizeKeys[0] || "3 ml");
   const [fallbackQuantity, setFallbackQuantity] = useState<number>(1);
   const [fallbackIsWishlisted, setFallbackIsWishlisted] = useState(false);
@@ -30,8 +32,20 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
   const setSelectedSize = selection?.setSelectedSize ?? setFallbackSelectedSize;
   const quantity = selection?.quantity ?? fallbackQuantity;
   const setQuantity = selection?.setQuantity ?? setFallbackQuantity;
-  const isWishlisted = selection?.isWishlisted ?? fallbackIsWishlisted;
-  const toggleWishlist = selection?.toggleWishlist ?? (() => setFallbackIsWishlisted(!fallbackIsWishlisted));
+  const isWishlisted = wishlist?.isInWishlist(product._id) ?? (selection?.isWishlisted ?? fallbackIsWishlisted);
+  const toggleWishlist = () => {
+    if (wishlist) {
+      if (wishlist.isInWishlist(product._id)) {
+        wishlist.removeFromWishlist(product._id)
+      } else {
+        wishlist.addToWishlist(product as any)
+      }
+      return
+    }
+    // fallback local toggle (should rarely happen as provider is global)
+    const toggle = selection?.toggleWishlist ?? (() => setFallbackIsWishlisted(!fallbackIsWishlisted))
+    toggle()
+  }
 
   // Available sizes based on product data
   const availableSizes = sizeKeys;
