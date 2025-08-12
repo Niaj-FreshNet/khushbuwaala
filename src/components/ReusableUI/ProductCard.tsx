@@ -7,8 +7,10 @@ import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card"
 import { Heart, ShoppingCart, Star, Eye, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { useWishlist } from "@/context/WishlistContext"
-import { useState } from "react"
+import { useState, useMemo } from "react"
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
+import { toggleWishlist, selectIsInWishlist } from "@/lib/store/features/wishlist/wishlistSlice"
+import { addToCart } from "@/lib/store/features/cart/cartSlice"
 
 interface ProductCardProps {
   product: {
@@ -78,8 +80,8 @@ export function ProductCard({
   isLoading = false
 }: ProductCardProps) {
   const [imageError, setImageError] = useState(false)
-  const wishlist = useWishlist()
-  const isWishlisted = !!wishlist?.isInWishlist(product._id)
+  const dispatch = useAppDispatch()
+  const isWishlisted = useAppSelector(useMemo(() => selectIsInWishlist(product._id), [product._id]))
   const [isAddingToCart, setIsAddingToCart] = useState(false)
 
   if (isLoading) {
@@ -88,26 +90,23 @@ export function ProductCard({
 
   const handleAddToCart = async () => {
     setIsAddingToCart(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800))
-    
     const defaultSize = product.variantPrices ? Object.keys(product.variantPrices)[0] : "3 ml"
+    dispatch(addToCart({ product, quantity: 1, selectedSize: defaultSize }))
+    await new Promise((resolve) => setTimeout(resolve, 400))
     toast.success("Added to Cart!", {
       description: `${product.name} (${defaultSize}) has been added to your cart.`,
-      duration: 3000,
+      duration: 2500,
     })
     setIsAddingToCart(false)
   }
 
   const handleAddToWishlist = () => {
-    if (!wishlist) return
-    if (isWishlisted) {
-      wishlist.removeFromWishlist(product._id)
-      toast.success("Removed from Wishlist", { description: `${product.name} removed from wishlist.`, duration: 1800 })
-    } else {
-      wishlist.addToWishlist(product as any)
-      toast.success("Added to Wishlist!", { description: `${product.name} added to wishlist.`, duration: 1800 })
-    }
+    dispatch(toggleWishlist(product))
+    const nowWishlisted = !isWishlisted
+    toast.success(nowWishlisted ? "Added to Wishlist!" : "Removed from Wishlist", {
+      description: `${product.name} has been ${nowWishlisted ? 'added to' : 'removed from'} your wishlist.`,
+      duration: 1800,
+    })
   }
 
   const productSlug = product.name.toLowerCase().replace(/ /g, "-")

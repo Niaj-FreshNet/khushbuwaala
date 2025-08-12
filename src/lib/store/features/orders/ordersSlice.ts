@@ -12,6 +12,7 @@ export interface Order {
   orderId: string
   cartItems: CartLikeItem[]
   subtotal: number
+  discount?: number
   shippingCost: number
   estimatedTaxes: number
   total: number
@@ -20,6 +21,7 @@ export interface Order {
   postStatus: string
   paymentStatus: string
   notes?: string
+  promoCode?: string | null
   contactInfo: { email?: string }
   shippingAddress: {
     name: string

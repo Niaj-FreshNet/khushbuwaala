@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import cartReducer from './features/cart/cartSlice'
+import wishlistReducer from './features/wishlist/wishlistSlice'
 import { cartApi } from './features/cart/cartApi'
 import { ordersApi } from './features/orders/ordersApi'
 import ordersReducer from './features/orders/ordersSlice'
@@ -8,6 +9,7 @@ import ordersReducer from './features/orders/ordersSlice'
 export const store = configureStore({
   reducer: {
     cart: cartReducer,
+    wishlist: wishlistReducer,
     [cartApi.reducerPath]: cartApi.reducer,
     [ordersApi.reducerPath]: ordersApi.reducer,
     orders: ordersReducer,

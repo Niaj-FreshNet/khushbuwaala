@@ -13,7 +13,7 @@ import { useCart } from "@/context/CartContext"
 
 // Use real cart from store
 
-  
+
 
 interface CartDrawerProps {
   visible: boolean
@@ -24,8 +24,8 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
   const router = useRouter()
   const { cartItems, updateQuantity, removeFromCart, calculateSubtotal } = useCart() || {
     cartItems: [],
-    updateQuantity: () => {},
-    removeFromCart: () => {},
+    updateQuantity: () => { },
+    removeFromCart: () => { },
     calculateSubtotal: () => 0,
   }
 
@@ -34,13 +34,13 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
     : 0
 
   const redirectToCart = () => {
-    onClose()
     router.push("/cart")
+    onClose()
   }
 
   const handleCheckout = () => {
-    onClose()
     router.push("/checkout")
+    onClose()
   }
 
   return (
@@ -71,7 +71,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
         </SheetHeader>
 
         <div className="flex flex-col h-full">
-          <ScrollArea className="flex-1 px-6 py-4">
+          <ScrollArea className="flex-1 px-6 py-4 overflow-auto">
             {totalItems > 0 ? (
               <div className="space-y-4">
                 {cartItems.map((item: any, index: number) => (
@@ -170,7 +170,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
 
           {/* Enhanced Cart Footer */}
           {totalItems > 0 && (
-            <div className="border-t bg-white p-6 space-y-4">
+            <div className="border-t bg-white p-6 space-y-4 flex-shrink-0">
               <Separator />
 
               {/* Subtotal with enhanced styling */}

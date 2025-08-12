@@ -12,6 +12,7 @@ import { useCart } from "@/lib/store/hooks/useCart"
 import type { Product } from "@/lib/Data/data"
 import Image from "next/image"
 import Link from "next/link"
+import StoreContainer from "@/components/Layout/StoreContainer"
 
 // Types
 interface CartItem extends Product {
@@ -96,8 +97,8 @@ const CartItemCard = ({ item, onUpdateQuantity, onRemove }: CartItemCardProps) =
                 sizes="(max-width: 768px) 80px, 96px"
               />
             </div>
-            <Badge 
-              variant="secondary" 
+            <Badge
+              variant="secondary"
               className="absolute -top-2 -right-2 text-xs px-1.5 py-0.5"
             >
               {item.size}
@@ -316,8 +317,8 @@ export default function CartPage() {
   const total = subtotal - discount
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <StoreContainer>
+      <div className="min-h-screen px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
@@ -400,7 +401,7 @@ export default function CartPage() {
                         onChange={(e) => setCouponCode(e.target.value)}
                         className="flex-1"
                       />
-                      <Button 
+                      <Button
                         onClick={applyCoupon}
                         disabled={!couponCode.trim()}
                         variant="outline"
@@ -489,6 +490,6 @@ export default function CartPage() {
           </div>
         )}
       </div>
-    </div>
+    </StoreContainer>
   )
 }

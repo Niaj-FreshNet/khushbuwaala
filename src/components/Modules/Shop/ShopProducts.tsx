@@ -9,6 +9,9 @@ import {
   LayoutGrid,
   LayoutList,
   Loader2,
+  Grid2X2,
+  Columns3,
+  Grid3X3,
 } from "lucide-react";
 import { getProducts, type Product } from "@/lib/Data/data";
 import { FilterSheet } from "./FilterSheet";
@@ -259,7 +262,7 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
             onClick={() => handleColumnChange(2)}
             aria-label="Show products in 2 columns"
           >
-            <LayoutGrid className="h-4 w-4" />
+            <Grid2X2 className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
@@ -272,7 +275,7 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
             onClick={() => handleColumnChange(3)}
             aria-label="Show products in 3 columns"
           >
-            <LayoutGrid className="h-4 w-4" />
+            <Columns3 className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
@@ -285,7 +288,7 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
             onClick={() => handleColumnChange(4)}
             aria-label="Show products in 4 columns"
           >
-            <LayoutGrid className="h-4 w-4" />
+            <Grid3X3 className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"

@@ -17,10 +17,12 @@ interface ProductDetailsProps {
 export default function ProductDetails({ product, onReadMore }: ProductDetailsProps) {
   const cart = useCart()
   const sizeKeys = product.variantPrices
-    ? Object.keys(product.variantPrices)
-    : product.measurement === "ml"
-      ? ["3 ml", "6 ml", "12 ml", "25 ml"]
-      : ["3 gm", "6 gm", "12 gm"]
+  ? Object.keys(product.variantPrices).filter(
+      size => !(product.measurement === "ml" && size.trim().toLowerCase() === "100 ml")
+    )
+  : product.measurement === "ml"
+    ? ["3 ml", "6 ml", "12 ml", "25 ml"]
+    : ["3 gm", "6 gm", "12 gm"];
 
   const selection = useProductSelectionOptional();
   const wishlist = useWishlist();
@@ -255,7 +257,7 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
                 {product.variantPrices?.[size] && (
                   <div className={`text-sm font-medium ${selectedSize === size ? 'text-blue-600' : 'text-gray-500'
                     }`}>
-                    ৳{product.variantPrices[size].toLocaleString()}
+                    {/* ৳{product.variantPrices[size].toLocaleString()} */}
                   </div>
                 )}
               </div>

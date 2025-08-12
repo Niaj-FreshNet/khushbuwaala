@@ -3,9 +3,14 @@
 import { useCart } from "@/context/CartContext";
 import { Product } from "@/lib/Data/data";
 import { Heart, MessageSquare, ShoppingCart, Zap } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
+<<<<<<< HEAD
 import { useWishlist } from "@/context/WishlistContext";
+=======
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { toggleWishlist, selectIsInWishlist } from "@/lib/store/features/wishlist/wishlistSlice";
+>>>>>>> d2f2895f76e40ea41259b62c37aded2ff7e8fd3f
 
 export default function ProductPageBottomBar({ product }: { product: Product }) {
     const cart = useCart()
@@ -19,12 +24,13 @@ export default function ProductPageBottomBar({ product }: { product: Product }) 
     const wishlist = useWishlist();
     const [fallbackSelectedSize, setFallbackSelectedSize] = useState<string>(sizeKeys[0] || "3 ml");
     const [fallbackQuantity, setFallbackQuantity] = useState<number>(1);
-    const [fallbackIsWishlisted, setFallbackIsWishlisted] = useState(false);
+    const dispatch = useAppDispatch();
 
     const selectedSize = selection?.selectedSize ?? fallbackSelectedSize;
     const setSelectedSize = selection?.setSelectedSize ?? setFallbackSelectedSize;
     const quantity = selection?.quantity ?? fallbackQuantity;
     const setQuantity = selection?.setQuantity ?? setFallbackQuantity;
+<<<<<<< HEAD
     const isWishlisted = wishlist?.isInWishlist(product._id) ?? (selection?.isWishlisted ?? fallbackIsWishlisted);
     const toggleWishlist = () => {
         if (wishlist) {
@@ -38,6 +44,10 @@ export default function ProductPageBottomBar({ product }: { product: Product }) 
         const toggle = selection?.toggleWishlist ?? (() => setFallbackIsWishlisted(!fallbackIsWishlisted))
         toggle()
     };
+=======
+    const isWishlisted = useAppSelector(useMemo(() => selectIsInWishlist(product._id), [product._id]));
+    const onToggleWishlist = () => dispatch(toggleWishlist(product));
+>>>>>>> d2f2895f76e40ea41259b62c37aded2ff7e8fd3f
 
     // Available sizes based on product data
     const availableSizes = sizeKeys;
@@ -101,9 +111,9 @@ export default function ProductPageBottomBar({ product }: { product: Product }) 
 
                             <div className="flex items-center gap-4">
                                 <button
-            onClick={toggleWishlist} 
-            className="flex items-center gap-2 bg-white border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-2xl font-semibold hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-all duration-300">
-                                    <Heart className="w-5 h-5" />
+                                    onClick={onToggleWishlist}
+                                    className="flex items-center gap-2 bg-white border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-2xl font-semibold hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-all duration-300">
+                                    <Heart className={`w-5 h-5 mr-2 ${isWishlisted ? "fill-current" : ""}`} />
                                     {isWishlisted ? "Saved" : "Wishlist"}
                                 </button>
 
@@ -113,7 +123,7 @@ export default function ProductPageBottomBar({ product }: { product: Product }) 
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-2 bg-white border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-2xl font-semibold hover:border-green-300 hover:bg-green-50 hover:text-green-600 transition-all duration-300"
                                 >
-                                    <MessageSquare className={`w-5 h-5 mr-2 ${isWishlisted ? "fill-current" : ""}`} />
+                                    <MessageSquare className="w-5 h-5" />
                                     Ask Expert
                                 </a>
 
@@ -163,7 +173,7 @@ export default function ProductPageBottomBar({ product }: { product: Product }) 
                             </button>
 
                             <button
-                                onClick={toggleWishlist}
+                                onClick={onToggleWishlist}
                                 className="w-14 h-14 bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-200 text-red-600 rounded-2xl flex items-center justify-center hover:bg-red-100 transition-all duration-300 touch-manipulation active:scale-95 shadow-lg"
                             >
                                 <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />

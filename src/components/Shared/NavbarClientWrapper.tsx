@@ -1,7 +1,8 @@
 "use client"
 
 import { useCart } from "@/context/CartContext"
-import { useWishlist } from "@/context/WishlistContext"
+import { useAppSelector } from "@/lib/store/hooks"
+import { selectWishlistCount } from "@/lib/store/features/wishlist/wishlistSlice"
 import React, { useState, useEffect } from "react"
 
 import NavDrawer from "./NavDrawer"
@@ -29,7 +30,7 @@ export function NavbarClientWrapper({ children }: NavbarClientWrapperProps) {
   const { cartItems } = useCart() || {
     cartItems: [],
   }
-  //   const { wishlistItems } = useWishlist()
+  const wishlistCount = useAppSelector(selectWishlistCount)
 
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollTop, setLastScrollTop] = useState(0)
@@ -62,9 +63,7 @@ export function NavbarClientWrapper({ children }: NavbarClientWrapperProps) {
 
   const counts = {
     cart: cartItems.length,
-    // wishlist: wishlistItems.length,
-    // cart: 3,
-    wishlist: 2,
+    wishlist: wishlistCount,
   }
 
   return (
