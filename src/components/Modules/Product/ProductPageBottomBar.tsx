@@ -5,12 +5,8 @@ import { Product } from "@/lib/Data/data";
 import { Heart, MessageSquare, ShoppingCart, Zap } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
-<<<<<<< HEAD
-import { useWishlist } from "@/context/WishlistContext";
-=======
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { toggleWishlist, selectIsInWishlist } from "@/lib/store/features/wishlist/wishlistSlice";
->>>>>>> d2f2895f76e40ea41259b62c37aded2ff7e8fd3f
 
 export default function ProductPageBottomBar({ product }: { product: Product }) {
     const cart = useCart()
@@ -21,7 +17,6 @@ export default function ProductPageBottomBar({ product }: { product: Product }) 
             : ["3 gm", "6 gm", "12 gm"]
 
     const selection = useProductSelectionOptional();
-    const wishlist = useWishlist();
     const [fallbackSelectedSize, setFallbackSelectedSize] = useState<string>(sizeKeys[0] || "3 ml");
     const [fallbackQuantity, setFallbackQuantity] = useState<number>(1);
     const dispatch = useAppDispatch();
@@ -30,24 +25,8 @@ export default function ProductPageBottomBar({ product }: { product: Product }) 
     const setSelectedSize = selection?.setSelectedSize ?? setFallbackSelectedSize;
     const quantity = selection?.quantity ?? fallbackQuantity;
     const setQuantity = selection?.setQuantity ?? setFallbackQuantity;
-<<<<<<< HEAD
-    const isWishlisted = wishlist?.isInWishlist(product._id) ?? (selection?.isWishlisted ?? fallbackIsWishlisted);
-    const toggleWishlist = () => {
-        if (wishlist) {
-            if (wishlist.isInWishlist(product._id)) {
-                wishlist.removeFromWishlist(product._id)
-            } else {
-                wishlist.addToWishlist(product as any)
-            }
-            return
-        }
-        const toggle = selection?.toggleWishlist ?? (() => setFallbackIsWishlisted(!fallbackIsWishlisted))
-        toggle()
-    };
-=======
     const isWishlisted = useAppSelector(useMemo(() => selectIsInWishlist(product._id), [product._id]));
     const onToggleWishlist = () => dispatch(toggleWishlist(product));
->>>>>>> d2f2895f76e40ea41259b62c37aded2ff7e8fd3f
 
     // Available sizes based on product data
     const availableSizes = sizeKeys;

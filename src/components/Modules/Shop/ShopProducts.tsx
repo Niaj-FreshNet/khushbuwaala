@@ -17,6 +17,7 @@ import { getProducts, type Product } from "@/lib/Data/data";
 import { FilterSheet } from "./FilterSheet";
 import { SortSheet } from "./SortSheet";
 import { ProductCard } from "@/components/ReusableUI/ProductCard";
+import { ProductQuickView } from "@/components/ReusableUI/ProductQuickView";
 
 interface ShopProductProps {
   category?: string;
@@ -27,6 +28,7 @@ interface ShopProductProps {
 export function ShopProducts({ category, specification, section }: ShopProductProps) {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [filters, setFilters] = useState<any>({
     priceRange: [100, 5000],
     selectedCategories: [],
@@ -40,6 +42,19 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
 
   const [isFilterSheetVisible, setIsFilterSheetVisible] = useState(false);
   const [isSortSheetVisible, setIsSortSheetVisible] = useState(false);
+
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false)
+
+  const handleQuickView = (product: Product) => {
+    setQuickViewProduct(product)
+    setIsQuickViewOpen(true)
+  }
+
+  const handleCloseQuickView = () => {
+    setIsQuickViewOpen(false)
+    setQuickViewProduct(null)
+  }
 
   // Fetch all products on component mount
   useEffect(() => {
@@ -153,6 +168,7 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
 
   const totalFilteredProducts = displayedProducts.length;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleApplyFilters = (newFilters: any) => {
     setIsLoading(true);
     setFilters(newFilters);
@@ -241,11 +257,10 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
           <Button
             variant="outline"
             size="icon"
-            className={`sm:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
-              columns === 1
+            className={`sm:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 1
                 ? "bg-white text-blue-600 shadow-md"
                 : "bg-transparent"
-            }`}
+              }`}
             onClick={() => handleColumnChange(1)}
             aria-label="Show products in 1 column"
           >
@@ -254,11 +269,10 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
           <Button
             variant="outline"
             size="icon"
-            className={`h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
-              columns === 2
+            className={`h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 2
                 ? "bg-white text-blue-600 shadow-md"
                 : "bg-transparent"
-            }`}
+              }`}
             onClick={() => handleColumnChange(2)}
             aria-label="Show products in 2 columns"
           >
@@ -267,11 +281,10 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
           <Button
             variant="outline"
             size="icon"
-            className={`hidden md:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
-              columns === 3
+            className={`hidden md:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 3
                 ? "bg-white text-blue-600 shadow-md"
                 : "bg-transparent"
-            }`}
+              }`}
             onClick={() => handleColumnChange(3)}
             aria-label="Show products in 3 columns"
           >
@@ -280,11 +293,10 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
           <Button
             variant="outline"
             size="icon"
-            className={`hidden lg:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
-              columns === 4
+            className={`hidden lg:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 4
                 ? "bg-white text-blue-600 shadow-md"
                 : "bg-transparent"
-            }`}
+              }`}
             onClick={() => handleColumnChange(4)}
             aria-label="Show products in 4 columns"
           >
@@ -293,11 +305,10 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
           <Button
             variant="outline"
             size="icon"
-            className={`hidden xl:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
-              columns === 5
+            className={`hidden xl:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 5
                 ? "bg-white text-blue-600 shadow-md"
                 : "bg-transparent"
-            }`}
+              }`}
             onClick={() => handleColumnChange(5)}
             aria-label="Show products in 5 columns"
           >
@@ -349,6 +360,7 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
                     product={product}
                     layout={columns === 1 ? "list" : "grid"}
                     showDescription={columns === 1}
+                    onQuickView={() => handleQuickView(product)}
                   />
                 ))}
             </div>
@@ -360,7 +372,7 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
               </h3>
               <p className="text-sm text-gray-600 max-w-sm">
                 Try adjusting your filters or sorting options to find what
-                you're looking for.
+                you&apos;re looking for.
               </p>
             </div>
           )}
@@ -371,7 +383,7 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
       {totalFilteredProducts > visibleProductsCount && (
         <div className="text-center mt-8">
           <p className="text-sm text-gray-600 mb-6">
-            You've viewed{" "}
+            You&apos;ve viewed{" "}
             {Math.min(visibleProductsCount, totalFilteredProducts)} of{" "}
             {totalFilteredProducts} products
           </p>
@@ -403,6 +415,9 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
         onClose={setIsSortSheetVisible}
         onSortChange={handleSortChange}
       />
+      {quickViewProduct && (
+        <ProductQuickView product={quickViewProduct} open={isQuickViewOpen} onOpenChange={setIsQuickViewOpen} />
+      )}
     </section>
   );
 }
