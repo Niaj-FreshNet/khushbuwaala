@@ -7,7 +7,10 @@ import { useMemo, useState } from "react";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { toggleWishlist, selectIsInWishlist } from "@/lib/store/features/wishlist/wishlistSlice";
+<<<<<<< HEAD
 import { useWishlist } from "@/context/WishlistContext";
+=======
+>>>>>>> 4ee4e7c8de7cb36fa91e23853fb87767c4ba156d
 
 export default function ProductPageBottomBar({ product }: { product: Product }) {
     const cart = useCart()
@@ -18,7 +21,6 @@ export default function ProductPageBottomBar({ product }: { product: Product }) 
             : ["3 gm", "6 gm", "12 gm"]
 
     const selection = useProductSelectionOptional();
-    const wishlist = useWishlist();
     const [fallbackSelectedSize, setFallbackSelectedSize] = useState<string>(sizeKeys[0] || "3 ml");
     const [fallbackQuantity, setFallbackQuantity] = useState<number>(1);
     const dispatch = useAppDispatch();

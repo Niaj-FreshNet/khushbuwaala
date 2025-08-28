@@ -48,20 +48,20 @@ const dummyReviews = [
 ];
 
 interface AccordionItemProps {
-  title: string; 
-  children: React.ReactNode; 
-  icon: any; 
-  isOpen: boolean; 
+  title: string;
+  children: React.ReactNode;
+  icon: any;
+  isOpen: boolean;
   onToggle: () => void;
   badge?: string;
   'data-section'?: string;
 }
 
-const AccordionItem = ({ 
-  title, 
-  children, 
-  icon: Icon, 
-  isOpen, 
+const AccordionItem = ({
+  title,
+  children,
+  icon: Icon,
+  isOpen,
   onToggle,
   badge,
   'data-section': dataSection
@@ -85,10 +85,9 @@ const AccordionItem = ({
           )}
         </div>
       </div>
-      <ChevronDown 
-        className={`w-6 h-6 text-gray-400 transition-transform duration-300 ${
-          isOpen ? 'transform rotate-180' : ''
-        }`} 
+      <ChevronDown
+        className={`w-6 h-6 text-gray-400 transition-transform duration-300 ${isOpen ? 'transform rotate-180' : ''
+          }`}
       />
     </button>
     <AnimatePresence>
@@ -110,7 +109,7 @@ const AccordionItem = ({
 );
 
 export default function ProductAccordion({ product }: ProductAccordionProps) {
-  const [openSection, setOpenSection] = useState<string>("description");
+  const [openSection, setOpenSection] = useState<string>("");
 
   const toggleSection = (section: string) => {
     setOpenSection(openSection === section ? "" : section);
@@ -131,11 +130,10 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
           <button
             key={section.id}
             onClick={() => toggleSection(section.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-              openSection === section.id
-                ? 'bg-white text-gray-900 shadow-md border border-gray-200'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${openSection === section.id
+              ? 'bg-white text-gray-900 shadow-md border border-gray-200'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+              }`}
           >
             <section.icon className="w-4 h-4" />
             {section.label}
@@ -155,12 +153,11 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
           <div>
             <h4 className="font-semibold text-gray-900 mb-3">Product Description</h4>
             <p className="text-gray-700 leading-relaxed">
-              {product.description || `Experience the luxury of ${product.name}, a premium ${
-                product.specification === 'male' ? "men's" : "women's"
-              } fragrance that embodies sophistication and elegance. This exquisite scent is perfect for those who appreciate fine fragrances and want to make a lasting impression.`}
+              {product.description || `Experience the luxury of ${product.name}, a premium ${product.specification === 'male' ? "men's" : "women's"
+                } fragrance that embodies sophistication and elegance. This exquisite scent is perfect for those who appreciate fine fragrances and want to make a lasting impression.`}
             </p>
           </div>
-          
+
           {product.notes && (
             <div>
               <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -168,7 +165,16 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
                 Fragrance Notes
               </h4>
               <div className="bg-white rounded-xl p-4 border border-purple-100">
-                <p className="text-gray-700">{product.notes}</p>
+                <div className="space-y-1">
+                  {product.notes.split("\n").map((line, index) => {
+                    const [title, ...rest] = line.split(":");
+                    return (
+                      <p key={index} className="text-gray-700">
+                        <span className="font-semibold">{title}:</span>{rest.join(":")}
+                      </p>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}
@@ -274,15 +280,15 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
                 </div>
                 <div className="flex justify-center mb-3">
                   {[...Array(5)].map((_, i) => (
-                    <Star 
-                      key={i} 
-                      className={`w-6 h-6 ${i < Math.floor(avgRating) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
+                    <Star
+                      key={i}
+                      className={`w-6 h-6 ${i < Math.floor(avgRating) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`}
                     />
                   ))}
                 </div>
                 <div className="text-gray-700 font-medium">Based on {dummyReviews.length} verified reviews</div>
               </div>
-              
+
               <div className="space-y-3">
                 {[5, 4, 3, 2, 1].map((rating) => {
                   const count = dummyReviews.filter(r => r.rating === rating).length;
@@ -294,7 +300,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
                         <Star className="w-3 h-3 text-yellow-500 fill-current" />
                       </div>
                       <div className="flex-1 bg-yellow-200 rounded-full h-3 overflow-hidden">
-                        <div 
+                        <div
                           className="bg-gradient-to-r from-yellow-400 to-orange-500 h-3 rounded-full transition-all duration-700 ease-out"
                           style={{ width: `${percentage}%` }}
                         />
@@ -329,9 +335,9 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
                       <div className="flex items-center gap-3">
                         <div className="flex">
                           {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className={`w-5 h-5 ${i < review.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
+                            <Star
+                              key={i}
+                              className={`w-5 h-5 ${i < review.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'}`}
                             />
                           ))}
                         </div>
