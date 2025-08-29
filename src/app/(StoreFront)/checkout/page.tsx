@@ -21,7 +21,7 @@ import { ShieldCheck, Truck, CreditCard, Percent, Info, Phone } from "lucide-rea
 import { toast } from "sonner"
 
 import { useCart } from "@/lib/store/hooks/useCart"
-import { useCreateOrderMutation } from "@/lib/store/features/orders/ordersApi"
+import { useCreateOrderMutation } from "@/redux/store/api/order/ordersApi"
 import { useAppDispatch } from "@/lib/store/hooks"
 import { setOrder } from "@/lib/store/features/orders/ordersSlice"
 import StoreContainer from "@/components/Layout/StoreContainer"

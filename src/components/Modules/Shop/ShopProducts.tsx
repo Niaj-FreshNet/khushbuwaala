@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
+import { useGetAllProductsQuery } from "@/redux/store/api/product/productApi";
+import { IProductQuery, IProductResponse } from "@/types/product.types";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -13,180 +15,143 @@ import {
   Columns3,
   Grid3X3,
 } from "lucide-react";
-import { getProducts, type Product } from "@/lib/Data/data";
 import { FilterSheet } from "./FilterSheet";
 import { SortSheet } from "./SortSheet";
 import { ProductCard } from "@/components/ReusableUI/ProductCard";
 import { ProductQuickView } from "@/components/ReusableUI/ProductQuickView";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface ShopProductProps {
+  initialProducts: IProductResponse[];
+  initialPage: number;
+  totalPages: number;
   category?: string;
   specification?: string;
   section?: string;
+  priceMin?: number;
+  priceMax?: number;
+  smells?: string;
+  sortBy?: string;
 }
 
-export function ShopProducts({ category, specification, section }: ShopProductProps) {
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [filters, setFilters] = useState<any>({
-    priceRange: [100, 5000],
-    selectedCategories: [],
-    selectedSmells: [],
-    selectedSpecification: "all",
+export function ShopProducts({
+  initialProducts,
+  initialPage,
+  totalPages,
+  category,
+  specification,
+  section,
+  priceMin,
+  priceMax,
+  smells,
+  sortBy,
+}: ShopProductProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [page, setPage] = useState(initialPage);
+  const limit = 20;
+  const [filters, setFilters] = useState({
+    priceRange: [priceMin || 100, priceMax || 5000],
+    selectedCategories: category ? [category] : [],
+    selectedSmells: smells ? smells.split(",") : [],
+    selectedSpecification: specification || "all",
   });
-  const [sortOption, setSortOption] = useState("new-to-old");
-  const [columns, setColumns] = useState(2); // Default column layout for mobile
-  const [visibleProductsCount, setVisibleProductsCount] = useState(20); // Initial number of products to show
+  const [sortOption, setSortOption] = useState(sortBy || "new-to-old");
+  const [columns, setColumns] = useState(2);
+  const [visibleProductsCount, setVisibleProductsCount] = useState(limit);
   const [loadingMore, setLoadingMore] = useState(false);
-
   const [isFilterSheetVisible, setIsFilterSheetVisible] = useState(false);
   const [isSortSheetVisible, setIsSortSheetVisible] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState<IProductResponse | null>(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
-  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
-  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false)
+  const sortMap: { [key: string]: string } = {
+    newArrival: "newArrival",
+    featured: "featured",
+    onSale: "onSale",
+    "a-z": "name",
+    "z-a": "name_desc",
+    "low-to-high": "price_asc",
+    "high-to-low": "price_desc",
+    "old-to-new": "oldest",
+    "new-to-old": "newest",
+  };
 
-  const handleQuickView = (product: Product) => {
-    setQuickViewProduct(product)
-    setIsQuickViewOpen(true)
-  }
+  const { data, error, isLoading, isFetching } = useGetAllProductsQuery(
+    {
+      page,
+      limit,
+      category: filters.selectedCategories.join(","),
+      specification: filters.selectedSpecification === "all" ? undefined : filters.selectedSpecification,
+      priceMin: filters.priceRange[0],
+      priceMax: filters.priceRange[1],
+      smells: filters.selectedSmells.join(","),
+      // sortBy: sortMap[sortOption] as ProductQueryParams["sortBy"],
+      sortBy: sortMap[sortOption] as IProductQuery["sortBy"],
+      section,
+    },
+    { skip: page === initialPage } // Skip initial fetch to use server data
+  );
 
-  const handleCloseQuickView = () => {
-    setIsQuickViewOpen(false)
-    setQuickViewProduct(null)
-  }
+  const products = page === initialPage && !isFetching ? initialProducts : data?.data || [];
+  const totalFilteredProducts = data?.meta.total || initialProducts.length;
 
-  // Fetch all products on component mount
+  // Update URL with page and filters
   useEffect(() => {
-    const fetchProducts = async () => {
-      setIsLoading(true);
-      try {
-        const products = await getProducts();
-        // Sort alphabetically by default initially
-        const sortedAlphabetically = [...products].sort((a, b) =>
-          a.name.localeCompare(b.name)
-        );
-        setAllProducts(sortedAlphabetically);
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-        // Handle error state, e.g., show an error message
-      } finally {
-        setIsLoading(false);
+    const params = new URLSearchParams(searchParams.toString());
+    if (page > 1) params.set("page", page.toString());
+    if (filters.selectedCategories.length) params.set("category", filters.selectedCategories.join(","));
+    if (filters.selectedSpecification && filters.selectedSpecification !== "all")
+      params.set("specification", filters.selectedSpecification);
+    if (filters.selectedSmells.length) params.set("smells", filters.selectedSmells.join(","));
+    if (filters.priceRange[0] !== 100) params.set("priceMin", filters.priceRange[0].toString());
+    if (filters.priceRange[1] !== 5000) params.set("priceMax", filters.priceRange[1].toString());
+    if (sortOption !== "new-to-old") params.set("sortBy", sortOption);
+    if (section) params.set("section", section);
+
+    const url = `/shop${params.toString() ? `?${params.toString()}` : ""}`;
+    router.push(url, { scroll: false });
+  }, [page, filters, sortOption, section, router, searchParams]);
+
+  // Infinite scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 &&
+        visibleProductsCount < totalFilteredProducts &&
+        !isFetching
+      ) {
+        setVisibleProductsCount((prev) => Math.min(prev + limit, totalFilteredProducts));
+        if (visibleProductsCount + limit > page * limit) {
+          setPage((prev) => prev + 1);
+        }
       }
     };
-    fetchProducts();
-  }, []);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [visibleProductsCount, totalFilteredProducts, isFetching, page, limit]);
 
-  // Apply filters and sort whenever dependencies change
-  const displayedProducts = useMemo(() => {
-    let filtered = allProducts.filter((product) => {
-      // Enforce category prop if provided
-      const matchesCategoryProp = category
-        ? product.category === category
-        : true;
+  const handleQuickView = (product: IProductResponse) => {
+    setQuickViewProduct(product);
+    setIsQuickViewOpen(true);
+  };
 
-      // Enforce specification prop if provided
-      const matchesSpecificationProp = specification
-        ? product.specification === specification
-        : true;
+  const handleCloseQuickView = () => {
+    setIsQuickViewOpen(false);
+    setQuickViewProduct(null);
+  };
 
-      // Enforce section prop if provided
-      const matchesSectionProp = section ? product.section === section : true;
-
-      // Existing filters (price, selectedCategories, selectedSmells, selectedSpecification) still apply as before
-
-      // Example:
-      const matchesPrice =
-        product.price >= filters.priceRange[0] &&
-        product.price <= filters.priceRange[1];
-
-      const matchesCategoryFilter =
-        filters.selectedCategories.length === 0 ||
-        filters.selectedCategories.includes(product.category);
-
-      const matchesSmell =
-        filters.selectedSmells.length === 0 ||
-        (product.smell &&
-          filters.selectedSmells.every((smell: string) =>
-            product.smell.includes(smell)
-          ));
-
-      const matchesSpecificationFilter =
-        filters.selectedSpecification === "all" ||
-        product.specification === filters.selectedSpecification;
-
-      // Return true only if all conditions pass
-      return (
-        matchesCategoryProp &&
-        matchesSpecificationProp &&
-        matchesSectionProp &&
-        matchesPrice &&
-        matchesCategoryFilter &&
-        matchesSmell &&
-        matchesSpecificationFilter
-      );
-    });
-
-    // Apply sorting
-    switch (sortOption) {
-      case "newArrival":
-        filtered = filtered.filter((item) => item.section === "newArrival");
-        break;
-      case "featured":
-        filtered = filtered.filter((item) => item.section === "featured");
-        break;
-      case "onSale":
-        filtered = filtered.filter(
-          (item) => item.discount && item.discount > 0
-        );
-        break;
-      case "a-z":
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case "z-a":
-        filtered.sort((a, b) => b.name.localeCompare(a.name));
-        break;
-      case "low-to-high":
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case "high-to-low":
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case "old-to-new":
-        // Assuming products have a createdAt or similar field for date sorting
-        // For now, using a simple ID comparison as a placeholder
-        filtered.sort((a, b) => a._id.localeCompare(b._id));
-        break;
-      case "new-to-old":
-        filtered.sort((a, b) => b._id.localeCompare(a._id));
-        break;
-      default:
-        break;
-    }
-    return filtered;
-  }, [category, specification, section, allProducts, filters, sortOption]);
-
-  const totalFilteredProducts = displayedProducts.length;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleApplyFilters = (newFilters: any) => {
-    setIsLoading(true);
+  const handleApplyFilters = (newFilters: typeof filters) => {
     setFilters(newFilters);
-    setVisibleProductsCount(20); // Reset visible products on new filter
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
+    setPage(1);
+    setVisibleProductsCount(limit);
   };
 
   const handleSortChange = (newSortOption: string) => {
-    setIsLoading(true);
     setSortOption(newSortOption);
-    setVisibleProductsCount(20); // Reset visible products on new sort
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
+    setPage(1);
+    setVisibleProductsCount(limit);
   };
 
   const handleColumnChange = (cols: number) => {
@@ -195,25 +160,19 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
 
   const handleLoadMore = () => {
     setLoadingMore(true);
-    setTimeout(() => {
-      setVisibleProductsCount((prev) =>
-        Math.min(prev + 20, totalFilteredProducts)
-      );
-      setLoadingMore(false);
-    }, 1000); // Simulate loading time
+    setVisibleProductsCount((prev) =>
+      Math.min(prev + 20, totalFilteredProducts)
+    );
+    setLoadingMore(false);
   };
 
-  // Effect to set initial columns based on screen size
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1280) {
-        // lg breakpoint
         setColumns(4);
       } else if (window.innerWidth >= 768) {
-        // md breakpoint
         setColumns(3);
       } else {
-        // mobile
         setColumns(2);
       }
     };
@@ -229,7 +188,7 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
       3: "grid-cols-2 md:grid-cols-3",
       4: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
       5: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
-    }[columns] || "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"; // Default fallback
+    }[columns] || "grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
 
   return (
     <section
@@ -329,7 +288,7 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
 
       {/* Product List */}
       {isLoading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className={`grid gap-6 ${gridColsClass}`}>
           {[...Array(12)].map((_, i) => (
             <div
               key={i}
@@ -347,16 +306,23 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
             </div>
           ))}
         </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center text-center py-20 bg-white rounded-xl shadow-lg border border-gray-100">
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">Error Loading Perfumes</h3>
+          <p className="text-sm text-gray-600 max-w-sm">
+            Failed to fetch products. Please try again later.
+          </p>
+        </div>
       ) : (
         <>
-          {displayedProducts.length > 0 ? (
+          {products.length > 0 ? (
             <div className={`grid gap-6 ${gridColsClass}`}>
-              {displayedProducts
+              {products
                 .slice(0, visibleProductsCount)
                 .map((product) => (
                   <ProductCard
                     className="py-0"
-                    key={product._id}
+                    key={product.id}
                     product={product}
                     layout={columns === 1 ? "list" : "grid"}
                     showDescription={columns === 1}

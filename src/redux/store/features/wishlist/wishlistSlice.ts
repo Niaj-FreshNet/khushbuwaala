@@ -1,12 +1,15 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { Product } from '@/lib/Data/data'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { IProductResponse } from '@/types/product.types'
 
-export interface WishlistItem extends Product {}
+export interface WishlistItem {
+  product: IProductResponse
+}
 
 export interface WishlistState {
   items: WishlistItem[]
 }
 
+// Load wishlist from localStorage
 const loadWishlistFromStorage = (): WishlistItem[] => {
   if (typeof window === 'undefined') return []
   try {
@@ -17,6 +20,7 @@ const loadWishlistFromStorage = (): WishlistItem[] => {
   }
 }
 
+// Save wishlist to localStorage
 const saveWishlistToStorage = (items: WishlistItem[]) => {
   if (typeof window === 'undefined') return
   try {
@@ -37,26 +41,26 @@ const wishlistSlice = createSlice({
     items: loadWishlistFromStorage(),
   },
   reducers: {
-    addToWishlist: (state, action: PayloadAction<Product>) => {
+    addToWishlist: (state, action: PayloadAction<IProductResponse>) => {
       const product = action.payload
-      const exists = state.items.some((item) => item._id === product._id)
+      const exists = state.items.some((item) => item.product.id === product.id)
       if (!exists) {
-        state.items.push({ ...product })
+        state.items.push({ product })
         saveWishlistToStorage(state.items)
       }
     },
     removeFromWishlist: (state, action: PayloadAction<string>) => {
       const productId = action.payload
-      state.items = state.items.filter((item) => item._id !== productId)
+      state.items = state.items.filter((item) => item.product.id !== productId)
       saveWishlistToStorage(state.items)
     },
-    toggleWishlist: (state, action: PayloadAction<Product>) => {
+    toggleWishlist: (state, action: PayloadAction<IProductResponse>) => {
       const product = action.payload
-      const exists = state.items.some((item) => item._id === product._id)
+      const exists = state.items.some((item) => item.product.id === product.id)
       if (exists) {
-        state.items = state.items.filter((item) => item._id !== product._id)
+        state.items = state.items.filter((item) => item.product.id !== product.id)
       } else {
-        state.items.push({ ...product })
+        state.items.push({ product })
       }
       saveWishlistToStorage(state.items)
     },
@@ -84,6 +88,4 @@ export default wishlistSlice.reducer
 export const selectWishlistItems = (state: { wishlist: WishlistState }) => state.wishlist.items
 export const selectWishlistCount = (state: { wishlist: WishlistState }) => state.wishlist.items.length
 export const selectIsInWishlist = (productId: string) => (state: { wishlist: WishlistState }) =>
-  state.wishlist.items.some((item) => item._id === productId)
-
-
+  state.wishlist.items.some((item) => item.product.id === productId)

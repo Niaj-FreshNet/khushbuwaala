@@ -15,7 +15,13 @@ import {
   selectCartLoading,
   selectCartError,
 } from '../features/cart/cartSlice'
-import type { Product } from '@/lib/Data/data'
+import type { IProductResponse } from '@/types/product.types'
+
+export interface CartItem {
+  product: IProductResponse;
+  quantity: number;
+  variantId: string; // direct reference to chosen variant
+}
 
 // Custom hook that maintains the same interface as the original useCart context
 export const useCart = () => {
@@ -30,7 +36,7 @@ export const useCart = () => {
 
   // Actions
   const addToCart = useCallback(
-    (product: Product, quantity: number, selectedSize: string) => {
+    (product: IProductResponse, quantity: number, selectedSize: string) => {
       dispatch(addToCartAction({ product, quantity, selectedSize }))
     },
     [dispatch]
@@ -52,7 +58,7 @@ export const useCart = () => {
 
   const calculateSubtotal = useCallback(() => {
     return cartItems.reduce((total, item) => {
-      const price = item.variantPrices?.[item.size] || item.price || 0
+      const price = item.variantPrices?.[item.size] || item.product.price || 0
       return total + price * item.quantity
     }, 0)
   }, [cartItems])
@@ -64,7 +70,7 @@ export const useCart = () => {
   }, [calculateSubtotal])
 
   const setCheckoutOnlyItem = useCallback(
-    (product: Product, quantity: number, size: string) => {
+    (product: IProductResponse, quantity: number, size: string) => {
       dispatch(setCheckoutOnlyItemAction({ product, quantity, size }))
     },
     [dispatch]
@@ -78,7 +84,6 @@ export const useCart = () => {
     dispatch(clearCartAction())
   }, [dispatch])
 
-  // Return the same interface as the original context
   return {
     cartItems,
     checkoutItem,
