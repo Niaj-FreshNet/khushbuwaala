@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useGetAllProductsQuery } from "@/redux/store/api/product/productApi";
+import { ProductQueryParams, useGetAllProductsQuery } from "@/redux/store/api/product/productApi";
 import { IProductQuery, IProductResponse } from "@/types/product.types";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -66,10 +66,10 @@ export function ShopProducts({
   const [quickViewProduct, setQuickViewProduct] = useState<IProductResponse | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
-  const sortMap: { [key: string]: string } = {
-    newArrival: "newArrival",
-    featured: "featured",
-    onSale: "onSale",
+const sortMap: { [key: string]: string } = {
+    newArrival: "newest",
+    featured: "popularity",
+    onSale: "price_asc",
     "a-z": "name",
     "z-a": "name_desc",
     "low-to-high": "price_asc",
@@ -87,8 +87,7 @@ export function ShopProducts({
       priceMin: filters.priceRange[0],
       priceMax: filters.priceRange[1],
       smells: filters.selectedSmells.join(","),
-      // sortBy: sortMap[sortOption] as ProductQueryParams["sortBy"],
-      sortBy: sortMap[sortOption] as IProductQuery["sortBy"],
+      sortBy: sortMap[sortOption] as ProductQueryParams["sortBy"],
       section,
     },
     { skip: page === initialPage } // Skip initial fetch to use server data

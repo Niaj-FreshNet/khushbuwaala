@@ -12,6 +12,8 @@ import { ShoppingCart, Heart, MessageSquare, Zap, Info, Sparkles } from "lucide-
 import ProductDetailSection from "@/components/Modules/Product/ProductDetailSection";
 import ProductPageBottomBar from "@/components/Modules/Product/ProductPageBottomBar";
 import { ProductSelectionProvider } from "@/context/ProductSelectionContext";
+import { useRouter } from "next/router";
+import { useGetProductQuery } from "@/redux/store/api/product/productApi";
 
 interface Props {
   params: { slug: string };
@@ -46,6 +48,8 @@ const generateBreadcrumbs = (product: Product): BreadcrumbItem[] => {
 // Generate comprehensive SEO metadata
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProductBySlug(params.slug);
+
+  console.log("Product:", product);
 
   if (!product) {
     return {
@@ -289,7 +293,18 @@ function StructuredData({ product }: { product: Product }) {
 }
 
 export default async function ProductPage({ params }: Props) {
+// export default async function ProductPage({ }: Props) {
+  // console.log("Params slug:", params.slug);
   const product = await getProductBySlug(params.slug);
+
+  // const router = useRouter();
+  // const { id } = router.query;
+  // console.log("ID:", id);
+
+    // Fetch product by ID using RTK Query
+  // const { data: product, isLoading, isError } = useGetProductQuery(id as string, {
+  //   skip: !id,
+  // });
 
   if (!product) {
     return (

@@ -3,7 +3,7 @@ import baseApi from "../baseApi";
 
 
 // Define query params type based on backend query parsing
-interface ProductQueryParams extends Partial<IProductQuery> {
+export interface ProductQueryParams extends Partial<IProductQuery> {
   page?: number;
   limit?: number;
   sortBy?: 'name' | 'price_asc' | 'price_desc' | 'newest' | 'oldest' | 'popularity';
