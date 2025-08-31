@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import type { Order } from './ordersSlice'
+import type { Order } from '../../../../lib/store/features/orders/ordersSlice'
 
 interface CreateOrderResponse {
   orderId: string

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { AlertCircle, ArrowLeft, ClipboardCopy, Truck, CheckCircle, Clock, PackageOpen, Search } from "lucide-react"
-import { useLazyGetOrderByIdQuery } from "@/lib/store/features/orders/ordersApi"
+import { useLazyGetOrderByIdQuery } from "@/redux/store/api/order/ordersApi"
 import { useAppSelector } from "@/lib/store/hooks"
 import { selectOrderById } from "@/lib/store/features/orders/ordersSlice"
 

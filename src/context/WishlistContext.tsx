@@ -1,7 +1,7 @@
 "use client"
 
+import { IProductResponse } from "@/types/product.types"
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import type { Product } from "@/lib/Data/data"
 
 interface WishlistItem {
   id: string
@@ -12,7 +12,7 @@ interface WishlistItem {
 
 interface WishlistContextType {
   wishlistItems: WishlistItem[]
-  addToWishlist: (product: Product) => void
+  addToWishlist: (product: IProductResponse) => void
   removeFromWishlist: (productId: string) => void
   isInWishlist: (productId: string) => boolean
   clearWishlist: () => void
@@ -41,16 +41,16 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("khushbuwaala-wishlist", JSON.stringify(wishlistItems))
   }, [wishlistItems])
 
-  const addToWishlist = (product: Product) => {
+  const addToWishlist = (product: IProductResponse) => {
     setWishlistItems((prev) => {
-      const existingItem = prev.find((item) => item.id === product._id)
+      const existingItem = prev.find((item) => item.id === product.id)
       if (existingItem) {
         return prev // Item already in wishlist
       }
       return [
         ...prev,
         {
-          id: product._id,
+          id: product.id,
           name: product.name,
           price: product.price,
           image: product.primaryImage,

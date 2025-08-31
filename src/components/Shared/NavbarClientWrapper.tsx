@@ -1,13 +1,13 @@
 "use client"
 
 import { useCart } from "@/context/CartContext"
-import { useAppSelector } from "@/lib/store/hooks"
-import { selectWishlistCount } from "@/lib/store/features/wishlist/wishlistSlice"
 import React, { useState, useEffect } from "react"
 
 import NavDrawer from "./NavDrawer"
 import CartDrawer from "../Modules/Cart/CartDrawer"
 import SearchDrawer from "../Modules/Search/SearchDrawer"
+import { useAppSelector } from "@/redux/store/hooks"
+import { selectWishlistCount } from "@/redux/store/features/wishlist/wishlistSlice"
 
 interface NavbarClientWrapperProps {
   children: (props: {

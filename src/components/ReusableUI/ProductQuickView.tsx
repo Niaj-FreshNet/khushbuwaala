@@ -25,8 +25,8 @@ import {
   ExternalLink,
   CreditCard,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+<<<<<<< HEAD
 
 interface Product {
   id: string
@@ -43,9 +43,16 @@ interface Product {
   reviewCount?: number
   images?: string[]
 }
+=======
+import { cn } from "@/lib/utils"
+import { IProductResponse } from "@/types/product.types"
+import { useAppDispatch } from "@/redux/store/hooks"
+import { addToCart } from "@/redux/store/features/cart/cartSlice"
+import { toggleWishlist } from "@/redux/store/features/wishlist/wishlistSlice"
+>>>>>>> 86d0ed816e00f2667ef1e4bb43e78d4827648e83
 
 interface ProductQuickViewProps {
-  product: Product
+  product: IProductResponse
   trigger?: React.ReactNode
   open?: boolean
   onOpenChange?: (open: boolean) => void
@@ -61,15 +68,16 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [isImageZoomed, setIsImageZoomed] = useState(false)
 
+  const dispatch = useAppDispatch()
+
   const images = [
     product.primaryImage,
-    ...(product.secondaryImage ? [product.secondaryImage] : []),
-    ...(product.images || []),
+    ...(product.otherImages || []),
   ].filter(Boolean)
 
   useEffect(() => {
-    if (product.variantPrices && Object.keys(product.variantPrices).length > 0) {
-      setSelectedSize(Object.keys(product.variantPrices)[0])
+    if (product.variants && product.variants.length > 0) {
+      setSelectedSize(product.variants[0].size.toString() + "ml")
     } else {
       setSelectedSize("3ml")
     }
@@ -86,15 +94,18 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
   }
 
   const getCurrentPrice = () => {
-    if (product.variantPrices && selectedSize && product.variantPrices[selectedSize]) {
-      return product.variantPrices[selectedSize]
+    if (product.variants && selectedSize) {
+      const sizeNum = Number(selectedSize.replace("ml", ""));
+      const variant = product.variants.find(v => v.size === sizeNum);
+      return variant ? variant.price : product.minPrice;
     }
-    return product.price
+    return product.minPrice
   }
 
   const handleAddToCart = async () => {
     setIsAddingToCart(true)
     await new Promise((resolve) => setTimeout(resolve, 600))
+    dispatch(addToCart({ product, quantity, selectedSize: selectedSize || "3ml" }))
     toast.success("Added to Cart!", {
       description: `${product.name} (${selectedSize}) × ${quantity} added to your cart.`,
       duration: 3000,
@@ -120,6 +131,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
   }
 
   const handleAddToWishlist = () => {
+    dispatch(toggleWishlist(product))
     setIsWishlisted(!isWishlisted)
     toast.success(isWishlisted ? "Removed from Wishlist!" : "Added to Wishlist!", {
       description: `${product.name} has been ${isWishlisted ? "removed from" : "added to"} your wishlist.`,
@@ -135,14 +147,14 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
   }
 
-  const sizeOptions = product.variantPrices ? Object.keys(product.variantPrices) : ["3ml", "6ml", "12ml"]
+  const sizeOptions = product.variants ? product.variants.map(v => v.size + "ml") : ["3ml", "6ml", "12ml"]
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
-        <DialogContent className="max-w-sm sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto p-0 bg-white">
+        <DialogContent className="max-w-sm sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl w-full max-h-[95vh] overflow-y-auto p-0 bg-white">
           <div className="grid grid-cols-1 md:grid-cols-2 min-h-[60vh] md:min-h-[70vh]">
             {/* Image Gallery Section */}
             <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
@@ -200,21 +212,21 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                           index === currentImageIndex ? "bg-white shadow-lg" : "bg-white/50 hover:bg-white/75",
                         )}
                         onClick={() => setCurrentImageIndex(index)}
-                        >
+                      >
                       </Button>
                     ))}
                   </div>
                 )}
 
                 {/* Premium Badge */}
-                {product.category === "premium" && (
+                {/* {product.category === "premium" && (
                   <div className="absolute top-2 sm:top-4 left-2 sm:left-4">
                     <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white border-0 text-xs sm:text-sm">
                       <Sparkles className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
                       Premium
                     </Badge>
                   </div>
-                )}
+                )} */}
               </div>
 
               {/* Thumbnail Gallery */}
@@ -257,7 +269,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                       </h1>
 
                       {/* Rating */}
-                      {product.rating && (
+                      {/* {product.rating && (
                         <div className="flex items-center gap-2 mt-2">
                           <div className="flex items-center">
                             {[...Array(5)].map((_, i) => (
@@ -274,7 +286,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                             {product.rating} ({product.reviewCount || 0} reviews)
                           </span>
                         </div>
-                      )}
+                      )} */}
                     </div>
 
                     <div className="flex gap-2">
@@ -332,14 +344,14 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                           "p-2 sm:p-3 rounded-lg border-2 text-xs sm:text-sm font-medium transition-all duration-200 hover:shadow-md touch-manipulation",
                           selectedSize === size
                             ? "border-red-500 bg-red-50 text-red-700"
-                            : "border-gray-200 hover:border-gray-300 text-gray-700",
+                            : "border-gray-200 hover:border-gray-300",
                         )}
                         onClick={() => setSelectedSize(size)}
                       >
                         <div className="font-semibold">{size}</div>
-                        {product.variantPrices?.[size] && (
+                        {product.variants?.find(v => v.size + "ml" === size)?.price && (
                           <div className="text-xs text-gray-500 mt-1 break-words">
-                            {formatPrice(product.variantPrices[size])}
+                            {formatPrice(product.variants.find(v => v.size + "ml" === size)?.price || 0)}
                           </div>
                         )}
                       </button>
@@ -348,18 +360,18 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                 </div>
 
                 {/* Scent Notes */}
-                {product.smell && product.smell.length > 0 && (
+                {product.accords && product.accords.length > 0 && (
                   <div className="space-y-2 sm:space-y-3">
                     <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm sm:text-base">
                       <Award className="h-3 w-3 sm:h-4 sm:w-4 text-purple-500 flex-shrink-0" />
                       Scent Profile
                     </h3>
                     <div className="flex flex-wrap gap-1 sm:gap-2">
-                      {product.smell.map((note, index) => (
+                      {product.accords.map((note, index) => (
                         <Badge
                           key={index}
                           variant="outline"
-                          className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200 text-purple-700 hover:shadow-md transition-shadow text-xs sm:text-sm"
+                          className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200 text-purple-700 hover:shadow-md transition-shadow text-xs rounded-full"
                         >
                           {note}
                         </Badge>
@@ -380,13 +392,17 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                 )}
 
                 {/* Perfume Notes */}
-                {product.notes && (
+                {product.perfumeNotes && (
                   <div className="space-y-2 sm:space-y-3">
                     <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm sm:text-base">
                       <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 flex-shrink-0" />
                       Fragrance Notes
                     </h3>
-                    <p className="text-gray-700 leading-relaxed text-xs sm:text-sm">{product.notes}</p>
+                    <p className="text-gray-700 leading-relaxed text-xs sm:text-sm">
+                      Top: {product.perfumeNotes.top.join(", ")} <br />
+                      Middle: {product.perfumeNotes.middle.join(", ")} <br />
+                      Base: {product.perfumeNotes.base.join(", ")}
+                    </p>
                   </div>
                 )}
 

@@ -1,9 +1,20 @@
+<<<<<<< HEAD:src/redux/store/features/cart/cartApi.ts
 import type { CartItem } from './cartSlice'
 import baseApi from '../../api/baseApi';
 
 // Base API configuration
 export const cartApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+=======
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import type { Product } from '@/lib/Data/data'
+import type { CartItem } from '../../features/cart/cartSlice'
+import baseApi from '../baseApi';
+
+// Base API configuration
+export const cartApi = baseApi.injectEndpoints({
+    endpoints: (builder) => ({
+>>>>>>> 86d0ed816e00f2667ef1e4bb43e78d4827648e83:src/redux/store/api/cart/cartApi.ts
     // Sync cart with server (for logged-in users)
     syncCart: builder.mutation<
       { success: boolean; cart: CartItem[] },

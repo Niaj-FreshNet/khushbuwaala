@@ -1,10 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import type { Product } from '@/lib/Data/data'
+import { IProductResponse } from '@/types/product.types'
 
-export interface CartItem extends Product {
+export interface CartItem {
+  product: IProductResponse
   quantity: number
-  size: string
-  variantPrices?: { [key: string]: number }
+  selectedSize: string
 }
 
 export interface CartState {
@@ -55,14 +55,14 @@ const cartSlice = createSlice({
     addToCart: (
       state,
       action: PayloadAction<{
-        product: Product
+        product: IProductResponse
         quantity: number
         selectedSize: string
       }>
     ) => {
       const { product, quantity, selectedSize } = action.payload
       const existingIndex = state.items.findIndex(
-        (item) => item._id === product._id && item.size === selectedSize
+        (item) => item.product.id === product.id && item.selectedSize === selectedSize
       )
 
       if (existingIndex !== -1) {
@@ -71,10 +71,9 @@ const cartSlice = createSlice({
       } else {
         // Add new item
         state.items.push({
-          ...product,
+          product,
           quantity,
-          size: selectedSize,
-          variantPrices: product.variantPrices,
+          selectedSize,
         })
       }
 
@@ -92,7 +91,7 @@ const cartSlice = createSlice({
     ) => {
       const { productId, size, quantity } = action.payload
       const itemIndex = state.items.findIndex(
-        (item) => item._id === productId && item.size === size
+        (item) => item.product.id === productId && item.selectedSize === size
       )
 
       if (itemIndex !== -1) {
@@ -108,7 +107,7 @@ const cartSlice = createSlice({
     ) => {
       const { productId, size } = action.payload
       state.items = state.items.filter(
-        (item) => item._id !== productId || item.size !== size
+        (item) => item.product.id !== productId || item.selectedSize !== size
       )
       saveCartToStorage(state.items)
     },
@@ -123,17 +122,16 @@ const cartSlice = createSlice({
     setCheckoutOnlyItem: (
       state,
       action: PayloadAction<{
-        product: Product
+        product: IProductResponse
         quantity: number
-        size: string
+        selectedSize: string
       }>
     ) => {
-      const { product, quantity, size } = action.payload
+      const { product, quantity, selectedSize } = action.payload
       state.checkoutItem = {
-        ...product,
+        product,
         quantity,
-        size,
-        variantPrices: product.variantPrices,
+        selectedSize,
       }
       state.checkoutMode = true
     },
@@ -177,18 +175,25 @@ export default cartSlice.reducer
 
 // Selectors
 export const selectCartItems = (state: { cart: CartState }) => state.cart.items
+
 export const selectCartItemsCount = (state: { cart: CartState }) =>
   state.cart.items.reduce((total, item) => total + item.quantity, 0)
+
 export const selectCartSubtotal = (state: { cart: CartState }) =>
   state.cart.items.reduce((total, item) => {
-    const price = item.variantPrices?.[item.size] || item.price || 0
+    const price =
+      item.product.variants?.find((v) => v.size === Number(item.selectedSize))?.price ||
+      item.product.minPrice ||
+      0
     return total + price * item.quantity
   }, 0)
+
 export const selectCartTotal = (state: { cart: CartState }) => {
   const subtotal = selectCartSubtotal(state)
   const taxes = subtotal * 0.0 // No taxes for now
   return subtotal + taxes
 }
+
 export const selectCheckoutItem = (state: { cart: CartState }) => state.cart.checkoutItem
 export const selectCheckoutMode = (state: { cart: CartState }) => state.cart.checkoutMode
 export const selectCartLoading = (state: { cart: CartState }) => state.cart.isLoading

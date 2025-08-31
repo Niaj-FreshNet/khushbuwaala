@@ -7,30 +7,25 @@ import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card"
 import { Heart, ShoppingCart, Star, Eye, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { useState, useMemo } from "react"
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
-import { toggleWishlist, selectIsInWishlist } from "@/lib/store/features/wishlist/wishlistSlice"
-import { addToCart } from "@/lib/store/features/cart/cartSlice"
+import { useState } from "react"
+import { useAppDispatch, useAppSelector } from "@/redux/store/hooks"
+import { toggleWishlist, selectIsInWishlist } from "@/redux/store/features/wishlist/wishlistSlice"
+import { addToCart } from "@/redux/store/features/cart/cartSlice"
+import { IProductResponse } from "@/types/product.types"
 
 interface ProductCardProps {
-  product: {
-    _id: string
-    name: string
-    price: number
-    primaryImage: string
-    secondaryImage?: string
-    category: string
-    smell: string[]
-    variantPrices?: { [key: string]: number }
-    description?: string
-    notes?: string
-  }
+  product: IProductResponse
   className?: string
   layout?: "grid" | "list"
   showDescription?: boolean
-  isLoading?: boolean
   onQuickView?: () => void
 }
+
+const priceFormatter = new Intl.NumberFormat("en-BD", {
+  style: "currency",
+  currency: "BDT",
+  minimumFractionDigits: 0,
+})
 
 // Skeleton loader component
 function ProductCardSkeleton({ layout = "grid" }: { layout?: "grid" | "list" }) {
@@ -78,21 +73,16 @@ export function ProductCard({
   className,
   layout = "grid",
   showDescription = false,
-  isLoading = false,
   onQuickView,
 }: ProductCardProps) {
   const [imageError, setImageError] = useState(false)
   const dispatch = useAppDispatch()
-  const isWishlisted = useAppSelector(useMemo(() => selectIsInWishlist(product._id), [product._id]))
+  const isWishlisted = useAppSelector(selectIsInWishlist(product.id))
   const [isAddingToCart, setIsAddingToCart] = useState(false)
-
-  if (isLoading) {
-    return <ProductCardSkeleton layout={layout} />
-  }
 
   const handleAddToCart = async () => {
     setIsAddingToCart(true)
-    const defaultSize = product.variantPrices ? Object.keys(product.variantPrices)[0] : "3 ml"
+    const defaultSize = product.variants ? product.variants[0].size + "ml" : "3ml"
     dispatch(addToCart({ product, quantity: 1, selectedSize: defaultSize }))
     await new Promise((resolve) => setTimeout(resolve, 400))
     toast.success("Added to Cart!", {
@@ -115,13 +105,10 @@ export function ProductCard({
   const productLink = `/products/${productSlug}`
 
   // Enhanced price display with better formatting
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-BD', {
-      style: 'currency',
-      currency: 'BDT',
-      minimumFractionDigits: 0,
-    }).format(price).replace('BDT', '৳')
-  }
+  const formatPrice = (price: number) => priceFormatter.format(price).replace("BDT", "৳")
+
+  const visibleAccords = product.accords?.slice(0, layout === "list" ? 6 : 3) || []
+
 
   // --- LIST LAYOUT ---
   if (layout === "list") {
@@ -146,9 +133,9 @@ export function ProductCard({
                 onError={() => setImageError(true)}
               />
               {/* Secondary Image Hover */}
-              {product.secondaryImage && !imageError && (
+              {product.otherImages && product.otherImages.length > 0 && !imageError && (
                 <Image
-                  src={product.secondaryImage}
+                  src={product.otherImages[0]}
                   alt={`${product.name} - alternate view`}
                   fill
                   sizes="(max-width:600px) 100vw, 320px"
@@ -198,14 +185,14 @@ export function ProductCard({
             </div>
 
             {/* Premium badge */}
-            {product.category === "premium" && (
+            {/* {product.category === "premium" && (
               <div className="absolute top-4 left-4 z-10">
                 <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
                   <Sparkles className="h-3 w-3" />
                   Premium
                 </div>
               </div>
-            )}
+            )} */}
           </div>
 
           <div className="flex-1 p-6 flex flex-col justify-between min-w-0">
@@ -218,7 +205,7 @@ export function ProductCard({
 
               <div className="space-y-1">
                 <p className="text-3xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-                  {formatPrice(product.price)}
+                  {formatPrice(product.minPrice)}
                 </p>
                 <p className="text-sm text-gray-500 flex items-center gap-1">
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
@@ -227,19 +214,19 @@ export function ProductCard({
               </div>
 
               {/* Enhanced Smell Tags */}
-              {product.smell && product.smell.length > 0 && (
+              {product.accords && product.accords.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {product.smell.slice(0, 6).map((note, index) => (
+                  {visibleAccords.map((note, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1.5 bg-gradient-to-r from-red-50 via-pink-50 to-red-50 text-red-700 text-xs rounded-full border border-red-100 hover:shadow-md transition-shadow duration-200 cursor-default"
+                      className="px-3 py-1.5 bg-gradient-to-r from-red-50 to-pink-50 text-red-700 text-xs rounded-full border border-red-100 hover:shadow-md transition-shadow duration-200 cursor-default"
                     >
                       {note}
                     </span>
                   ))}
-                  {product.smell.length > 6 && (
+                  {product.accords.length > 6 && (
                     <span className="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs rounded-full hover:bg-gray-200 transition-colors cursor-default">
-                      +{product.smell.length - 6} more
+                      +{product.accords.length - 6} more
                     </span>
                   )}
                 </div>
@@ -257,13 +244,17 @@ export function ProductCard({
               )}
 
               {/* Enhanced Perfume Notes */}
-              {showDescription && product.notes && (
+              {showDescription && product.perfumeNotes && (
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
                     <Star className="h-4 w-4 text-yellow-500" />
                     Perfume Notes
                   </p>
-                  <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">{product.notes.replace(/\n/g, ' • ')}</p>
+                  <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                    Top: {product.perfumeNotes.top.join(", ")} <br />
+                    Middle: {product.perfumeNotes.middle.join(", ")} <br />
+                    Base: {product.perfumeNotes.base.join(", ")}
+                  </p>
                 </div>
               )}
             </div>
@@ -311,7 +302,6 @@ export function ProductCard({
         )}
       >
         <div className="relative aspect-[4/5] w-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-          {/* <Link href={productLink} aria-label={`View details for ${product.name}`}> */}
           <Image
             src={!imageError ? product.primaryImage : "/placeholder.svg?height=256&width=200&text=No+Image"}
             alt={product.name}
@@ -321,9 +311,9 @@ export function ProductCard({
             priority
             onError={() => setImageError(true)}
           />
-          {product.secondaryImage && !imageError && (
+          {product.otherImages && product.otherImages.length > 0 && !imageError && (
             <Image
-              src={product.secondaryImage}
+              src={product.otherImages[0]}
               alt={`${product.name} - alternate view`}
               fill
               sizes="(max-width:600px) 100vw, (max-width:1200px) 50vw, 33vw"
@@ -333,7 +323,6 @@ export function ProductCard({
 
           {/* Gradient overlay on hover */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          {/* </Link> */}
 
           {/* Enhanced Wishlist Button */}
           <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -357,14 +346,14 @@ export function ProductCard({
           </div>
 
           {/* Premium badge */}
-          {product.category === "premium" && (
+          {/* {product.category === "premium" && (
             <div className="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
                 <Sparkles className="h-3 w-3" />
                 Premium
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Quick view overlay */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -385,17 +374,15 @@ export function ProductCard({
 
         <CardContent className="p-4 space-y-3">
           <CardTitle className="text-lg font-semibold line-clamp-2 text-center leading-tight">
-            {/* <Link href={productLink} */}
             <span
               className="hover:text-red-600 transition-colors duration-300 group-hover:underline decoration-red-600 underline-offset-4">
               {product.name}
             </span>
-            {/* </Link> */}
           </CardTitle>
 
           <div className="text-center space-y-1">
             <span className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-              {formatPrice(product.price)}
+              {formatPrice(product.minPrice)}
             </span>
             <span className="text-xs text-gray-500 block flex items-center justify-center gap-1">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
@@ -404,19 +391,19 @@ export function ProductCard({
           </div>
 
           {/* Enhanced Smell Tags for Grid */}
-          {product.smell && product.smell.length > 0 && (
+          {product.accords && product.accords.length > 0 && (
             <div className="flex flex-wrap justify-center gap-2">
-              {product.smell.slice(0, 3).map((note, index) => (
+              {product.accords.slice(0, 3).map((note, index) => (
                 <span
                   key={index}
-                  className="px-2 py-1 bg-gradient-to-r from-red-50 via-pink-50 to-red-50 text-red-700 text-xs rounded-full border border-red-100 hover:shadow-md transition-shadow duration-200 cursor-default"
+                  className="px-2 py-1 bg-gradient-to-r from-red-50 to-pink-50 text-red-700 text-xs rounded-full border border-red-100 hover:shadow-md transition-shadow duration-200 cursor-default"
                 >
                   {note}
                 </span>
               ))}
-              {product.smell.length > 3 && (
+              {product.accords.length > 3 && (
                 <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full hover:bg-gray-200 transition-colors cursor-default">
-                  +{product.smell.length - 3}
+                  +{product.accords.length - 3}
                 </span>
               )}
             </div>

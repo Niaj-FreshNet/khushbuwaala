@@ -231,6 +231,7 @@ export interface LowStockProduct {
     unit: string;
     price: number;
   }>;
+<<<<<<< HEAD
 }
 
 // export default {
@@ -246,3 +247,6 @@ export interface LowStockProduct {
 //   IRelatedProductsResponse,
 //   IProductVariant
 // };
+=======
+}
+>>>>>>> 86d0ed816e00f2667ef1e4bb43e78d4827648e83

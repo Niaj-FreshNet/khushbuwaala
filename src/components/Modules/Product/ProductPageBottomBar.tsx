@@ -5,8 +5,8 @@ import { Product } from "@/lib/Data/data";
 import { Heart, MessageSquare, ShoppingCart, Zap } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { toggleWishlist, selectIsInWishlist } from "@/lib/store/features/wishlist/wishlistSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
+import { toggleWishlist, selectIsInWishlist } from "@/redux/store/features/wishlist/wishlistSlice";
 
 export default function ProductPageBottomBar({ product }: { product: Product }) {
     const cart = useCart()
