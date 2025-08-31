@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { IProductResponse } from "@/types/product.types";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -13,11 +14,14 @@ import {
   Columns3,
   Grid3X3,
 } from "lucide-react";
-import { getProducts, type Product } from "@/lib/Data/data";
 import { FilterSheet } from "./FilterSheet";
 import { SortSheet } from "./SortSheet";
 import { ProductCard } from "@/components/ReusableUI/ProductCard";
 import { ProductQuickView } from "@/components/ReusableUI/ProductQuickView";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import Head from "next/head";
+import { useGetAllProductsQuery } from "@/redux/store/api/productApi";
 
 interface ShopProductProps {
   category?: string;
@@ -26,201 +30,139 @@ interface ShopProductProps {
 }
 
 export function ShopProducts({ category, specification, section }: ShopProductProps) {
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [filters, setFilters] = useState<any>({
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialPage = Number(searchParams.get("page")) || 1;
+  const [page, setPage] = useState(initialPage);
+  const limit = 20; // Matches initial visibleProductsCount
+  const [filters, setFilters] = useState({
     priceRange: [100, 5000],
-    selectedCategories: [],
+    selectedCategories: category ? [category] : [],
     selectedSmells: [],
-    selectedSpecification: "all",
+    selectedSpecification: specification || "all",
   });
-  const [sortOption, setSortOption] = useState("new-to-old");
-  const [columns, setColumns] = useState(2); // Default column layout for mobile
-  const [visibleProductsCount, setVisibleProductsCount] = useState(20); // Initial number of products to show
-  const [loadingMore, setLoadingMore] = useState(false);
-
+  const [sortOption, setSortOption] = useState("newest");
+  const [columns, setColumns] = useState(2);
+  const [visibleProductsCount, setVisibleProductsCount] = useState(limit);
   const [isFilterSheetVisible, setIsFilterSheetVisible] = useState(false);
   const [isSortSheetVisible, setIsSortSheetVisible] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState<IProductResponse | null>(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
-  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
-  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false)
+  // Map sort options to backend sortBy values
+  const sortMap: { [key: string]: string } = {
+    newArrival: "newArrival",
+    featured: "featured",
+    onSale: "onSale",
+    "a-z": "name",
+    "z-a": "name_desc",
+    "low-to-high": "price_asc",
+    "high-to-low": "price_desc",
+    "old-to-new": "oldest",
+    newest: "newest",
+  };
 
-  const handleQuickView = (product: Product) => {
-    setQuickViewProduct(product)
-    setIsQuickViewOpen(true)
-  }
+  // Fetch products with RTK Query
+  const { data, error, isLoading, isFetching } = useGetAllProductsQuery({
+    page,
+    limit,
+    category: filters.selectedCategories.join(","),
+    specification: filters.selectedSpecification === "all" ? undefined : filters.selectedSpecification,
+    priceMin: filters.priceRange[0],
+    priceMax: filters.priceRange[1],
+    smells: filters.selectedSmells.join(","),
+    sortBy: sortMap[sortOption] as any,
+    section,
+  });
+  console.log(data)
 
-  const handleCloseQuickView = () => {
-    setIsQuickViewOpen(false)
-    setQuickViewProduct(null)
-  }
-
-  // Fetch all products on component mount
+  // Update URL with page and filters
   useEffect(() => {
-    const fetchProducts = async () => {
-      setIsLoading(true);
-      try {
-        const products = await getProducts();
-        // Sort alphabetically by default initially
-        const sortedAlphabetically = [...products].sort((a, b) =>
-          a.name.localeCompare(b.name)
-        );
-        setAllProducts(sortedAlphabetically);
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-        // Handle error state, e.g., show an error message
-      } finally {
-        setIsLoading(false);
+    const params = new URLSearchParams();
+    if (page > 1) params.set("page", page.toString());
+    if (filters.selectedCategories.length)
+      params.set("category", filters.selectedCategories.join(","));
+    if (filters.selectedSpecification && filters.selectedSpecification !== "all")
+      params.set("specification", filters.selectedSpecification);
+    if (filters.selectedSmells.length) params.set("smells", filters.selectedSmells.join(","));
+    if (filters.priceRange[0] !== 100) params.set("priceMin", filters.priceRange[0].toString());
+    if (filters.priceRange[1] !== 5000) params.set("priceMax", filters.priceRange[1].toString());
+    if (sortOption !== "newest") params.set("sortBy", sortMap[sortOption]);
+    if (section) params.set("section", section);
+
+    const url = `/shop${params.toString() ? `?${params.toString()}` : ""}`;
+    router.push(url, { scroll: false });
+  }, [page, filters, sortOption, section, router]);
+
+  // Infinite scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 &&
+        visibleProductsCount < (data?.meta.total || 0) &&
+        !isFetching
+      ) {
+        setVisibleProductsCount((prev) => Math.min(prev + limit, data?.meta.total || prev));
+        if (visibleProductsCount + limit > page * limit) {
+          setPage((prev) => prev + 1);
+        }
       }
     };
-    fetchProducts();
-  }, []);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [visibleProductsCount, data?.meta.total, isFetching, page, limit]);
 
-  // Apply filters and sort whenever dependencies change
-  const displayedProducts = useMemo(() => {
-    let filtered = allProducts.filter((product) => {
-      // Enforce category prop if provided
-      const matchesCategoryProp = category
-        ? product.category === category
-        : true;
+  // Handle quick view
+  const handleQuickView = (product: IProductResponse) => {
+    setQuickViewProduct(product);
+    setIsQuickViewOpen(true);
+  };
 
-      // Enforce specification prop if provided
-      const matchesSpecificationProp = specification
-        ? product.specification === specification
-        : true;
+  const handleCloseQuickView = () => {
+    setIsQuickViewOpen(false);
+    setQuickViewProduct(null);
+  };
 
-      // Enforce section prop if provided
-      const matchesSectionProp = section ? product.section === section : true;
-
-      // Existing filters (price, selectedCategories, selectedSmells, selectedSpecification) still apply as before
-
-      // Example:
-      const matchesPrice =
-        product.price >= filters.priceRange[0] &&
-        product.price <= filters.priceRange[1];
-
-      const matchesCategoryFilter =
-        filters.selectedCategories.length === 0 ||
-        filters.selectedCategories.includes(product.category);
-
-      const matchesSmell =
-        filters.selectedSmells.length === 0 ||
-        (product.smell &&
-          filters.selectedSmells.every((smell: string) =>
-            product.smell.includes(smell)
-          ));
-
-      const matchesSpecificationFilter =
-        filters.selectedSpecification === "all" ||
-        product.specification === filters.selectedSpecification;
-
-      // Return true only if all conditions pass
-      return (
-        matchesCategoryProp &&
-        matchesSpecificationProp &&
-        matchesSectionProp &&
-        matchesPrice &&
-        matchesCategoryFilter &&
-        matchesSmell &&
-        matchesSpecificationFilter
-      );
-    });
-
-    // Apply sorting
-    switch (sortOption) {
-      case "newArrival":
-        filtered = filtered.filter((item) => item.section === "newArrival");
-        break;
-      case "featured":
-        filtered = filtered.filter((item) => item.section === "featured");
-        break;
-      case "onSale":
-        filtered = filtered.filter(
-          (item) => item.discount && item.discount > 0
-        );
-        break;
-      case "a-z":
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case "z-a":
-        filtered.sort((a, b) => b.name.localeCompare(a.name));
-        break;
-      case "low-to-high":
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case "high-to-low":
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case "old-to-new":
-        // Assuming products have a createdAt or similar field for date sorting
-        // For now, using a simple ID comparison as a placeholder
-        filtered.sort((a, b) => a._id.localeCompare(b._id));
-        break;
-      case "new-to-old":
-        filtered.sort((a, b) => b._id.localeCompare(a._id));
-        break;
-      default:
-        break;
-    }
-    return filtered;
-  }, [category, specification, section, allProducts, filters, sortOption]);
-
-  const totalFilteredProducts = displayedProducts.length;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleApplyFilters = (newFilters: any) => {
-    setIsLoading(true);
+  // Handle filters
+  const handleApplyFilters = (newFilters: typeof filters) => {
     setFilters(newFilters);
-    setVisibleProductsCount(20); // Reset visible products on new filter
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
+    setPage(1);
+    setVisibleProductsCount(limit);
   };
 
+  // Handle sort change
   const handleSortChange = (newSortOption: string) => {
-    setIsLoading(true);
     setSortOption(newSortOption);
-    setVisibleProductsCount(20); // Reset visible products on new sort
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
+    setPage(1);
+    setVisibleProductsCount(limit);
   };
 
+  // Handle column change
   const handleColumnChange = (cols: number) => {
     setColumns(cols);
   };
 
-  const handleLoadMore = () => {
-    setLoadingMore(true);
-    setTimeout(() => {
-      setVisibleProductsCount((prev) =>
-        Math.min(prev + 20, totalFilteredProducts)
-      );
-      setLoadingMore(false);
-    }, 1000); // Simulate loading time
-  };
-
-  // Effect to set initial columns based on screen size
+  // Responsive columns
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1280) {
-        // lg breakpoint
-        setColumns(4);
-      } else if (window.innerWidth >= 768) {
-        // md breakpoint
-        setColumns(3);
-      } else {
-        // mobile
-        setColumns(2);
-      }
+      if (window.innerWidth >= 1280) setColumns(4);
+      else if (window.innerWidth >= 768) setColumns(3);
+      else setColumns(2);
     };
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // SEO meta tags
+  const pageTitle = `Shop Perfumes - Page ${page} | KhushbuWaala`;
+  const metaDescription = `Browse page ${page} of KhushbuWaala's premium perfume oils. Discover authentic fragrances with free shipping on orders over ৳1000.`;
+  const canonicalUrl = `https://khushbuwaala.com/shop?page=${page}`;
+  const prevUrl = page > 1 ? `https://khushbuwaala.com/shop?page=${page - 1}` : null;
+  const nextUrl =
+    data?.meta.totalPage && page < data.meta.totalPage
+      ? `https://khushbuwaala.com/shop?page=${page + 1}`
+      : null;
 
   const gridColsClass =
     {
@@ -229,195 +171,287 @@ export function ShopProducts({ category, specification, section }: ShopProductPr
       3: "grid-cols-2 md:grid-cols-3",
       4: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
       5: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
-    }[columns] || "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"; // Default fallback
+    }[columns] || "grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
 
   return (
-    <section
-      className="container mx-auto py-8 px-4 relative"
-      aria-labelledby="shop-products-heading"
-    >
-      <h2 id="shop-products-heading" className="sr-only">
-        All Products
-      </h2>
+    <>
+      <Head>
+        <title>{pageTitle}</title>
+        <meta name="description" content={metaDescription} />
+        <meta name="robots" content={page > 3 ? "noindex" : "index, follow"} />
+        <meta name="keywords" content="perfume oil, premium fragrance, attar collection, KhushbuWaala shop, Bangladesh perfume" />
+        <link rel="canonical" href={canonicalUrl} />
+        {prevUrl && <link rel="prev" href={prevUrl} />}
+        {nextUrl && <link rel="next" href={nextUrl} />}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ItemList",
+              itemListElement: (data?.data || [])
+                .slice(0, visibleProductsCount)
+                .map((product, index) => ({
+                  "@type": "ListItem",
+                  position: index + 1,
+                  item: {
+                    "@type": "Product",
+                    name: product.name,
+                    image: product.primaryImage,
+                    offers: {
+                      "@type": "Offer",
+                      price: product.minPrice,
+                      priceCurrency: "BDT",
+                      availability: product.inStock
+                        ? "https://schema.org/InStock"
+                        : "https://schema.org/OutOfStock",
+                    },
+                  },
+                })),
+            }),
+          }}
+        />
+      </Head>
 
-      {/* Enhanced Sticky Controls: Filter, Sort, Column Layout */}
-      <div className="sticky top-0 z-40 flex justify-between items-center bg-white/95 backdrop-blur-xl py-4 px-4 rounded-b-xl shadow-lg mb-8 border border-gray-200/50 transition-all duration-300">
-        <Button
-          variant="outline"
-          className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-300 bg-transparent rounded-lg px-4 py-2 shadow-sm hover:shadow-md"
-          onClick={() => setIsFilterSheetVisible(true)}
-          aria-controls="filter-sheet"
-          aria-expanded={isFilterSheetVisible}
-        >
-          <FilterIcon className="h-4 w-4" /> Filter
-        </Button>
+      <section className="container mx-auto py-8 px-4 relative" aria-labelledby="shop-products-heading">
+        <h2 id="shop-products-heading" className="sr-only">All Perfume Oils</h2>
 
-        <div className="flex gap-1 bg-gray-50 p-1 rounded-lg">
-          {/* Column Layout Buttons */}
+        {/* Breadcrumbs */}
+        <nav aria-label="Breadcrumb" className="mb-4 text-sm text-gray-600">
+          <Link href="/" className="hover:text-red-600">Home</Link> &gt;{" "}
+          <Link href="/shop" className="hover:text-red-600">Shop</Link> {page > 1 && `&gt; Page ${page}`}
+        </nav>
+
+        {/* Sticky Controls */}
+        <div className="sticky top-0 z-40 flex justify-between items-center bg-white/95 backdrop-blur-xl py-4 px-4 rounded-b-xl shadow-lg mb-8 border border-gray-200/50 transition-all duration-300">
           <Button
             variant="outline"
-            size="icon"
-            className={`sm:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 1
-                ? "bg-white text-blue-600 shadow-md"
-                : "bg-transparent"
-              }`}
-            onClick={() => handleColumnChange(1)}
-            aria-label="Show products in 1 column"
+            className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-300 bg-transparent rounded-lg px-4 py-2 shadow-sm hover:shadow-md"
+            onClick={() => setIsFilterSheetVisible(true)}
+            aria-controls="filter-sheet"
+            aria-expanded={isFilterSheetVisible}
           >
-            <LayoutList className="h-4 w-4" />
+            <FilterIcon className="h-4 w-4" /> Filter
           </Button>
+
+          <div className="flex gap-1 bg-gray-50 p-1 rounded-lg">
+            <Button
+              variant="outline"
+              size="icon"
+              className={`sm:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+                columns === 1 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+              }`}
+              onClick={() => handleColumnChange(1)}
+              aria-label="Show products in 1 column"
+            >
+              <LayoutList className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className={`h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+                columns === 2 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+              }`}
+              onClick={() => handleColumnChange(2)}
+              aria-label="Show products in 2 columns"
+            >
+              <Grid2X2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className={`hidden md:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+                columns === 3 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+              }`}
+              onClick={() => handleColumnChange(3)}
+              aria-label="Show products in 3 columns"
+            >
+              <Columns3 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className={`hidden lg:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+                columns === 4 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+              }`}
+              onClick={() => handleColumnChange(4)}
+              aria-label="Show products in 4 columns"
+            >
+              <Grid3X3 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className={`hidden xl:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${
+                columns === 5 ? "bg-white text-blue-600 shadow-md" : "bg-transparent"
+              }`}
+              onClick={() => handleColumnChange(5)}
+              aria-label="Show products in 5 columns"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+          </div>
+
           <Button
             variant="outline"
-            size="icon"
-            className={`h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 2
-                ? "bg-white text-blue-600 shadow-md"
-                : "bg-transparent"
-              }`}
-            onClick={() => handleColumnChange(2)}
-            aria-label="Show products in 2 columns"
+            className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 bg-transparent rounded-lg px-4 py-2 shadow-sm hover:shadow-md"
+            onClick={() => setIsSortSheetVisible(true)}
+            aria-controls="sort-sheet"
+            aria-expanded={isSortSheetVisible}
           >
-            <Grid2X2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className={`hidden md:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 3
-                ? "bg-white text-blue-600 shadow-md"
-                : "bg-transparent"
-              }`}
-            onClick={() => handleColumnChange(3)}
-            aria-label="Show products in 3 columns"
-          >
-            <Columns3 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className={`hidden lg:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 4
-                ? "bg-white text-blue-600 shadow-md"
-                : "bg-transparent"
-              }`}
-            onClick={() => handleColumnChange(4)}
-            aria-label="Show products in 4 columns"
-          >
-            <Grid3X3 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className={`hidden xl:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 5
-                ? "bg-white text-blue-600 shadow-md"
-                : "bg-transparent"
-              }`}
-            onClick={() => handleColumnChange(5)}
-            aria-label="Show products in 5 columns"
-          >
-            <LayoutGrid className="h-4 w-4" />
+            <ListFilter className="h-4 w-4" /> Sort
           </Button>
         </div>
 
-        <Button
-          variant="outline"
-          className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-300 bg-transparent rounded-lg px-4 py-2 shadow-sm hover:shadow-md"
-          onClick={() => setIsSortSheetVisible(true)}
-          aria-controls="sort-sheet"
-          aria-expanded={isSortSheetVisible}
-        >
-          <ListFilter className="h-4 w-4" /> Sort
-        </Button>
-      </div>
-
-      {/* Product List */}
-      {isLoading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {[...Array(12)].map((_, i) => (
-            <div
-              key={i}
-              className="border border-gray-100 rounded-xl shadow-sm overflow-hidden"
-            >
-              <Skeleton className="w-full h-64 rounded-t-xl" />
-              <div className="p-4 space-y-3">
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-                <div className="flex gap-2 pt-2">
-                  <Skeleton className="h-10 w-10 rounded-full" />
-                  <Skeleton className="h-10 flex-1 rounded-lg" />
+        {/* Product List */}
+        {isLoading ? (
+          <div className={`grid gap-6 ${gridColsClass}`}>
+            {[...Array(12)].map((_, i) => (
+              <div
+                key={i}
+                className="border border-gray-100 rounded-xl shadow-sm overflow-hidden"
+              >
+                <Skeleton className="w-full h-64 rounded-t-xl" />
+                <div className="p-4 space-y-3">
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <div className="flex gap-2 pt-2">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <Skeleton className="h-10 flex-1 rounded-lg" />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <>
-          {displayedProducts.length > 0 ? (
-            <div className={`grid gap-6 ${gridColsClass}`}>
-              {displayedProducts
-                .slice(0, visibleProductsCount)
-                .map((product) => (
+            ))}
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center text-center py-20 bg-white rounded-xl shadow-lg border border-gray-100">
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Error Loading Perfumes</h3>
+            <p className="text-sm text-gray-600 max-w-sm">
+              Failed to fetch products. Please try again later.
+            </p>
+          </div>
+        ) : (
+          <>
+            {data?.data.length ? (
+              <div className={`grid gap-6 ${gridColsClass}`}>
+                {data.data.slice(0, visibleProductsCount).map((product) => (
                   <ProductCard
                     className="py-0"
-                    key={product._id}
+                    key={product.id}
                     product={product}
                     layout={columns === 1 ? "list" : "grid"}
                     showDescription={columns === 1}
                     onQuickView={() => handleQuickView(product)}
                   />
                 ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center text-center py-20 bg-white rounded-xl shadow-lg border border-gray-100">
-              <FilterIcon className="h-16 w-16 text-gray-300 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                No products found
-              </h3>
-              <p className="text-sm text-gray-600 max-w-sm">
-                Try adjusting your filters or sorting options to find what
-                you&apos;re looking for.
-              </p>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Load More Button */}
-      {totalFilteredProducts > visibleProductsCount && (
-        <div className="text-center mt-8">
-          <p className="text-sm text-gray-600 mb-6">
-            You&apos;ve viewed{" "}
-            {Math.min(visibleProductsCount, totalFilteredProducts)} of{" "}
-            {totalFilteredProducts} products
-          </p>
-          <Button
-            className="px-10 py-4 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-            onClick={handleLoadMore}
-            disabled={loadingMore}
-          >
-            {loadingMore ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" /> Loading More...
-              </span>
+              </div>
             ) : (
-              "Load More"
+              <div className="flex flex-col items-center justify-center text-center py-20 bg-white rounded-xl shadow-lg border border-gray-100">
+                <FilterIcon className="h-16 w-16 text-gray-300 mb-4" />
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">No Perfumes Found</h3>
+                <p className="text-sm text-gray-600 max-w-sm">
+                  Try adjusting your filters or sorting options to find your perfect fragrance.
+                </p>
+              </div>
             )}
-          </Button>
-        </div>
-      )}
+          </>
+        )}
 
-      {/* Filter and Sort Sheets */}
-      <FilterSheet
-        visible={isFilterSheetVisible}
-        onClose={setIsFilterSheetVisible}
-        onApplyFilters={handleApplyFilters}
-        initialFilters={{ category }}
-      />
-      <SortSheet
-        visible={isSortSheetVisible}
-        onClose={setIsSortSheetVisible}
-        onSortChange={handleSortChange}
-      />
-      {quickViewProduct && (
-        <ProductQuickView product={quickViewProduct} open={isQuickViewOpen} onOpenChange={setIsQuickViewOpen} />
-      )}
-    </section>
+        {/* Pagination */}
+        {data?.meta.total > visibleProductsCount && (
+          <div className="text-center mt-8">
+            <p className="text-sm text-gray-600 mb-6">
+              Showing {Math.min(visibleProductsCount, data?.meta.total || 0)} of {data?.meta.total} perfumes
+            </p>
+            <nav aria-label="Perfume pagination">
+              <div className="flex justify-center gap-2 flex-wrap">
+                <Link
+                  href={page > 1 ? `/shop?page=${page - 1}` : "/shop"}
+                  onClick={() => {
+                    if (page > 1) {
+                      setPage(page - 1);
+                      setVisibleProductsCount(limit);
+                    }
+                  }}
+                  aria-disabled={page === 1}
+                  className={`px-4 py-2 text-sm font-semibold rounded-lg ${
+                    page === 1
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 hover:bg-gray-50 hover:text-red-600"
+                  } border border-gray-200 shadow-sm transition-all duration-300`}
+                >
+                  Previous
+                </Link>
+                {data?.meta.totalPage &&
+                  Array.from({ length: data.meta.totalPage }, (_, i) => i + 1).map((pageNum) => (
+                    <Link
+                      key={pageNum}
+                      href={`/shop?page=${pageNum}`}
+                      onClick={() => {
+                        setPage(pageNum);
+                        setVisibleProductsCount(pageNum * limit);
+                      }}
+                      aria-label={`Go to page ${pageNum}`}
+                      className={`px-4 py-2 text-sm font-semibold rounded-lg ${
+                        page === pageNum
+                          ? "bg-red-600 text-white"
+                          : "bg-white text-gray-700 hover:bg-gray-50 hover:text-red-600"
+                      } border border-gray-200 shadow-sm transition-all duration-300`}
+                    >
+                      {pageNum}
+                    </Link>
+                  ))}
+                <Link
+                  href={
+                    data?.meta.totalPage && page < data.meta.totalPage
+                      ? `/shop?page=${page + 1}`
+                      : "#"
+                  }
+                  onClick={() => {
+                    if (data?.meta.totalPage && page < data.meta.totalPage) {
+                      setPage(page + 1);
+                      setVisibleProductsCount((prev) => prev + limit);
+                    }
+                  }}
+                  aria-disabled={page >= (data?.meta.totalPage || 1)}
+                  className={`px-4 py-2 text-sm font-semibold rounded-lg ${
+                    page >= (data?.meta.totalPage || 1)
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 hover:bg-gray-50 hover:text-red-600"
+                  } border border-gray-200 shadow-sm transition-all duration-300`}
+                >
+                  Next
+                </Link>
+              </div>
+            </nav>
+            {isFetching && (
+              <p className="text-sm text-gray-600 mt-4">
+                <Loader2 className="h-4 w-4 animate-spin inline mr-2" /> Loading more perfumes...
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Filter and Sort Sheets */}
+        <FilterSheet
+          visible={isFilterSheetVisible}
+          onClose={setIsFilterSheetVisible}
+          onApplyFilters={handleApplyFilters}
+          initialFilters={{ category }}
+        />
+        <SortSheet
+          visible={isSortSheetVisible}
+          onClose={setIsSortSheetVisible}
+          onSortChange={handleSortChange}
+        />
+        {quickViewProduct && (
+          <ProductQuickView
+            product={quickViewProduct}
+            open={isQuickViewOpen}
+            onOpenChange={setIsQuickViewOpen}
+          />
+        )}
+      </section>
+    </>
   );
 }

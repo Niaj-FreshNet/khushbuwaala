@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
 interface Product {
-  _id: string
+  id: string
   name: string
   price: number
   primaryImage: string

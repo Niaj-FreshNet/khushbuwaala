@@ -1,7 +1,10 @@
-import { NoticeBar } from "@/components/Modules/Shop/NoticeBar"
-import { ShopBanner } from "@/components/Modules/Shop/ShopBanner"
-import { ShopProducts } from "@/components/Modules/Shop/ShopProducts"
-import type { Metadata } from "next"
+import { GetServerSideProps } from "next";
+import type { Metadata } from "next";
+import { NoticeBar } from "@/components/Modules/Shop/NoticeBar";
+import { ShopBanner } from "@/components/Modules/Shop/ShopBanner";
+import { ShopProducts } from "@/components/Modules/Shop/ShopProducts";
+import { initializeStore } from "@/redux/store/store";
+import productApi from "@/redux/store/api/productApi";
 
 // SEO: Enhanced page-specific metadata
 export const metadata: Metadata = {
@@ -56,7 +59,7 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-}
+};
 
 // Enhanced structured data for the shop page
 const shopStructuredData = {
@@ -87,42 +90,75 @@ const shopStructuredData = {
       },
     ],
   },
-}
+};
 
-export default function ShopPage() {
+export default function ShopPage({ initialReduxState }: { initialReduxState?: any }) {
   const notices = [
     "🚚 Free Nationwide Shipping on Orders Over ৳1000",
     "🔥 Up to 50% Off on Selected Premium Items",
     "✨ Authentic Quality Guaranteed - 100% Original Products",
     "🏪 Visit Our Banasree Outlet for In-Person Experience",
     "💝 Special Gift Wrapping Available for All Orders",
-  ]
+  ];
 
   return (
-    <div className="w-full mx-auto">
-      {/* Shop Banner */}
-      <ShopBanner
-        heading={"Best Quality Perfume Oil Collection"}
-        text={"Choose Your Desired Perfume Oil from Worlds Best Perfume Oil Collection"}
-        buttonText={"Shop Now"}
-        link={"/shop"}
-        images={{
-          desktop: "/images/n111.png",
-          mobile: "/images/n1.webp",
-        }}
-        altText="Banner displaying the best quality perfume oil collection"
-        variant="premium"
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(shopStructuredData) }}
       />
-
-        {/* Enhanced Notice Bar */}
+      <div className="w-full mx-auto">
+        <ShopBanner
+          heading="Best Quality Perfume Oil Collection"
+          text="Choose Your Desired Perfume Oil from World's Best Perfume Oil Collection"
+          buttonText="Shop Now"
+          link="/shop"
+          images={{
+            desktop: "/images/n111.png",
+            mobile: "/images/n1.webp",
+          }}
+          altText="Banner displaying the best quality perfume oil collection"
+          variant="premium"
+        />
         <div className="py-8 bg-gradient-to-r from-gray-50 via-white to-gray-50">
           <NoticeBar heading="World's Finest Perfume Oils" notices={notices} interval={4500} />
         </div>
-
-        {/* Enhanced Shop Products Section */}
         <div id="products" className="bg-white pt-0 pb-8">
           <ShopProducts />
         </div>
       </div>
-  )
+    </>
+  );
 }
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const store = initializeStore();
+  const page = Number(context.query.page) || 1;
+  const category = context.query.category as string | undefined;
+  const specification = context.query.specification as string | undefined;
+  const section = context.query.section as string | undefined;
+  const priceMin = Number(context.query.priceMin) || undefined;
+  const priceMax = Number(context.query.priceMax) || undefined;
+  const smells = context.query.smells as string | undefined;
+  const sortBy = context.query.sortBy as 'name' | 'price_asc' | 'price_desc' | 'newest' | 'oldest' | 'popularity' | undefined;
+
+  await store.dispatch(
+    productApi.endpoints.getAllProducts.initiate({
+      page,
+      limit: 20,
+      category,
+      specification,
+      section,
+      priceMin,
+      priceMax,
+      smells,
+      sortBy,
+    })
+  );
+
+  return {
+    props: {
+      initialReduxState: store.getState(),
+    },
+  };
+};
