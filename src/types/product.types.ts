@@ -99,6 +99,7 @@ export interface IProductQuery {
 export interface IProductResponse {
   id: string;
   name: string;
+  slug: string;
   description: string;
   primaryImage: string;
   otherImages: string[];

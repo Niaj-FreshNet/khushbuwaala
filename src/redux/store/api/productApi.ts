@@ -1,14 +1,12 @@
-import { IProductAnalytics, IProductQuery, IProductResponse, IProductSearchResult, IRelatedProductsResponse, ITrendingProduct, LowStockProduct } from "@/types/product.types";
-import baseApi from "../baseApi";
-
+import { IProductAnalytics, IProductQuery, IProductResponse, IProductSearchResult, IRelatedProductsResponse, ITrendingProduct, LowStockProduct } from '@/types/product.types';
+import baseApi from './baseApi';
 
 // Define query params type based on backend query parsing
-export interface ProductQueryParams extends Partial<IProductQuery> {
+interface ProductQueryParams extends Partial<IProductQuery> {
   page?: number;
   limit?: number;
   sortBy?: 'name' | 'price_asc' | 'price_desc' | 'newest' | 'oldest' | 'popularity';
   stock?: 'in' | 'out';
-  smells?: string;
   // Add other query fields as needed (e.g., brand, category, price range)
 }
 
@@ -40,13 +38,10 @@ export const productApi = baseApi.injectEndpoints({
       ProductQueryParams
     >({
       query: (params) => ({
-        url: "/products/get-all-products",
-        params: {
-          ...params,
-          smells: params.smells ? params?.smells?.split(",").join(",") : undefined,
-        },
+        url: '/products/get-all-products',
+        params,
       }),
-      providesTags: ["Product"],
+      providesTags: ['Product'],
     }),
 
     // Get All Products (Admin)
@@ -65,12 +60,6 @@ export const productApi = baseApi.injectEndpoints({
     getProduct: builder.query<IProductResponse, string>({
       query: (id) => `/products/get-product/${id}`,
       providesTags: (result, error, id) => [{ type: 'Product', id }],
-    }),
-
-    // Get Single Product By Slug
-    getProductBySlug: builder.query<IProductResponse, string>({
-      query: (slug) => `/products/get-product-by-slug/${slug}`,
-      providesTags: (result, error, slug) => [{ type: 'Product', slug }],
     }),
 
     // Update Product (ADMIN)
@@ -211,7 +200,6 @@ export const {
   useGetAllProductsQuery,
   useGetAllProductsAdminQuery,
   useGetProductQuery,
-  useGetProductBySlugQuery,
   useUpdateProductMutation,
   useDeleteProductMutation,
   useGetTrendingProductsQuery,
