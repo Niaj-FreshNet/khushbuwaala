@@ -99,6 +99,7 @@ export interface IProductQuery {
 export interface IProductResponse {
   id: string;
   name: string;
+  slug: string;
   description: string;
   primaryImage: string;
   otherImages: string[];
@@ -231,22 +232,4 @@ export interface LowStockProduct {
     unit: string;
     price: number;
   }>;
-<<<<<<< HEAD
 }
-
-// export default {
-//   IProduct,
-//   IUpdateProduct,
-//   IProductQuery,
-//   IProductResponse,
-//   IProductVariantResponse,
-//   IProductAnalytics,
-//   IStockUpdate,
-//   IProductSearchResult,
-//   ITrendingProduct,
-//   IRelatedProductsResponse,
-//   IProductVariant
-// };
-=======
-}
->>>>>>> 86d0ed816e00f2667ef1e4bb43e78d4827648e83

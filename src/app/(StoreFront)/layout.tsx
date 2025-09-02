@@ -11,7 +11,7 @@ export default function Layout({
   return (
     <div className="min-h-screen flex flex-col">
       {/* Main Navigation (fixed at top) */}
-      {/* <Navbar /> */}
+      <Navbar />
 
       {/* Main content area */}
       {/* pt-16 to account for fixed navbar height (h-16) */}

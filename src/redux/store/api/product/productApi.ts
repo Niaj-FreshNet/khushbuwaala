@@ -67,6 +67,12 @@ export const productApi = baseApi.injectEndpoints({
       providesTags: (result, error, id) => [{ type: 'Product', id }],
     }),
 
+    // Get Single Product By Slug
+    getProductBySlug: builder.query<IProductResponse, string>({
+      query: (slug) => `/products/get-product-by-slug/${slug}`,
+      providesTags: (result, error, slug) => [{ type: 'Product', slug }],
+    }),
+
     // Update Product (ADMIN)
     updateProduct: builder.mutation<IProductResponse, { id: string; formData: FormData }>({
       query: ({ id, formData }) => ({
@@ -205,6 +211,7 @@ export const {
   useGetAllProductsQuery,
   useGetAllProductsAdminQuery,
   useGetProductQuery,
+  useGetProductBySlugQuery,
   useUpdateProductMutation,
   useDeleteProductMutation,
   useGetTrendingProductsQuery,

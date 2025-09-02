@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ProductQueryParams, useGetAllProductsQuery } from "@/redux/store/api/product/productApi";
-import { IProductQuery, IProductResponse } from "@/types/product.types";
+import { IProductResponse } from "@/types/product.types";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -19,7 +19,6 @@ import { FilterSheet } from "./FilterSheet";
 import { SortSheet } from "./SortSheet";
 import { ProductCard } from "@/components/ReusableUI/ProductCard";
 import { ProductQuickView } from "@/components/ReusableUI/ProductQuickView";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 interface ShopProductProps {
@@ -66,7 +65,7 @@ export function ShopProducts({
   const [quickViewProduct, setQuickViewProduct] = useState<IProductResponse | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
-const sortMap: { [key: string]: string } = {
+  const sortMap: { [key: string]: string } = {
     newArrival: "newest",
     featured: "popularity",
     onSale: "price_asc",
@@ -218,8 +217,8 @@ const sortMap: { [key: string]: string } = {
             variant="outline"
             size="icon"
             className={`sm:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 1
-                ? "bg-white text-blue-600 shadow-md"
-                : "bg-transparent"
+              ? "bg-white text-blue-600 shadow-md"
+              : "bg-transparent"
               }`}
             onClick={() => handleColumnChange(1)}
             aria-label="Show products in 1 column"
@@ -230,8 +229,8 @@ const sortMap: { [key: string]: string } = {
             variant="outline"
             size="icon"
             className={`h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 2
-                ? "bg-white text-blue-600 shadow-md"
-                : "bg-transparent"
+              ? "bg-white text-blue-600 shadow-md"
+              : "bg-transparent"
               }`}
             onClick={() => handleColumnChange(2)}
             aria-label="Show products in 2 columns"
@@ -242,8 +241,8 @@ const sortMap: { [key: string]: string } = {
             variant="outline"
             size="icon"
             className={`hidden md:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 3
-                ? "bg-white text-blue-600 shadow-md"
-                : "bg-transparent"
+              ? "bg-white text-blue-600 shadow-md"
+              : "bg-transparent"
               }`}
             onClick={() => handleColumnChange(3)}
             aria-label="Show products in 3 columns"
@@ -254,8 +253,8 @@ const sortMap: { [key: string]: string } = {
             variant="outline"
             size="icon"
             className={`hidden lg:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 4
-                ? "bg-white text-blue-600 shadow-md"
-                : "bg-transparent"
+              ? "bg-white text-blue-600 shadow-md"
+              : "bg-transparent"
               }`}
             onClick={() => handleColumnChange(4)}
             aria-label="Show products in 4 columns"
@@ -266,8 +265,8 @@ const sortMap: { [key: string]: string } = {
             variant="outline"
             size="icon"
             className={`hidden xl:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 5
-                ? "bg-white text-blue-600 shadow-md"
-                : "bg-transparent"
+              ? "bg-white text-blue-600 shadow-md"
+              : "bg-transparent"
               }`}
             onClick={() => handleColumnChange(5)}
             aria-label="Show products in 5 columns"

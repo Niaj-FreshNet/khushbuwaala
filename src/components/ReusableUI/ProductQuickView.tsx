@@ -26,30 +26,11 @@ import {
   CreditCard,
 } from "lucide-react"
 import { toast } from "sonner"
-<<<<<<< HEAD
-
-interface Product {
-  id: string
-  name: string
-  price: number
-  primaryImage: string
-  secondaryImage?: string
-  category: string
-  smell: string[]
-  variantPrices?: { [key: string]: number }
-  description?: string
-  notes?: string
-  rating?: number
-  reviewCount?: number
-  images?: string[]
-}
-=======
 import { cn } from "@/lib/utils"
 import { IProductResponse } from "@/types/product.types"
 import { useAppDispatch } from "@/redux/store/hooks"
 import { addToCart } from "@/redux/store/features/cart/cartSlice"
 import { toggleWishlist } from "@/redux/store/features/wishlist/wishlistSlice"
->>>>>>> 86d0ed816e00f2667ef1e4bb43e78d4827648e83
 
 interface ProductQuickViewProps {
   product: IProductResponse
