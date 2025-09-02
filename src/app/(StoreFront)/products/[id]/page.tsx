@@ -12,7 +12,7 @@ import { ShoppingCart, Heart, MessageSquare, Zap, Info, Sparkles } from "lucide-
 import ProductDetailSection from "@/components/Modules/Product/ProductDetailSection";
 import ProductPageBottomBar from "@/components/Modules/Product/ProductPageBottomBar";
 import { ProductSelectionProvider } from "@/context/ProductSelectionContext";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useGetProductQuery } from "@/redux/store/api/product/productApi";
 
 interface Props {
@@ -295,16 +295,17 @@ function StructuredData({ product }: { product: Product }) {
 export default async function ProductPage({ params }: Props) {
 // export default async function ProductPage({ }: Props) {
   // console.log("Params slug:", params.slug);
-  const product = await getProductBySlug(params.slug);
+  // const product = await getProductBySlug(params.slug);
 
-  // const router = useRouter();
-  // const { id } = router.query;
+  const router = useRouter();
+  const { id } = router.query;
   // console.log("ID:", id);
 
     // Fetch product by ID using RTK Query
-  // const { data: product, isLoading, isError } = useGetProductQuery(id as string, {
-  //   skip: !id,
-  // });
+  const { data: product, isLoading, isError } = useGetProductQuery(id as string, {
+    skip: !id,
+  });
+  console.log("Product:", product);
 
   if (!product) {
     return (
