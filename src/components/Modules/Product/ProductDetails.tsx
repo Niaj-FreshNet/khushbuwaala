@@ -5,27 +5,34 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart, Heart, Tag, Shield, Truck, Clock, Star, Award, Sparkles, Zap, CheckCircle, Minus, Plus, Info, Gift, Crown, FileCheck, Phone, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/context/CartContext";
-import { Product } from "@/lib/Data/data";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
-import { useWishlist } from "@/context/WishlistContext";
+import { IDiscount, IProduct, IProductVariant } from "@/types/product.types";
+// import { useWishlist } from "@/context/WishlistContext";
 
 interface ProductDetailsProps {
-  product: Product
+  product: Partial<IProduct>;
   onReadMore?: () => void;
 }
 
 export default function ProductDetails({ product, onReadMore }: ProductDetailsProps) {
   const cart = useCart()
-  const sizeKeys = product.variantPrices
-  ? Object.keys(product.variantPrices).filter(
-      size => !(product.measurement === "ml" && size.trim().toLowerCase() === "100 ml")
-    )
-  : product.measurement === "ml"
-    ? ["3 ml", "6 ml", "12 ml", "25 ml"]
-    : ["3 gm", "6 gm", "12 gm"];
+  // const sizeKeys = product.variantPrices
+  //   ? Object.keys(product.variantPrices).filter(
+  //     size => !(product.measurement === "ml" && size.trim().toLowerCase() === "100 ml")
+  //   )
+  //   : product.measurement === "ml"
+  //     ? ["3 ml", "6 ml", "12 ml", "25 ml"]
+  //     : ["3 gm", "6 gm", "12 gm"];
+
+  const sizeKeys = product.variants?.length
+    ? product.variants.map(v => `${v.size} ${v.unit.toLowerCase()}`)
+    : ["3 ml", "6 ml", "12 ml", "25 ml"]
+  // : product.measurement === "ml"
+  // ? ["3 ml", "6 ml", "12 ml", "25 ml"]
+  // : ["3 gm", "6 gm", "12 gm"];
 
   const selection = useProductSelectionOptional();
-  const wishlist = useWishlist();
+  // const wishlist = useWishlist();
   const [fallbackSelectedSize, setFallbackSelectedSize] = useState<string>(sizeKeys[0] || "3 ml");
   const [fallbackQuantity, setFallbackQuantity] = useState<number>(1);
   const [fallbackIsWishlisted, setFallbackIsWishlisted] = useState(false);
@@ -34,35 +41,74 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
   const setSelectedSize = selection?.setSelectedSize ?? setFallbackSelectedSize;
   const quantity = selection?.quantity ?? fallbackQuantity;
   const setQuantity = selection?.setQuantity ?? setFallbackQuantity;
-  const isWishlisted = wishlist?.isInWishlist(product._id) ?? (selection?.isWishlisted ?? fallbackIsWishlisted);
-  const toggleWishlist = () => {
-    if (wishlist) {
-      if (wishlist.isInWishlist(product._id)) {
-        wishlist.removeFromWishlist(product._id)
-      } else {
-        wishlist.addToWishlist(product as any)
-      }
-      return
-    }
-    // fallback local toggle (should rarely happen as provider is global)
-    const toggle = selection?.toggleWishlist ?? (() => setFallbackIsWishlisted(!fallbackIsWishlisted))
-    toggle()
-  }
+  // const isWishlisted = wishlist?.isInWishlist(product._id) ?? (selection?.isWishlisted ?? fallbackIsWishlisted);
+  // const toggleWishlist = () => {
+  //   if (wishlist) {
+  //     if (wishlist.isInWishlist(product._id)) {
+  //       wishlist.removeFromWishlist(product._id)
+  //     } else {
+  //       wishlist.addToWishlist(product as any)
+  //     }
+  //     return
+  //   }
+  //   // fallback local toggle (should rarely happen as provider is global)
+  //   const toggle = selection?.toggleWishlist ?? (() => setFallbackIsWishlisted(!fallbackIsWishlisted))
+  //   toggle()
+  // }
 
   // Available sizes based on product data
   const availableSizes = sizeKeys;
 
-  // Get current price
-  const getCurrentPrice = () => {
-    return product.variantPrices?.[selectedSize] || product.price;
+  // Get current variant
+  const getCurrentVariant = () => {
+    return product.variants?.find(
+      v => `${v.size} ${v.unit.toLowerCase()}` === selectedSize
+    );
   };
 
-  const currentPrice = getCurrentPrice();
-  const discountedPrice = product.discount
-    ? currentPrice - (currentPrice * product.discount) / 100
-    : currentPrice;
+  const currentVariant = getCurrentVariant();
+  const currentPrice = currentVariant?.price ?? product.minPrice ?? 0;
+
+  // Get active discount (checks dates, variant first)
+  const getActiveDiscount = (
+    product: Partial<IProduct>,
+    variant?: IProductVariant
+  ): IDiscount | null => {
+    const now = new Date();
+    const discounts = variant?.discounts?.length
+      ? variant.discounts
+      : product.discounts;
+
+    if (!discounts || discounts.length === 0) return null;
+
+    return discounts.find(d => {
+      const startOk = !d.startDate || new Date(d.startDate) <= now;
+      const endOk = !d.endDate || new Date(d.endDate) >= now;
+      return startOk && endOk;
+    }) || null;
+  };
+
+  const discount = getActiveDiscount(product, currentVariant);
+
+  let discountedPrice = currentPrice;
+
+  if (discount) {
+    if (discount.type === "percentage") {
+      discountedPrice = currentPrice - (currentPrice * discount.value) / 100;
+    } else if (discount.type === "fixed") {
+      discountedPrice = currentPrice - discount.value;
+    }
+  }
+
+  // Final totals
   const totalCurrent = currentPrice * quantity;
   const totalDiscounted = discountedPrice * quantity;
+
+  const activeDiscount = getActiveDiscount(product, currentVariant);
+
+  const discountValue = activeDiscount?.type === "percentage"
+    ? activeDiscount.value
+    : 0;
 
   const handleQuantityChange = (type: "increment" | "decrement") => {
     const next = type === "increment"
@@ -71,9 +117,14 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
     setQuantity(next);
   };
 
-  
 
-  const isOutOfStock = product.stock === "0";
+
+  const totalVariantStock = product.variants?.reduce(
+    (sum, v) => sum + (v.stock ?? 0),
+    0
+  );
+
+  const isOutOfStock = (product.stock ?? 0) <= 0 || (totalVariantStock ?? 0) <= 0;
 
   return (
     <div className="space-y-8 lg:space-y-10">
@@ -92,10 +143,18 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
               For {product.specification === 'male' ? 'Men' : 'Women'}
             </Badge>
           )} */}
-          {product.discount && product.discount > 0 ? (
+          {/* {product.discount && product.discount > 0 ? (
             <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 animate-pulse shadow-lg">
               <Tag className="w-3 h-3 mr-2" />
               {product.discount}% OFF
+            </Badge>
+          ) : null} */}
+          {activeDiscount ? (
+            <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 animate-pulse shadow-lg">
+              <Tag className="w-3 h-3 mr-2" />
+              {activeDiscount.type === "percentage"
+                ? `${activeDiscount.value}% OFF`
+                : `৳${activeDiscount.value} OFF`}
             </Badge>
           ) : null}
         </div>
@@ -135,7 +194,21 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
 
           <div className="relative space-y-4">
             <div className="flex items-baseline gap-4 flex-wrap">
-              {product.discount && product.discount > 0 ? (
+              {/* {product.discount && product.discount > 0 ? (
+                <>
+                  <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
+                    ৳{discountedPrice.toLocaleString()}
+                  </span>
+                  <span className="text-2xl text-gray-500 line-through">
+                    ৳{currentPrice.toLocaleString()}
+                  </span>
+                </>
+              ) : (
+                <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
+                  ৳{currentPrice.toLocaleString()}
+                </span>
+              )} */}
+              {activeDiscount ? (
                 <>
                   <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
                     ৳{discountedPrice.toLocaleString()}
@@ -151,23 +224,26 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
               )}
             </div>
 
-            {product.discount && product.discount > 0 ? (
+            {discount ? (
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <div className="text-green-600 font-bold text-lg">
                     You save ৳{(currentPrice - discountedPrice).toLocaleString()}
                   </div>
                   <div className="text-green-700 text-sm">
-                    That's {product.discount}% off the regular price!
+                    {discount.type === "percentage"
+                      ? `That's ${discount.value}% off the regular price!`
+                      : `That's ৳${discount.value.toLocaleString()} off the regular price!`}
                   </div>
                 </div>
                 <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 text-lg font-bold shadow-lg">
-                  {product.discount}% OFF
+                  {discount.type === "percentage"
+                    ? `${discount.value}% OFF`
+                    : `৳${discount.value} OFF`}
                 </Badge>
               </div>
-            ) :
-              null
-            }
+            ) : null}
+
           </div>
         </div>
       </div>
@@ -209,14 +285,14 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
       </div>
 
       {/* Fragrance Notes */}
-      {product.smell && product.smell.length > 0 && (
+      {product.accords && product.accords.length > 0 && (
         <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-3xl border border-purple-100 shadow-sm">
           <h3 className="font-semibold text-purple-800 mb-4 flex items-center gap-2 text-lg">
             <Sparkles className="w-5 h-5" />
-            Fragrance Notes
+            Fragrance
           </h3>
           <div className="flex flex-wrap gap-3">
-            {product.smell.map((note, index) => (
+            {product.accords.map((note, index) => (
               <span
                 key={index}
                 className="px-4 py-2 bg-white/70 text-purple-700 rounded-full text-sm font-medium border border-purple-200 hover:bg-purple-100 transition-colors duration-200 cursor-default"
@@ -254,12 +330,21 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
               )}
               <div className="text-center">
                 <div className="font-bold text-lg mb-1">{size}</div>
-                {product.variantPrices?.[size] && (
+                {/* {product.variantPrices?.[size] && (
                   <div className={`text-sm font-medium ${selectedSize === size ? 'text-blue-600' : 'text-gray-500'
                     }`}>
-                    {/* ৳{product.variantPrices[size].toLocaleString()} */}
+                    ৳{product.variantPrices[size].toLocaleString()}
                   </div>
-                )}
+                )} */}
+                {product.variants?.map(v => (
+                  <div
+                    key={v.id}
+                    className={`text-sm font-medium ${selectedSize === `${v.size} ${v.unit.toLowerCase()}` ? "text-blue-600" : "text-gray-500"
+                      }`}
+                  >
+                    ৳{v.price.toLocaleString()}
+                  </div>
+                ))}
               </div>
             </button>
           ))}
@@ -370,7 +455,7 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
 
         {/* Secondary Actions */}
         <div className="grid grid-cols-2 gap-6">
-          <Button
+          {/* <Button
             variant="outline"
             size="lg"
             onClick={toggleWishlist}
@@ -381,7 +466,7 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
           >
             <Heart className={`w-5 h-5 mr-2 ${isWishlisted ? "fill-current" : ""}`} />
             {isWishlisted ? "Saved" : "Wishlist"}
-          </Button>
+          </Button> */}
 
           <Button
             variant="outline"

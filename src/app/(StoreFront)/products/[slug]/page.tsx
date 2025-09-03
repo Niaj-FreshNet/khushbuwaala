@@ -1,4 +1,4 @@
-import { getProductBySlug } from "@/lib/Functions";
+import { getProductBySlug } from "@/lib/Functions/ServerFn";
 import HydrateProduct from "./_components/HydrateProduct";
 
 

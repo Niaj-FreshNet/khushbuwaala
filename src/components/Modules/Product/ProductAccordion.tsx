@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Product } from "@/lib/Data/data";
 
 interface ProductAccordionProps {
-  product: Product;
+  product: Partial<Product>;
 }
 
 // Enhanced dummy reviews

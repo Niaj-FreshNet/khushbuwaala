@@ -1,14 +1,16 @@
-"use client";
-
+import { IProduct } from "@/types/product.types";
 import ProductDetails from "./ProductDetails";
-import { Product } from "@/lib/Data/data";
 
-export default function ProductDetailSection({ product }: { product: Product }) {
+interface IProductDetailSectionProps {
+    product: Partial<IProduct>;
+}
+
+export default function ProductDetailSection({ product }: IProductDetailSectionProps) {
     return (
         <ProductDetails
             product={{
                 ...product,
-                description: product.description || `Premium ${product.specification === 'male' ? "men's" : "women's"} perfume from KhushbuWaala`
+                description: product.description || `Premium ${product.gender === 'male' ? "men's" : "women's"} perfume from KhushbuWaala`
             }}
             onReadMore={() => {
                 document.getElementById('product-accordion')?.scrollIntoView({
@@ -17,9 +19,7 @@ export default function ProductDetailSection({ product }: { product: Product }) 
                 });
                 setTimeout(() => {
                     const descriptionButton = document.querySelector('[data-section="description"]') as HTMLButtonElement;
-                    if (descriptionButton) {
-                        descriptionButton.click();
-                    }
+                    if (descriptionButton) descriptionButton.click();
                 }, 500);
             }}
         />

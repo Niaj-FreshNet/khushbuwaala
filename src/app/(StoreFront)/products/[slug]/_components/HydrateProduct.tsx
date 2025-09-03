@@ -14,6 +14,7 @@ export default function HydrateProduct({ initialData, slug }: Props) {
   const { data: product = initialData } = useGetProductBySlugQuery(slug, {
     skip: !slug,
   });
+  // console.log("product:", product);
 
   return <ProductDetailPage product={product} />;
 }

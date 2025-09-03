@@ -1,20 +1,23 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
-import { Product } from "@/lib/Data/data";
 import { Heart, MessageSquare, ShoppingCart, Zap } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
 import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
 import { toggleWishlist, selectIsInWishlist } from "@/redux/store/features/wishlist/wishlistSlice";
+import { IProduct } from "@/types/product.types";
 
-export default function ProductPageBottomBar({ product }: { product: Product }) {
+export default function ProductPageBottomBar({ product }: { product: IProduct }) {
     const cart = useCart()
-    const sizeKeys = product.variantPrices
-        ? Object.keys(product.variantPrices)
-        : product.measurement === "ml"
-            ? ["3 ml", "6 ml", "12 ml", "25 ml"]
-            : ["3 gm", "6 gm", "12 gm"]
+    // const sizeKeys = product.variantPrices
+    //     ? Object.keys(product.variantPrices)
+    //     : product.measurement === "ml"
+    //         ? ["3 ml", "6 ml", "12 ml", "25 ml"]
+    //         : ["3 gm", "6 gm", "12 gm"]
+    const sizeKeys = product.variants?.length
+        ? product.variants.map(v => `${v.size} ${v.unit.toLowerCase()}`)
+        : ["3 ml", "6 ml", "12 ml", "25 ml"]
 
     const selection = useProductSelectionOptional();
     const [fallbackSelectedSize, setFallbackSelectedSize] = useState<string>(sizeKeys[0] || "3 ml");

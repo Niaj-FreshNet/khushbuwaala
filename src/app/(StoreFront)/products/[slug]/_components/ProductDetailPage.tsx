@@ -13,6 +13,7 @@ import ProductDetailSection from "@/components/Modules/Product/ProductDetailSect
 import ProductPageBottomBar from "@/components/Modules/Product/ProductPageBottomBar";
 import { ProductSelectionProvider } from "@/context/ProductSelectionContext";
 import { IProductResponse } from "@/types/product.types";
+import mapProductResponseToProduct from "@/lib/Functions/ClientFn";
 
 interface IProductResponseProps {
     product: IProductResponse;
@@ -58,6 +59,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
     //   const { data: product, isLoading, isError } = useGetProductBySlugQuery(slug, {
     //     skip: !slug,
     //   });
+    console.log("product::::::::::::::::::::::::", product);
 
     if (!product) {
         return (
@@ -118,7 +120,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                                 {/* Product Details */}
                                 <div className="w-full order-2 lg:order-2">
                                     <div className="lg:sticky lg:top-16">
-                                        <ProductDetailSection product={product} />
+                                        <ProductDetailSection product={mapProductResponseToProduct(product)} />
                                     </div>
                                 </div>
                             </div>
@@ -146,7 +148,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
               </p> */}
                             </div>
                             <div id="product-accordion">
-                                <ProductAccordion product={product} />
+                                <ProductAccordion product={mapProductResponseToProduct(product)} />
                             </div>
                         </div>
                     </section>
@@ -166,7 +168,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                 Discover more exquisite fragrances from our carefully curated collection
               </p>
             </div> */}
-                            <RelatedProducts category={product.category} currentProductId={product._id} />
+                            <RelatedProducts category={product.category} currentProductId={product.id} />
                         </div>
                     </section>
 

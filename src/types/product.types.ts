@@ -1,15 +1,33 @@
 
 // Base Product Variant Interface (aligned with schema)
+
+export interface IDiscount {
+  id: string;
+  code?: string;
+  type: "percentage" | "fixed";
+  value: number;
+  maxUsage?: number;
+  startDate?: string;
+  endDate?: string;
+  variantId?: string; // null means product-level discount
+}
+
 export interface IProductVariant {
+  id: string;
   sku: string;
   unit: string;
-  size: number; // Changed from string to number as per schema
+  size: number;
   price: number;
-  stock: number; // Changed from quantity to stock as per schema
+  stock?: number;
+  discounts?: IDiscount[]; // variant-level discounts
+
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Product Creation Interface
 export interface IProduct {
+  id: string;
   name: string;
   description: string;
   primaryImage: string;
@@ -36,8 +54,18 @@ export interface IProduct {
   categoryId: string;
   published: boolean;
 
-  stock: number;
+  stock: number; // float at product-level
   variants: IProductVariant[];
+  discounts?: IDiscount[]; // product-level discounts
+  
+  // Computed fields
+  minPrice: number;
+  maxPrice: number;
+  totalStock: number;
+  inStock: boolean;
+  
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Product Update Interface

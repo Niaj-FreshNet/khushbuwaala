@@ -3,6 +3,7 @@
 export interface Product {
   _id: string
   name: string
+  slug?: string
   category: string
   price: number
   primaryImage: string
@@ -23,7 +24,6 @@ export interface Product {
   discount?: number
   moreImages?: string[]
   relatedProducts?: string[]
-  slug?: string
 }
 
 export interface Review {

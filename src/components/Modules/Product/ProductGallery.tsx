@@ -10,7 +10,7 @@ interface ProductGalleryProps {
     primaryImage: string;
     secondaryImage?: string;
     moreImages?: string[];
-    _id: string;
+    id: string;
   };
 }
 
