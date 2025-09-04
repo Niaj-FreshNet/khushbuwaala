@@ -12,7 +12,7 @@ import { ShoppingCart, Heart, MessageSquare, Zap, Info, Sparkles } from "lucide-
 import ProductDetailSection from "@/components/Modules/Product/ProductDetailSection";
 import ProductPageBottomBar from "@/components/Modules/Product/ProductPageBottomBar";
 import { ProductSelectionProvider } from "@/context/ProductSelectionContext";
-import { IProductResponse } from "@/types/product.types";
+import { IProduct, IProductResponse } from "@/types/product.types";
 import mapProductResponseToProduct from "@/lib/Functions/ClientFn";
 
 interface IProductResponseProps {
@@ -35,8 +35,8 @@ const getCategoryInfo = (category: string) => {
 };
 
 // Generate dynamic breadcrumbs
-const generateBreadcrumbs = (product: Product): BreadcrumbItem[] => {
-    const categoryInfo = getCategoryInfo(product.category);
+const generateBreadcrumbs = (product: IProduct): BreadcrumbItem[] => {
+    const categoryInfo = getCategoryInfo(product.categoryId);
 
     return [
         { name: 'Home', href: '/' },
@@ -59,7 +59,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
     //   const { data: product, isLoading, isError } = useGetProductBySlugQuery(slug, {
     //     skip: !slug,
     //   });
-    console.log("product::::::::::::::::::::::::", product);
+    console.log("product:", product);
 
     if (!product) {
         return (
@@ -100,7 +100,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
 
             {/* Main Product Content */}
             <main className="bg-white">
-                <ProductSelectionProvider product={product}>
+                <ProductSelectionProvider product={mapProductResponseToProduct(product)}>
                     {/* Hero Section - Product Gallery and Details */}
                     <section className="relative overflow-hidden">
                         {/* Subtle Background Elements */}
@@ -188,7 +188,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                         </div>
                     </section>
 
-                    <ProductPageBottomBar product={product} />
+                    <ProductPageBottomBar product={mapProductResponseToProduct(product)} />
                 </ProductSelectionProvider>
             </main>
         </>

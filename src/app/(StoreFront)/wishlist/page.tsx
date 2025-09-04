@@ -8,17 +8,17 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Heart, Grid3X3, Grid2X2, Columns3, Trash2, ShoppingCart, ArrowLeft } from "lucide-react"
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks"
-import { selectWishlistItems, clearWishlist, removeFromWishlist } from "@/lib/store/features/wishlist/wishlistSlice"
-import { addToCart } from "@/lib/store/features/cart/cartSlice"
-import type { Product } from "@/lib/Data/data"
+import { useAppDispatch, useAppSelector } from "@/redux/store/hooks"
+import { IProduct } from "@/types/product.types"
+import { addToCart } from "@/redux/store/features/cart/cartSlice"
+import { clearWishlist } from "@/redux/store/features/wishlist/wishlistSlice"
 
 export default function WishlistPage() {
   const dispatch = useAppDispatch()
   const items = useAppSelector(selectWishlistItems)
   const [columns, setColumns] = useState<number>(4)
 
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = (product: IProduct) => {
     const defaultSize = product.variantPrices ? Object.keys(product.variantPrices)[0] : "3 ml"
     dispatch(addToCart({ product, quantity: 1, selectedSize: defaultSize }))
   }

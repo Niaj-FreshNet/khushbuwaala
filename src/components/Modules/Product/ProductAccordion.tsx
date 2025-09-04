@@ -1,13 +1,12 @@
 "use client";
 import React, { useState } from "react";
 import { ChevronDown, Star, Shield, Award, Truck, CheckCircle, ThumbsUp, Calendar, Verified, Heart, MessageCircle, Info, Package, Sparkles, Clock, Globe } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
-import { Product } from "@/lib/Data/data";
+import { IProduct } from "@/types/product.types";
 
 interface ProductAccordionProps {
-  product: Partial<Product>;
+  product: Partial<IProduct>;
 }
 
 // Enhanced dummy reviews
@@ -153,12 +152,12 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
           <div>
             <h4 className="font-semibold text-gray-900 mb-3">Product Description</h4>
             <p className="text-gray-700 leading-relaxed">
-              {product.description || `Experience the luxury of ${product.name}, a premium ${product.specification === 'male' ? "men's" : "women's"
+              {product.description || `Experience the luxury of ${product.name}, a premium ${product.gender === 'male' ? "men's" : "women's"
                 } fragrance that embodies sophistication and elegance. This exquisite scent is perfect for those who appreciate fine fragrances and want to make a lasting impression.`}
             </p>
           </div>
 
-          {product.notes && (
+          {product.perfumeNotes && (
             <div>
               <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-purple-600" />
@@ -166,7 +165,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
               </h4>
               <div className="bg-white rounded-xl p-4 border border-purple-100">
                 <div className="space-y-1">
-                  {product.notes.split("\n").map((line, index) => {
+                  {(product.perfumeNotes as unknown as string).split("\n").map((line, index) => {
                     const [title, ...rest] = line.split(":");
                     return (
                       <p key={index} className="text-gray-700">
@@ -179,11 +178,11 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
             </div>
           )}
 
-          {product.smell && product.smell.length > 0 && (
+          {product.accords && product.accords.length > 0 && (
             <div>
               <h4 className="font-semibold text-gray-900 mb-3">Fragrance Family</h4>
               <div className="flex flex-wrap gap-2">
-                {product.smell.map((scent, index) => (
+                {product.accords.map((scent, index) => (
                   <Badge key={index} variant="outline" className="border-purple-200 text-purple-700">
                     {scent}
                   </Badge>
@@ -217,19 +216,19 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
                   <span className="font-medium text-gray-900">{product.origin}</span>
                 </div>
               )}
-              {product.specification && (
+              {product.gender && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">Gender</span>
                   <span className="font-medium text-gray-900 capitalize">
-                    {product.specification === 'male' ? 'Men' : 'Women'}
+                    {product.gender === 'male' ? 'Men' : 'Women'}
                   </span>
                 </div>
               )}
-              {product.measurement && (
+              {(product.variants || []).length > 0 && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">Available Sizes</span>
                   <span className="font-medium text-gray-900">
-                    {product.measurement === 'ml' ? '3ml, 6ml, 12ml, 25ml' : '3gm, 6gm, 12gm'}
+                    {product.variants![0].unit === 'ml' ? '3ml, 6ml, 12ml, 25ml' : '3gm, 6gm, 12gm'}
                   </span>
                 </div>
               )}
@@ -254,7 +253,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
               <div className="flex justify-between">
                 <span className="text-gray-600">Best For</span>
                 <span className="font-medium text-gray-900">
-                  {product.specification === 'male' ? 'Office, Evening' : 'Daily, Special Occasions'}
+                  {product.gender === 'male' ? 'Office, Evening' : 'Daily, Special Occasions'}
                 </span>
               </div>
             </div>

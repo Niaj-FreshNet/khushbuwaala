@@ -21,14 +21,15 @@ export interface IProductVariant {
   stock?: number;
   discounts?: IDiscount[]; // variant-level discounts
 
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Product Creation Interface
 export interface IProduct {
   id: string;
   name: string;
+  slug: string;
   description: string;
   primaryImage: string;
   otherImages?: string[];
@@ -54,7 +55,7 @@ export interface IProduct {
   categoryId: string;
   published: boolean;
 
-  stock: number; // float at product-level
+  stock?: number; // float at product-level
   variants: IProductVariant[];
   discounts?: IDiscount[]; // product-level discounts
   
@@ -158,6 +159,7 @@ export interface IProductResponse {
     imageUrl: string;
   };
   
+  stock?: number;
   variants: IProductVariantResponse[];
   
   // Computed fields
@@ -176,7 +178,7 @@ export interface IProductVariantResponse {
   unit: string;
   size: number;
   price: number;
-  stock: number;
+  stock?: number;
   productId: string;
   createdAt: Date;
   updatedAt: Date;

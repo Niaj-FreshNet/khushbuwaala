@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Star, Heart, ShoppingCart, Sparkles, Tag, ArrowRight } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { IProduct } from "@/types/product.types";
 
 interface RelatedProductsProps {
   category: string;
@@ -38,7 +39,7 @@ const getSmartRelatedProducts = (allProducts: Product[], category: string, curre
   return categoryProducts.slice(0, 4);
 };
 
-const ProductCard = ({ product }: { product: Product }) => {
+const ProductCard = ({ product }: { product: IProduct }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const cart = useCart()

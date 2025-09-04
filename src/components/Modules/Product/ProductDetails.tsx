@@ -37,10 +37,23 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
   const [fallbackQuantity, setFallbackQuantity] = useState<number>(1);
   const [fallbackIsWishlisted, setFallbackIsWishlisted] = useState(false);
 
-  const selectedSize = selection?.selectedSize ?? fallbackSelectedSize;
-  const setSelectedSize = selection?.setSelectedSize ?? setFallbackSelectedSize;
+  // const selectedSize = selection?.selectedSize ?? fallbackSelectedSize;
+  // const setSelectedSize = selection?.setSelectedSize ?? setFallbackSelectedSize;
   const quantity = selection?.quantity ?? fallbackQuantity;
   const setQuantity = selection?.setQuantity ?? setFallbackQuantity;
+
+  const selectedSize = selection?.selectedVariant
+  ? `${selection.selectedVariant.size} ${selection.selectedVariant.unit.toLowerCase()}`
+  : fallbackSelectedSize;
+
+const setSelectedSize = (size: string) => {
+  if (!selection) return setFallbackSelectedSize(size);
+
+  const variant = product.variants?.find(
+    (v) => `${v.size} ${v.unit.toLowerCase()}` === size
+  );
+  if (variant) selection.setSelectedVariant(variant);
+};
   // const isWishlisted = wishlist?.isInWishlist(product._id) ?? (selection?.isWishlisted ?? fallbackIsWishlisted);
   // const toggleWishlist = () => {
   //   if (wishlist) {
