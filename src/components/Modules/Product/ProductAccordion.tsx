@@ -157,7 +157,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
             </p>
           </div>
 
-          {product.perfumeNotes && (
+          {/* {product.perfumeNotes && (
             <div>
               <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-purple-600" />
@@ -165,7 +165,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
               </h4>
               <div className="bg-white rounded-xl p-4 border border-purple-100">
                 <div className="space-y-1">
-                  {(product.perfumeNotes as unknown as string).split("\n").map((line, index) => {
+                  {product.perfumeNotes.split("\n").map((line, index) => {
                     const [title, ...rest] = line.split(":");
                     return (
                       <p key={index} className="text-gray-700">
@@ -173,6 +173,24 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
                       </p>
                     );
                   })}
+                </div>
+              </div>
+            </div>
+          )} */}
+
+          {product.perfumeNotes && typeof product.perfumeNotes === "object" && (
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-purple-600" />
+                Fragrance Notes
+              </h4>
+              <div className="bg-white rounded-xl p-4 border border-purple-100">
+                <div className="space-y-1">
+                  {Object.entries(product.perfumeNotes).map(([title, note]) => (
+                    <p key={title} className="text-gray-700">
+                      <span className="font-semibold">{title}:</span> {note}
+                    </p>
+                  ))}
                 </div>
               </div>
             </div>
