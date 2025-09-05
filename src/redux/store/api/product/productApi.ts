@@ -1,6 +1,18 @@
 import { IProductAnalytics, IProductQuery, IProductResponse, IProductSearchResult, IRelatedProductsResponse, ITrendingProduct, LowStockProduct } from "@/types/product.types";
 import baseApi from "../baseApi";
 
+interface ApiResponse<T> {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  meta?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPage: number;
+  };
+  data: T;
+}
 
 // Define query params type based on backend query parsing
 export interface ProductQueryParams extends Partial<IProductQuery> {
@@ -68,9 +80,9 @@ export const productApi = baseApi.injectEndpoints({
     }),
 
     // Get Single Product By Slug
-    getProductBySlug: builder.query<IProductResponse, string>({
+    getProductBySlug: builder.query<ApiResponse<IProductResponse>, string>({
       query: (slug) => `/products/get-product-by-slug/${slug}`,
-      providesTags: (result, error, slug) => [{ type: 'Product', slug }],
+      providesTags: (result, error, slug) => [{ type: "Product", slug }],
     }),
 
     // Update Product (ADMIN)

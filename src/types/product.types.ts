@@ -35,7 +35,7 @@ export interface IProduct {
   otherImages?: string[];
   videoUrl?: string;
   tags: string[];
-  
+
   // Perfume specifications
   origin?: string;
   brand?: string;
@@ -51,20 +51,20 @@ export interface IProduct {
   projection?: string;
   sillage?: string;
   bestFor: string[];
-  
+
   categoryId: string;
   published: boolean;
 
   stock?: number; // float at product-level
   variants: IProductVariant[];
   discounts?: IDiscount[]; // product-level discounts
-  
+
   // Computed fields
   minPrice: number;
   maxPrice: number;
   totalStock: number;
   inStock: boolean;
-  
+
   createdAt: string;
   updatedAt: string;
 }
@@ -77,7 +77,7 @@ export interface IUpdateProduct {
   otherImages?: string[];
   videoUrl?: string;
   tags?: string[];
-  
+
   // Perfume specifications
   origin?: string;
   brand?: string;
@@ -93,14 +93,14 @@ export interface IUpdateProduct {
   projection?: string;
   sillage?: string;
   bestFor?: string[];
-  
+
   categoryId?: string;
   published?: boolean;
-  
+
   // Image handling
   imagesToKeep?: string[];
   newImages?: string[];
-  
+
   stock?: number;
   variants?: IProductVariant[];
 }
@@ -136,7 +136,7 @@ export interface IProductResponse {
   tags: string[];
   salesCount: number;
   published: boolean;
-  
+
   // Perfume specifications
   origin?: string;
   brand?: string;
@@ -152,22 +152,23 @@ export interface IProductResponse {
   projection?: string;
   sillage?: string;
   bestFor: string[];
-  
+
   categoryId: string;
   category?: {
     categoryName: string;
     imageUrl: string;
   };
-  
+
   stock?: number;
   variants: IProductVariantResponse[];
-  
+  discounts?: IDiscount[];
+
   // Computed fields
   minPrice: number;
   maxPrice: number;
   totalStock: number;
   inStock: boolean;
-  
+
   createdAt: Date;
   updatedAt: Date;
 }

@@ -85,7 +85,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
         );
     }
 
-    const breadcrumbItems = generateBreadcrumbs(product);
+    const breadcrumbItems = generateBreadcrumbs(mapProductResponseToProduct(product));
 
     return (
         <>
@@ -168,7 +168,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                 Discover more exquisite fragrances from our carefully curated collection
               </p>
             </div> */}
-                            <RelatedProducts category={product.category} currentProductId={product.id} />
+                            <RelatedProducts product={mapProductResponseToProduct(product)} />
                         </div>
                     </section>
 
