@@ -33,7 +33,7 @@ export default function mapProductResponseToProduct(
     published: product.published,
     
     stock: product.stock || 0,
-    variants: product.variants.map<IProductVariant>(v => ({
+    variants: product.variants?.map<IProductVariant>(v => ({
       id: v.id,
       sku: v.sku,
       unit: v.unit,

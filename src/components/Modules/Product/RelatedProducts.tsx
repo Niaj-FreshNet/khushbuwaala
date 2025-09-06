@@ -11,7 +11,12 @@ interface RelatedProductsProps {
 }
 
 export default function RelatedProducts({ product }: RelatedProductsProps) {
+  console.log("Rendering RelatedProducts component");
+  console.log("Current product ID:", product.id);
+
   const { data, isLoading } = useGetRelatedProductsQuery(product.id);
+  console.log("Related products isLoading:", isLoading);
+  console.log("Related products data:", data);
 
   if (isLoading) {
     return (
@@ -31,15 +36,20 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
 
   if (!data) return null;
 
-  // flatten categories of related products
-  const related = [
-    ...data.sameBrand,
-    ...data.sameCategory,
-    ...data.similarAccords,
+  // Flatten related products arrays
+  const relatedProducts = [
+    ...(data.sameBrand ?? []),
+    ...(data.sameCategory ?? []),
+    ...(data.similarAccords ?? []),
     ...(data.recentlyViewed ?? []),
   ];
 
-  if (!related.length) return null;
+  // Deduplicate products by ID
+  const uniqueProducts = Array.from(
+    new Map(relatedProducts.map((p) => [p.id, p])).values()
+  );
+
+  if (!uniqueProducts.length) return null;
 
   return (
     <section
@@ -50,7 +60,7 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
         You may also like
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        {related.map((p) => {
+        {uniqueProducts.map((p) => {
           const activeDiscount = p.discounts?.[0];
           const basePrice = p.minPrice ?? 0;
           const discountedPrice = activeDiscount
@@ -106,8 +116,9 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
 
                 <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                   <span
-                    className={`text-xs font-medium ${p.inStock ? "text-green-600" : "text-red-600"
-                      }`}
+                    className={`text-xs font-medium ${
+                      p.inStock ? "text-green-600" : "text-red-600"
+                    }`}
                   >
                     {p.inStock ? "In Stock" : "Out of Stock"}
                   </span>

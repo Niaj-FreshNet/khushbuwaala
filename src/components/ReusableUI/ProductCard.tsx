@@ -101,7 +101,7 @@ export function ProductCard({
     })
   }
 
-  const productSlug = product.name.toLowerCase().replace(/ /g, "-")
+  const productSlug = product.slug || product.name.toLowerCase().replace(/ /g, "-") || "https://khushbuwaala.com/shop"
   const productLink = `/products/${productSlug}`
 
   // Enhanced price display with better formatting

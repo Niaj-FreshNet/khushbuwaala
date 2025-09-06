@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator"
 import NewsletterForm from "./Newsletter"
 import FooterCollapsible from "./FooterCollapsible"
 import SocialIcons from "../Icons/SocialIcons/SocialIcons"
+import Image from "next/image"
 
 // SEO: Enhanced Structured Data for Footer (Server-side)
 const footerStructuredData = {
@@ -167,8 +168,8 @@ export const Footer = () => {
           {/* Logo and Brand Section - Static Server Component */}
           <div className="text-center mb-12">
             <Link href="/" className="inline-block group">
-              <img
-                src="/images/khushbuwaala-logo.webp"
+              <Image
+                src="/images/khushbuwaala.webp"
                 alt="KhushbuWaala - Premium Perfumes"
                 className="h-12 w-auto mx-auto transition-transform duration-300 group-hover:scale-110"
                 width={120}
