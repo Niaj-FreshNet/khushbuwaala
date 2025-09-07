@@ -1,22 +1,15 @@
 "use client";
 
-import { useGetProductBySlugQuery } from "@/redux/store/api/product/productApi";
+import React from "react";
 import { IProductResponse } from "@/types/product.types";
 import ProductDetailPage from "./ProductDetailPage";
-
 
 interface Props {
   initialData: IProductResponse;
   slug: string;
 }
 
-export default function HydrateProduct({ initialData, slug }: Props) {
-  const { data: productResponse = { data: initialData } as any } =
-    useGetProductBySlugQuery(slug, {
-      skip: !slug,
-    });
-    
-  const product = productResponse.data;
-
-  return <ProductDetailPage product={product} />;
+export default function HydrateProduct({ initialData }: Props) {
+  // No client-side fetching here, just render the product
+  return <ProductDetailPage product={initialData} />;
 }
