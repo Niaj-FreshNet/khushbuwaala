@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Tag } from "lucide-react";
 import { IProduct } from "@/types/product.types";
-import { useGetRelatedProductsQuery } from "@/redux/store/api/productApi";
+import { useGetRelatedProductsQuery } from "@/redux/store/api/product/productApi";
 
 interface RelatedProductsProps {
   product: IProduct; // current product
@@ -14,7 +14,10 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
   console.log("Rendering RelatedProducts component");
   console.log("Current product ID:", product.id);
 
-  const { data, isLoading } = useGetRelatedProductsQuery(product.id);
+  const { data, isLoading } = useGetRelatedProductsQuery(product?.id!, {
+  skip: !product?.id,
+});
+
   console.log("Related products isLoading:", isLoading);
   console.log("Related products data:", data);
 

@@ -130,7 +130,7 @@ export default function ForWomenPage() {
 
       {/* Enhanced Shop Products Section */}
       <div id="products" className="bg-white pt-0 pb-8">
-        <ShopProducts specification={specification} />
+        <ShopProducts specification={specification} initialProducts={[]} initialPage={0} totalPages={0} />
       </div>
     </div>
   );
