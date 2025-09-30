@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { ListFilter, X } from "lucide-react"
+import { ListFilter } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface SortSheetProps {
@@ -43,9 +43,6 @@ export function SortSheet({ visible, onClose, onSortChange }: SortSheetProps) {
               <ListFilter className="h-6 w-6 text-blue-600" />
               Sort By
             </div>
-            {/* <Button variant="ghost" size="icon" onClick={() => onClose(false)} aria-label="Close sort options">
-              <X className="h-5 w-5" />
-            </Button> */}
           </SheetTitle>
         </SheetHeader>
 
@@ -57,7 +54,10 @@ export function SortSheet({ visible, onClose, onSortChange }: SortSheetProps) {
                 className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
               >
                 <RadioGroupItem value={option.value} id={`sort-${option.value}`} />
-                <Label htmlFor={`sort-${option.value}`} className="text-base font-medium text-gray-800 cursor-pointer">
+                <Label
+                  htmlFor={`sort-${option.value}`}
+                  className="text-base font-medium text-gray-800 cursor-pointer"
+                >
                   {option.label}
                 </Label>
               </div>

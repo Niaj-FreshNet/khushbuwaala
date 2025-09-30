@@ -1,36 +1,31 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Slider } from "@/components/ui/slider";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { useState } from "react"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Slider } from "@/components/ui/slider"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { FilterIcon } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+} from "@/components/ui/select"
+import { FilterIcon } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from "@/components/ui/collapsible"
+import { Button } from "@/components/ui/button"
 
 interface FilterSheetProps {
-  visible: boolean;
-  onClose: (open: boolean) => void;
-  onApplyFilters: (filters: any) => void;
+  visible: boolean
+  onClose: (open: boolean) => void
+  onApplyFilters: (filters: any) => void
   initialFilters?: {
     category?: string;
   };
@@ -43,48 +38,30 @@ export function FilterSheet({
   initialFilters,
 }: FilterSheetProps) {
   const [priceRange, setPriceRange] = useState<[number, number]>([100, 5000]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialFilters?.category ? [initialFilters.category] : []);
   const [selectedSmells, setSelectedSmells] = useState<string[]>([]);
-  const [selectedSpecification, setSelectedSpecification] =
-    useState<string>("all");
-
-  useEffect(() => {
-    if (initialFilters?.category) {
-      setSelectedCategories([initialFilters.category]);
-    }
-  }, [initialFilters?.category]);
+  const [selectedSpecification, setSelectedSpecification] = useState<string>("all");
 
   const handleApply = () => {
-    setTimeout(() => {
-      onApplyFilters({
-        priceRange,
-        selectedCategories,
-        selectedSmells,
-        selectedSpecification,
-      });
-    }, 500); // simulate filter delay
-  };
-
-  useEffect(() => {
-    handleApply();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [priceRange, selectedCategories, selectedSmells, selectedSpecification]);
-
-  const handleCategoryChange = (value: string) => {
-    setSelectedCategories(value === "all" ? [] : [value]);
-  };
-
-  const handleSmellChange = (smell: string, checked: boolean) => {
-    setSelectedSmells((prev) =>
-      checked ? [...prev, smell] : prev.filter((s) => s !== smell)
-    );
+    onApplyFilters({
+      priceRange,
+      selectedCategories,
+      selectedSmells,
+      selectedSpecification,
+    });
   };
 
   const handleReset = () => {
+    setPriceRange([100, 5000]);
     setSelectedCategories([]);
     setSelectedSmells([]);
     setSelectedSpecification("all");
-    setPriceRange([100, 5000]);
+    onApplyFilters({
+      priceRange: [100, 5000],
+      selectedCategories: [],
+      selectedSmells: [],
+      selectedSpecification: "all",
+    });
   };
 
   const smellTypes = {
@@ -146,7 +123,7 @@ export function FilterSheet({
               <CollapsibleContent>
                 <Select
                   value={selectedCategories[0] || "all"}
-                  onValueChange={handleCategoryChange}
+                  onValueChange={(value) => setSelectedCategories(value === "all" ? [] : [value])}
                 >
                   <SelectTrigger className="w-full h-10 bg-white border-gray-200 rounded-md">
                     <SelectValue placeholder="Select Category" />
@@ -188,9 +165,11 @@ export function FilterSheet({
                           <Checkbox
                             id={`smell-${smell}`}
                             checked={selectedSmells.includes(smell)}
-                            onCheckedChange={(checked) =>
-                              handleSmellChange(smell, checked as boolean)
-                            }
+                            onCheckedChange={(checked) => {
+                              setSelectedSmells((prev) =>
+                                checked ? [...prev, smell] : prev.filter((s) => s !== smell)
+                              )
+                            }}
                           />
                           <Label
                             htmlFor={`smell-${smell}`}
@@ -241,9 +220,7 @@ export function FilterSheet({
                   max={5000}
                   step={50}
                   value={priceRange}
-                  onValueChange={(value: number[]) =>
-                    setPriceRange(value as [number, number])
-                  }
+                  onValueChange={(value) => setPriceRange(value as [number, number])}
                   className="w-full"
                 />
                 <p className="text-sm text-gray-600 mt-2">

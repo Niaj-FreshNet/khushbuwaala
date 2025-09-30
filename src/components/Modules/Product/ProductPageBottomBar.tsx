@@ -1,55 +1,118 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
-import { Product } from "@/lib/Data/data";
-import { Heart, MessageSquare, ShoppingCart, Zap } from "lucide-react";
+import { Badge, Heart, MessageSquare, ShoppingCart, Tag, Zap } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
-import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { toggleWishlist, selectIsInWishlist } from "@/lib/store/features/wishlist/wishlistSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
+import { toggleWishlist, selectIsInWishlist } from "@/redux/store/features/wishlist/wishlistSlice";
+import { IDiscount, IProduct, IProductVariant } from "@/types/product.types";
 
-export default function ProductPageBottomBar({ product }: { product: Product }) {
+export default function ProductPageBottomBar({ product }: { product: IProduct }) {
     const cart = useCart()
-    const sizeKeys = product.variantPrices
-        ? Object.keys(product.variantPrices)
-        : product.measurement === "ml"
-            ? ["3 ml", "6 ml", "12 ml", "25 ml"]
-            : ["3 gm", "6 gm", "12 gm"]
+    // const sizeKeys = product.variantPrices
+    //     ? Object.keys(product.variantPrices)
+    //     : product.measurement === "ml"
+    //         ? ["3 ml", "6 ml", "12 ml", "25 ml"]
+    //         : ["3 gm", "6 gm", "12 gm"]
+    const sizeKeys = product.variants?.length
+        ? product.variants.map(v => `${v.size} ${v.unit.toLowerCase()}`)
+        : ["3 ml", "6 ml", "12 ml", "25 ml"]
 
     const selection = useProductSelectionOptional();
     const [fallbackSelectedSize, setFallbackSelectedSize] = useState<string>(sizeKeys[0] || "3 ml");
     const [fallbackQuantity, setFallbackQuantity] = useState<number>(1);
     const dispatch = useAppDispatch();
 
-    const selectedSize = selection?.selectedSize ?? fallbackSelectedSize;
-    const setSelectedSize = selection?.setSelectedSize ?? setFallbackSelectedSize;
+    // const selectedSize = selection?.selectedSize ?? fallbackSelectedSize;
+    // const setSelectedSize = selection?.setSelectedSize ?? setFallbackSelectedSize;
     const quantity = selection?.quantity ?? fallbackQuantity;
     const setQuantity = selection?.setQuantity ?? setFallbackQuantity;
-    const isWishlisted = useAppSelector(useMemo(() => selectIsInWishlist(product._id), [product._id]));
-    const onToggleWishlist = () => dispatch(toggleWishlist(product));
+    // const isWishlisted = useAppSelector(useMemo(() => selectIsInWishlist(product._id), [product._id]));
+    // const onToggleWishlist = () => dispatch(toggleWishlist(product));
+
+    const selectedSize = selection?.selectedVariant
+        ? `${selection.selectedVariant.size} ${selection.selectedVariant.unit.toLowerCase()}`
+        : fallbackSelectedSize;
+
+    const setSelectedSize = (size: string) => {
+        if (!selection) return setFallbackSelectedSize(size);
+
+        const variant = product.variants?.find(
+            (v) => `${v.size} ${v.unit.toLowerCase()}` === size
+        );
+        if (variant) selection.setSelectedVariant(variant);
+    };
 
     // Available sizes based on product data
     const availableSizes = sizeKeys;
 
     // Get current price
-    const getCurrentPrice = () => {
-        return product.variantPrices?.[selectedSize] || product.price;
+    const getCurrentVariant = () => {
+        return product.variants?.find(
+            v => `${v.size} ${v.unit.toLowerCase()}` === selectedSize
+        );
     };
 
-    const currentPrice = getCurrentPrice();
-    const discountedPrice = product.discount
-        ? currentPrice - (currentPrice * product.discount) / 100
-        : currentPrice;
-    const totalCurrent = currentPrice * (typeof quantity === "number" ? quantity : 1);
-    const totalDiscounted = discountedPrice * (typeof quantity === "number" ? quantity : 1);
+    const currentVariant = getCurrentVariant();
+    const currentPrice = currentVariant?.price ?? product.minPrice ?? 0;
+
+    // Get active discount (checks dates, variant first)
+    const getActiveDiscount = (
+        product: Partial<IProduct>,
+        variant?: IProductVariant
+    ): IDiscount | null => {
+        const now = new Date();
+        const discounts = variant?.discounts?.length
+            ? variant.discounts
+            : product.discounts;
+
+        if (!discounts || discounts.length === 0) return null;
+
+        return discounts.find(d => {
+            const startOk = !d.startDate || new Date(d.startDate) <= now;
+            const endOk = !d.endDate || new Date(d.endDate) >= now;
+            return startOk && endOk;
+        }) || null;
+    };
+
+    const discount = getActiveDiscount(product, currentVariant);
+
+    let discountedPrice = currentPrice;
+
+    if (discount) {
+        if (discount.type === "percentage") {
+            discountedPrice = currentPrice - (currentPrice * discount.value) / 100;
+        } else if (discount.type === "fixed") {
+            discountedPrice = currentPrice - discount.value;
+        }
+    }
+
+    // Final totals
+    const totalCurrent = currentPrice * quantity;
+    const totalDiscounted = discountedPrice * quantity;
+
+    const activeDiscount = getActiveDiscount(product, currentVariant);
+
+    const discountValue = activeDiscount?.type === "percentage"
+        ? activeDiscount.value
+        : 0;
 
     const handleQuantityChange = (type: "increment" | "decrement") => {
-        const current = typeof quantity === "number" ? quantity : 1;
-        const next = type === "increment" ? Math.min(current + 1, 10) : Math.max(current - 1, 1);
+        const next = type === "increment"
+            ? Math.min(quantity + 1, 10)
+            : Math.max(quantity - 1, 1);
         setQuantity(next);
     };
 
-    const isOutOfStock = product.stock === "0";
+
+
+    const totalVariantStock = product.variants?.reduce(
+        (sum, v) => sum + (v.stock ?? 0),
+        0
+    );
+
+    const isOutOfStock = (product.stock ?? 0) <= 0 || (totalVariantStock ?? 0) <= 0;
 
     return (
         <>
@@ -61,7 +124,7 @@ export default function ProductPageBottomBar({ product }: { product: Product }) 
                 {/* Shadow */}
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
 
-                <div className="relative px-4 py-4 safe-area-bottom">
+                <div className="relative px-4 py-2 safe-area-bottom">
                     {/* Desktop/Tablet Layout */}
                     <div className="hidden md:block">
                         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -78,23 +141,31 @@ export default function ProductPageBottomBar({ product }: { product: Product }) 
                                         <h3 className="font-bold text-gray-900 text-lg">{product.name}</h3>
                                         <div className="text-2xl font-bold text-gray-900">
                                             ৳{discountedPrice.toLocaleString()}
-                                            {(product.discount && discountedPrice !== currentPrice) && (
+                                            {/* {(product.discount && discountedPrice !== currentPrice) && (
                                                 <span className="text-lg text-gray-500 line-through ml-2">
                                                     ৳{currentPrice.toLocaleString()}
                                                 </span>
-                                            )}
+                                            )} */}
+                                            {activeDiscount ? (
+                                                <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 animate-pulse shadow-lg">
+                                                    <Tag className="w-3 h-3 mr-2" />
+                                                    {activeDiscount.type === "percentage"
+                                                        ? `${activeDiscount.value}% OFF`
+                                                        : `৳${activeDiscount.value} OFF`}
+                                                </Badge>
+                                            ) : null}
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-4">
-                                <button
+                                {/* <button
                                     onClick={onToggleWishlist}
                                     className="flex items-center gap-2 bg-white border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-2xl font-semibold hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-all duration-300">
                                     <Heart className={`w-5 h-5 mr-2 ${isWishlisted ? "fill-current" : ""}`} />
                                     {isWishlisted ? "Saved" : "Wishlist"}
-                                </button>
+                                </button> */}
 
                                 <a
                                     href="https://wa.me/8801566395807"
@@ -151,12 +222,12 @@ export default function ProductPageBottomBar({ product }: { product: Product }) 
                                 {isOutOfStock ? "Out of Stock" : "Add to Cart"}
                             </button>
 
-                            <button
+                            {/* <button
                                 onClick={onToggleWishlist}
                                 className="w-14 h-14 bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-200 text-red-600 rounded-2xl flex items-center justify-center hover:bg-red-100 transition-all duration-300 touch-manipulation active:scale-95 shadow-lg"
                             >
                                 <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
-                            </button>
+                            </button> */}
 
                             <a
                                 href="https://wa.me/8801566395807"
@@ -173,7 +244,8 @@ export default function ProductPageBottomBar({ product }: { product: Product }) 
                                 <div className="text-xs text-gray-500 font-medium">Total Price</div>
                                 <div className="text-xl font-bold text-gray-900">
                                     ৳{totalDiscounted.toLocaleString()}
-                                    {(product.discount && totalDiscounted !== totalCurrent) && (
+                                    {/* {(product.discount && totalDiscounted !== totalCurrent) && ( */}
+                                    {(totalDiscounted !== totalCurrent) && (
                                         <span className="text-sm text-gray-500 line-through ml-2">
                                             ৳{totalCurrent.toLocaleString()}
                                         </span>

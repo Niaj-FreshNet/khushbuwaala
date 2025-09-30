@@ -3,23 +3,14 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Maximize2, RotateCw, Sparkles, Search, X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
+import { IProduct } from "@/types/product.types";
 
 interface ProductGalleryProps {
-  product: {
-    name: string;
-    primaryImage: string;
-    secondaryImage?: string;
-    moreImages?: string[];
-    _id: string;
-  };
+  product: Pick<IProduct, "id" | "name" | "primaryImage" | "otherImages">;
 }
 
 export default function ProductGallery({ product }: ProductGalleryProps) {
-  const images = [
-    product.primaryImage,
-    ...(product.secondaryImage ? [product.secondaryImage] : []),
-    ...(product.moreImages || [])
-  ].filter(Boolean);
+  const images = [product.primaryImage, ...(product.otherImages ?? [])];
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [lightbox, setLightbox] = useState(false);
@@ -30,7 +21,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
   // Auto-rotate simulation for 360° effect
   useEffect(() => {
     if (!isRotating || images.length < 2) return;
-    
+
     const interval = setInterval(() => {
       setActiveIdx(prev => (prev + 1) % images.length);
     }, 800);
@@ -40,7 +31,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!zoom) return;
-    
+
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
@@ -63,7 +54,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
       {/* Main Image Container */}
       <div className="relative group">
         {/* Enhanced Showcase Background */}
-        <div 
+        <div
           className="relative rounded-3xl p-0 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/20 shadow-2xl border border-blue-100/50 backdrop-blur-sm aspect-[4/5] min-h-[500px] flex items-center justify-center cursor-pointer overflow-hidden"
           onClick={() => setLightbox(true)}
           onMouseMove={handleMouseMove}
@@ -76,7 +67,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
           <div className="absolute inset-0 bg-gradient-to-r from-blue-50/20 via-transparent to-purple-50/20 rounded-3xl"></div>
           <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-blue-200/15 to-transparent rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-purple-200/15 to-transparent rounded-full blur-3xl"></div>
-          
+
           {/* Main Product Image */}
           <div className="relative w-full h-full flex items-center justify-center">
             <Image
@@ -84,9 +75,8 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
               alt={`${product.name} - Premium perfume bottle`}
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
-              className={`object-contain transition-all duration-500 ${
-                zoom ? 'scale-150' : 'scale-100'
-              } ${isRotating ? 'animate-pulse' : ''} drop-shadow-2xl`}
+              className={`object-contain transition-all duration-500 ${zoom ? 'scale-150' : 'scale-100'
+                } ${isRotating ? 'animate-pulse' : ''} drop-shadow-2xl`}
               style={zoom ? {
                 transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`
               } : {}}
@@ -107,14 +97,13 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
             {/* 360° Rotation Button */}
             {images.length > 1 && (
               <button
-                className={`p-3 rounded-full backdrop-blur-sm transition-all duration-300 shadow-lg ${
-                  isRotating 
-                    ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white' 
+                className={`p-3 rounded-full backdrop-blur-sm transition-all duration-300 shadow-lg ${isRotating
+                    ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white'
                     : 'bg-white/90 text-gray-700 hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-600 hover:text-white border border-gray-200'
-                }`}
-                onClick={(e) => { 
-                  e.stopPropagation(); 
-                  toggleRotation(); 
+                  }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleRotation();
                 }}
                 aria-label="Toggle 360° view"
                 title="360° View"
@@ -122,17 +111,16 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
                 <RotateCw size={20} className={isRotating ? 'animate-spin' : ''} />
               </button>
             )}
-            
+
             {/* Zoom Button */}
             <button
-              className={`p-3 rounded-full backdrop-blur-sm transition-all duration-300 shadow-lg ${
-                zoom 
-                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white' 
+              className={`p-3 rounded-full backdrop-blur-sm transition-all duration-300 shadow-lg ${zoom
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
                   : 'bg-white/90 text-gray-700 hover:bg-gradient-to-r hover:from-blue-500 hover:to-indigo-600 hover:text-white border border-gray-200'
-              }`}
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                setZoom(!zoom); 
+                }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setZoom(!zoom);
               }}
               aria-label="Toggle zoom"
               title="Zoom In/Out"
@@ -143,9 +131,9 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
             {/* Expand Button */}
             <button
               className="p-3 bg-white/90 text-gray-700 rounded-full hover:bg-gradient-to-r hover:from-green-500 hover:to-emerald-600 hover:text-white transition-all duration-300 backdrop-blur-sm shadow-lg border border-gray-200"
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                setLightbox(true); 
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightbox(true);
               }}
               aria-label="Expand image"
               title="Full Screen"
@@ -177,7 +165,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
           {/* Refined Decorative Elements */}
           <div className="absolute top-1/4 right-1/5 w-2 h-2 bg-blue-400 rounded-full animate-ping opacity-60"></div>
           <div className="absolute bottom-1/3 left-1/5 w-1.5 h-1.5 bg-purple-400 rounded-full animate-ping opacity-50" style={{ animationDelay: '1s' }}></div>
-          
+
           {/* Enhanced Zoom Instruction */}
           {zoom && (
             <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-gray-900 to-gray-800 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
@@ -200,16 +188,15 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Product Views</h3>
             <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
           </div>
-          
+
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide justify-center">
             {images.map((src, idx) => (
               <button
                 key={idx}
-                className={`relative flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all duration-300 w-20 h-20 md:w-24 md:h-24 ${
-                  activeIdx === idx
+                className={`relative flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all duration-300 w-20 h-20 md:w-24 md:h-24 ${activeIdx === idx
                     ? "border-blue-500 ring-4 ring-blue-200/50 scale-110 shadow-xl"
                     : "border-gray-300 hover:border-blue-400 hover:scale-105 hover:shadow-lg"
-                }`}
+                  }`}
                 onClick={() => {
                   setActiveIdx(idx);
                   setIsRotating(false);
@@ -230,7 +217,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
                     <div className="w-3 h-3 bg-white rounded-full shadow-lg border-2 border-blue-500"></div>
                   </div>
                 )}
-                
+
                 {/* Thumbnail index */}
                 <div className="absolute bottom-1 right-1 bg-white/90 text-gray-700 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
                   {idx + 1}
@@ -247,7 +234,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
           <DialogTitle className="sr-only">
             {product.name} - Full size image {activeIdx + 1} of {images.length}
           </DialogTitle>
-          
+
           {/* Close Button */}
           <button
             className="absolute top-4 right-4 z-10 p-2 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors"
@@ -302,9 +289,8 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
               {images.map((src, idx) => (
                 <button
                   key={idx}
-                  className={`flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
-                    activeIdx === idx ? 'border-white' : 'border-transparent opacity-60 hover:opacity-100'
-                  }`}
+                  className={`flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${activeIdx === idx ? 'border-white' : 'border-transparent opacity-60 hover:opacity-100'
+                    }`}
                   onClick={() => setActiveIdx(idx)}
                   aria-label={`Jump to image ${idx + 1}`}
                 >
