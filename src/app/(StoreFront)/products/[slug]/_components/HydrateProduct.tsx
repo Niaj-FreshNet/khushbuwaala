@@ -1,9 +1,10 @@
 "use client";
 
-import { useGetProductBySlugQuery } from "@/redux/store/api/product/productApi";
+import React from "react";
 import { IProductResponse } from "@/types/product.types";
 import ProductDetailPage from "./ProductDetailPage";
 import ProductPageLoading from "../loading";
+import { useGetProductBySlugQuery } from "@/redux/store/api/product/productApi";
 
 
 interface Props {
