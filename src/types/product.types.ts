@@ -13,7 +13,7 @@ export interface IDiscount {
 }
 
 export interface IProductVariant {
-  id: string;
+  id?: string;
   sku: string;
   unit: string;
   size: number;

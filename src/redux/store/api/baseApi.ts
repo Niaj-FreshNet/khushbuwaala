@@ -1,32 +1,36 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-// import Cookies from "js-cookie";
+import type { RootState } from "../store";
 
-const baseQuery = fetchBaseQuery({
-	// baseUrl: process.env.NEXT_PUBLIC_API_URL,
-	baseUrl: "http://localhost:7302/api",
-	// prepareHeaders: (headers) => {
-	// 	const token = Cookies.get("access_token");
-	// 	if (token) {
-	// 		headers.set("Authorization", token);
-	// 	}
-	// 	return headers;
-	// },
+const rawBaseQuery = fetchBaseQuery({
+  baseUrl: "http://localhost:7302/api",
+  credentials: "include", // allows cookies for refresh
+  prepareHeaders: (headers, { getState }) => {
+    // const token = (getState() as RootState).auth.accessTokenn || localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+    return headers;
+  },
 });
 
 export const baseApi = createApi({
-	reducerPath: "baseApi",
-	baseQuery,
-	tagTypes: [
-		"Cart",
-        "CartSync",
-        "Wishlist",
-        "Category",
-        "Product",
-        "Review",
-        "User",
-        "Order",
-	],
-	endpoints: () => ({}),
+  reducerPath: "baseApi",
+  baseQuery: rawBaseQuery,
+  tagTypes: [
+    "Cart",
+    "CartSync",
+    "Wishlist",
+    "Category",
+    "Material",
+    "Fragrance",
+    "Product",
+    "Review",
+    "Auth",
+    "User",
+    "Order",
+  ],
+  endpoints: () => ({}),
 });
 
 export default baseApi;
