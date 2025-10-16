@@ -6,6 +6,7 @@ import baseApi from './api/baseApi';
 import cartReducer from './features/cart/cartSlice';
 import wishlistReducer from './features/wishlist/wishlistSlice';
 import authReducer from './features/auth/authSlice';
+import ordersReducer from './features/orders/ordersSlice';
 
 // Persist config for cart, wishlist, and auth
 const persistConfig: PersistConfig<any> = {
@@ -35,15 +36,17 @@ const persistConfig: PersistConfig<any> = {
 };
 
 // Wrap reducers with persistReducer
-const persistedCartReducer = persistReducer(persistConfig, cartReducer);
-const persistedWishlistReducer = persistReducer(persistConfig, wishlistReducer);
 const persistedAuthReducer = persistReducer(persistConfig, authReducer);
+const persistedCartReducer = persistReducer(persistConfig, cartReducer);
+const persistedOrderReducer = persistReducer(persistConfig, ordersReducer);
+const persistedWishlistReducer = persistReducer(persistConfig, wishlistReducer);
 
 export const store = configureStore({
   reducer: {
+    auth: persistedAuthReducer,
+    orders: persistedOrderReducer,
     cart: persistedCartReducer,
     wishlist: persistedWishlistReducer,
-    auth: persistedAuthReducer,
     [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>

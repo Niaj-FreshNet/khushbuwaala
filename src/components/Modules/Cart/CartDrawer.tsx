@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
 import Image from "next/image"
-import { useCart } from "@/context/CartContext"
+import { useCart } from "@/redux/store/hooks/useCart"
 
 
 // Use real cart from store
@@ -28,6 +28,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
     removeFromCart: () => { },
     calculateSubtotal: () => 0,
   }
+  // console.log(cartItems)
 
   const totalItems = Array.isArray(cartItems)
     ? cartItems.reduce((sum: number, item: any) => sum + (item?.quantity || 0), 0)
@@ -74,75 +75,78 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
           <ScrollArea className="flex-1 px-6 py-4 overflow-auto">
             {totalItems > 0 ? (
               <div className="space-y-4">
-                {cartItems.map((item: any, index: number) => (
-                  <div
-                    key={`${item._id}-${item.size}-${index}`}
-                    className="group p-4 border border-gray-200 rounded-xl hover:border-red-200 hover:shadow-md transition-all duration-300 bg-white"
-                  >
-                    <div className="flex items-start gap-4">
-                      {/* Enhanced Product Image */}
-                      <div className="relative w-20 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 group-hover:shadow-lg transition-shadow duration-300">
-                        <Image
-                          src={item.primaryImage || "/placeholder.svg?height=96&width=80"}
-                          alt={item.name}
-                          fill
-                          sizes="80px"
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      </div>
-
-                      {/* Enhanced Product Details */}
-                      <div className="flex-1 space-y-2">
-                        <h4 className="font-semibold text-sm leading-tight text-gray-900 group-hover:text-red-600 transition-colors duration-300">
-                          {item.name}
-                        </h4>
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
-                            <span>Size: {item.size}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-6 w-6 p-0 rounded-full hover:bg-red-50 hover:border-red-200 bg-transparent"
-                              onClick={() => updateQuantity(item._id, item.size, Math.max(1, item.quantity - 1))}
-                              disabled={item.quantity <= 1}
-                              aria-label="Decrease quantity"
-                            >
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <span className="font-medium text-gray-900 min-w-[20px] text-center">{item.quantity}</span>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-6 w-6 p-0 rounded-full hover:bg-red-50 hover:border-red-200 bg-transparent"
-                              onClick={() => updateQuantity(item._id, item.size, item.quantity + 1)}
-                              aria-label="Increase quantity"
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </div>
+                {cartItems.map((item: any, index: number) => {
+                  return (
+                    <div
+                      key={`${item.product?.id}-${item.selectedSize}-${index}`}
+                      className="group p-4 border border-gray-200 rounded-xl hover:border-red-200 hover:shadow-md transition-all duration-300 bg-white"
+                    >
+                      <div className="flex items-start gap-4">
+                        {/* Enhanced Product Image */}
+                        <div className="relative w-20 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 group-hover:shadow-lg transition-shadow duration-300">
+                          <Image
+                            src={item.product?.primaryImage || "/placeholder.svg?height=96&width=80"}
+                            alt={item.product?.name}
+                            fill
+                            sizes="80px"
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <p className="font-bold text-red-600">
-                            ৳{(((item?.variantPrices?.[item?.size]) || item?.price || 0) * (item?.quantity || 1)).toFixed(2)} BDT
-                          </p>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full p-2"
-                            onClick={() => removeFromCart(item._id, item.size)}
-                            aria-label="Remove from cart"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+
+                        {/* Enhanced Product Details */}
+                        <div className="flex-1 space-y-2">
+                          <h4 className="font-semibold text-sm leading-tight text-gray-900 group-hover:text-red-600 transition-colors duration-300">
+                            {item.product?.name}
+                          </h4>
+                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                            <div className="flex items-center gap-1">
+                              <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
+                              <span>Size: {item.selectedSize}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-6 w-6 p-0 rounded-full hover:bg-red-50 hover:border-red-200 bg-transparent"
+                                onClick={() => updateQuantity(item.product?.id, item.selectedSize, Math.max(1, item.quantity - 1), item.product?.name, item.cartItemId)}
+                                disabled={item.quantity <= 1}
+                                aria-label="Decrease quantity"
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <span className="font-medium text-gray-900 min-w-[20px] text-center">{item.quantity}</span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-6 w-6 p-0 rounded-full hover:bg-red-50 hover:border-red-200 bg-transparent"
+                                onClick={() => updateQuantity(item.product?.id, item.selectedSize, item.quantity + 1, item.product?.name, item.cartItemId)}
+                                aria-label="Increase quantity"
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <p className="font-bold text-red-600">
+                              {/* ৳{((item?.selectedPrice || 0) * (item?.quantity || 1)).toFixed(2)} BDT */}
+                              ৳{((item.selectedPrice || 0) * (item?.quantity || 1)).toFixed(2)} BDT
+                            </p>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full p-2"
+                              onClick={() => removeFromCart(item.product?.id, item.selectedSize, item.product?.name, item.cartItemId)}
+                              aria-label="Remove from cart"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center text-center py-16">
@@ -180,7 +184,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
                   <span className="text-xs text-gray-500">{totalItems} {totalItems === 1 ? "item" : "items"}</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-2xl font-bold text-red-600">৳{calculateSubtotal()?.toFixed(2)}</span>
+                  <span className="text-2xl font-bold text-red-600">৳{calculateSubtotal().toFixed(2)}</span>
                   <span className="text-sm text-gray-600 block">BDT</span>
                 </div>
               </div>

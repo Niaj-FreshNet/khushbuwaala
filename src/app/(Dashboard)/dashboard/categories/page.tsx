@@ -40,12 +40,16 @@ export default function CategoryList() {
 
     // ✅ Dummy sizes array to render map
     const sizes = [
-        { id: '30', size: '30 ML' },
-        { id: '50', size: '50 ML' },
-        { id: '75', size: '75 ML' },
-        { id: '100', size: '100 ML' },
-        { id: '150', size: '150 ML' },
-    ];
+            { id: '3', size: '3' },
+            { id: '6', size: '6' },
+            { id: '10', size: '10' },
+            { id: '12', size: '12' },
+            { id: '15', size: '15' },
+            { id: '25', size: '25' },
+            { id: '30', size: '30' },
+            { id: '50', size: '50' },
+            { id: '100', size: '100' },
+        ];
 
     const allCategories = data?.data?.data || [];
     const meta = data?.data?.meta;
@@ -95,7 +99,7 @@ export default function CategoryList() {
                 formData.append('image', imageFile);
                 formData.append('published', JSON.stringify(data.published));
                 formData.append('sizes', JSON.stringify(data.sizes.map((s) => s.toLowerCase())));
-                // formData.append('specification', data.specification);
+                formData.append('unit', data.unit);
                 if (editingCategory?.imageUrl) {
                     formData.append('existingImageUrl', editingCategory.imageUrl);
                 }
@@ -162,6 +166,7 @@ export default function CategoryList() {
                         <TableHead>Name</TableHead>
                         <TableHead>Image</TableHead>
                         <TableHead>Sizes</TableHead>
+                        <TableHead>Unit</TableHead>
                         <TableHead>Publish</TableHead>
                         <TableHead>Actions</TableHead>
                     </TableRow>
@@ -180,6 +185,7 @@ export default function CategoryList() {
                                 />
                             </TableCell>
                             <TableCell>{category.sizes?.join(', ')}</TableCell>
+                            <TableCell>{category.unit}</TableCell>
                             <TableCell>
                                 <Switch
                                     checked={category.published}
@@ -224,7 +230,7 @@ export default function CategoryList() {
                         defaultValues={{
                             categoryName: editingCategory?.categoryName || '',
                             sizes: editingCategory?.sizes || [],
-                            // specification: editingCategory?.specification,
+                            unit: editingCategory?.unit,
                             published: editingCategory?.published || false,
                         }}
                         onSubmit={handleUpdate}
@@ -254,18 +260,18 @@ export default function CategoryList() {
                             // options={['30 ML', '50 ML', '100 ML']}
                             options={sizes.map(f => ({ label: f.size, value: f.id }))}
                         />
-                        {/* <FormInput
-                            name="specification"
-                            label="Specification"
+                        <FormInput
+                            name="unit"
+                            label="Unit"
                             type="select"
                             required
                             options={[
-                                { value: 'male', label: 'Male' },
-                                { value: 'female', label: 'Female' },
-                                { value: 'unisex', label: 'Unisex' },
+                                { value: 'ML', label: 'ML' },
+                                { value: 'GM', label: 'GM' },
+                                { value: 'PIECE', label: 'PIECE' },
                             ]}
                             inputClassName="border-orange-400 focus:ring-orange-300"
-                        /> */}
+                        />
                         <div>
                             <label className="text-sm font-medium text-gray-700">Category Image <span className="text-red-500">*</span></label>
                             <div className="mt-1 border-2 border-dashed border-orange-400 rounded-md p-4 text-center">

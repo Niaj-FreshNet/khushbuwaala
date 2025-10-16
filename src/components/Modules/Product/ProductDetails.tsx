@@ -43,17 +43,34 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
   const setQuantity = selection?.setQuantity ?? setFallbackQuantity;
 
   const selectedSize = selection?.selectedVariant
-  ? `${selection.selectedVariant.size} ${selection.selectedVariant.unit.toLowerCase()}`
-  : fallbackSelectedSize;
+    ? `${selection.selectedVariant.size} ${selection.selectedVariant.unit.toLowerCase()}`
+    : fallbackSelectedSize;
 
-const setSelectedSize = (size: string) => {
-  if (!selection) return setFallbackSelectedSize(size);
+  const price = selection?.selectedVariant
+    ? `${selection.selectedVariant.price}`
+    : 0;
 
-  const variant = product.variants?.find(
-    (v) => `${v.size} ${v.unit.toLowerCase()}` === size
-  );
-  if (variant) selection.setSelectedVariant(variant);
-};
+  const selectedPrice = Number(price)
+  // console.log(selectedPrice)
+
+  // 🧩 Dynamically find the selected variant and its price
+  // const selectedVariant =
+  //   product.variants?.find(
+  //     (v) => `${v.size} ${v.unit.toLowerCase()}` === selectedSize
+  //   ) || null;
+
+  // const selectedPrice = selectedVariant?.price ?? 0; // ✅ selected variant price (default 0 if none found)
+  // console.log('selectedPrice: ', selectedPrice) ///showing the price in console
+
+  const setSelectedSize = (size: string) => {
+    if (!selection) return setFallbackSelectedSize(size);
+
+    const variant = product.variants?.find(
+      (v) => `${v.size} ${v.unit.toLowerCase()}` === size
+    );
+    if (variant) selection.setSelectedVariant(variant);
+  };
+
   // const isWishlisted = wishlist?.isInWishlist(product._id) ?? (selection?.isWishlisted ?? fallbackIsWishlisted);
   // const toggleWishlist = () => {
   //   if (wishlist) {
@@ -132,15 +149,22 @@ const setSelectedSize = (size: string) => {
 
 
 
-  const totalVariantStock = product.variants?.reduce(
-    (sum, v) => sum + (v.stock ?? 0),
-    0
-  );
+  // const totalVariantStock = product.variants?.reduce(
+  //   (sum, v) => sum + (v.stock ?? 0),
+  //   0
+  // );
 
-  const isOutOfStock = (product.stock ?? 0) <= 0 || (totalVariantStock ?? 0) <= 0;
+  // const isOutOfStock = (product.totalStock ?? 0) <= 0 || (totalVariantStock ?? 0) <= 0;
+  const isOutOfStock = (product.totalStock ?? 0) <= 0;
+
+  const handleAddToCart = async () => {
+    if (isOutOfStock) return;
+    cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
+  };
+
 
   return (
-    <div className="space-y-8 lg:space-y-10">
+    <div className="space-y-8 lg:space-y-10">``
       {/* Header Section */}
       <div className="space-y-6">
         {/* Brand and Category Tags */}
@@ -342,22 +366,26 @@ const setSelectedSize = (size: string) => {
                 </div>
               )}
               <div className="text-center">
-                <div className="font-bold text-lg mb-1">{size}</div>
+                <div className="font-bold text-lg">{size}</div>
                 {/* {product.variantPrices?.[size] && (
                   <div className={`text-sm font-medium ${selectedSize === size ? 'text-blue-600' : 'text-gray-500'
                     }`}>
                     ৳{product.variantPrices[size].toLocaleString()}
                   </div>
                 )} */}
-                {product.variants?.map(v => (
-                  <div
-                    key={v.id}
-                    className={`text-sm font-medium ${selectedSize === `${v.size} ${v.unit.toLowerCase()}` ? "text-blue-600" : "text-gray-500"
-                      }`}
-                  >
-                    ৳{v.price.toLocaleString()}
-                  </div>
-                ))}
+                {/* {product.variants
+                  ?.filter(v => `${v.size} ${v.unit.toLowerCase()}` === selectedSize)
+                  .map(v => (
+                    <div
+                      key={v.id}
+                      className={`text-sm font-medium ${selectedSize === `${v.size} ${v.unit.toLowerCase()}`
+                          ? 'text-blue-600'
+                          : 'text-gray-500'
+                        }`}
+                    >
+                      ৳{v.price.toLocaleString()}
+                    </div>
+                  ))} */}
               </div>
             </button>
           ))}
@@ -450,17 +478,13 @@ const setSelectedSize = (size: string) => {
       <div id="action-buttons" className="space-y-6">
         {/* Primary CTA */}
         <Button
-          size="xl"
+          // size="xl"
           disabled={isOutOfStock}
           className={`w-full h-16 text-xl font-bold shadow-2xl transform transition-all duration-300 hover:scale-[1.02] ${isOutOfStock
             ? "bg-gray-400 cursor-not-allowed"
             : "bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-800 text-white border-0 shadow-blue-500/30 hover:shadow-blue-600/50"
             } rounded-2xl`}
-          onClick={() => {
-            if (!isOutOfStock) {
-              cart?.addToCart?.(product as any, quantity, selectedSize)
-            }
-          }}
+          onClick={handleAddToCart}
         >
           <ShoppingCart className="w-6 h-6 mr-3" />
           {isOutOfStock ? "Out of Stock" : "Add to Cart"}
@@ -496,12 +520,12 @@ const setSelectedSize = (size: string) => {
 
         {/* Buy Now Button */}
         <Button
-          size="xl"
+          // size="xl"
           disabled={isOutOfStock}
           className="w-full h-16 text-xl font-bold bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white shadow-2xl shadow-orange-500/30 hover:shadow-orange-600/50 transform transition-all duration-300 hover:scale-[1.02] border-0 rounded-2xl"
           onClick={() => {
             if (!isOutOfStock) {
-              cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize)
+              cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize, selectedPrice)
               // Navigate to checkout is handled by pages that observe checkoutMode
             }
           }}

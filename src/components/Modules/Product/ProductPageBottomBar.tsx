@@ -35,6 +35,12 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
         ? `${selection.selectedVariant.size} ${selection.selectedVariant.unit.toLowerCase()}`
         : fallbackSelectedSize;
 
+  const price = selection?.selectedVariant
+    ? `${selection.selectedVariant.price}`
+    : 0;
+
+  const selectedPrice = Number(price)
+
     const setSelectedSize = (size: string) => {
         if (!selection) return setFallbackSelectedSize(size);
 
@@ -107,12 +113,18 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
 
 
 
-    const totalVariantStock = product.variants?.reduce(
-        (sum, v) => sum + (v.stock ?? 0),
-        0
-    );
+    // const totalVariantStock = product.variants?.reduce(
+    //   (sum, v) => sum + (v.stock ?? 0),
+    //   0
+    // );
 
-    const isOutOfStock = (product.stock ?? 0) <= 0 || (totalVariantStock ?? 0) <= 0;
+    // const isOutOfStock = (product.totalStock ?? 0) <= 0 || (totalVariantStock ?? 0) <= 0;
+    const isOutOfStock = (product.totalStock ?? 0) <= 0;
+
+  const handleAddToCart = async () => {
+    if (isOutOfStock) return;
+    cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
+  };
 
     return (
         <>
@@ -182,7 +194,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                     className="flex items-center gap-3 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white py-4 px-8 rounded-2xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]"
                                     onClick={() => {
                                         if (!isOutOfStock) {
-                                            cart?.addToCart?.(product as any, quantity, selectedSize)
+                                            cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice)
                                         }
                                     }}
                                 >
@@ -194,7 +206,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                     disabled={isOutOfStock}
                                     onClick={() => {
                                         if (!isOutOfStock) {
-                                            cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize)
+                                            cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize, selectedPrice)
                                         }
                                     }}
                                     className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white py-4 px-8 rounded-2xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
@@ -211,11 +223,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                         <div className="flex items-center gap-3 mb-4">
                             <button
                                 disabled={isOutOfStock}
-                                onClick={() => {
-                                    if (!isOutOfStock) {
-                                        cart?.addToCart?.(product as any, quantity, selectedSize)
-                                    }
-                                }}
+                                onClick={handleAddToCart}
                                 className="flex-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white py-4 px-4 rounded-2xl font-bold text-center shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation active:scale-95 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                             >
                                 <ShoppingCart className="w-5 h-5" />
@@ -257,7 +265,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                 disabled={isOutOfStock}
                                 onClick={() => {
                                     if (!isOutOfStock) {
-                                        cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize)
+                                        cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize, selectedPrice)
                                     }
                                 }}
                                 className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white py-3 px-8 rounded-2xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation active:scale-95 flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"

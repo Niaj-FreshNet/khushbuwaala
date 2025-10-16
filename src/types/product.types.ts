@@ -25,6 +25,14 @@ export interface IProductVariant {
   updatedAt?: string;
 }
 
+export interface VariantForForm extends Omit<IProductVariant, "size"> {
+  size: string; // force size to be string here
+  price: number;
+  stock?: number;
+  unit: string;
+  sku: string;
+}
+
 // Product Creation Interface
 export interface IProduct {
   id: string;
@@ -55,6 +63,7 @@ export interface IProduct {
   categoryId: string;
   published: boolean;
 
+  supplier: string;
   stock?: number; // float at product-level
   variants: IProductVariant[];
   discounts?: IDiscount[]; // product-level discounts
@@ -140,7 +149,7 @@ export interface IProductResponse {
   // Perfume specifications
   origin?: string;
   brand?: string;
-  gender?: string;
+  gender?: 'UNISEX' | 'MALE' | 'FEMALE';
   perfumeNotes?: {
     top: string[];
     middle: string[];
@@ -159,6 +168,10 @@ export interface IProductResponse {
     imageUrl: string;
   };
 
+  materialIds: string[];
+  fragranceIds: string[];
+
+  supplier: string;
   stock?: number;
   variants: IProductVariantResponse[];
   discounts?: IDiscount[];
@@ -180,7 +193,7 @@ export interface IProductVariantResponse {
   size: number;
   price: number;
   stock?: number;
-  productId: string;
+  productId?: string;
   createdAt: Date;
   updatedAt: Date;
 }

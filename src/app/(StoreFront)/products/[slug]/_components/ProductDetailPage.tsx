@@ -59,7 +59,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
     //   const { data: product, isLoading, isError } = useGetProductBySlugQuery(slug, {
     //     skip: !slug,
     //   });
-    console.log("product:", product);
+    // console.log("product:", product);
 
     if (!product) {
         return (

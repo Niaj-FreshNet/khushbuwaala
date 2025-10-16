@@ -39,7 +39,7 @@ export function ProductSelectionProvider({
 }) {
   const defaultVariant = useMemo(() => getDefaultVariant(product), [product]);
   // console.log("product:>>>", product);
-  console.log("defaultVariant:", defaultVariant);
+  // console.log("defaultVariant:", defaultVariant);
 
   const [selectedVariant, setSelectedVariant] = useState<IProductVariant | null>(
     defaultVariant

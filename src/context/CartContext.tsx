@@ -1,38 +1,62 @@
-"use client"
+"use client";
 
-import { createContext, useContext, type ReactNode } from "react"
-import { useCart as useReduxCart } from "@/redux/store/hooks/useCart"
-import type { CartItem } from "@/redux/store/features/cart/cartSlice"
-import type { IProductResponse } from "@/types/product.types"
+import { createContext, useContext, type ReactNode, useCallback } from "react";
+import { useCart as useReduxCart } from "@/redux/store/hooks/useCart";
+import type { IProductResponse } from "@/types/product.types";
+import type { CartItem } from "@/redux/store/features/cart/cartSlice";
 
 interface CartContextType {
-  cartItems: CartItem[]
-  checkoutItem: CartItem | null
-  checkoutMode: boolean
-  addToCart: (product: IProductResponse, quantity: number, selectedSize: string) => void
-  removeFromCart: (productId: string, size: string) => void
-  updateQuantity: (productId: string, size: string, quantity: number) => void
-  calculateSubtotal: () => number
-  calculateTotal: () => number
-  setCheckoutOnlyItem: (product: IProductResponse, quantity: number, size: string) => void
-  proceedToCartCheckout: () => void
-  clearCart: () => void
+  cartItems: CartItem[];
+  checkoutItem: CartItem | null;
+  checkoutMode: boolean;
+  addToCart: (
+    product: IProductResponse,
+    quantity: number,
+    selectedSize: string,
+    selectedPrice: number
+  ) => void;
+  removeFromCart: (productId: string, size: string) => void;
+  updateQuantity: (productId: string, size: string, quantity: number) => void;
+  calculateSubtotal: () => number;
+  calculateTotal: () => number;
+  setCheckoutOnlyItem: (
+    product: IProductResponse,
+    quantity: number,
+    size: string
+  ) => void;
+  proceedToCartCheckout: () => void;
+  clearCart: () => void;
 }
 
-const CartContext = createContext<CartContextType | undefined>(undefined)
+const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Compatibility wrapper that bridges Context API to Redux
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const reduxCart = useReduxCart() // ✅ comes from slice
+  const reduxCart = useReduxCart(); // from your redux slice
+
+  // ✅ Recalculate subtotal with selectedPrice
+  const calculateSubtotal = useCallback(() => {
+    return reduxCart.cartItems.reduce((total, item) => {
+      const price = item.selectedPrice ?? 0;
+      return total + price * item.quantity;
+    }, 0);
+  }, [reduxCart.cartItems]);
+
+  const calculateTotal = useCallback(() => calculateSubtotal(), [calculateSubtotal]);
 
   return (
-    <CartContext.Provider value={reduxCart}>
+    <CartContext.Provider
+      value={{
+        ...reduxCart,
+        calculateSubtotal,
+        calculateTotal,
+      }}
+    >
       {children}
     </CartContext.Provider>
-  )
-}
+  );
+};
 
 export const useCart = () => {
-  const context = useContext(CartContext)
-  return context || useReduxCart()
-}
+  const context = useContext(CartContext);
+  return context || useReduxCart();
+};

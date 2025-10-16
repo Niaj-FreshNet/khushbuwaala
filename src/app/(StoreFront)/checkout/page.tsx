@@ -19,17 +19,53 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ShieldCheck, Truck, CreditCard, Percent, Info, Phone } from "lucide-react"
 import { toast } from "sonner"
-
-import { useCart } from "@/lib/store/hooks/useCart"
-import { useCreateOrderMutation } from "@/redux/store/api/order/ordersApi"
-import { useAppDispatch } from "@/lib/store/hooks"
-import { setOrder } from "@/lib/store/features/orders/ordersSlice"
+import { useAppDispatch } from "@/redux/store/hooks"
+import { useCart } from "@/redux/store/hooks/useCart"
+import { useOrder } from "@/redux/store/hooks/useOrder"
 import StoreContainer from "@/components/Layout/StoreContainer"
 
+// --- Types ---
 type ShippingMethod = "insideDhaka" | "outsideDhaka"
 type PaymentMethod = "sslCommerz" | "cashOnDelivery"
 type BillingType = "sameAsShipping" | "differentBillingAddress"
 
+interface CartItem {
+  id: string
+  quantity: number
+  selectedSize?: string
+  product?: {
+    id: string
+    name: string
+    primaryImage: string
+    variants?: { size: number; unit: string; price: number }[]
+  }
+}
+
+interface IOrderPayload {
+  cartItemIds: string[]
+  amount: number
+  isPaid?: boolean
+  orderSource?: "WEBSITE"
+  saleType?: "SINGLE"
+  customerInfo?: {
+    name?: string
+    phone?: string
+    email?: string
+    address?: string
+  }
+}
+
+interface IOrderResponse {
+  id: string
+  amount: number
+  isPaid: boolean
+  status: string
+  orderSource: string
+  createdAt: string
+  updatedAt: string
+}
+
+// --- Districts ---
 const districts = [
   "Bagerhat", "Bandarban", "Barguna", "Barishal", "Bhola", "Bogura", "Brahmanbaria", "Chandpur",
   "Chattogram", "Chuadanga", "Cox's Bazar", "Cumilla", "Dhaka", "Dinajpur", "Faridpur", "Feni",
@@ -44,11 +80,11 @@ const districts = [
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { cartItems, calculateSubtotal, checkoutMode, checkoutItem, clearCart } = useCart()
-  const [createOrder, { isLoading: isPlacingOrder }] = useCreateOrderMutation()
+  const { cartItems, calculateSubtotal, clearCart } = useCart()
   const dispatch = useAppDispatch()
+  const { handleCreateOrder, loading: isPlacingOrder } = useOrder()
 
-  // UI state
+  // --- UI state ---
   const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false)
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod>("insideDhaka")
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cashOnDelivery")
@@ -56,23 +92,22 @@ export default function CheckoutPage() {
   const [selectedDistrict, setSelectedDistrict] = useState<string | undefined>(undefined)
   const [customThana, setCustomThana] = useState("")
 
-  // Form state
+  // --- Form state ---
   const [name, setName] = useState("")
   const [address, setAddress] = useState("")
   const [contactNumber, setContactNumber] = useState("")
   const [email, setEmail] = useState("")
   const [notes, setNotes] = useState("")
 
-  // UX state
   const [agreeToTerms, setAgreeToTerms] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Promotions
+  // --- Promotions ---
   const [promoCode, setPromoCode] = useState("")
   const [appliedPromoCode, setAppliedPromoCode] = useState<string | null>(null)
   const [discount, setDiscount] = useState(0)
 
-  // Billing details (when different)
+  // --- Billing details ---
   const [billingName, setBillingName] = useState("")
   const [billingAddress, setBillingAddress] = useState("")
   const [billingDistrict, setBillingDistrict] = useState("")
@@ -80,19 +115,17 @@ export default function CheckoutPage() {
   const [billingContactNumber, setBillingContactNumber] = useState("")
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.scrollTo(0, 0)
-    }
+    if (typeof window !== "undefined") window.scrollTo(0, 0)
   }, [])
 
-  const itemsToDisplay = useMemo(() => {
-    return checkoutMode && checkoutItem ? [checkoutItem] : cartItems
-  }, [checkoutMode, checkoutItem, cartItems])
+  // --- Items to display ---
+  const itemsToDisplay = useMemo(() => cartItems, [cartItems])
 
+  // --- Shipping & totals ---
   const shippingCost = useMemo(() => (shippingMethod === "outsideDhaka" ? 110 : 50), [shippingMethod])
-  const subtotal = useMemo(() => calculateSubtotal(), [calculateSubtotal])
+  const subtotal = calculateSubtotal()
   const estimatedTaxes = 0
-  const discountedSubtotal = useMemo(() => Math.max(0, subtotal - discount), [subtotal, discount])
+  const discountedSubtotal = Math.max(0, subtotal - discount)
   const total = discountedSubtotal + estimatedTaxes + shippingCost
 
   const formatBDT = (amount: number) =>
@@ -105,48 +138,38 @@ export default function CheckoutPage() {
       .replace("BDT", "৳")
       .trim()
 
+  // --- Validation ---
   const validateForm = () => {
     const nextErrors: Record<string, string> = {}
     if (!name.trim()) nextErrors.name = "Please enter your full name."
     if (!address.trim()) nextErrors.address = "Please enter your full address."
     if (!selectedDistrict) nextErrors.district = "Please select your district."
-    const phone = contactNumber.replace(/\D/g, "")
-    if (phone.length < 10) nextErrors.contactNumber = "Please enter a valid phone number."
+    if (contactNumber.replace(/\D/g, "").length < 10)
+      nextErrors.contactNumber = "Please enter a valid phone number."
     setErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
   }
 
+  // --- Promo code ---
   const applyPromo = () => {
-    if (!promoCode.trim()) {
-      toast.error("Enter a promo code to apply")
-      return
-    }
+    if (!promoCode.trim()) return toast.error("Enter a promo code")
     if (appliedPromoCode) {
       setAppliedPromoCode(null)
       setDiscount(0)
       setPromoCode("")
-      toast.success("Promo removed")
-      return
+      return toast.success("Promo removed")
     }
     const code = promoCode.trim().toUpperCase()
     let newDiscount = 0
-    if (code === "WELCOME10") {
-      newDiscount = Math.min(subtotal * 0.1, 300)
-    } else if (code === "SAVE100") {
-      newDiscount = 100
-    } else {
-      toast.error("Invalid promo code")
-      return
-    }
-    if (subtotal <= 0) {
-      toast.error("Your cart is empty")
-      return
-    }
+    if (code === "WELCOME10") newDiscount = Math.min(subtotal * 0.1, 300)
+    else if (code === "SAVE100") newDiscount = 100
+    else return toast.error("Invalid promo code")
     setAppliedPromoCode(code)
     setDiscount(newDiscount)
     toast.success(`Promo applied: -${formatBDT(newDiscount)}`)
   }
 
+  // --- Submit order ---
   const handleSubmit = async () => {
     if (!validateForm()) {
       toast.error("Please fix the highlighted fields")
@@ -157,47 +180,31 @@ export default function CheckoutPage() {
       return
     }
 
-    const orderDetails = {
-      cartItems: itemsToDisplay,
-      subtotal,
-      discount,
-      shippingCost,
-      estimatedTaxes,
-      total,
-      paymentMethod,
-      shippingMethod,
-      postStatus: "Pending",
-      paymentStatus: paymentMethod === "cashOnDelivery" ? "Due" : "Paid",
-      notes,
-      promoCode: appliedPromoCode,
-      contactInfo: { email },
-      shippingAddress: {
+    const cartItemIds = itemsToDisplay
+      .map((item) => item.cartItemId)
+      .filter(Boolean) as string[] // ensure only valid strings
+
+    const payload: IOrderPayload = {
+      cartItemIds,
+      amount: total,
+      isPaid: paymentMethod !== "cashOnDelivery",
+      orderSource: "WEBSITE",
+      saleType: "SINGLE",
+      customerInfo: {
         name,
+        phone: contactNumber,
+        email,
         address,
-        district: selectedDistrict as string,
-        thana: customThana,
-        contactNumber,
       },
-      billingAddress:
-        billingType === "sameAsShipping"
-          ? { name, address, district: selectedDistrict as string, thana: customThana, contactNumber }
-          : {
-            name: billingName,
-            address: billingAddress,
-            district: billingDistrict,
-            thana: billingThana,
-            contactNumber: billingContactNumber,
-          },
     }
 
     try {
-      const data = await createOrder(orderDetails).unwrap()
-      dispatch(setOrder({ ...orderDetails, orderId: data.orderId, createdAt: new Date().toISOString() }))
+      const res: IOrderResponse = await handleCreateOrder(payload)
       clearCart()
-      router.push(`/thank-you?orderId=${encodeURIComponent(data.orderId)}`)
+      router.push(`/thank-you?order=${encodeURIComponent(res.data.id)}`)
     } catch (err) {
       console.error(err)
-      alert("Failed to complete the order. Please try again.")
+      toast.error("Failed to place order. Please try again.")
     }
   }
 
@@ -239,21 +246,19 @@ export default function CheckoutPage() {
               <Card>
                 <CardContent className="p-4 space-y-3">
                   {itemsToDisplay.map((product, idx) => {
-                    const unit = product.variantPrices?.[product.size] ?? product.price ?? 0
-                    const line = unit * product.quantity
                     return (
-                      <div key={`${product._id}-${product.size}-${idx}`} className="flex items-start gap-3">
+                      <div key={`${product.product?.id}-${product.selectedSize}-${idx}`} className="flex items-start gap-3">
                         <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100">
-                          <Image src={product.primaryImage} alt={product.name} fill className="object-cover" />
+                          <Image src={product.product?.primaryImage} alt={product.product?.name} fill className="object-cover" />
                           <div className="absolute -top-2 -right-2 text-xs bg-gray-200 text-black rounded-full px-2 py-0.5">
                             {product.quantity}
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{product.name}</p>
-                          <p className="text-xs text-gray-500">Size: {product.size}</p>
+                          <p className="text-sm font-medium truncate">{product.product?.name}</p>
+                          <p className="text-xs text-gray-500">Size: {product.selectedSize}</p>
                         </div>
-                        <div className="text-sm font-medium">{formatBDT(line)}</div>
+                        <div className="text-sm font-medium">{formatBDT(subtotal)}</div>
                       </div>
                     )
                   })}
@@ -504,19 +509,24 @@ export default function CheckoutPage() {
                     </p>
                   )}
                 </RadioGroup>
-              
-              <div className="flex items-center gap-2 pt-2">
-                <Checkbox id="terms" checked={agreeToTerms} onCheckedChange={(v) => setAgreeToTerms(Boolean(v))} />
-                <label htmlFor="terms" className="text-sm text-gray-600">
-                  I agree to the Terms & Conditions and Privacy Policy
-                </label>
-              </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <Checkbox id="terms" checked={agreeToTerms} onCheckedChange={(v) => setAgreeToTerms(Boolean(v))} />
+                  <label htmlFor="terms" className="text-sm text-gray-600">
+                    I agree to the Terms & Conditions and Privacy Policy
+                  </label>
+                </div>
               </CardContent>
             </Card>
 
             <div className="space-y-3">
-              <Button onClick={handleSubmit} className="w-full h-14 text-lg font-bold" variant="gradient" disabled={isPlacingOrder || !agreeToTerms}>
-                {isPlacingOrder ? "Placing Order…" : "Complete Order"}
+              <Button
+                variant="default"
+                className="w-full h-14 text-lg font-bold"
+                onClick={handleSubmit}
+                disabled={isPlacingOrder}
+              >
+                {isPlacingOrder ? "Placing Order..." : "Complete Order"}
               </Button>
               <div className="flex items-center justify-center gap-6 text-xs text-gray-600">
                 <div className="flex items-center gap-1"><ShieldCheck className="h-3 w-3 text-green-600" /> SSL Secure</div>
@@ -536,19 +546,35 @@ export default function CheckoutPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
                     {itemsToDisplay.map((product, idx) => {
-                      const unit = product.variantPrices?.[product.size] ?? product.price ?? 0
-                      const line = unit * product.quantity
+
+                      // 🧩 Extract size and unit from selectedSize like "100 ml"
+                      const [sizeValue, sizeUnit] = product?.selectedSize?.split(" ") || [];
+
+                      // 🧩 Find the matching variant by size and unit
+                      const matchedVariant = product?.product?.variants?.find(
+                        (v: any) =>
+                          Number(v.size) === Number(sizeValue) &&
+                          v.unit?.toLowerCase() === sizeUnit?.toLowerCase()
+                      );
+
+                      // 🧩 Define selectedPrice from the matched variant
+                      const selectedPrice = matchedVariant?.price || 0;
+
+                      // const price = item.variantPrices?.[item.size] || item.price || 0
+                      const price = selectedPrice
+                      const line = price * product.quantity
+
                       return (
-                        <div key={`${product._id}-${product.size}-${idx}`} className="flex items-start gap-3">
+                        <div key={`${product.product?.id}-${product.selectedSize}-${idx}`} className="flex items-start gap-3">
                           <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100">
-                            <Image src={product.primaryImage} alt={product.name} fill className="object-cover" />
+                            <Image src={product.product?.primaryImage} alt={product.product?.name} fill className="object-cover" />
                             <div className="absolute -top-2 -right-2 text-xs bg-gray-200 text-black rounded-full px-2 py-0.5">
                               {product.quantity}
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{product.name}</p>
-                            <p className="text-xs text-gray-500">Size: {product.size}</p>
+                            <p className="text-sm font-medium truncate">{product.product?.name}</p>
+                            <p className="text-xs text-gray-500">Size: {product.selectedSize}</p>
                           </div>
                           <div className="text-sm font-medium">{formatBDT(line)}</div>
                         </div>

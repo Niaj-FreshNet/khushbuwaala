@@ -1,9 +1,16 @@
 'use client';
 
+import { ChangeEvent, useId } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { cn } from '@/lib/utils';
-import { ChangeEvent, useId } from 'react';
 import { LucideAlertCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 
 interface FormInputProps {
   name: string;
@@ -11,17 +18,21 @@ interface FormInputProps {
   type?: 'text' | 'number' | 'email' | 'password' | 'select' | 'file' | 'checkbox' | 'radio' | 'textarea';
   placeholder?: string;
   required?: boolean;
-  options?: { value: string; label: string }[]; // For select inputs
+  options?: { value: string; label: string }[];
   className?: string;
   inputClassName?: string;
   labelClassName?: string;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void; // ✅ added onChange
+  onChange?: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  accept?: string;
+  multiple?: boolean;
+  value?: string | number;
+  disabled?: boolean;
 }
 
 export default function FormInput({
   name,
   label,
-  type,
+  type = 'text',
   placeholder,
   required = false,
   options,
@@ -29,108 +40,137 @@ export default function FormInput({
   inputClassName,
   labelClassName,
   onChange,
+  accept,
+  multiple = false,
+  value,
+  disabled = false,
 }: FormInputProps) {
-  const {
-    register,
-    formState: { errors },
-    setValue,
-  } = useFormContext();
   const id = useId();
+  const { control, setValue, formState: { errors } } = useFormContext();
 
-  // Handle file input internally
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
-    if (files.length > 0) {
-      setValue(name, files); // update RHF form value
-    }
+    setValue(name, multiple ? files : files.length > 0 ? files[0] : null);
   };
 
-  const errorMessage = errors[name]?.message as string | undefined;
-
   return (
-    <div className={cn('flex flex-col gap-1', className)}>
-      {type !== 'checkbox' && type !== 'radio' && (
-        <label
-          htmlFor={id}
-          className={cn('text-sm font-medium text-gray-700', labelClassName)}
-        >
-          {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
-        </label>
-      )}
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className={cn('flex flex-col gap-2', className)}>
+          {label && type !== 'checkbox' && type !== 'radio' && (
+            <FormLabel className={cn('text-sm font-medium text-gray-700', labelClassName)}>
+              {label} {required && <span className="text-red-500 ml-1">*</span>}
+            </FormLabel>
+          )}
 
-      {type === 'select' ? (
-        <select
-          {...register(name, { required: required ? `${label} is required` : false })}
-          id={id}
-          className={cn(
-            'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500',
-            errors[name] ? 'border-red-500' : 'border-gray-300',
-            inputClassName
-          )}
-        >
-          <option value="" disabled>
-            {placeholder || `Select ${label}`}
-          </option>
-          {options?.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      ) : type === 'file' ? (
-        <input
-          type="file"
-          id={id}
-          accept="image/*"
-          onChange={(e) => {
-            handleFileChange(e); // internal handling
-            onChange?.(e);       // call external onChange if provided
-          }}
-          className={cn(
-            'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500',
-            errors[name] ? 'border-red-500' : 'border-gray-300',
-            inputClassName
-          )}
-        />
-      ) : type === 'checkbox' || type === 'radio' ? (
-        <div className="flex items-center gap-2">
-          <input
-            {...register(name, { required: required ? `${label} is required` : false })}
-            id={id}
-            type={type}
-            className={cn(
-              'w-4 h-4 rounded border-gray-300',
-              errors[name] ? 'border-red-500' : 'border-gray-300',
-              inputClassName
+          <FormControl>
+            {type === 'select' ? (
+              <Select
+                value={field.value}
+                onValueChange={(value) => field.onChange(value)}
+              >
+                <SelectTrigger
+                  id={id}
+                  className={cn(
+                    'w-full border border-gray-300 focus:ring-orange-500 focus:ring-2',
+                    errors[name] && 'border-red-500',
+                    inputClassName
+                  )}
+                >
+                  <SelectValue placeholder={placeholder || `Select ${label}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  {options?.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : type === 'textarea' ? (
+              <Textarea
+                {...field}
+                id={id}
+                placeholder={placeholder}
+                onChange={onChange || field.onChange}
+                className={cn(
+                  'resize-none border border-gray-300 focus:ring-2 focus:ring-orange-500',
+                  errors[name] && 'border-red-500',
+                  inputClassName
+                )}
+              />
+            ) : type === 'file' ? (
+              <Input
+                id={id}
+                type="file"
+                accept={accept || 'image/*'}
+                multiple={multiple}
+                onChange={(e) => {
+                  handleFileChange(e);
+                  onChange?.(e);
+                }}
+                className={cn(
+                  'cursor-pointer file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-orange-500 file:text-white hover:file:bg-orange-600',
+                  errors[name] ? 'border-red-500' : 'border-gray-300',
+                  inputClassName
+                )}
+              />
+            ) : type === 'checkbox' ? (
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id={id}
+                  checked={!!field.value}
+                  onCheckedChange={(checked) => field.onChange(checked)}
+                />
+                <Label htmlFor={id} className={cn('text-sm text-gray-700', labelClassName)}>
+                  {label}
+                </Label>
+              </div>
+            ) : type === 'radio' ? (
+              <RadioGroup
+                value={field.value}
+                onValueChange={(value) => field.onChange(value)}
+                className="flex gap-4"
+              >
+                {options?.map(opt => (
+                  <div key={opt.value} className="flex items-center gap-2">
+                    <RadioGroupItem id={`${id}-${opt.value}`} value={opt.value} />
+                    <Label htmlFor={`${id}-${opt.value}`} className="text-sm text-gray-700">
+                      {opt.label}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            ) : (
+              <Input
+                {...field}
+                id={id}
+                type={type}
+                placeholder={placeholder}
+                value={value ?? field.value}
+                disabled={disabled}
+                onChange={onChange || field.onChange}
+                className={cn(
+                  'border border-gray-300 focus:ring-2 focus:ring-orange-500',
+                  errors[name] && 'border-red-500',
+                  inputClassName
+                )}
+              />
             )}
-            onChange={onChange} // pass to external onChange
-          />
-          <label htmlFor={id} className={cn('text-sm text-gray-600', labelClassName)}>
-            {label}
-          </label>
-        </div>
-      ) : (
-        <input
-          {...register(name, { required: required ? `${label} is required` : false })}
-          id={id}
-          type={type}
-          placeholder={placeholder}
-          className={cn(
-            'w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500',
-            errors[name] ? 'border-red-500' : 'border-gray-300',
-            inputClassName
-          )}
-          onChange={onChange} // allow external change for other types too
-        />
-      )}
+          </FormControl>
 
-      {errorMessage && (
-        <div className="flex items-center gap-1 text-red-500 text-sm mt-1">
-          <LucideAlertCircle className="w-4 h-4" />
-          <span>{errorMessage}</span>
-        </div>
+          <FormMessage className="text-xs text-red-500 flex items-center gap-1">
+            {errors[name] && (
+              <>
+                <LucideAlertCircle className="w-4 h-4" />
+                {errors[name]?.message as string}
+              </>
+            )}
+          </FormMessage>
+        </FormItem>
       )}
-    </div>
+    />
   );
 }

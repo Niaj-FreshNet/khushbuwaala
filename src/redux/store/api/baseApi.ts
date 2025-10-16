@@ -6,10 +6,15 @@ const rawBaseQuery = fetchBaseQuery({
   credentials: "include", // allows cookies for refresh
   prepareHeaders: (headers, { getState }) => {
     // const token = (getState() as RootState).auth.accessTokenn || localStorage.getItem('accessToken');
-    const token = localStorage.getItem('accessToken');
+    const token =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('accessToken')
+        : null;
+
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
     }
+
     return headers;
   },
 });
@@ -29,6 +34,7 @@ export const baseApi = createApi({
     "Auth",
     "User",
     "Order",
+    "Sales",
   ],
   endpoints: () => ({}),
 });

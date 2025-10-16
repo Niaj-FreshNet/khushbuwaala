@@ -1,107 +1,129 @@
-// File: src/redux/api/orders/orderApi.ts
-import baseApi from "../baseApi"
-import { Order } from "@/types/order.types"
+import baseApi from '../../api/baseApi'
 
-interface CreateOrderResponse {
-  orderId: string
-  message?: string
+// Types
+export interface IOrderPayload {
+  cartItemIds: string[]
+  amount: number
+  isPaid?: boolean
+  orderSource?: 'WEBSITE' | 'ADMIN_PANEL'
+  customerInfo?: {
+    name?: string
+    phone?: string
+    email?: string
+    address?: string
+  }
 }
 
-interface GetOrdersParams {
-  page?: number
-  limit?: number
-  status?: string
-  startDate?: string
-  endDate?: string
-  search?: string
+export interface IOrderResponse {
+  id: string
+  amount: number
+  isPaid: boolean
+  status: string
+  orderSource: string
+  createdAt: string
+  updatedAt: string
+  customer?: {
+    id: string
+    name: string
+    imageUrl?: string
+  }
+  orderItems?: {
+    id: string
+    quantity: number
+    product?: {
+      id: string
+      name: string
+      primaryImage?: string
+    }
+    variant?: {
+      id: string
+      size?: string
+      price?: number
+    }
+  }[]
 }
 
-interface PaginatedOrders {
-  data: Order[]
-  total: number
-  page: number
-  limit: number
+export interface IPaginatedResponse<T> {
+  meta: {
+    page: number
+    limit: number
+    total: number
+  }
+  data: T[]
 }
 
 export const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // ✅ Create order (customer flow)
-    createOrder: builder.mutation<CreateOrderResponse, Partial<Order>>({
-      query: (order) => ({
-        url: "/order/create-order",
-        method: "POST",
-        body: order,
+    // ✅ Create order (customer or guest)
+    createOrder: builder.mutation<IOrderResponse, IOrderPayload>({
+      query: (body) => ({
+        url: '/order/create-order',
+        method: 'POST',
+        body,
       }),
-      invalidatesTags: ["Order"],
+      invalidatesTags: ['Order'],
     }),
 
-    // ✅ Admin: Get all orders (with pagination & filters)
-    getAllOrders: builder.query<PaginatedOrders, GetOrdersParams>({
-      query: ({ page = 1, limit = 10, status, startDate, endDate, search }) => {
-        const params = new URLSearchParams()
-
-        params.set("page", String(page))
-        params.set("limit", String(limit))
-
-        if (status) params.set("status", status)
-        if (startDate) params.set("startDate", startDate)
-        if (endDate) params.set("endDate", endDate)
-        if (search) params.set("search", search)
-
-        return `/order/get-all-orders?${params.toString()}`
-      },
-      providesTags: ["Order"],
+    // ✅ Get all orders (Admin)
+    getAllOrders: builder.query<IPaginatedResponse<IOrderResponse>, Record<string, any> | void>({
+      query: (params) => ({
+        url: '/order/get-all-orders',
+        params: params ?? undefined,
+      }),
+      providesTags: ['Order'],
     }),
 
-    // ✅ Admin: Get order by ID
-    getOrderById: builder.query<Order, string>({
+    // ✅ Get order by ID (Admin)
+    getOrderById: builder.query<IOrderResponse, string>({
       query: (id) => `/order/get-order-by-id/${id}`,
-      providesTags: (result, error, id) => [{ type: "Order", id }],
+      providesTags: (result, error, id) => [{ type: 'Order' as const, id }],
     }),
 
-    // ✅ Admin: Update order status
-    updateOrderStatus: builder.mutation<
-      { success: boolean; message: string },
-      { id: string; status: string }
-    >({
-      query: ({ id, status }) => ({
+    // ✅ Update order status (Admin)
+    updateOrderStatus: builder.mutation<IOrderResponse, { id: string; data: Record<string, any> }>({
+      query: ({ id, data }) => ({
         url: `/order/update-order-status/${id}`,
-        method: "PATCH",
-        body: { status },
+        method: 'PATCH',
+        body: data,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: "Order", id }],
+      invalidatesTags: ['Order'],
     }),
 
-    // ✅ Admin: Get all customers
-    getAllCustomers: builder.query<any[], void>({
-      query: () => "/order/get-all-customers",
+    // ✅ Get all customers (Admin)
+    getAllCustomers: builder.query<IPaginatedResponse<any>, Record<string, any> | void>({
+      query: (params) => ({
+        url: '/order/get-all-customers',
+        params: params ?? undefined,
+      }),
+      providesTags: ['User'],
     }),
 
-    // ✅ User: Get user orders by ID
-    getUserOrders: builder.query<Order[], string>({
-      query: (userId) => `/get-user-orders/${userId}`,
-      providesTags: ["Order"],
+    // ✅ Get all orders for a specific user (Admin view)
+    getUserOrders: builder.query<IOrderResponse[], string>({
+      query: (userId) => `/order/get-user-order/${userId}`,
+      providesTags: ['Order'],
     }),
 
-    // ✅ User: Get my orders
-    getMyOrders: builder.query<Order[], void>({
-      query: () => "/order/my-orders",
-      providesTags: ["Order"],
+    // ✅ Get logged-in user’s orders (User)
+    getMyOrders: builder.query<IOrderResponse[], void>({
+      query: () => '/order/my-orders',
+      providesTags: ['Order'],
     }),
 
-    // ✅ User: Get my order by ID
-    getMyOrderById: builder.query<Order, string>({
-      query: (id) => `/order/my-orders/${id}`,
-      providesTags: (result, error, id) => [{ type: "Order", id }],
+    // ✅ Get a single logged-in user’s order
+    getMyOrderById: builder.query<IOrderResponse, string>({
+      query: (id) => `/order/my-order/${id}`,
+      providesTags: (result, error, id) => [{ type: 'Order' as const, id }],
     }),
   }),
+  overrideExisting: true,
 })
 
-// Export hooks
 export const {
   useCreateOrderMutation,
   useGetAllOrdersQuery,
   useGetOrderByIdQuery,
+  useLazyGetOrderByIdQuery,
   useUpdateOrderStatusMutation,
   useGetAllCustomersQuery,
   useGetUserOrdersQuery,

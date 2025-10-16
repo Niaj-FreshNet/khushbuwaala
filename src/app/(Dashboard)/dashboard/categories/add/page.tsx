@@ -23,11 +23,15 @@ export default function AddCategoryPage() {
 
     // ✅ Dummy sizes array to render map
     const sizes = [
-        { id: '30', size: '30 ML' },
-        { id: '50', size: '50 ML' },
-        { id: '75', size: '75 ML' },
-        { id: '100', size: '100 ML' },
-        { id: '150', size: '150 ML' },
+        { id: '3', size: '3' },
+        { id: '6', size: '6' },
+        { id: '10', size: '10' },
+        { id: '12', size: '12' },
+        { id: '15', size: '15' },
+        { id: '25', size: '25' },
+        { id: '30', size: '30' },
+        { id: '50', size: '50' },
+        { id: '100', size: '100' },
     ];
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,7 +64,7 @@ export default function AddCategoryPage() {
             formData.append('image', file);
             formData.append('published', data.published.toString());
             formData.append('sizes', JSON.stringify(data.sizes.map((s) => s.toLowerCase())));
-            // formData.append('specification', data.specification);
+            formData.append('unit', data.unit);
 
             await addCategory(formData).unwrap();
             router.push('/dashboard/categories');
@@ -105,18 +109,18 @@ export default function AddCategoryPage() {
                                 // options={['30 ML', '50 ML', '100 ML']}
                                 options={sizes.map(f => ({ label: f.size, value: f.id }))}
                             />
-                            {/* <FormInput
-                                name="specification"
-                                label="Specification"
+                            <FormInput
+                                name="unit"
+                                label="Unit"
                                 type="select"
                                 required
                                 options={[
-                                    { value: 'male', label: 'Male' },
-                                    { value: 'female', label: 'Female' },
-                                    { value: 'unisex', label: 'Unisex' },
+                                    { value: 'ML', label: 'ML' },
+                                    { value: 'GM', label: 'GM' },
+                                    { value: 'PIECE', label: 'PIECE' },
                                 ]}
                                 inputClassName="border-orange-400 focus:ring-orange-300"
-                            /> */}
+                            />
                         </div>
                         <div>
                             <label className="text-sm font-medium text-gray-700">Category Image <span className="text-red-500">*</span></label>

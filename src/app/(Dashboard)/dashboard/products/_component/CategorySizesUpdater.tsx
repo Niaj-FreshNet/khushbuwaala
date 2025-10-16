@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { IProductVariant } from '@/types/product.types';
+import { VariantForForm } from '@/types/product.types';
 import { Category } from '@/types/category.types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,11 +13,12 @@ interface Props {
 
 interface FormValues {
   categoryId: string;
-  variants: IProductVariant[];
+  variants: VariantForForm[];
 }
 
 export default function CategorySizesUpdater({ categories, setSelectedSizes }: Props) {
   const form = useFormContext<FormValues>();
+  // console.log(setSelectedSizes)
 
   // Watch categoryId in form
   const selectedCategoryId = useWatch({
@@ -30,7 +31,6 @@ export default function CategorySizesUpdater({ categories, setSelectedSizes }: P
 
   useEffect(() => {
     if (!selectedCategoryId) {
-      // Clear sizes if no category selected
       if (prevSizesRef.current.length > 0) {
         prevSizesRef.current = [];
         setSelectedSizes([]);
@@ -38,45 +38,44 @@ export default function CategorySizesUpdater({ categories, setSelectedSizes }: P
       return;
     }
 
-    // Get sizes for the selected category
     const category = categories.find(cat => cat.id === selectedCategoryId);
     const sizes = category?.sizes || [];
 
-    // Only update selectedSizes if it actually changed
     const sizesChanged =
       prevSizesRef.current.length !== sizes.length ||
       !sizes.every(size => prevSizesRef.current.includes(size));
 
-    if (!sizesChanged) return; // nothing to do
+    if (!sizesChanged) return;
 
-    prevSizesRef.current = sizes; // update ref
+    prevSizesRef.current = sizes;
     setSelectedSizes(sizes);
 
-    // Sync form variants with selected sizes
     const variants = form.getValues('variants') || [];
 
-    const updatedVariants = sizes.map(sizeStr => {
-      const sizeNum = Number(sizeStr);
-      // Keep existing variant if it exists
-      return variants.find(v => v.size === sizeNum) || {
-        id: uuidv4(),
-        size: sizeNum,
-        price: 0,
-        stock: 0,
-        sku: '',
-        unit: 'ML',
-      };
+    const updatedVariantses = sizes.map(size => {
+      return (
+        variants.find(v => v.size === size) || {
+          id: uuidv4(),
+          size: size,
+          price: undefined,
+          stock: undefined,
+          sku: undefined,
+          unit: undefined,
+        }
+      );
     });
 
-    // Only update form if variants actually changed
     const variantsChanged =
-      variants.length !== updatedVariants.length ||
-      variants.some((v, i) => v?.size !== updatedVariants[i]?.size);
+      variants.length !== updatedVariantses.length ||
+      variants.some((v, i) => v?.size !== updatedVariantses[i]?.size);
 
     if (variantsChanged) {
-      form.setValue('variants', updatedVariants);
+      // 🧩 Delay state update until after render to prevent React warning
+      queueMicrotask(() => {
+        form.setValue('variants', updatedVariantses, { shouldDirty: true });
+      });
     }
-  }, [selectedCategoryId, categories, form, setSelectedSizes]);
+  }, [selectedCategoryId, categories, setSelectedSizes]); // 🚫 removed `form`
 
   return null;
 }

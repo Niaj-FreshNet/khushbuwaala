@@ -8,30 +8,13 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { useCart } from "@/lib/store/hooks/useCart"
-import type { Product } from "@/lib/Data/data"
 import Image from "next/image"
 import Link from "next/link"
 import StoreContainer from "@/components/Layout/StoreContainer"
-
-// Types
-interface CartItem extends Product {
-  quantity: number
-  size: string
-  variantPrices?: { [key: string]: number }
-}
-
-interface CartItemCardProps {
-  item: CartItem
-  onUpdateQuantity: (productId: string, size: string, quantity: number) => void
-  onRemove: (productId: string, size: string) => void
-}
-
-interface DesktopCartTableProps {
-  items: CartItem[]
-  onUpdateQuantity: (productId: string, size: string, quantity: number) => void
-  onRemove: (productId: string, size: string) => void
-}
+import { useCart } from "@/redux/store/hooks/useCart"
+import { CartItem } from "@/types/cart.types"
+import { CartItemCard } from "@/components/Modules/Cart/CartItemCard"
+import { DesktopCartTable } from "@/components/Modules/Cart/DesktopCartTable"
 
 // Empty cart illustration component
 const EmptyCartIllustration = () => (
@@ -52,7 +35,9 @@ const EmptyCartIllustration = () => (
       Discover our amazing collection of premium perfume oils and find your signature scent.
     </p>
     <div className="flex flex-col sm:flex-row gap-3">
-      <Button asChild variant="gradient" size="lg" className="min-w-[160px]">
+      <Button asChild 
+      // variant="gradient" 
+      size="lg" className="min-w-[160px]">
         <Link href="/shop">
           <ShoppingBag className="w-4 h-4 mr-2" />
           Continue Shopping
@@ -67,202 +52,6 @@ const EmptyCartIllustration = () => (
     </div>
   </div>
 )
-
-// Cart item component
-const CartItemCard = ({ item, onUpdateQuantity, onRemove }: CartItemCardProps) => {
-  const [isUpdating, setIsUpdating] = useState(false)
-  const price = item.variantPrices?.[item.size] || item.price || 0
-  const total = price * item.quantity
-
-  const handleQuantityChange = async (increment: number) => {
-    setIsUpdating(true)
-    const newQuantity = Math.max(item.quantity + increment, 1)
-    onUpdateQuantity(item._id, item.size, newQuantity)
-    // Simulate brief loading state for better UX
-    setTimeout(() => setIsUpdating(false), 200)
-  }
-
-  return (
-    <Card className="group hover:shadow-md transition-all duration-300">
-      <CardContent className="p-4">
-        <div className="flex gap-4">
-          {/* Product Image */}
-          <div className="relative">
-            <div className="w-20 h-24 md:w-24 md:h-28 rounded-lg overflow-hidden bg-gray-100 group-hover:shadow-lg transition-shadow duration-300">
-              <Image
-                src={item.primaryImage}
-                alt={item.name}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                sizes="(max-width: 768px) 80px, 96px"
-              />
-            </div>
-            <Badge
-              variant="secondary"
-              className="absolute -top-2 -right-2 text-xs px-1.5 py-0.5"
-            >
-              {item.size}
-            </Badge>
-          </div>
-
-          {/* Product Details */}
-          <div className="flex-1 min-w-0">
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-gray-900 truncate text-sm md:text-base">
-                  {item.name}
-                </h3>
-                <p className="text-gray-500 text-xs md:text-sm">
-                  Size: <span className="font-medium">{item.size}</span>
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={() => onRemove(item._id, item.size)}
-                className="text-red-500 hover:text-red-700 hover:bg-red-50 ml-2"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-
-            {/* Price and Quantity Controls */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center border rounded-lg">
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => handleQuantityChange(-1)}
-                    disabled={item.quantity === 1 || isUpdating}
-                    className="rounded-r-none border-r"
-                  >
-                    <Minus className="w-3 h-3" />
-                  </Button>
-                  <div className="w-10 flex items-center justify-center text-sm font-medium">
-                    {isUpdating ? "..." : item.quantity}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => handleQuantityChange(1)}
-                    disabled={isUpdating}
-                    className="rounded-l-none border-l"
-                  >
-                    <Plus className="w-3 h-3" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="text-right">
-                <p className="text-xs text-gray-500">
-                  ৳{price.toFixed(2)} each
-                </p>
-                <p className="font-semibold text-gray-900">
-                  ৳{total.toFixed(2)}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-// Desktop cart table component
-const DesktopCartTable = ({ items, onUpdateQuantity, onRemove }: DesktopCartTableProps) => {
-  return (
-    <Card>
-      <CardHeader className="bg-gray-50">
-        <div className="grid grid-cols-12 gap-4 text-sm font-semibold text-gray-700">
-          <div className="col-span-6">Product</div>
-          <div className="col-span-2 text-center">Price</div>
-          <div className="col-span-2 text-center">Quantity</div>
-          <div className="col-span-2 text-center">Total</div>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        {items.map((item: CartItem, index: number) => {
-          const price = item.variantPrices?.[item.size] || item.price || 0
-          const total = price * item.quantity
-
-          return (
-            <div key={`${item._id}-${item.size}`}>
-              <div className="grid grid-cols-12 gap-4 p-6 hover:bg-gray-50 transition-colors duration-200">
-                {/* Product */}
-                <div className="col-span-6 flex items-center gap-4">
-                  <div className="relative w-16 h-20 rounded-lg overflow-hidden bg-gray-100">
-                    <Image
-                      src={item.primaryImage}
-                      alt={item.name}
-                      fill
-                      className="object-cover"
-                      sizes="64px"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 truncate">
-                      {item.name}
-                    </h3>
-                    <p className="text-gray-500 text-sm">
-                      Size: <span className="font-medium">{item.size}</span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Price */}
-                <div className="col-span-2 flex items-center justify-center">
-                  <span className="font-medium">৳{price.toFixed(2)}</span>
-                </div>
-
-                {/* Quantity */}
-                <div className="col-span-2 flex items-center justify-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => onRemove(item._id, item.size)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                  <div className="flex items-center border rounded-lg">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => onUpdateQuantity(item._id, item.size, Math.max(item.quantity - 1, 1))}
-                      disabled={item.quantity === 1}
-                      className="rounded-r-none border-r"
-                    >
-                      <Minus className="w-3 h-3" />
-                    </Button>
-                    <div className="w-12 flex items-center justify-center text-sm font-medium">
-                      {item.quantity}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => onUpdateQuantity(item._id, item.size, item.quantity + 1)}
-                      className="rounded-l-none border-l"
-                    >
-                      <Plus className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Total */}
-                <div className="col-span-2 flex items-center justify-center">
-                  <span className="font-semibold">৳{total.toFixed(2)}</span>
-                </div>
-              </div>
-              {index < items.length - 1 && <Separator />}
-            </div>
-          )
-        })}
-      </CardContent>
-    </Card>
-  )
-}
 
 export default function CartPage() {
   const { cartItems, updateQuantity, removeFromCart, calculateSubtotal } = useCart()
@@ -312,7 +101,20 @@ export default function CartPage() {
     )
   }
 
-  const subtotal = calculateSubtotal()
+  // const subtotal = calculateSubtotal()
+  // 🧮 Calculate subtotal dynamically
+  const subtotal = Array.isArray(cartItems)
+    ? cartItems.reduce((sum: number, item: any) => {
+      const [sizeValue, sizeUnit] = item?.selectedSize?.split(" ") || []
+      const matchedVariant = item?.product?.variants?.find(
+        (v: any) =>
+          Number(v.size) === Number(sizeValue) &&
+          v.unit?.toLowerCase() === sizeUnit?.toLowerCase()
+      )
+      const selectedPrice = matchedVariant?.price || 0
+      return sum + selectedPrice * (item?.quantity || 1)
+    }, 0)
+    : 0
   const discount = appliedCoupon ? subtotal * 0.1 : 0 // 10% discount for demo
   const total = subtotal - discount
 
@@ -350,13 +152,11 @@ export default function CartPage() {
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-6">
               {/* Mobile Layout */}
-              <div className="lg:hidden space-y-4">
+              <div className="lg:hidden space-y-4 border-2">
                 {cartItems.map((item: CartItem) => (
                   <CartItemCard
-                    key={`${item._id}-${item.size}`}
+                    key={`${item.product?.id}-${item.selectedSize}`}
                     item={item}
-                    onUpdateQuantity={updateQuantity}
-                    onRemove={removeFromCart}
                   />
                 ))}
               </div>
@@ -365,8 +165,6 @@ export default function CartPage() {
               <div className="hidden lg:block">
                 <DesktopCartTable
                   items={cartItems}
-                  onUpdateQuantity={updateQuantity}
-                  onRemove={removeFromCart}
                 />
               </div>
 
@@ -459,7 +257,7 @@ export default function CartPage() {
                   <Button
                     onClick={handleCheckout}
                     className="w-full"
-                    variant="gradient"
+                    // variant="gradient"
                     size="lg"
                   >
                     Proceed to Checkout

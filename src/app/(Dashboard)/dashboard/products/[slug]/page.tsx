@@ -1,383 +1,405 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useGetProductQuery, useUpdateProductMutation } from '@/redux/store/api/product/productApi';
+import { useGetProductBySlugQuery, useUpdateProductMutation } from '@/redux/store/api/product/productApi';
+import { useGetAllCategoriesAdminQuery } from '@/redux/store/api/category/categoryApi';
+import { useGetAllMaterialsQuery } from '@/redux/store/api/material/materialApi';
+import { useGetAllFragrancesQuery } from '@/redux/store/api/fragrance/fragranceApi';
 import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+import { Category } from '@/types/category.types';
+import { Material } from '@/types/material.types';
+import { Fragrance } from '@/types/fragrance.types';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import Image from 'next/image';
-import { X } from 'lucide-react';
-import { IProductResponse, IProductVariantResponse } from '@/types/product.types';
-
-interface Variant {
-  id?: string;
-  size: string;
-  color: string;
-  price: number;
-  stock: number;
-  sku: string;
-  unit: string;
-}
+import FormWrapper from '@/components/ReusableUI/FormWrapper';
+import FormInput from '@/components/ReusableUI/FormInput';
+import { FormCheckboxGroup } from '@/components/ReusableUI/FormCheckboxGroup';
+import CategorySizesUpdater from '../_component/CategorySizesUpdater';
+import SizesCheckboxes from '../_component/SizesCheckboxes';
+import { VariantsSection } from '../_component/VariantsSection';
+import AddVariantButton from '../_component/AddVariantButton';
+import { PublishedSwitch } from '../_component/PublishedSwitch';
+import { VariantForForm } from '@/types/product.types';
+import { useFormContext } from 'react-hook-form';
 
 interface FormValues {
   name: string;
   description: string;
   brand: string;
-  gender: string;
+  gender: 'MALE' | 'FEMALE' | 'UNISEX';
   perfumeNotes: { top: string; middle: string; base: string };
   accords: string;
   tags: string;
+  categoryId: string;
+  materialIds: string[];
+  fragranceIds: string[];
   published: boolean;
-  variants: Variant[];
-  images: File[];
+  variants: VariantForForm[];
+  primaryImage: File[] | string[];
+  otherImages: File[] | string[];
+  origin?: string;
+  performance?: string;
+  longevity?: string;
+  projection?: string;
+  sillage?: string;
+  bestFor?: string;
+  videoUrl?: string;
+  stock: number;
+  supplier: string;
 }
 
-const ProductDetails = () => {
-  const { id } = useParams<{ id: string }>();
+const EditProductPage = () => {
   const router = useRouter();
-  const { data, isLoading } = useGetProductQuery(id || '');
-  const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { slug } = useParams<{ slug: string }>();
+
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [imagesToKeep, setImagesToKeep] = useState<string[]>([]);
+  const [updateProduct] = useUpdateProductMutation();
 
-  const product: IProductResponse = data;
+  const { data: productResponse, isLoading } = useGetProductBySlugQuery(slug);
+  const product = productResponse?.data;
 
-  if (isLoading || !product) {
-    return (
-      <div className="flex justify-center items-center h-[60vh]">
-        <p className="text-gray-600">Loading product...</p>
-      </div>
-    );
-  }
+  const { data: categoriesData } = useGetAllCategoriesAdminQuery();
+  const { data: materialsData } = useGetAllMaterialsQuery({});
+  const { data: fragrancesData } = useGetAllFragrancesQuery({});
 
-  const defaultValues: FormValues = {
-    name: product.name,
-    description: product.description,
-    brand: product.brand || '',
-    gender: product.gender || '',
-    perfumeNotes: {
-      top: product.perfumeNotes?.top?.join(', ') || '',
-      middle: product.perfumeNotes?.middle?.join(', ') || '',
-      base: product.perfumeNotes?.base?.join(', ') || '',
-    },
-    accords: product.accords?.join(', ') || '',
-    tags: product.tags?.join(', ') || '',
-    published: product.published,
-    variants: product.variants.map((v: IProductVariantResponse) => ({
-      id: v.id,
-      size: v.size.toString(),
-      color: v.color || '#ffffff',
-      price: v.price,
-      stock: v.stock || 0,
-      sku: v.sku,
-      unit: v.unit,
-    })),
-    images: [],
-  };
+  const categories: Category[] = categoriesData?.data?.data || [];
+  const materials: Material[] = materialsData?.data?.data || [];
+  const fragrances: Fragrance[] = fragrancesData?.data?.data || [];
 
-  const handleEditClick = () => {
-    setIsEditModalOpen(true);
-    setImagePreviews([...(product.primaryImage ? [product.primaryImage] : []), ...(product.otherImages || [])]);
-    setImagesToKeep([...(product.primaryImage ? [product.primaryImage] : []), ...(product.otherImages || [])]);
-  };
+  // Convert API product to form default values
+  const [defaultValues, setDefaultValues] = useState<FormValues | null>(null);
 
+  useEffect(() => {
+    if (product) {
+      setImagePreviews([product.primaryImage, ...(product.otherImages || [])]);
+
+      setDefaultValues({
+        name: product.name || '',
+        description: product.description || '',
+        brand: product.brand || '',
+        gender: product.gender || 'UNISEX',
+        perfumeNotes: {
+          top: (product.perfumeNotes?.top || []).join(', '),
+          middle: (product.perfumeNotes?.middle || []).join(', '),
+          base: (product.perfumeNotes?.base || []).join(', '),
+        },
+        accords: (product.accords || []).join(', '),
+        tags: (product.tags || []).join(', '),
+        categoryId: product.categoryId || '',
+        materialIds: product.materialIds || [],
+        fragranceIds: product.fragranceIds || [],
+        published: product.published,
+        variants:
+          product.variants?.map(v => ({
+            sku: v.sku,
+            size: v.size.toString(),
+            price: v.price,
+            unit: v.unit,
+          })) || [{ size: '', price: 0, stock: 0, sku: '', unit: 'ML' }],
+        primaryImage: [product.primaryImage],
+        otherImages: product.otherImages || [],
+        origin: product.origin || '',
+        performance: product.performance || 'GOOD',
+        longevity: product.longevity || 'MODERATE',
+        projection: product.projection || 'MODERATE',
+        sillage: product.sillage || 'MODERATE',
+        bestFor: (product.bestFor || []).join(', '),
+        videoUrl: product.videoUrl || '',
+        stock: product.totalStock || 0,
+        supplier: product.supplier || '',
+      });
+    }
+  }, [product]);
+
+  // console.log(product?.materialIds)
   const handleSubmit = async (values: FormValues) => {
     try {
-      const formData = new FormData();
-      formData.append('name', values.name);
-      formData.append('description', values.description);
-      formData.append('brand', values.brand);
-      formData.append('gender', values.gender);
-      formData.append('perfumeNotes', JSON.stringify({
-        top: values.perfumeNotes.top.split(',').map(note => note.trim()).filter(note => note),
-        middle: values.perfumeNotes.middle.split(',').map(note => note.trim()).filter(note => note),
-        base: values.perfumeNotes.base.split(',').map(note => note.trim()).filter(note => note),
-      }));
-      formData.append('accords', JSON.stringify(values.accords.split(',').map(accord => accord.trim()).filter(accord => accord)));
-      formData.append('tags', JSON.stringify(values.tags.split(',').map(tag => tag.trim()).filter(tag => tag)));
-      formData.append('published', values.published.toString());
-      formData.append('variants', JSON.stringify(values.variants));
-      if (imagesToKeep.length > 0) {
-        formData.append('imagesToKeep', JSON.stringify(imagesToKeep));
-      }
-      values.images.forEach((file) => formData.append('images', file));
+      const payload = {
+        name: values.name,
+        description: values.description,
+        brand: values.brand,
+        gender: values.gender,
+        origin: values.origin || '',
+        primaryImage: imagePreviews[0] || '',
+        otherImages: imagePreviews.slice(1),
+        videoUrl: values.videoUrl || '',
+        tags: values.tags.split(',').map(t => t.trim()).filter(Boolean),
+        perfumeNotes: {
+          top: values.perfumeNotes.top.split(',').map(n => n.trim()).filter(Boolean),
+          middle: values.perfumeNotes.middle.split(',').map(n => n.trim()).filter(Boolean),
+          base: values.perfumeNotes.base.split(',').map(n => n.trim()).filter(Boolean),
+        },
+        accords: values.accords.split(',').map(a => a.trim()).filter(Boolean),
+        bestFor: values.bestFor?.split(',').map(b => b.trim()).filter(Boolean),
+        categoryId: values.categoryId,
+        materialIds: values.materialIds,
+        fragranceIds: values.fragranceIds,
+        published: values.published,
+        performance: values.performance || '',
+        longevity: values.longevity || '',
+        projection: values.projection || '',
+        sillage: values.sillage || '',
+        stock: values.stock,
+        supplier: values.supplier,
+        variants: values.variants.map(v => ({
+          sku: v.sku,
+          size: Number(v.size),
+          unit: v.unit.toUpperCase(),
+          price: Number(v.price),
+        })),
+      };
 
-      await updateProduct({ id: product.id, formData }).unwrap();
+      await updateProduct({ id: product?.id, formData: payload }).unwrap();
       toast.success('Product updated successfully!');
-      setIsEditModalOpen(false);
-    } catch (error: any) {
-      toast.error(error?.data?.message || 'Failed to update product');
+      // router.push('/dashboard/products');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to update product.');
     }
   };
 
-  const handleImageToggle = (imageUrl: string, checked: boolean) => {
-    setImagesToKeep((prev) => checked ? [...prev, imageUrl] : prev.filter((url) => url !== imageUrl));
-  };
-
-  const getPriceRange = () => {
-    if (!product.variants?.length) return 'N/A';
-    const prices = product.variants.map((v) => v.price);
-    const min = Math.min(...prices);
-    const max = Math.max(...prices);
-    return min === max ? `$${min}` : `$${min} - $${max}`;
-  };
-
-  const getTotalQuantity = () => {
-    return product.variants?.reduce((sum, variant) => sum + (variant.stock || 0), 0) || 0;
-  };
+  if (isLoading || !defaultValues) {
+    return <div className="p-6 text-center text-gray-500">Loading product details...</div>;
+  }
 
   return (
-    <div className="p-6 bg-gray-50 max-w-7xl mx-auto">
-      <h2 className="text-2xl font-semibold text-[#FB923C] mb-6">Product Details</h2>
-      <div className="space-y-6">
-        <Card className="border-[#FB923C]">
-          <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="text-sm font-medium text-gray-700">Name</label>
-                <Input value={product.name} readOnly className="border-[#FB923C] mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Price Range</label>
-                <Input value={getPriceRange()} readOnly className="border-[#FB923C] mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Description</label>
-                <Input.TextArea value={product.description} readOnly rows={4} className="border-[#FB923C] mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Product Images</label>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {[...(product.primaryImage ? [product.primaryImage] : []), ...(product.otherImages || [])].map((img, index) => (
-                    <Image key={index} src={img} alt={`Product ${index + 1}`} width={80} height={80} className="object-cover border border-[#FB923C] rounded" />
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Brand</label>
-                <Input value={product.brand || 'N/A'} readOnly className="border-[#FB923C] mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Gender</label>
-                <Input value={product.gender || 'N/A'} readOnly className="border-[#FB923C] mt-1" />
-              </div>
-              <div className="col-span-2">
-                <label className="text-sm font-medium text-gray-700">Perfume Notes</label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border border-[#FB923C] rounded p-4 mt-1">
-                  <div>
-                    <p className="font-semibold">Top:</p> {product.perfumeNotes?.top?.join(', ') || 'N/A'}
-                  </div>
-                  <div>
-                    <p className="font-semibold">Middle:</p> {product.perfumeNotes?.middle?.join(', ') || 'N/A'}
-                  </div>
-                  <div>
-                    <p className="font-semibold">Base:</p> {product.perfumeNotes?.base?.join(', ') || 'N/A'}
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Accords</label>
-                <div className="border border-[#FB923C] rounded p-2 mt-1">
-                  {product.accords?.map((accord, index) => (
-                    <span key={index} className="inline-block bg-gray-100 rounded px-2 py-1 mr-2 mb-2">{accord}</span>
-                  )) || 'N/A'}
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Total Quantity</label>
-                <Input value={getTotalQuantity()} readOnly className="border-[#FB923C] mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Tags</label>
-                <div className="border border-[#FB923C] rounded p-2 mt-1">
-                  {product.tags?.map((tag, index) => (
-                    <span key={index} className="inline-block bg-gray-100 rounded px-2 py-1 mr-2 mb-2">{tag}</span>
-                  )) || 'N/A'}
-                </div>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Published</label>
-                <Switch checked={product.published} disabled className="data-[state=checked]:bg-[#4CD964] mt-1" />
-              </div>
-              <div className="col-span-2">
-                <label className="text-sm font-medium text-gray-700">Variants</label>
-                <div className="border border-[#FB923C] rounded p-4 mt-1">
-                  {product.variants.map((variant, index) => (
-                    <div key={variant.id} className={`pb-4 ${index < product.variants.length - 1 ? 'border-b border-dashed border-gray-300 mb-4' : ''}`}>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <p className="font-semibold">Size:</p> {variant.size} {variant.unit}
-                        </div>
-                        <div>
-                          <p className="font-semibold">Color:</p> {variant.color}
-                        </div>
-                        <div>
-                          <p className="font-semibold">Price:</p> ${variant.price}
-                        </div>
-                        <div>
-                          <p className="font-semibold">Quantity:</p> {variant.stock || 0}
-                        </div>
-                        <div>
-                          <p className="font-semibold">SKU:</p> {variant.sku}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" className="border-[#FB923C] text-[#FB923C]" onClick={() => router.push('/dashboard/products')}>
-            Back
-          </Button>
-          <Button className="bg-[#FB923C] hover:bg-[#ff8a29]" onClick={handleEditClick}>
-            Edit Product
-          </Button>
-        </div>
-      </div>
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-[#FB923C]">Edit Product</DialogTitle>
-          </DialogHeader>
+    <div className="container mx-auto p-4 max-w-7xl">
+      <Card className="border-none shadow-none">
+        <CardHeader>
+          <CardTitle className="text-2xl font-semibold text-gray-900">Edit Product</CardTitle>
+        </CardHeader>
+        <CardContent>
           <FormWrapper
             defaultValues={defaultValues}
             onSubmit={handleSubmit}
             submitButtonText="Update Product"
             submitButtonClassName="bg-[#FB923C] hover:bg-[#ff8a29]"
+            successMessage="Product updated successfully!"
+            errorMessage="Failed to update product."
             resetButtonText="Cancel"
             resetButtonClassName="border-[#FB923C] text-[#FB923C]"
           >
+            {/* Category Sizes */}
+            <CategorySizesUpdater categories={categories} setSelectedSizes={setSelectedSizes} />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormInput name="name" label="Name" placeholder="Product Name" required inputClassName="border-[#FB923C]" />
-              <FormInput name="brand" label="Brand" placeholder="Brand" required inputClassName="border-[#FB923C]" />
-              <FormInput name="gender" label="Gender" type="select" options={[
-                { value: 'male', label: 'Male' },
-                { value: 'female', label: 'Female' },
-                { value: 'unisex', label: 'Unisex' },
-              ]} required inputClassName="border-[#FB923C]" />
-              <FormInput name="accords" label="Accords" placeholder="e.g. floral, woody, citrus" required inputClassName="border-[#FB923C]" />
+              <FormInput name="name" label="Name" placeholder="Product Name" inputClassName="border-[#FB923C]" />
+              <FormInput
+                name="categoryId"
+                label="Category"
+                type="select"
+                options={categories.map(cat => ({ value: cat.id, label: cat.categoryName }))}
+                inputClassName="border-[#FB923C]"
+              />
+              <FormCheckboxGroup
+                name="fragranceIds"
+                label="Fragrance-family"
+                options={fragrances.map(f => ({ label: f.fragranceName, value: f.id }))}
+              />
+
+              <FormCheckboxGroup
+                name="materialIds"
+                label="Materials"
+                options={materials.map(m => ({ label: m.materialName, value: m.id }))}
+              />
+              <FormInput name="brand" label="Brand" placeholder="Brand" inputClassName="border-[#FB923C]" />
+              <FormInput name="origin" label="Origin" placeholder="e.g. France, Middle East" inputClassName="border-[#FB923C]" />
+              <FormInput
+                name="gender"
+                label="Gender"
+                type="select"
+                options={[
+                  { value: 'MALE', label: 'Male' },
+                  { value: 'FEMALE', label: 'Female' },
+                  { value: 'UNISEX', label: 'Unisex' },
+                ]}
+                inputClassName="border-[#FB923C]"
+              />
+              <FormInput
+                name="performance"
+                label="Performance"
+                type="select"
+                options={[
+                  { value: 'POOR', label: 'Poor' },
+                  { value: 'WEAK', label: 'Weak' },
+                  { value: 'MODERATE', label: 'Moderate' },
+                  { value: 'GOOD', label: 'Good' },
+                  { value: 'EXCELLENT', label: 'Excellent' },
+                  { value: 'BEAST_MODE', label: 'Beast Mode' },
+                ]}
+                inputClassName="border-[#FB923C]"
+              />
+              <FormInput
+                name="longevity"
+                label="Longevity"
+                type="select"
+                options={[
+                  { value: 'VERY_WEAK', label: 'Very Weak' },
+                  { value: 'WEAK', label: 'Weak' },
+                  { value: 'MODERATE', label: 'Moderate' },
+                  { value: 'LONG_LASTING', label: 'Long Lasting' },
+                  { value: 'ETERNAL', label: 'Eternal' },
+                ]}
+                inputClassName="border-[#FB923C]"
+              />
+              <FormInput
+                name="projection"
+                label="Projection"
+                type="select"
+                options={[
+                  { value: 'INTIMATE', label: 'Intimate' },
+                  { value: 'CLOSE', label: 'Close' },
+                  { value: 'MODERATE', label: 'Moderate' },
+                  { value: 'STRONG', label: 'Strong' },
+                  { value: 'NUCLEAR', label: 'Nuclear' },
+                ]}
+                inputClassName="border-[#FB923C]"
+              />
+              <FormInput
+                name="sillage"
+                label="Sillage"
+                type="select"
+                options={[
+                  { value: 'SOFT', label: 'Soft' },
+                  { value: 'MODERATE', label: 'Moderate' },
+                  { value: 'HEAVY', label: 'Heavy' },
+                  { value: 'ENORMOUS', label: 'Enormous' },
+                ]}
+                inputClassName="border-[#FB923C]"
+              />
+              <FormInput name="bestFor" label="Best For" placeholder="e.g. Office, Party" inputClassName="border-[#FB923C]" />
+              <FormInput name="accords" label="Accords" placeholder="e.g. floral, luxury, unisex" inputClassName="border-[#FB923C]" />
+              <FormInput name="tags" label="Tags" placeholder="e.g. floral, luxury, unisex" inputClassName="border-[#FB923C]" />
             </div>
+
+            <FormInput name="description" label="Description" type="textarea" placeholder="Product Description" inputClassName="border-[#FB923C]" />
+
+            {/* Perfume Notes */}
             <Card className="border-[#FB923C]">
               <CardHeader>
                 <CardTitle>Perfume Notes</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormInput name="perfumeNotes.top" label="Top Notes" placeholder="e.g. bergamot, lemon" required inputClassName="border-[#FB923C]" />
-                  <FormInput name="perfumeNotes.middle" label="Middle Notes" placeholder="e.g. jasmine, rose" required inputClassName="border-[#FB923C]" />
-                  <FormInput name="perfumeNotes.base" label="Base Notes" placeholder="e.g. sandalwood, musk" required inputClassName="border-[#FB923C]" />
-                </div>
+              <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormInput name="perfumeNotes.top" label="Top Notes" placeholder="e.g. bergamot, lemon" inputClassName="border-[#FB923C]" />
+                <FormInput name="perfumeNotes.middle" label="Middle Notes" placeholder="e.g. jasmine, rose" inputClassName="border-[#FB923C]" />
+                <FormInput name="perfumeNotes.base" label="Base Notes" placeholder="e.g. sandalwood, musk" inputClassName="border-[#FB923C]" />
               </CardContent>
             </Card>
-            <FormInput name="description" label="Description" type="textarea" placeholder="Product Description" required inputClassName="border-[#FB923C]" />
+
+
+            {/* Product Images */}
             <Card className="border-[#FB923C]">
               <CardHeader>
                 <CardTitle>Product Images</CardTitle>
               </CardHeader>
-              <CardContent>
-                <FormInput
-                  name="images"
-                  label="Upload Images"
-                  type="file"
-                  inputClassName="border-[#FB923C]"
-                  onChange={(e) => {
-                    const files = Array.from(e.target.files || []);
-                    form.setValue('images', files);
-                    setImagePreviews([...imagesToKeep, ...files.map((file) => URL.createObjectURL(file))]);
-                  }}
-                />
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {imagePreviews.map((preview, index) => {
-                    const isExistingImage = index < (product.primaryImage ? 1 : 0) + (product.otherImages?.length || 0);
-                    return (
-                      <div key={index} className="relative w-20 h-20">
-                        <Image src={preview} alt={`preview-${index}`} width={80} height={80} className="object-cover border border-[#FB923C] rounded" />
-                        {isExistingImage && (
-                          <input
-                            type="checkbox"
-                            checked={imagesToKeep.includes(preview)}
-                            onChange={(e) => handleImageToggle(preview, e.target.checked)}
-                            className="absolute top-1 left-1 w-4 h-4"
-                          />
-                        )}
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2"
-                          onClick={() => {
-                            setImagePreviews((prev) => prev.filter((_, i) => i !== index));
-                            if (index >= (product.primaryImage ? 1 : 0) + (product.otherImages?.length || 0)) {
-                              const images = form.getValues('images');
-                              form.setValue('images', images.filter((_, i) => i !== (index - ((product.primaryImage ? 1 : 0) + (product.otherImages?.length || 0)))));
-                            } else {
-                              handleImageToggle(preview, false);
-                            }
-                          }}
+              <CardContent className="space-y-4">
+                {/* Primary Image */}
+                <div>
+                  <FormInput
+                    name="primaryImage"
+                    label="Primary Image"
+                    type="file"
+                    inputClassName="border-[#FB923C]"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const previewUrl = URL.createObjectURL(file);
+                        setImagePreviews((prev) => [previewUrl, ...prev.slice(1)]);
+                      }
+                    }}
+                  />
+                  {imagePreviews[0] && (
+                    <div className="mt-3 w-24 h-24 border border-[#FB923C] rounded overflow-hidden">
+                      <img
+                        src={imagePreviews[0]}
+                        alt="Primary Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Other Images */}
+                <div>
+                  <FormInput
+                    name="otherImages"
+                    label="Other Images"
+                    type="file"
+                    inputClassName="border-[#FB923C]"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      const previews = files.map((file) => URL.createObjectURL(file));
+                      setImagePreviews((prev) => [prev[0], ...previews]); // keep primary first
+                    }}
+                  />
+
+                  {imagePreviews.slice(1).length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {imagePreviews.slice(1).map((preview, index) => (
+                        <div
+                          key={index}
+                          className="relative w-20 h-20 rounded border border-[#FB923C] overflow-hidden"
                         >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    );
-                  })}
+                          <img
+                            src={preview}
+                            alt={`Other preview ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="absolute top-2 right-4 -translate-y-1/2 translate-x-1/2"
+                            onClick={() => {
+                              const form = useFormContext<FormValues>();
+                              const otherImages = form.getValues("otherImages");
+                              // adjust the array removing that image
+                              otherImages.splice(index + 1, 1);
+                              form.setValue("otherImages", otherImages);
+                              setImagePreviews((prev) =>
+                                prev.filter((_, i) => i !== index + 1)
+                              );
+                            }}
+                          >
+                            x
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
+
+
+            <FormInput name="videoUrl" label="Video URL" placeholder="Optional video link" inputClassName="border-[#FB923C]" />
+
+            {/* Variants */}
             <Card className="border-[#FB923C]">
-              <CardHeader>
+              <CardHeader className="flex items-center justify-between">
                 <CardTitle>Variants</CardTitle>
+                <SizesCheckboxes selectedSizes={selectedSizes} />
               </CardHeader>
               <CardContent>
-                {form.watch('variants').map((variant, index) => (
-                  <div key={index} className="border border-[#FB923C] rounded-lg p-4 mb-4">
-                    <div className="flex justify-end mb-2">
-                      <Button variant="destructive" size="icon" onClick={() => {
-                        const variants = form.getValues('variants');
-                        form.setValue('variants', variants.filter((_, i) => i !== index));
-                      }}>
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <FormInput name={`variants.${index}.size`} label="Size" required inputClassName="border-[#FB923C]" />
-                      <FormInput name={`variants.${index}.color`} label="Color" required inputClassName="border-[#FB923C]" />
-                      <FormInput name={`variants.${index}.price`} label="Price" type="number" required inputClassName="border-[#FB923C]" />
-                      <FormInput name={`variants.${index}.stock`} label="Quantity" type="number" required inputClassName="border-[#FB923C]" />
-                      <FormInput name={`variants.${index}.sku`} label="SKU" required inputClassName="border-[#FB923C]" />
-                      <FormInput name={`variants.${index}.unit`} label="Unit" initialValue="ml" inputClassName="hidden" />
-                    </div>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full border-[#FB923C] text-[#FB923C] hover:bg-[#FFF7ED]"
-                  onClick={() => form.setValue('variants', [...form.getValues('variants'), { size: '', color: '#ffffff', price: 0, stock: 0, sku: '', unit: 'ml' }])}
-                >
-                  <Plus className="w-4 h-4 mr-2" /> Add Variant
-                </Button>
+                <VariantsSection selectedSizes={selectedSizes} />
+                <div className="flex flex-wrap gap-2">
+                  <AddVariantButton selectedSizes={selectedSizes} />
+                </div>
               </CardContent>
             </Card>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormInput name="tags" label="Tags" placeholder="e.g. floral, luxury, unisex" inputClassName="border-[#FB923C]" />
-              <div>
-                <label className="text-sm font-medium text-gray-700">Published</label>
-                <Switch checked={form.watch('published')} onCheckedChange={(checked) => form.setValue('published', checked)} className="data-[state=checked]:bg-[#4CD964] mt-1" />
-              </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <FormInput name="stock" label="Stock" placeholder="Stock Quantity" type="number" inputClassName="border-[#FB923C]" />
+              <FormInput name="supplier" label="Supplier" placeholder="Product Supplier" inputClassName="border-[#FB923C]" />
+              <PublishedSwitch />
             </div>
           </FormWrapper>
-        </DialogContent>
-      </Dialog>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-export default ProductDetails;
+export default EditProductPage;

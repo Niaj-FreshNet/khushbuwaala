@@ -1,6 +1,11 @@
-import { useFormContext, Controller } from "react-hook-form";
+'use client';
 
-// ✅ Multi-checkbox group
+import { useFormContext } from 'react-hook-form';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { FormField, FormItem, FormControl, FormLabel, FormMessage } from '@/components/ui/form';
+import { cn } from '@/lib/utils';
+
 interface Option {
   label: string;
   value: string;
@@ -10,40 +15,46 @@ interface FormCheckboxGroupProps {
   name: string;
   label: string;
   options: Option[];
+  className?: string;
 }
 
-export function FormCheckboxGroup({ name, label, options }: FormCheckboxGroupProps) {
+export function FormCheckboxGroup({ name, label, options, className }: FormCheckboxGroupProps) {
   const { control } = useFormContext();
 
   return (
-    <div className="space-y-1">
-      <p className="text-sm font-medium text-gray-700">{label}</p>
-      <Controller
-        name={name}
-        control={control}
-        render={({ field: { value = [], onChange } }) => (
-          <div className="flex flex-wrap gap-2 mt-1">
-            {options.map((option) => (
-              <label key={option.value} className="flex items-center gap-2 text-sm text-gray-600">
-                <input
-                  type="checkbox"
-                  value={option.value}
-                  checked={value.includes(option.value)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      onChange([...value, option.value]);
-                    } else {
-                      onChange(value.filter((v: string) => v !== option.value));
-                    }
-                  }}
-                  className="w-4 h-4 rounded border-gray-300 accent-[#FB923C] "
-                />
-                {option.label}
-              </label>
-            ))}
-          </div>
-        )}
-      />
-    </div>
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className={cn('flex flex-col gap-1', className)}>
+          <FormLabel className="text-sm text-gray-700">{label}</FormLabel>
+          <FormControl>
+            <div className="flex flex-wrap gap-2">
+              {options.map((option) => (
+                <div key={option.value} className="flex items-center gap-1">
+                  <Checkbox
+                    id={`${name}-${option.value}`}
+                    checked={field.value?.includes(option.value)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        field.onChange([...(field.value || []), option.value]);
+                      } else {
+                        field.onChange(
+                          (field.value || []).filter((v: string) => v !== option.value)
+                        );
+                      }
+                    }}
+                  />
+                  <Label htmlFor={`${name}-${option.value}`} className="text-sm text-gray-700">
+                    {option.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </FormControl>
+          <FormMessage className="text-xs text-red-500" />
+        </FormItem>
+      )}
+    />
   );
 }

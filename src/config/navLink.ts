@@ -50,14 +50,20 @@ export const navLinks: NavLink[] = [
     roles: ['SALESMAN', 'ADMIN', 'SUPER_ADMIN'],
     subItems: [
       {
-        name: 'Add Sale',
-        href: '/dashboard/add-sales',
+        name: 'Add Sales',
+        href: '/dashboard/sales/add-sales',
+        icon: GoPlus,
+        roles: ['SALESMAN', 'ADMIN', 'SUPER_ADMIN'],
+      },
+      {
+        name: 'Bulk Sales',
+        href: '/dashboard/sales/bulk-sales',
         icon: GoPlus,
         roles: ['SALESMAN', 'ADMIN', 'SUPER_ADMIN'],
       },
       {
         name: 'Sale List',
-        href: '/dashboard/sale-list',
+        href: '/dashboard/sales',
         icon: MdDetails,
         roles: ['SALESMAN', 'ADMIN', 'SUPER_ADMIN'],
       },
@@ -118,7 +124,7 @@ export const navLinks: NavLink[] = [
   },
   {
     name: 'Orders',
-    href: '/dashboard/order-list',
+    href: '/dashboard/orders',
     icon: MdOutlinePayments,
     roles: ['ADMIN', 'SUPER_ADMIN'],
   },

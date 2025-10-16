@@ -21,7 +21,7 @@ import SizesCheckboxes from '../_component/SizesCheckboxes';
 import { VariantsSection } from '../_component/VariantsSection';
 import AddVariantButton from '../_component/AddVariantButton';
 import { PublishedSwitch } from '../_component/PublishedSwitch';
-import { IProductVariant } from '@/types/product.types';
+import { VariantForForm } from '@/types/product.types';
 
 interface FormValues {
   name: string;
@@ -35,8 +35,9 @@ interface FormValues {
   materialIds: string[];
   fragranceIds: string[];
   published: boolean;
-  variants: IProductVariant[];
-  images: File[];
+  variants: VariantForForm[];
+  primaryImage: File[];
+  otherImages: File[];
   origin?: string;
   performance?: 'POOR' | 'WEAK' | 'MODERATE' | 'GOOD' | 'EXCELLENT' | 'BEAST_MODE';
   longevity?: 'VERY_WEAK' | 'WEAK' | 'MODERATE' | 'LONG_LASTING' | 'ETERNAL';
@@ -63,32 +64,33 @@ const AddProductPage = () => {
   const fragrances: Fragrance[] = fragrancesData?.data?.data || [];
 
   const defaultValues: FormValues = {
-    name: 'ABC',
-    description: 'ABCABCABCABCABCABCABCABC',
-    brand: 'ABC',
+    name: '',
+    description: '',
+    brand: '',
     gender: 'UNISEX',
-    perfumeNotes: { top: 'ABC', middle: 'ABC', base: '' },
-    accords: 'ABC',
-    tags: 'ABC',
+    perfumeNotes: { top: '', middle: '', base: '' },
+    accords: '',
+    tags: '',
     categoryId: '',
     materialIds: [],
     fragranceIds: [],
     published: true,
-    variants: [{ size: 3, price: 10, stock: 10, sku: 'ABC', unit: 'ML' }],
-    images: [],
-    origin: 'ABC',
-    performance: 'MODERATE',
+    variants: [{ size: '', price: 0, stock: 0, sku: '', unit: 'ML' }],
+    primaryImage: [],
+    otherImages: [],
+    origin: '',
+    performance: 'GOOD',
     longevity: 'MODERATE',
     projection: 'MODERATE',
     sillage: 'MODERATE',
-    bestFor: 'ABC',
-    videoUrl: 'http://localhost:3000/dashboard/products/add',
+    bestFor: '',
+    videoUrl: '',
     stock: 0,
-    supplier: 'ABC',
+    supplier: '',
   };
 
   const handleSubmit = async (values: FormValues) => {
-    if (values.images.length === 0) {
+    if (values.primaryImage.length === 0) {
       toast.error('Please upload at least one image.');
       return;
     }
@@ -98,68 +100,48 @@ const AddProductPage = () => {
     }
 
     try {
-      const formData = new FormData();
-
-      formData.append('name', values.name);
-      formData.append('description', values.description);
-      formData.append('brand', values.brand);
-      formData.append('gender', values.gender);
-      formData.append('origin', values.origin || '');
-      formData.append(
-        'perfumeNotes',
-        JSON.stringify({
+      // Construct payload aligned with your working Postman format
+      const payload = {
+        name: values.name,
+        description: values.description,
+        brand: values.brand,
+        gender: values.gender,
+        origin: values.origin || '',
+        primaryImage: imagePreviews[0] || '', // first uploaded image
+        otherImages: imagePreviews.slice(1),  // rest of the images
+        videoUrl: values.videoUrl || '',
+        tags: values.tags.split(',').map(t => t.trim()).filter(Boolean),
+        perfumeNotes: {
           top: values.perfumeNotes.top.split(',').map(n => n.trim()).filter(Boolean),
           middle: values.perfumeNotes.middle.split(',').map(n => n.trim()).filter(Boolean),
           base: values.perfumeNotes.base.split(',').map(n => n.trim()).filter(Boolean),
-        })
-      );
-      formData.append(
-        'accords',
-        JSON.stringify(values.accords.split(',').map(a => a.trim()).filter(Boolean))
-      );
-      formData.append(
-        'tags',
-        JSON.stringify(values.tags.split(',').map(t => t.trim()).filter(Boolean))
-      );
-      formData.append('categoryId', values.categoryId);
-      formData.append('materialIds', JSON.stringify(values.materialIds));
-      formData.append('fragranceIds', JSON.stringify(values.fragranceIds));
-      formData.append('published', values.published.toString());
-      formData.append('performance', values.performance || '');
-      formData.append('longevity', values.longevity || '');
-      formData.append('projection', values.projection || '');
-      formData.append('sillage', values.sillage || '');
-      formData.append(
-        'bestFor',
-        JSON.stringify(values.bestFor?.split(',').map(b => b.trim()).filter(Boolean))
-      );
-      formData.append('supplier', values.supplier || '');
-      formData.append('stock', values.stock.toString());
+        },
+        accords: values.accords.split(',').map(a => a.trim()).filter(Boolean),
+        bestFor: values.bestFor?.split(',').map(b => b.trim()).filter(Boolean),
+        categoryId: values.categoryId,
+        materialIds: values.materialIds,
+        fragranceIds: values.fragranceIds,
+        published: values.published,
+        performance: values.performance || '',
+        longevity: values.longevity || '',
+        projection: values.projection || '',
+        sillage: values.sillage || '',
+        stock: values.stock,
+        supplier: values.supplier,
+        variants: values.variants.map(v => ({
+          sku: v.sku,
+          size: Number(v.size),
+          unit: v.unit.toUpperCase(),
+          price: Number(v.price),
+        })),
+      };
 
-      formData.append(
-        'variants',
-        JSON.stringify(
-          values.variants.map(v => ({
-            ...v,
-            size: Number(v.size),
-            price: Number(v.price),
-            stock: Number(v.stock),
-            unit: v.unit.toUpperCase(),
-          }))
-        )
-      );
-
-      if (values.videoUrl) formData.append('videoUrl', values.videoUrl);
-      values.images.forEach(file => formData.append('images', file));
-
-      console.log(formData)
-
-      await createProduct(formData).unwrap();
-      toast.success('Product added successfully!');
-      router.push('/dashboard/products');
+      await createProduct(payload).unwrap();
+      // router.push('/dashboard/products');
+      return true;
     } catch (error) {
-      toast.error('Failed to add product');
       console.error(error);
+      return false;
     }
   };
 
@@ -175,6 +157,8 @@ const AddProductPage = () => {
             onSubmit={handleSubmit}
             submitButtonText="Add Product"
             submitButtonClassName="bg-[#FB923C] hover:bg-[#ff8a29]"
+            successMessage='Product added successfully!'
+            errorMessage='Failed to add product. Please try again.'
             resetButtonText="Cancel"
             resetButtonClassName="border-[#FB923C] text-[#FB923C]"
             resetOnSuccess={true}
@@ -267,10 +251,11 @@ const AddProductPage = () => {
                 inputClassName="border-[#FB923C]"
               />
               <FormInput name="bestFor" label="Best For" placeholder="e.g. Office, Party" inputClassName="border-[#FB923C]" />
-              <FormInput name="videoUrl" label="Video URL" placeholder="Optional video link" inputClassName="border-[#FB923C]" />
-              <FormInput name="stock" label="Stock" placeholder="Stock Quantity" type="number" inputClassName="border-[#FB923C]" />
-              <FormInput name="supplier" label="Supplier" placeholder="Product Supplier" inputClassName="border-[#FB923C]" />
+              <FormInput name="accords" label="Accords" placeholder="e.g. floral, luxury, unisex" inputClassName="border-[#FB923C]" />
+              <FormInput name="tags" label="Tags" placeholder="e.g. floral, luxury, unisex" inputClassName="border-[#FB923C]" />
             </div>
+
+            <FormInput name="description" label="Description" type="textarea" placeholder="Product Description" inputClassName="border-[#FB923C]" />
 
             {/* Perfume Notes */}
             <Card className="border-[#FB923C]">
@@ -284,47 +269,93 @@ const AddProductPage = () => {
               </CardContent>
             </Card>
 
-            <FormInput name="description" label="Description" type="textarea" placeholder="Product Description" inputClassName="border-[#FB923C]" />
 
-            {/* Images */}
+            {/* Product Images */}
             <Card className="border-[#FB923C]">
               <CardHeader>
                 <CardTitle>Product Images</CardTitle>
               </CardHeader>
-              <CardContent>
-                <FormInput
-                  name="images"
-                  label="Upload Images"
-                  type="file"
-                  inputClassName="border-[#FB923C]"
-                  onChange={(e) => {
-                    const files = Array.from(e.target.files || []);
-                    setImagePreviews(files.map(file => URL.createObjectURL(file)));
-                  }}
-                />
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {imagePreviews.map((preview, index) => (
-                    <div key={index} className="relative w-20 h-20">
-                      <img src={preview} alt={`preview-${index}`} className="w-full h-full object-cover border border-[#FB923C] rounded" />
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2"
-                        onClick={() => {
-                          const form = useFormContext<FormValues>();
-                          const images = form.getValues('images');
-                          images.splice(index, 1);
-                          form.setValue('images', images);
-                          setImagePreviews(prev => prev.filter((_, i) => i !== index));
-                        }}
-                      >
-                        ×
-                      </Button>
+              <CardContent className="space-y-4">
+                {/* Primary Image */}
+                <div>
+                  <FormInput
+                    name="primaryImage"
+                    label="Primary Image"
+                    type="file"
+                    inputClassName="border-[#FB923C]"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const previewUrl = URL.createObjectURL(file);
+                        setImagePreviews((prev) => [previewUrl, ...prev.slice(1)]);
+                      }
+                    }}
+                  />
+                  {imagePreviews[0] && (
+                    <div className="mt-3 w-24 h-24 border border-[#FB923C] rounded overflow-hidden">
+                      <img
+                        src={imagePreviews[0]}
+                        alt="Primary Preview"
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                  ))}
+                  )}
+                </div>
+
+                {/* Other Images */}
+                <div>
+                  <FormInput
+                    name="otherImages"
+                    label="Other Images"
+                    type="file"
+                    inputClassName="border-[#FB923C]"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      const previews = files.map((file) => URL.createObjectURL(file));
+                      setImagePreviews((prev) => [prev[0], ...previews]); // keep primary first
+                    }}
+                  />
+
+                  {imagePreviews.slice(1).length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {imagePreviews.slice(1).map((preview, index) => (
+                        <div
+                          key={index}
+                          className="relative w-20 h-20 rounded border border-[#FB923C] overflow-hidden"
+                        >
+                          <img
+                            src={preview}
+                            alt={`Other preview ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="absolute top-2 right-4 -translate-y-1/2 translate-x-1/2"
+                            onClick={() => {
+                              const form = useFormContext<FormValues>();
+                              const otherImages = form.getValues("otherImages");
+                              // adjust the array removing that image
+                              otherImages.splice(index + 1, 1);
+                              form.setValue("otherImages", otherImages);
+                              setImagePreviews((prev) =>
+                                prev.filter((_, i) => i !== index + 1)
+                              );
+                            }}
+                          >
+                            x
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
+
+
+            <FormInput name="videoUrl" label="Video URL" placeholder="Optional video link" inputClassName="border-[#FB923C]" />
 
             {/* Variants */}
             <Card className="border-[#FB923C]">
@@ -340,14 +371,15 @@ const AddProductPage = () => {
               </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormInput name="tags" label="Tags" placeholder="e.g. floral, luxury, unisex" inputClassName="border-[#FB923C]" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <FormInput name="stock" label="Stock" placeholder="Stock Quantity" type="number" inputClassName="border-[#FB923C]" />
+              <FormInput name="supplier" label="Supplier" placeholder="Product Supplier" inputClassName="border-[#FB923C]" />
               <PublishedSwitch />
             </div>
           </FormWrapper>
         </CardContent>
       </Card>
-    </div>
+    </div >
   );
 };
 

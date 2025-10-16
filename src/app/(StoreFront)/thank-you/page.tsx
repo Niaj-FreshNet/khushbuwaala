@@ -8,17 +8,18 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { selectLastOrder, selectOrderById } from "@/lib/store/features/orders/ordersSlice"
-import { useAppSelector } from "@/lib/store/hooks"
 import OrderReceipt from "@/components/Modules/Orders/OrderReceipt"
+import { useAppSelector } from "@/redux/store/hooks"
+import { selectLastOrder, selectOrderById } from "@/redux/store/features/orders/ordersSlice"
 
 export default function ThankYouPage() {
   const params = useSearchParams()
-  const queryOrderId = params.get("orderId") || undefined
+  const queryOrderId = params.get("order") || undefined
 
   const lastOrder = useAppSelector(selectLastOrder)
   const orderById = useAppSelector(queryOrderId ? selectOrderById(queryOrderId) : () => undefined)
-  const order = orderById || lastOrder
+  const order = orderById?.data || lastOrder?.data
+  console.log("order: ", order)
 
   const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false)
   const [isReceiptOpen, setIsReceiptOpen] = useState(false)
@@ -28,15 +29,27 @@ export default function ThankYouPage() {
     if (typeof window !== "undefined") window.scrollTo(0, 0)
   }, [])
 
-  const totals = useMemo(() => {
-    if (!order) return { subtotal: 0, shippingCost: 0, estimatedTaxes: 0, total: 0 }
-    return {
-      subtotal: order.subtotal,
-      shippingCost: order.shippingCost,
-      estimatedTaxes: order.estimatedTaxes,
-      total: order.total,
-    }
+  // Map API orderItems to cart-like structure for display
+  const cartItems = useMemo(() => {
+    if (!order?.orderItems) return []
+    return order.orderItems.map((item) => ({
+      id: item.id,
+      name: item.product?.name || "Product",
+      primaryImage: item.product?.primaryImage || "/placeholder.png",
+      size: item.variant?.size || "Default",
+      quantity: item.quantity,
+      price: item.variant?.price || 0,
+    }))
   }, [order])
+
+  const totals = useMemo(() => {
+    if (!cartItems) return { subtotal: 0, shippingCost: 0, estimatedTaxes: 0, total: 0 }
+    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    const shippingCost = order?.shippingCost || 0
+    const estimatedTaxes = order?.estimatedTaxes || 0
+    const total = subtotal + shippingCost + estimatedTaxes
+    return { subtotal, shippingCost, estimatedTaxes, total }
+  }, [cartItems, order])
 
   if (!order) {
     return (
@@ -57,7 +70,7 @@ export default function ThankYouPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Alhamdulillah! Order Confirmed</h1>
-            <p className="text-gray-600 mt-1 text-sm">Order ID: <span className="font-semibold">{order.orderId}</span></p>
+            <p className="text-gray-600 mt-1 text-sm">Order ID: <span className="font-semibold">{order.id}</span></p>
           </div>
         </div>
       </div>
@@ -77,9 +90,8 @@ export default function ThankYouPage() {
           <div className="mt-4 space-y-4">
             <Card>
               <CardContent className="p-4 space-y-3">
-                {order.cartItems.map((product, idx) => {
-                  const unit = product.variantPrices?.[product.size] ?? product.price ?? 0
-                  const line = unit * product.quantity
+                {cartItems.map((product, idx) => {
+                  const line = product.price * product.quantity
                   return (
                     <div key={`${product._id}-${product.size}-${idx}`} className="flex items-start gap-3">
                       <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100">
@@ -125,16 +137,16 @@ export default function ThankYouPage() {
         <div className="space-y-8">
           <Card className="shadow-sm">
             <CardHeader>
-              <CardTitle className="text-md">Thank you, {order.shippingAddress.name}!</CardTitle>
+              <CardTitle className="text-md">Thank you, {order.customer?.name || 'Customer'}!</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-gray-700">
-              <p>Your order is confirmed. Well notify you when it ships.</p>
+              <p>Your order is confirmed. We’ll notify you when it ships.</p>
               <p>
                 Payment Method: <span className="font-medium">
-                  {order.paymentMethod === 'cashOnDelivery' ? 'Cash on Delivery' : 'Online Payment'}
-                </span> <span className="ml-1 text-xs text-gray-500">({order.paymentStatus})</span>
+                  {order.isPaid ? 'Online Payment' : 'Cash on Delivery'}
+                </span>
               </p>
-              <p>Shipping Method: {order.shippingMethod === 'insideDhaka' ? 'Inside Dhaka' : 'Outside Dhaka'}</p>
+              <p>Order Status: <span className="font-medium">{order.status}</span></p>
               <div className="pt-2">
                 <Button variant="outline" onClick={() => setIsReceiptOpen(true)}>View Invoice</Button>
               </div>
@@ -150,51 +162,18 @@ export default function ThankYouPage() {
                 <div className="border rounded-lg p-4 bg-gray-50">
                   <p className="text-sm font-semibold mb-2">Contact Information</p>
                   <Separator className="mb-3" />
-                  <p className="text-sm">{order.contactInfo.email || 'N/A'}</p>
+                  <p className="text-sm">{order.name || 'N/A'}</p>
                 </div>
                 <div className="border rounded-lg p-4 bg-gray-50">
                   <p className="text-sm font-semibold mb-2">Payment Summary</p>
                   <Separator className="mb-3" />
-                  <p className="text-sm">Total: ৳{order.total.toFixed(2)} <span className="text-xs">({order.paymentStatus})</span></p>
+                  <p className="text-sm">Total: ৳{totals.total.toFixed(2)}</p>
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <p className="text-sm font-semibold mb-2">Shipping Address</p>
-                  <Separator className="mb-3" />
-                  <div className="space-y-1 text-sm">
-                    <p>{order.shippingAddress.name}</p>
-                    <p>{order.shippingAddress.address}</p>
-                    <p>{order.shippingAddress.contactNumber}</p>
-                    <p>District: {order.shippingAddress.district}</p>
-                    {order.shippingAddress.thana && <p>Thana: {order.shippingAddress.thana}</p>}
-                  </div>
-                </div>
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <p className="text-sm font-semibold mb-2">Billing Address</p>
-                  <Separator className="mb-3" />
-                  <div className="space-y-1 text-sm">
-                    <p>{order.billingAddress.name}</p>
-                    <p>{order.billingAddress.address}</p>
-                    <p>{order.billingAddress.contactNumber}</p>
-                    <p>District: {order.billingAddress.district}</p>
-                    {order.billingAddress.thana && <p>Thana: {order.billingAddress.thana}</p>}
-                  </div>
-                </div>
-              </div>
-
-              {order.notes && (
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <p className="text-sm font-semibold mb-2">Notes</p>
-                  <Separator className="mb-3" />
-                  <p className="text-sm text-gray-700 whitespace-pre-line">{order.notes}</p>
-                </div>
-              )}
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button asChild variant="outline">
-                  <Link href={`/order/${order.orderId}`}>View Order</Link>
+                  <Link href={`/order/${order.id}`}>View Order</Link>
                 </Button>
                 <Button asChild>
                   <Link href="/shop">Continue Shopping</Link>
@@ -213,9 +192,8 @@ export default function ThankYouPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
-                  {order.cartItems.map((product, idx) => {
-                    const unit = product.variantPrices?.[product.size] ?? product.price ?? 0
-                    const line = unit * product.quantity
+                  {cartItems.map((product, idx) => {
+                    const line = product.price * product.quantity
                     return (
                       <div key={`${product._id}-${product.size}-${idx}`} className="flex items-start gap-3">
                         <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100">
@@ -260,5 +238,3 @@ export default function ThankYouPage() {
     </div>
   )
 }
-
-

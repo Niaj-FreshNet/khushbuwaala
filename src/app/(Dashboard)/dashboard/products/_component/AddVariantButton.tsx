@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { IProductVariant } from "@/types/product.types";
+import { VariantForForm } from "@/types/product.types";
 import { Plus } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
@@ -18,7 +18,7 @@ interface FormValues {
     categoryId: string;
     materialId: string;
     published: boolean;
-    variants: IProductVariant[];
+    variants: VariantForForm[];
     images: File[];
 }
 
@@ -32,7 +32,7 @@ export default function AddVariantButton({selectedSizes}: Props) {
       onClick={() => {
         form.setValue('variants', [
           ...form.getValues('variants'),
-          { id: crypto.randomUUID(), size: 0, price: 0, stock: 0, sku: '', unit: 'ML' },
+          { id: crypto.randomUUID(), size: '', price: 0, stock: 0, sku: '', unit: 'ML' },
         ]);
       }}
     >

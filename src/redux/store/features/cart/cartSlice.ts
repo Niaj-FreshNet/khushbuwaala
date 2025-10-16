@@ -1,11 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { IProductResponse } from '@/types/product.types'
-
-export interface CartItem {
-  product: IProductResponse
-  quantity: number
-  selectedSize: string
-}
+import { CartItem } from '@/types/cart.types'
 
 export interface CartState {
   items: CartItem[]
@@ -58,9 +53,10 @@ const cartSlice = createSlice({
         product: IProductResponse
         quantity: number
         selectedSize: string
+        selectedPrice: number
       }>
     ) => {
-      const { product, quantity, selectedSize } = action.payload
+      const { product, quantity, selectedSize, selectedPrice } = action.payload
       const existingIndex = state.items.findIndex(
         (item) => item.product.id === product.id && item.selectedSize === selectedSize
       )
@@ -74,9 +70,10 @@ const cartSlice = createSlice({
           product,
           quantity,
           selectedSize,
+          selectedPrice
         })
       }
-
+      // console.log(state.items, 'cartItem')
       saveCartToStorage(state.items)
     },
 
@@ -85,19 +82,27 @@ const cartSlice = createSlice({
       state,
       action: PayloadAction<{
         productId: string
-        size: string
+        selectedSize: string
         quantity: number
+        cartItemId?: string
       }>
     ) => {
-      const { productId, size, quantity } = action.payload
+      const { productId, selectedSize, quantity, cartItemId } = action.payload
+      // console.log('cartItemId', cartItemId)
       const itemIndex = state.items.findIndex(
-        (item) => item.product.id === productId && item.selectedSize === size
+        (item) => item.product.id === productId && item.selectedSize === selectedSize
       )
 
       if (itemIndex !== -1) {
         state.items[itemIndex].quantity = Math.max(quantity, 1)
+        state.items[itemIndex].cartItemId = cartItemId
         saveCartToStorage(state.items)
       }
+
+      // ✅ If backend cart item ID is provided, store it locally
+      // if (cartItemId) {
+      //   console.log('cartItemId provided', cartItemId)
+      // }
     },
 
     // Remove item from cart
@@ -125,13 +130,15 @@ const cartSlice = createSlice({
         product: IProductResponse
         quantity: number
         selectedSize: string
+        selectedPrice: number
       }>
     ) => {
-      const { product, quantity, selectedSize } = action.payload
+      const { product, quantity, selectedSize, selectedPrice } = action.payload
       state.checkoutItem = {
         product,
         quantity,
         selectedSize,
+        selectedPrice
       }
       state.checkoutMode = true
     },
