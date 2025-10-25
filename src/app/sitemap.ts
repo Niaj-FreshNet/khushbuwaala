@@ -31,7 +31,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Example: paginate shop pages statically
+  // Example::: paginate shop pages statically
   const totalPages = 5; // You can set a static number here
   for (let i = 2; i <= totalPages; i++) {
     urls.push({
