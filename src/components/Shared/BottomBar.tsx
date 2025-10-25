@@ -115,7 +115,7 @@ export default function BottomBar() {
       path: "/wishlist",
       ariaLabel: "View your wishlist",
       showBadge: true,
-      badgeCount: wishlistCount,
+      // badgeCount: wishlistCount,
     },
     {
       label: "Cart",
@@ -123,7 +123,7 @@ export default function BottomBar() {
       path: "/cart",
       ariaLabel: "View your shopping cart",
       showBadge: true,
-      badgeCount: cartCount,
+      // badgeCount: cartCount,
     },
   ]
 
