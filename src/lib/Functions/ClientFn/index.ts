@@ -32,6 +32,7 @@ export default function mapProductResponseToProduct(
     categoryId: product.categoryId,
     published: product.published,
     
+    supplier: product.supplier,
     stock: product.stock || 0,
     variants: product.variants?.map<IProductVariant>(v => ({
       id: v.id,

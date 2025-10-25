@@ -45,6 +45,39 @@ export function BannerSection({
   const [hasLoaded, setHasLoaded] = useState(false)
 
   // Parallax + mouse tracking
+  // useEffect(() => {
+  //   const handleScroll = () => setScrollY(window.scrollY)
+  //   const handleMouseMove = (e: MouseEvent) => {
+  //     setMousePosition({
+  //       x: (e.clientX / window.innerWidth) * 100,
+  //       y: (e.clientY / window.innerHeight) * 100
+  //     })
+  //   }
+
+  //   window.addEventListener("scroll", handleScroll)
+  //   window.addEventListener("mousemove", handleMouseMove)
+
+  //   // Intersection Observer — trigger animation only once when visible
+  //   const observer = new IntersectionObserver(
+  //     ([entry]) => {
+  //       if (entry.isIntersecting) {
+  //         setIsVisible(true)
+  //         observer.unobserve(entry.target) // stop observing after shown
+  //       }
+  //     },
+  //     { threshold: 0.3 }
+  //   )
+
+  //   const bannerElement = document.getElementById("banner-section")
+  //   if (bannerElement) observer.observe(bannerElement)
+
+  //   return () => {
+  //     window.removeEventListener("scroll", handleScroll)
+  //     window.removeEventListener("mousemove", handleMouseMove)
+  //     if (bannerElement) observer.unobserve(bannerElement)
+  //   }
+  // }, [])
+
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY)
     const handleMouseMove = (e: MouseEvent) => {
@@ -57,24 +90,14 @@ export function BannerSection({
     window.addEventListener("scroll", handleScroll)
     window.addEventListener("mousemove", handleMouseMove)
 
-    // Intersection Observer — trigger animation only once when visible
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true)
-          observer.unobserve(entry.target) // stop observing after shown
-        }
-      },
-      { threshold: 0.3 }
-    )
-
-    const bannerElement = document.getElementById("banner-section")
-    if (bannerElement) observer.observe(bannerElement)
+    // ✅ No observer — directly make visible after short delay
+    // const timeout = setTimeout(() => setIsVisible(true), 300)
+    setIsVisible(true)
 
     return () => {
       window.removeEventListener("scroll", handleScroll)
       window.removeEventListener("mousemove", handleMouseMove)
-      if (bannerElement) observer.unobserve(bannerElement)
+      // clearTimeout(timeout)
     }
   }, [])
 
@@ -134,9 +157,9 @@ export function BannerSection({
       {/* Background Images */}
       <div
         className="absolute inset-0 transition-transform duration-700"
-        // style={{
-        //   transform: `translateY(${scrollY * 0.1}px) scale(${1 + scrollY * 0.00005})`
-        // }}
+      // style={{
+      //   transform: `translateY(${scrollY * 0.1}px) scale(${1 + scrollY * 0.00005})`
+      // }}
       >
         <div className="absolute inset-0 min-h-full block md:hidden">
           <Image
