@@ -200,12 +200,12 @@ export function Navbar() {
                       title="Latest perfume arrivals"
                     >
                       <span className="relative z-10">NEW IN</span>
-                      <Badge
+                      {/* <Badge
                         variant="secondary"
                         className="bg-green-100 text-green-700 text-xs px-2 py-0.5 z-10 rounded-full"
                       >
                         Hot
-                      </Badge>
+                      </Badge> */}
                       <div className="absolute inset-0 bg-red-50 z-5 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
                     </Link>
                   </li>

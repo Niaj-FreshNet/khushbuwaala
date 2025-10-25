@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
+import SearchDrawer from "../Modules/Search/SearchDrawer"
 
 // Client Component - Contains interactivity and browser-specific APIs
 export default function BottomBar() {
@@ -18,6 +19,7 @@ export default function BottomBar() {
   const [wishlistCount, setWishlistCount] = useState(5) // Mock wishlist count
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+  const [searchVisible, setSearchVisible] = useState(false)
 
   useEffect(() => {
     // This check needs to run on the client side
@@ -47,6 +49,11 @@ export default function BottomBar() {
     }
   }, [lastScrollY])
 
+  const handlers = {
+    openSearch: () => setSearchVisible(true),
+    closeSearch: () => setSearchVisible(false),
+  }
+
   const handleNavigation = (path: string) => {
     // Add haptic feedback for mobile devices
     if (isMobileDevice && 'vibrate' in navigator) {
@@ -57,7 +64,7 @@ export default function BottomBar() {
 
   const handleMessengerClick = (e: React.MouseEvent) => {
     e.preventDefault()
-    
+
     // Add haptic feedback
     if (isMobileDevice && 'vibrate' in navigator) {
       navigator.vibrate(100)
@@ -130,13 +137,13 @@ export default function BottomBar() {
   return (
     <>
       {/* Backdrop blur overlay when bottom bar is visible */}
-      <div 
+      <div
         className={cn(
           "fixed lg:hidden bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white/80 to-transparent backdrop-blur-xl pointer-events-none z-40 transition-all duration-300",
           isVisible ? "opacity-100" : "opacity-0"
         )}
       />
-      
+
       <div
         className={cn(
           "fixed lg:hidden bottom-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
@@ -149,11 +156,11 @@ export default function BottomBar() {
         <div className="relative">
           <div className="absolute inset-0 bg-white/90 backdrop-blur-xl border-t border-gray-200/50 shadow-2xl" />
           <div className="absolute inset-0 bg-gradient-to-t from-gray-50/30 to-transparent" />
-          
+
           <div className="relative flex justify-around items-center h-16 px-2">
             {navItems.map((item, index) => {
               const isActive = item.path ? isActiveRoute(item.path) : false
-              
+
               return (
                 <div key={item.label} className="relative flex-1 flex justify-center">
                   {item.path ? (
@@ -162,8 +169,8 @@ export default function BottomBar() {
                       className={cn(
                         "relative flex flex-col items-center justify-center h-14 w-14 rounded-2xl transition-all duration-300 group",
                         "hover:bg-red-50/80 active:scale-95",
-                        isActive 
-                          ? "bg-red-50/80 text-red-600 shadow-lg shadow-red-500/20" 
+                        isActive
+                          ? "bg-red-50/80 text-red-600 shadow-lg shadow-red-500/20"
                           : "text-gray-600 hover:text-red-600",
                         item.isSpecial && "bg-blue-50/80 hover:bg-blue-100/80"
                       )}
@@ -179,9 +186,9 @@ export default function BottomBar() {
                           isActive && "scale-110"
                         )}>
                           {item.icon}
-                          
+
                           {/* Badge for notifications */}
-                          {item.showBadge && item.badgeCount && item.badgeCount > 0 && (
+                          {/* {item.showBadge && item.badgeCount && item.badgeCount > 0 && (
                             <Badge 
                               className={cn(
                                 "absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs font-bold",
@@ -191,9 +198,9 @@ export default function BottomBar() {
                             >
                               {item.badgeCount > 99 ? '99+' : item.badgeCount}
                             </Badge>
-                          )}
+                          )} */}
                         </div>
-                        
+
                         {/* Label with better typography */}
                         <span className={cn(
                           "text-xs mt-1 font-medium transition-all duration-300",
@@ -201,7 +208,7 @@ export default function BottomBar() {
                         )}>
                           {item.label}
                         </span>
-                        
+
                         {/* Active indicator */}
                         {isActive && (
                           <div className="absolute -bottom-1 w-1 h-1 bg-red-500 rounded-full animate-pulse" />
@@ -228,13 +235,13 @@ export default function BottomBar() {
                           "group-hover:scale-110 group-active:scale-95"
                         )}>
                           {item.icon}
-                          
+
                           {/* Special messenger indicator */}
                           {item.isSpecial && (
                             <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-ping" />
                           )}
                         </div>
-                        
+
                         {/* Label with better typography */}
                         <span className="text-xs mt-1 font-medium transition-all duration-300">
                           {item.label}
@@ -242,7 +249,7 @@ export default function BottomBar() {
                       </div>
                     </Button>
                   )}
-                  
+
                   {/* Ripple effect on touch */}
                   <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
                     <div className="absolute inset-0 bg-red-400/20 rounded-2xl scale-0 group-active:scale-100 transition-transform duration-200 ease-out" />
@@ -251,7 +258,7 @@ export default function BottomBar() {
               )
             })}
           </div>
-          
+
           {/* Bottom safe area for devices with home indicator */}
           <div className="h-2 bg-transparent" />
         </div>
@@ -265,12 +272,16 @@ export default function BottomBar() {
         <Button
           size="icon"
           className="h-12 w-12 rounded-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-xl hover:shadow-2xl hover:scale-110 transition-all duration-300 border-2 border-white/20"
-          onClick={() => handleNavigation('/search')}
+          // onClick={() => handleNavigation('/search')}
+          onClick={handlers.openSearch}
           aria-label="Search products"
         >
           <Search className="h-5 w-5" />
         </Button>
       </div>
+
+      {/* --- Search Drawer --- */}
+      <SearchDrawer visible={searchVisible} onClose={handlers.closeSearch} />
     </>
   )
 }
