@@ -11,14 +11,15 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <Provider store={store}>
       <PersistGate
-        loading={
-          <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="flex flex-col items-center gap-4">
-              <LucideLoader2 className="w-8 h-8 animate-spin text-indigo-600" />
-              <p className="text-gray-600">Loading...</p>
-            </div>
-          </div>
-        }
+        // loading={
+        //   <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        //     <div className="flex flex-col items-center gap-4">
+        //       <LucideLoader2 className="w-8 h-8 animate-spin text-indigo-600" />
+        //       <p className="text-gray-600">Loading...</p>
+        //     </div>
+        //   </div>
+        // }
+        loading={null}
         persistor={persistor}
       >
         <Toaster richColors position="top-right" />

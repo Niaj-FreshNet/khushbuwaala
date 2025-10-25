@@ -102,7 +102,7 @@ export default function BottomBar() {
       showBadge: false,
     },
     {
-      label: "Messenger",
+      label: "Support",
       icon: <MessageCircle className="h-7 w-7 text-[#0078FF]" />, // Larger icon for Messenger
       onClick: handleMessengerClick,
       ariaLabel: "Chat with us on Messenger",
