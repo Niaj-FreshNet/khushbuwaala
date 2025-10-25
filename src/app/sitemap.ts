@@ -1,28 +1,46 @@
-// import { MetadataRoute } from "next";
-// import { initializeStore } from "@/redux/store/ssrStore";
-// import { productApi } from "@/redux/store/api/product/productApi";
+import { MetadataRoute } from "next";
 
-// export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-//   const store = initializeStore();
-//   const { data } = await store.dispatch(
-//     productApi.endpoints.getAllProducts.initiate({ page: 1, limit: 20 })
-//   );
-//   const totalPages = data?.meta.totalPage || 1;
+// If you have dynamic product pages, you can optionally fetch product slugs at runtime.
+// For build-time static sitemap, keep it simple.
+export default function sitemap(): MetadataRoute.Sitemap {
+  const urls: MetadataRoute.Sitemap = [
+    {
+      url: "https://khushbuwaala.com",
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 1.0,
+    },
+    {
+      url: "https://khushbuwaala.com/shop",
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+    },
+    // Example static pages
+    {
+      url: "https://khushbuwaala.com/about",
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: "https://khushbuwaala.com/contact",
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+  ];
 
-//   const urls: MetadataRoute.Sitemap = [
-//     {
-//       url: "https://khushbuwaala.com/shop",
-//       lastModified: new Date(),
-//       changeFrequency: "daily",
-//       priority: 0.8,
-//     },
-//     ...Array.from({ length: totalPages }, (_, i) => ({
-//       url: `https://khushbuwaala.com/shop?page=${i + 1}`,
-//       lastModified: new Date(),
-//       changeFrequency: "daily",
-//       priority: i === 0 ? 0.8 : 0.6 / (i + 1),
-//     })),
-//   ];
+  // Example: paginate shop pages statically
+  const totalPages = 5; // You can set a static number here
+  for (let i = 2; i <= totalPages; i++) {
+    urls.push({
+      url: `https://khushbuwaala.com/shop?page=${i}`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.6,
+    });
+  }
 
-//   return urls;
-// }
+  return urls;
+}
