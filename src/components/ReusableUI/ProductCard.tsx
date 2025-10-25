@@ -102,7 +102,7 @@ export function ProductCard({
   }
 
   const productSlug = product.slug || product.name.toLowerCase().replace(/ /g, "-") || "https://khushbuwaala.com/shop"
-  const productLink = `/products/${productSlug}`
+  const productLink = `/product/${productSlug}`
 
   // Enhanced price display with better formatting
   const formatPrice = (price: number) => priceFormatter.format(price).replace("BDT", "৳")

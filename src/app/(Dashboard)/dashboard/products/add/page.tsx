@@ -22,6 +22,7 @@ import { VariantsSection } from '../_component/VariantsSection';
 import AddVariantButton from '../_component/AddVariantButton';
 import { PublishedSwitch } from '../_component/PublishedSwitch';
 import { VariantForForm } from '@/types/product.types';
+import { uploadToCloudinary } from '@/lib/helper/uploadToCloudinary';
 
 interface FormValues {
   name: string;
@@ -100,34 +101,42 @@ const AddProductPage = () => {
     }
 
     try {
-      // Construct payload aligned with your working Postman format
+      // 🧠 Upload primary image first
+      const primaryFile = Array.isArray(values.primaryImage)
+        ? values.primaryImage[0]
+        : values.primaryImage;
+
+      const primaryImageFile =
+        primaryFile instanceof FileList ? primaryFile[0] : primaryFile;
+
+      const primaryImageUrl = await uploadToCloudinary(
+        primaryImageFile,
+        'khushbuwaala_images/products'
+      );
+
+      // 🧠 Upload other images next
+      const otherFiles = Array.isArray(values.otherImages)
+        ? values.otherImages
+        : [values.otherImages];
+
+      const otherImageUrls = await Promise.all(
+        otherFiles.flatMap(fileList =>
+          Array.from(fileList instanceof FileList ? fileList : [fileList])
+        ).map(file => uploadToCloudinary(file, 'khushbuwaala_images/products'))
+      );
+
       const payload = {
-        name: values.name,
-        description: values.description,
-        brand: values.brand,
-        gender: values.gender,
-        origin: values.origin || '',
-        primaryImage: imagePreviews[0] || '', // first uploaded image
-        otherImages: imagePreviews.slice(1),  // rest of the images
-        videoUrl: values.videoUrl || '',
+        ...values,
+        primaryImage: primaryImageUrl,
+        otherImages: otherImageUrls,
         tags: values.tags.split(',').map(t => t.trim()).filter(Boolean),
+        accords: values.accords.split(',').map(a => a.trim()).filter(Boolean),
+        bestFor: values.bestFor?.split(',').map(b => b.trim()).filter(Boolean),
         perfumeNotes: {
           top: values.perfumeNotes.top.split(',').map(n => n.trim()).filter(Boolean),
           middle: values.perfumeNotes.middle.split(',').map(n => n.trim()).filter(Boolean),
           base: values.perfumeNotes.base.split(',').map(n => n.trim()).filter(Boolean),
         },
-        accords: values.accords.split(',').map(a => a.trim()).filter(Boolean),
-        bestFor: values.bestFor?.split(',').map(b => b.trim()).filter(Boolean),
-        categoryId: values.categoryId,
-        materialIds: values.materialIds,
-        fragranceIds: values.fragranceIds,
-        published: values.published,
-        performance: values.performance || '',
-        longevity: values.longevity || '',
-        projection: values.projection || '',
-        sillage: values.sillage || '',
-        stock: values.stock,
-        supplier: values.supplier,
         variants: values.variants.map(v => ({
           sku: v.sku,
           size: Number(v.size),
@@ -137,10 +146,13 @@ const AddProductPage = () => {
       };
 
       await createProduct(payload).unwrap();
+      toast.success('Product added successfully!');
+      setImagePreviews([]);
       // router.push('/dashboard/products');
       return true;
     } catch (error) {
       console.error(error);
+      toast.error('Image upload or product creation failed.');
       return false;
     }
   };
@@ -330,6 +342,7 @@ const AddProductPage = () => {
                             className="w-full h-full object-cover"
                           />
                           <Button
+                            type='button'
                             variant="outline"
                             size="icon"
                             className="absolute top-2 right-4 -translate-y-1/2 translate-x-1/2"

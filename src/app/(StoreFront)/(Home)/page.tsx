@@ -2,11 +2,11 @@ import type { Metadata } from "next"
 import { BannerSection } from "@/components/Modules/Home/BannerSection"
 import { CarouselSlider } from "@/components/Modules/Home/CaoruselSlider"
 import { CategoryBanner } from "@/components/Modules/Home/CategoryBanner"
-import { ProductCarouselSection } from "@/components/Modules/Home/ProductCarouselSection"
 import { ReviewsSection } from "@/components/Modules/Home/ReviewSection"
 import { ServicesSection } from "@/components/Modules/Home/ServiceSection"
 import { SubscribeSection } from "@/components/Modules/Home/SubscribeSection"
 import { Crown, Gem, Sparkles, Star } from "lucide-react"
+import { ProductCarouselSection } from "@/components/Modules/Home/ProductCarouselSection"
 
 // SEO: Page-specific Metadata for the homepage
 export const metadata: Metadata = {
@@ -43,10 +43,10 @@ export default function HomePage() {
       <CarouselSlider />
 
       {/* Best Sellers Section with premium variant */}
-      <div className="bg-gray-50 py-12">
+      <div className="pt-4 pb-8">
         <ProductCarouselSection
           title="Best Sellers"
-          section="featured"
+          section="bestSeller"
           linkPath="/shop"
           titleVariant="premium"
           titleSubtitle="Discover our most loved fragrances"
@@ -73,10 +73,10 @@ export default function HomePage() {
       />
 
       {/* Inspired Perfume Products Section with gradient variant */}
-      <div className="bg-gray-50 py-12">
+      <div className="pt-4 pb-8">
         <ProductCarouselSection
           title="Inspired Perfume Oils"
-          category="inspiredPerfumeOil"
+          category="68f2498c71690fc44bcc1af4"
           linkPath="/inspired-perfume-oil"
           titleVariant="gradient"
           titleSubtitle="Designer-inspired fragrances at affordable prices"
@@ -98,10 +98,10 @@ export default function HomePage() {
       />
 
       {/* Oriental Products Section with elegant variant */}
-      <div className="bg-gray-50 py-12">
+      <div className="pt-4 pb-8">
         <ProductCarouselSection
           title="Arabian Attar"
-          category="oriental"
+          category="68f210a763b8b512ce3acd7d"
           linkPath="/oriental-attar"
           titleVariant="elegant"
           titleSubtitle="Traditional Middle Eastern fragrances"
@@ -123,10 +123,10 @@ export default function HomePage() {
       />
 
       {/* Artificial Oud Products Section with modern variant */}
-      <div className="bg-gray-50 py-12">
+      <div className="pt-4 pb-8">
         <ProductCarouselSection
           title="Artificial Oud"
-          category="artificialOud"
+          category="68f249b171690fc44bcc1af5"
           linkPath="/artificial-oud"
           titleVariant="modern"
           titleSubtitle="Premium oud alternatives"

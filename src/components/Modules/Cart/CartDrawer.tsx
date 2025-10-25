@@ -48,7 +48,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
     <Sheet open={visible} onOpenChange={onClose}>
       <SheetContent
         side="right"
-        className="w-[420px] sm:w-[500px] flex flex-col p-0 bg-gradient-to-b from-white to-gray-50"
+        className="w-[320px] md:w-[550px] flex flex-col p-0 bg-gradient-to-b from-white to-gray-50"
       >
         <SheetHeader className="px-6 py-4 border-b bg-gradient-to-r from-red-50 to-pink-50">
           <SheetTitle className="flex items-center gap-3 text-xl">

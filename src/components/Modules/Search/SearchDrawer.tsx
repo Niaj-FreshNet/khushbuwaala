@@ -2,7 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Search, X, TagIcon, TrendingUp, Clock } from "lucide-react";
+import {
+  Search,
+  X,
+  TagIcon,
+  TrendingUp,
+  Clock,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,14 +23,16 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { getProducts, Product } from "@/lib/Data/data";
+import { useSearchProductsQuery } from "@/redux/store/api/product/productApi";
+import Link from "next/link";
 
 interface SearchDrawerProps {
   visible: boolean;
   onClose: () => void;
 }
-const trendingSearches = ["Dior Sauvage", "Oud", "Rose", "Vanilla", "Musk"];
-const recentSearches = ["Axe Signature", "Prada Candy", "Oriental Attar"];
+
+const trendingSearches = ["Dior Sauvage", "Oud", "Rose", "Vanilla"];
+const recentSearches = ["Axe Signature", "Prada Candy"];
 
 const smellTypes = [
   "Corporate",
@@ -62,93 +70,42 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const [searchValue, setSearchValue] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [isLoading, setIsLoading] = useState(false);
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
   const [searchPerformed, setSearchPerformed] = useState(false);
 
-  // Fetch all products once on mount
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setIsLoading(true);
-      try {
-        const prods = await getProducts();
-        const sortedProds = prods.sort((a, b) => a.name.localeCompare(b.name));
-        setAllProducts(sortedProds);
-        setProducts(sortedProds); // Initially show all products
-      } catch (err) {
-        console.error("Failed to fetch products:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchProducts();
-  }, []);
+  const [showMoreTrending, setShowMoreTrending] = useState(false);
+  const [showMoreRecent, setShowMoreRecent] = useState(false);
+  const [showMoreRefine, setShowMoreRefine] = useState(false);
 
-  // Focus search input when drawer opens
+
+  // Debounce search input
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(searchValue.trim());
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [searchValue]);
+
+  // Focus input when drawer opens
   useEffect(() => {
     if (visible && searchInputRef.current) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 300);
+      setTimeout(() => searchInputRef.current?.focus(), 300);
     }
   }, [visible]);
 
-  // Filter products when search value or category changes
-  useEffect(() => {
-    // If no search & category all, show all products and reset searchPerformed
-    if (!searchValue && selectedCategory === "all") {
-      setProducts(allProducts);
-      setSearchPerformed(false);
-      return;
-    }
+  // Fetch search results from backend
+  const { data, isFetching, isError } = useSearchProductsQuery(
+    {
+      searchTerm: debouncedSearch,
+      category: selectedCategory !== "all" ? selectedCategory : undefined,
+      limit: 30,
+      page: 1,
+    },
+    { skip: !debouncedSearch }
+  );
 
-    setIsLoading(true);
-
-    // Simulate some delay (e.g. debounce, api request simulation)
-    setTimeout(() => {
-  const lowerSearch = searchValue.toLowerCase();
-
-  const filtered = allProducts.filter((product) => {
-    // Category filter
-    const matchesCategory =
-      selectedCategory === "all" || product.category === selectedCategory;
-
-    // Search filtering: check these fields:
-    // - name (string)
-    // - smell (string array)
-    // - notes (string)
-    // - description (string)
-    // - brand (string)
-
-    const matchesSearch =
-      !searchValue ||
-      product.name.toLowerCase().includes(lowerSearch) ||
-      (product.smell &&
-        product.smell.some((smellTag) =>
-          smellTag.toLowerCase().includes(lowerSearch)
-        )) ||
-      (product.notes &&
-        product.notes.toLowerCase().includes(lowerSearch)) ||
-      (product.description &&
-        product.description.toLowerCase().includes(lowerSearch)) ||
-      (product.brand &&
-        product.brand.toLowerCase().includes(lowerSearch));
-
-    return matchesCategory && matchesSearch;
-  });
-
-  setProducts(filtered);
-  setIsLoading(false);
-  setSearchPerformed(true);
-}, 400);
-  }, [searchValue, selectedCategory, allProducts]);
-
-  const handleSearch = (value: string) => {
-    setSearchValue(value);
-    setSearchPerformed(true);
-  };
+  const products = data?.data || [];
 
   const handleTagClick = (tag: string) => {
     setSearchValue(tag);
@@ -159,8 +116,9 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
     <Sheet open={visible} onOpenChange={onClose}>
       <SheetContent
         side="right"
-  className="w-[450px] sm:w-[550px] flex flex-col p-0 bg-gradient-to-b from-white to-gray-50 h-full"      
-  >
+        className="w-[320px] md:w-[550px] flex flex-col p-0 bg-gradient-to-b from-white to-gray-50 h-full"
+      >
+        {/* Header */}
         <SheetHeader className="px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
           <SheetTitle className="flex items-center gap-3 text-xl">
             <div className="p-2 bg-blue-100 rounded-full">
@@ -175,9 +133,10 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
           </SheetTitle>
         </SheetHeader>
 
-  <div className="flex flex-col h-full">
+        {/* Body */}
+        <div className="flex flex-col flex-1 min-h-0">
           {/* Search Controls */}
-          <div className="p-6 space-y-6 border-b">
+          <div className="px-6 py-2 space-y-4 border-b">
             <div className="relative group">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-300" />
               <Input
@@ -186,7 +145,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                 placeholder="Search for perfumes, brands, or scents..."
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch(searchValue)}
+                onKeyDown={(e) => e.key === "Enter" && setDebouncedSearch(searchValue)}
                 className="pl-12 pr-12 h-12 border-2 border-gray-200 focus:border-blue-500 rounded-xl text-base transition-all duration-300 bg-white shadow-sm focus:shadow-md"
               />
               {searchValue && (
@@ -216,75 +175,96 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
             </Select>
 
             {/* Trending & Recent Searches */}
-            {!searchValue && (
-              <div className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                    <TrendingUp className="h-4 w-4 text-green-500" />
-                    Trending Searches:
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {trendingSearches.map((search) => (
-                      <Badge
-                        key={search}
-                        variant="secondary"
-                        className="cursor-pointer hover:bg-green-100 hover:text-green-700 transition-colors text-sm py-1 px-3 rounded-full bg-green-50 text-green-600"
-                        onClick={() => handleTagClick(search)}
-                      >
-                        {search}
-                      </Badge>
-                    ))}
-                  </div>
+            {debouncedSearch === "" && (
+              <div className="space-y-3">
+                {/* Trending Searches */}
+                <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-1.5">
+                  <TrendingUp className="h-4 w-4 text-green-500" />
+                  Trending:
+                </div>
+                <div className="flex flex-wrap gap-2 pb-1">
+                  {(showMoreTrending ? trendingSearches : trendingSearches.slice(0, 4)).map((search) => (
+                    <Badge
+                      key={search}
+                      variant="secondary"
+                      className="cursor-pointer whitespace-nowrap text-xs py-1 px-2 bg-white text-black border border-gray-200 rounded-full hover:bg-green-100 hover:text-green-700 transition-colors"
+                      onClick={() => handleTagClick(search)}
+                    >
+                      {search}
+                    </Badge>
+                  ))}
+                  {trendingSearches.length > 4 && (
+                    <Badge
+                      className="cursor-pointer whitespace-nowrap text-xs py-1 px-2 bg-white text-black border border-gray-200 rounded-full hover:bg-green-100 hover:text-green-700 transition-colors"
+                      onClick={() => setShowMoreTrending(!showMoreTrending)}
+                    >
+                      {showMoreTrending ? "See less" : "See more..."}
+                    </Badge>
+                  )}
                 </div>
 
-                <Separator />
-
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                    <Clock className="h-4 w-4 text-blue-500" />
-                    Recent Searches:
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {recentSearches.map((search) => (
-                      <Badge
-                        key={search}
-                        variant="outline"
-                        className="cursor-pointer hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors text-sm py-1 px-3 rounded-full"
-                        onClick={() => handleTagClick(search)}
-                      >
-                        {search}
-                      </Badge>
-                    ))}
-                  </div>
+                {/* Recent Searches */}
+                <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-1.5 mt-2">
+                  <Clock className="h-4 w-4 text-blue-500" />
+                  Recent:
+                </div>
+                <div className="flex flex-wrap gap-2 pb-1">
+                  {(showMoreRecent ? recentSearches : recentSearches.slice(0, 4)).map((search) => (
+                    <Badge
+                      key={search}
+                      variant="outline"
+                      className="cursor-pointer whitespace-nowrap text-xs py-1 px-2 rounded-full hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors"
+                      onClick={() => handleTagClick(search)}
+                    >
+                      {search}
+                    </Badge>
+                  ))}
+                  {recentSearches.length > 4 && (
+                    <Badge
+                      className="cursor-pointer whitespace-nowrap text-xs py-1 px-2 rounded-full hover:bg-green-100 hover:text-green-700 transition-colors"
+                      onClick={() => setShowMoreRecent(!showMoreRecent)}
+                    >
+                      {showMoreRecent ? "See less" : "See more..."}
+                    </Badge>
+                  )}
                 </div>
               </div>
             )}
 
             {/* Quick search tags when searching */}
-            {searchValue && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+            {debouncedSearch && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-1.5">
                   <TagIcon className="h-4 w-4 text-purple-500" />
-                  Refine by scent:
+                  Refine:
                 </div>
-                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
-                  {smellTypes.slice(0, 12).map((type) => (
+                <div className="flex flex-wrap gap-2 pb-1">
+                  {(showMoreRefine ? smellTypes : smellTypes.slice(0, 4)).map((type) => (
                     <Badge
                       key={type}
                       variant="secondary"
-                      className="cursor-pointer hover:bg-purple-100 hover:text-purple-700 transition-colors text-xs py-1 px-2 rounded-full"
+                      className="cursor-pointer whitespace-nowrap text-xs py-1 px-2 rounded-full hover:bg-purple-100 hover:text-purple-700 transition-colors"
                       onClick={() => handleTagClick(type)}
                     >
                       {type}
                     </Badge>
                   ))}
+                  {smellTypes.length > 4 && (
+                    <Badge
+                      className="cursor-pointer whitespace-nowrap text-xs py-1 px-2 bg-white text-black border border-gray-200 rounded-full hover:bg-green-100 hover:text-green-700 transition-colors"
+                      onClick={() => setShowMoreRefine(!showMoreRefine)}
+                    >
+                      {showMoreRefine ? "See less" : "See more..."}
+                    </Badge>
+                  )}
                 </div>
               </div>
             )}
+
           </div>
 
           {/* Search Results */}
-    <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col min-h-0">
             <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
               <div className="flex justify-between items-center">
                 <div>
@@ -297,89 +277,70 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
               </div>
             </div>
 
-            <ScrollArea className="flex-1 px-6 py-4">
-              {isLoading ? (
-                <div className="space-y-4" aria-busy="true" aria-label="Loading search results">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex gap-4 p-4 border rounded-xl">
-                      <Skeleton className="w-20 h-24 rounded-lg" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-5 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
-                        <Skeleton className="h-4 w-1/3" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : searchPerformed ? (
-                products.length > 0 ? (
-                  <div className="space-y-4">
-                    {products.map((product) => (
-                      <div
-                        key={product._id}
-                        className="group flex gap-4 p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-lg cursor-pointer transition-all duration-300 bg-white"
-                      >
-                        <div className="w-20 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 group-hover:shadow-md transition-shadow duration-300">
-                          <img
-                            src={
-                              product.primaryImage || "/placeholder.svg?height=96&width=80"
-                            }
-                            alt={product.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
+            {/* Scrollable area */}
+            <ScrollArea className="flex-1 min-h-0 overflow-hidden">
+              <div className="px-6 py-4 space-y-4">
+                {debouncedSearch === "" ? null : isFetching ? (
+                  <div className="space-y-4" aria-busy="true" aria-label="Loading search results">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex gap-4 p-4 border rounded-xl">
+                        <Skeleton className="w-20 h-24 rounded-lg" />
                         <div className="flex-1 space-y-2">
-                          <h4 className="font-semibold text-sm leading-tight group-hover:text-blue-600 transition-colors duration-300">
-                            {product.name}
-                          </h4>
-                          <p className="text-xs text-gray-500">3 ml starting price</p>
-                          <p className="text-lg font-bold text-red-600">
-                            ৳{product.price} BDT
-                          </p>
+                          <Skeleton className="h-5 w-3/4" />
+                          <Skeleton className="h-4 w-1/2" />
+                          <Skeleton className="h-4 w-1/3" />
                         </div>
                       </div>
                     ))}
                   </div>
+                ) : isError ? (
+                  <div className="text-center text-red-500 py-8">
+                    Failed to load search results.
+                  </div>
+                ) : products.length > 0 ? (
+                  <div className="space-y-4">
+                    {products.map((product) => (
+                      <Link key={product.id} href={`/product/${product.slug}`}>
+                        <div className="group flex gap-4 p-4 mb-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-lg cursor-pointer transition-all duration-300 bg-white">
+                          <div className="w-20 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 group-hover:shadow-md transition-shadow duration-300">
+                            <img
+                              src={product.primaryImage || "/placeholder.svg?height=96&width=80"}
+                              alt={product.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            <h4 className="font-semibold text-sm leading-tight group-hover:text-blue-600 transition-colors duration-300">
+                              {product.name}
+                            </h4>
+                            <p className="text-sm text-gray-600">
+                              {product.variants.length > 0
+                                ? `৳${product.variants[0].price} - ৳${product.variants[product.variants.length - 1].price} BDT`
+                                : product.minPrice && product.maxPrice
+                                  ? `৳${product.minPrice} - ৳${product.maxPrice} BDT`
+                                  : "Price not available"}
+                            </p>
+                            <div className="flex flex-wrap gap-1">
+                              {product.accords?.map((acc: string) => (
+                                <Badge key={acc} variant="outline" className="text-xs py-0.25 px-2">
+                                  {acc}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center text-center py-16">
-                    <div className="relative mb-6">
-                      <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-                        <Search className="h-10 w-10 text-gray-400" />
-                      </div>
-                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
-                        <X className="h-3 w-3 text-red-500" />
-                      </div>
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      No products found
-                    </h3>
-                    <p className="text-sm text-gray-500 mb-4 max-w-sm">
-                      Try adjusting your search terms or browse our categories
-                    </p>
-                    <Button
-                      variant="outline"
-                      onClick={() => setSearchValue("")}
-                      className="rounded-full px-6"
-                    >
-                      Clear Search
-                    </Button>
+                    {/* No products found UI */}
                   </div>
-                )
-              ) : (
-                <div className="flex flex-col items-center justify-center text-center py-16">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-6">
-                    <Search className="h-10 w-10 text-blue-500" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Start your search
-                  </h3>
-                  <p className="text-sm text-gray-500 max-w-sm">
-                    Enter a product name, brand, or scent type to find your perfect fragrance
-                  </p>
-                </div>
-              )}
+                )}
+              </div>
             </ScrollArea>
           </div>
+
         </div>
       </SheetContent>
     </Sheet>

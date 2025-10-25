@@ -2,7 +2,10 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../store";
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:7302/api",
+  // baseUrl: "http://localhost:7302/api",
+  // baseUrl: "https://api.khushbuwaala.com/api",
+  baseUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api`,
+  
   credentials: "include", // allows cookies for refresh
   prepareHeaders: (headers, { getState }) => {
     // const token = (getState() as RootState).auth.accessTokenn || localStorage.getItem('accessToken');

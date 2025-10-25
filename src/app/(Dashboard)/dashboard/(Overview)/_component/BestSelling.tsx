@@ -1,7 +1,7 @@
 // File: components/BestSelling.tsx
 'use client';
 
-import { useGetBestsellersQuery } from "@/redux/store/api/product/productApi";
+import { useGetBestSellersQuery } from "@/redux/store/api/product/productApi";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 const COLORS = ["#f59e0b", "#10b981", "#000000", "#22c55e", "#6366f1", "#f43f5e"];
@@ -13,7 +13,7 @@ interface PieData {
 }
 
 const BestSelling: React.FC = () => {
-  const { data, isLoading, isError } = useGetBestsellersQuery();
+  const { data, isLoading, isError } = useGetBestSellersQuery();
   console.log('best seller: ', data)
 
   const pieData: PieData[] =

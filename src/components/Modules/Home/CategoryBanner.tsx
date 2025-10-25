@@ -15,7 +15,7 @@ interface CategoryCardProps {
 function CategoryCard({ CategoryName, CategoryImage, CategoryLink, description }: CategoryCardProps) {
   return (
     <div className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1">
-      <div className="relative w-full h-48 md:h-64">
+      <div className="relative w-full h-56 md:h-64">
         <Image
           src={CategoryImage || "/placeholder.svg"}
           alt={CategoryName}
@@ -25,7 +25,9 @@ function CategoryCard({ CategoryName, CategoryImage, CategoryLink, description }
         />
         {/* Enhanced Overlay for Text and Button */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
-          <h3 className="text-white text-2xl md:text-3xl font-bold mb-2 drop-shadow-lg">{CategoryName}</h3>
+          <h3 className="text-white text-lg sm:text-xl md:text-2xl font-bold mb-2 drop-shadow-lg leading-snug break-words">
+            {CategoryName}
+          </h3>
           <p className="text-gray-200 text-sm md:text-base mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
             {description}
           </p>
@@ -77,12 +79,12 @@ export function CategoryBanner() {
   ]
 
   return (
-    <section className="py-12 px-4 bg-gray-50" aria-labelledby="categories-heading">
+    <section className="py-12 px-4" aria-labelledby="categories-heading">
       <SectionTitle
         title="Shop by Categories"
         subtitle="Explore our diverse range of exquisite fragrances"
         underlineWidth="w-48"
-        className="mb-8"
+        className="mb-4"
         variant="modern"
       />
       <div className="max-w-screen-xl mx-auto grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">

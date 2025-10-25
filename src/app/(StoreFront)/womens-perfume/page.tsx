@@ -10,45 +10,44 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 // Metadata
 export const metadata: Metadata = {
-  title: "Inspired Perfume Oils | KhushbuWaala",
+  title: "Perfume Oils for Women | KhushbuWaala",
   description:
-    "Explore KhushbuWaala's inspired perfume oil collection. Premium fragrances with free nationwide shipping on orders over ৳1000.",
+    "Explore KhushbuWaala's premium perfume oils designed for women. Authentic fragrances with free nationwide shipping on orders over ৳1000.",
   keywords: [
-    "inspired perfume oil",
-    "perfume oil",
-    "premium fragrance",
-    "attar collection",
+    "perfume oil women",
+    "women fragrance",
+    "premium attar",
     "KhushbuWaala shop",
     "Bangladesh perfume",
   ].join(", "),
-  alternates: { canonical: "https://khushbuwaala.com/inspired-perfume-oils" },
+  alternates: { canonical: "https://khushbuwaala.com/for-women" },
 };
 
 // Structured Data (Optional)
 const shopStructuredData = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
-  name: "Inspired Perfume Oils",
+  name: "Perfume Oils for Women",
   description:
-    "Explore KhushbuWaala's curated collection of inspired perfume oils and fragrances",
-  url: "https://khushbuwaala.com/inspired-perfume-oils",
+    "Explore KhushbuWaala's curated collection of perfume oils for women",
+  url: "https://khushbuwaala.com/for-women",
   mainEntity: {
     "@type": "ItemList",
     name: "Perfume Oil Products",
-    description: "Premium quality inspired perfume oils",
+    description: "Premium quality perfume oils for women",
   },
   breadcrumb: {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: "https://khushbuwaala.com" },
-      { "@type": "ListItem", position: 2, name: "Inspired Perfume Oils", item: "https://khushbuwaala.com/inspired-perfume-oils" },
+      { "@type": "ListItem", position: 2, name: "For Women", item: "https://khushbuwaala.com/for-women" },
     ],
   },
 };
 
 // Page Component
-export default async function InspiredPerfumeOilsPage() {
-  const category = "inspiredPerfumeOil";
+export default async function ForWomenPage() {
+  const specification = "women";
   const store = initializeStore();
 
   // Fetch products on server
@@ -56,7 +55,7 @@ export default async function InspiredPerfumeOilsPage() {
     productApi.endpoints.getAllProducts.initiate({
       page: 1,
       limit: 20,
-      category,
+      specification,
     })
   );
 
@@ -80,28 +79,28 @@ export default async function InspiredPerfumeOilsPage() {
       <div className="w-full mx-auto">
         {/* Shop Banner */}
         <ShopBanner
-          heading="Explore Inspired Perfume Oils"
-          text="Choose Your Desired Perfume Oil from Inspired Perfume Oil Collections"
+          heading="Premium Fragrances Suit For Women"
+          text="Choose Your Desired Perfume Oil for Girls and Women"
           buttonText="Shop Now"
-          link="/shop"
+          link="/for-women"
           images={{ desktop: "/images/n111.png", mobile: "/images/n1.webp" }}
-          altText="Banner displaying inspired perfume oil collection"
+          altText="Banner displaying premium perfume oils for women"
           variant="premium"
         />
 
         {/* Notice Bar */}
         <div className="py-8 bg-gradient-to-r from-gray-50 via-white to-gray-50">
-          <NoticeBar heading="Inspired Perfume Oils" notices={notices} interval={4500} />
+          <NoticeBar heading="Womens Perfume Oil" notices={notices} interval={4500} />
         </div>
 
         {/* Shop Products */}
         <div id="products" className="bg-white pt-0 pb-8">
           <Suspense fallback={<ShopProductsSkeleton />}>
             <ShopProducts
+              specification={specification}
               initialProducts={products}
               initialPage={1}
               totalPages={totalPages}
-              category={category}
             />
           </Suspense>
         </div>

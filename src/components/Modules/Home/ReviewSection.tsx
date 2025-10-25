@@ -10,7 +10,7 @@ import { SectionTitle } from "./SectionTitle"
 async function ReviewsGrid({ reviews }: { reviews: Review[] }) {
   return (
     <div className="flex justify-center">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-screen-lg">
+      <div className="max-w-screen-xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
         {reviews.map((celebrity) => (
           <div key={celebrity.id} className="relative group overflow-hidden rounded-lg shadow-md">
             <Image

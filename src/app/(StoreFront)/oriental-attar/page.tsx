@@ -10,45 +10,44 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 // Metadata
 export const metadata: Metadata = {
-  title: "Inspired Perfume Oils | KhushbuWaala",
+  title: "Oriental & Arabian Attar | KhushbuWaala",
   description:
-    "Explore KhushbuWaala's inspired perfume oil collection. Premium fragrances with free nationwide shipping on orders over ৳1000.",
+    "Explore KhushbuWaala's oriental perfume oil collection. Premium fragrances with free nationwide shipping on orders over ৳1000.",
   keywords: [
-    "inspired perfume oil",
-    "perfume oil",
+    "oriental perfume oil",
+    "arabian attar",
     "premium fragrance",
-    "attar collection",
     "KhushbuWaala shop",
     "Bangladesh perfume",
   ].join(", "),
-  alternates: { canonical: "https://khushbuwaala.com/inspired-perfume-oils" },
+  alternates: { canonical: "https://khushbuwaala.com/oriental-collection" },
 };
 
 // Structured Data (Optional)
 const shopStructuredData = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
-  name: "Inspired Perfume Oils",
+  name: "Oriental & Arabian Attar",
   description:
-    "Explore KhushbuWaala's curated collection of inspired perfume oils and fragrances",
-  url: "https://khushbuwaala.com/inspired-perfume-oils",
+    "Explore KhushbuWaala's curated collection of oriental and arabian attar fragrances",
+  url: "https://khushbuwaala.com/oriental-collection",
   mainEntity: {
     "@type": "ItemList",
     name: "Perfume Oil Products",
-    description: "Premium quality inspired perfume oils",
+    description: "Premium quality oriental and arabian attar products",
   },
   breadcrumb: {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: "https://khushbuwaala.com" },
-      { "@type": "ListItem", position: 2, name: "Inspired Perfume Oils", item: "https://khushbuwaala.com/inspired-perfume-oils" },
+      { "@type": "ListItem", position: 2, name: "Oriental Collection", item: "https://khushbuwaala.com/oriental-collection" },
     ],
   },
 };
 
 // Page Component
-export default async function InspiredPerfumeOilsPage() {
-  const category = "inspiredPerfumeOil";
+export default async function OrientalCollectionPage() {
+  const category = "oriental";
   const store = initializeStore();
 
   // Fetch products on server
@@ -80,18 +79,18 @@ export default async function InspiredPerfumeOilsPage() {
       <div className="w-full mx-auto">
         {/* Shop Banner */}
         <ShopBanner
-          heading="Explore Inspired Perfume Oils"
-          text="Choose Your Desired Perfume Oil from Inspired Perfume Oil Collections"
+          heading="Explore Oriental Fragrances"
+          text="Choose Your Desired Perfume Oil from Oriental & Arabian Attar Collections"
           buttonText="Shop Now"
           link="/shop"
           images={{ desktop: "/images/n111.png", mobile: "/images/n1.webp" }}
-          altText="Banner displaying inspired perfume oil collection"
+          altText="Banner displaying the best quality perfume oil collection"
           variant="premium"
         />
 
         {/* Notice Bar */}
         <div className="py-8 bg-gradient-to-r from-gray-50 via-white to-gray-50">
-          <NoticeBar heading="Inspired Perfume Oils" notices={notices} interval={4500} />
+          <NoticeBar heading="Oriental & Arabian Attar" notices={notices} interval={4500} />
         </div>
 
         {/* Shop Products */}

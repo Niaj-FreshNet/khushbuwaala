@@ -10,45 +10,44 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 // Metadata
 export const metadata: Metadata = {
-  title: "Inspired Perfume Oils | KhushbuWaala",
+  title: "Natural Attar Collection | KhushbuWaala",
   description:
-    "Explore KhushbuWaala's inspired perfume oil collection. Premium fragrances with free nationwide shipping on orders over ৳1000.",
+    "Explore KhushbuWaala's Natural and Authentic Attar collection. Premium fragrances with free nationwide shipping on orders over ৳1000.",
   keywords: [
-    "inspired perfume oil",
-    "perfume oil",
+    "natural attar",
+    "authentic attar",
     "premium fragrance",
-    "attar collection",
     "KhushbuWaala shop",
     "Bangladesh perfume",
   ].join(", "),
-  alternates: { canonical: "https://khushbuwaala.com/inspired-perfume-oils" },
+  alternates: { canonical: "https://khushbuwaala.com/natural-collection" },
 };
 
 // Structured Data (Optional)
 const shopStructuredData = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
-  name: "Inspired Perfume Oils",
+  name: "Natural Attar Collection",
   description:
-    "Explore KhushbuWaala's curated collection of inspired perfume oils and fragrances",
-  url: "https://khushbuwaala.com/inspired-perfume-oils",
+    "Explore KhushbuWaala's curated collection of natural and authentic attars",
+  url: "https://khushbuwaala.com/natural-collection",
   mainEntity: {
     "@type": "ItemList",
     name: "Perfume Oil Products",
-    description: "Premium quality inspired perfume oils",
+    description: "Premium quality natural and authentic attars",
   },
   breadcrumb: {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: "https://khushbuwaala.com" },
-      { "@type": "ListItem", position: 2, name: "Inspired Perfume Oils", item: "https://khushbuwaala.com/inspired-perfume-oils" },
+      { "@type": "ListItem", position: 2, name: "Natural Attar", item: "https://khushbuwaala.com/natural-collection" },
     ],
   },
 };
 
 // Page Component
-export default async function InspiredPerfumeOilsPage() {
-  const category = "inspiredPerfumeOil";
+export default async function NaturalCollectionPage() {
+  const category = "natural";
   const store = initializeStore();
 
   // Fetch products on server
@@ -80,18 +79,18 @@ export default async function InspiredPerfumeOilsPage() {
       <div className="w-full mx-auto">
         {/* Shop Banner */}
         <ShopBanner
-          heading="Explore Inspired Perfume Oils"
-          text="Choose Your Desired Perfume Oil from Inspired Perfume Oil Collections"
+          heading="Explore Natural and Authentic Attar"
+          text="Choose The Best Quality Natural & Authentic Attar"
           buttonText="Shop Now"
           link="/shop"
           images={{ desktop: "/images/n111.png", mobile: "/images/n1.webp" }}
-          altText="Banner displaying inspired perfume oil collection"
+          altText="Banner displaying the best quality natural & authentic attar"
           variant="premium"
         />
 
         {/* Notice Bar */}
         <div className="py-8 bg-gradient-to-r from-gray-50 via-white to-gray-50">
-          <NoticeBar heading="Inspired Perfume Oils" notices={notices} interval={4500} />
+          <NoticeBar heading="Natural Attar" notices={notices} interval={4500} />
         </div>
 
         {/* Shop Products */}

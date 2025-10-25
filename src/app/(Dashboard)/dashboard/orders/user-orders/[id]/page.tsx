@@ -6,15 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import FormWrapper from '@/components/form/FormWrapper';
-import FormInput from '@/components/form/FormInput';
-import { useGetUserOrderDetailsQuery } from '@/redux/api/order/orderApi';
-import { useAddReviewMutation } from '@/redux/api/feedback/feedbackApi';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { X } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useGetOrderByIdQuery } from '@/redux/store/api/order/ordersApi';
+import { Input } from '@/components/ui/input';
+import FormWrapper from '@/components/ReusableUI/FormWrapper';
+import FormInput from '@/components/ReusableUI/FormInput';
 
 interface CartItem {
   productId: string;
@@ -49,8 +49,8 @@ interface ReviewForm {
 const UserOrderDetails = () => {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { data, isLoading, error } = useGetUserOrderDetailsQuery(id);
-  const [addReview, { isLoading: isSubmittingReview }] = useAddReviewMutation();
+  const { data, isLoading, error } = useGetOrderByIdQuery(id);
+  // const [addReview, { isLoading: isSubmittingReview }] = useAddReviewMutation();
   const [isReviewModalVisible, setIsReviewModalVisible] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   const [selectedProductName, setSelectedProductName] = useState<string>('');
@@ -99,22 +99,22 @@ const UserOrderDetails = () => {
       toast.error('Please fill in all fields and provide a rating');
       return;
     }
-    try {
-      const res = await addReview({
-        title: values.title,
-        comment: values.comment,
-        rating: values.rating,
-        productId: selectedProductId,
-      }).unwrap();
-      if (res.success) {
-        toast.success(res.message);
-        setIsReviewModalVisible(false);
-      } else {
-        toast.error(res.error);
-      }
-    } catch {
-      toast.error('Failed to submit review');
-    }
+    // try {
+    //   const res = await addReview({
+    //     title: values.title,
+    //     comment: values.comment,
+    //     rating: values.rating,
+    //     productId: selectedProductId,
+    //   }).unwrap();
+    //   if (res.success) {
+    //     toast.success(res.message);
+    //     setIsReviewModalVisible(false);
+    //   } else {
+    //     toast.error(res.error);
+    //   }
+    // } catch {
+    //   toast.error('Failed to submit review');
+    // }
   };
 
   return (

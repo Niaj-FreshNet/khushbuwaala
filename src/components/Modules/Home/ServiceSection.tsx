@@ -27,7 +27,7 @@ export function ServicesSection() {
   ]
 
   return (
-    <section className="py-12 px-4 bg-gray-50" aria-labelledby="services-heading">
+    <section className="py-12 px-4" aria-labelledby="services-heading">
       <SectionTitle title="Our Services" underlineWidth="w-36" className="mb-8" />
       <div className="max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {services.map((service, index) => (
@@ -37,7 +37,7 @@ export function ServicesSection() {
           >
             <div className="flex-shrink-0 mr-4">{service.icon}</div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">{service.title}</h3>
+              <h3 className="text-md font-semibold text-gray-900 mb-1">{service.title}</h3>
               <p className="text-sm text-gray-600">{service.description}</p>
             </div>
           </div>

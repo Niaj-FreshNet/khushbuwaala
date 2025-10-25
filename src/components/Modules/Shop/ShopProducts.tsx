@@ -19,7 +19,7 @@ import { FilterSheet } from "./FilterSheet";
 import { SortSheet } from "./SortSheet";
 import { ProductCard } from "@/components/ReusableUI/ProductCard";
 import { ProductQuickView } from "@/components/ReusableUI/ProductQuickView";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 interface ShopProductProps {
   initialProducts: IProductResponse[];
@@ -48,6 +48,7 @@ export function ShopProducts({
 }: ShopProductProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const [page, setPage] = useState(initialPage);
   const limit = 20;
   const [filters, setFilters] = useState({
@@ -99,18 +100,42 @@ export function ShopProducts({
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
     if (page > 1) params.set("page", page.toString());
-    if (filters.selectedCategories.length) params.set("category", filters.selectedCategories.join(","));
+    // if (filters.selectedCategories.length) params.set("category", filters.selectedCategories.join(","));
     if (filters.selectedSpecification && filters.selectedSpecification !== "all")
       params.set("specification", filters.selectedSpecification);
     if (filters.selectedSmells.length) params.set("smells", filters.selectedSmells.join(","));
     if (filters.priceRange[0] !== 100) params.set("priceMin", filters.priceRange[0].toString());
     if (filters.priceRange[1] !== 5000) params.set("priceMax", filters.priceRange[1].toString());
     if (sortOption !== "new-to-old") params.set("sortBy", sortOption);
-    if (section) params.set("section", section);
+    // if (section) params.set("section", section);
 
-    const url = `/shop${params.toString() ? `?${params.toString()}` : ""}`;
+    // ✅ Keep SEO-friendly path for "new-arrivals"
+    // const basePath = pathname === "/new-arrivals" ? "/new-arrivals" : "/shop";
+
+    // Only set section param if not already on new-arrivals page
+    // if (section && pathname !== "/new-arrivals") {
+    //   params.set("section", section);
+    // } else {
+    //   params.delete("section");
+    // }
+
+    // Use pathname as base, but remove category if it matches the page's category
+    const basePath = pathname;
+    if (category) {
+      // Remove category from params if it's already implied by the page
+      params.delete("category");
+    }
+    if (category) {
+      params.delete("section");
+    }
+
+    const url = `${basePath}${params.toString() ? `?${params.toString()}` : ""}`;
+
+    // const url = `${basePath}${params.toString() ? `?${params.toString()}` : ""}`;
+
+    // const url = `/shop${params.toString() ? `?${params.toString()}` : ""}`;
     router.push(url, { scroll: false });
-  }, [page, filters, sortOption, section, router, searchParams]);
+  }, [page, filters, sortOption, section, router, searchParams, pathname, category, section]);
 
   // Infinite scroll
   useEffect(() => {
@@ -316,7 +341,7 @@ export function ShopProducts({
       ) : (
         <>
           {products.length > 0 ? (
-            <div className={`grid gap-6 ${gridColsClass}`}>
+            <div className={`grid gap-4 ${gridColsClass}`}>
               {products
                 .slice(0, visibleProductsCount)
                 .map((product) => (

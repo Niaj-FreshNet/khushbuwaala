@@ -148,7 +148,7 @@ export const Footer = () => {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(footerStructuredData) }} />
 
       {/* Newsletter Section - Contains Client Component */}
-      <section className="bg-gradient-to-r from-red-50 to-red-100 py-12 px-4" aria-labelledby="newsletter-heading">
+      {/* <section className="bg-gradient-to-r from-red-50 to-red-100 py-12 px-4" aria-labelledby="newsletter-heading">
         <div className="max-w-4xl mx-auto text-center">
           <h2 id="newsletter-heading" className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
             Stay Updated with KhushbuWaala
@@ -157,10 +157,9 @@ export const Footer = () => {
             Be the first to know about new arrivals, exclusive offers, and fragrance tips. Join our community of perfume
             lovers.
           </p>
-          {/* Client Component for form interactivity */}
           <NewsletterForm />
         </div>
-      </section>
+      </section> */}
 
       {/* Main Footer - Server Component */}
       <footer className="bg-white border-t border-gray-200" role="contentinfo">
@@ -176,7 +175,7 @@ export const Footer = () => {
                 height={48}
               />
             </Link>
-            <p className="mt-4 text-gray-600 max-w-md mx-auto">
+            <p className="mt-4 text-gray-600 text-sm max-w-md mx-auto">
               Crafting exceptional fragrances that tell your unique story. Premium quality, authentic ingredients,
               unforgettable scents.
             </p>

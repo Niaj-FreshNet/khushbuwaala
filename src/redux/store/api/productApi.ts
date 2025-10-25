@@ -215,7 +215,7 @@ export const {
   useUpdateProductStockMutation,
   useGetProductAnalyticsQuery,
   useGetLowStockProductsQuery,
-  useGetBestsellersQuery,
+  useGetBestSellersQuery,
 } = productApi;
 
 export default productApi;
@@ -402,7 +402,10 @@ export const productApi = baseApi.injectEndpoints({
     }),
 
     // Get Bestsellers
-    getBestsellers: builder.query<ITrendingProduct[], void>({
+    getBestsellers: builder.query<
+      { success: boolean; statusCode: number; message: string; data: ITrendingProduct[] },
+      void
+    >({
       query: () => '/products/get-bestsellers',
       providesTags: ['Product'],
     }),
@@ -428,7 +431,7 @@ export const {
   useUpdateProductStockMutation,
   useGetProductAnalyticsQuery,
   useGetLowStockProductsQuery,
-  useGetBestsellersQuery,
+  useGetBestSellersQuery,
 } = productApi;
 
 export default productApi;

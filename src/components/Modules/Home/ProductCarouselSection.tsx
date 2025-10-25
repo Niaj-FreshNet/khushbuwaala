@@ -1,15 +1,18 @@
-import { getProducts, type Product } from "@/lib/Data/data"
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Suspense } from "react"
-import type React from "react"
-import { SectionTitle } from "./SectionTitle"
-import { ProductCard } from "@/components/ReusableUI/ProductCard"
+'use client'
+
+import React from "react"
+import {
+  useGetBestSellersQuery,
+  useGetProductsByCategoryQuery,
+  useGetFeaturedProductsQuery,
+  useGetNewArrivalsQuery,
+} from "@/redux/store/api/product/productApi"
+import { ProductCarouselClient, ProductCarouselSkeleton } from "./ProductCarouselClient"
 
 interface ProductCarouselSectionProps {
   title: string
   category?: string
-  section?: string
+  section?: "bestSeller" | "featured" | "newArrivals"
   linkPath?: string
   titleVariant?: "default" | "gradient" | "elegant" | "modern" | "premium"
   titleSubtitle?: string
@@ -17,65 +20,10 @@ interface ProductCarouselSectionProps {
   titleUnderlineWidth?: string
   titleAnimated?: boolean
   titleShowDecorations?: boolean
-  titleUnderlineVariant?: "default" | "wide" | "full" // New prop
-}
-
-// Client Component for the Carousel functionality
-function ProductCarouselClient({
-  products,
-  title,
-  titleVariant = "default",
-  titleSubtitle,
-  titleIcon,
-  titleUnderlineWidth,
-  titleAnimated = true,
-  titleShowDecorations = true,
-  titleUnderlineVariant = "default", // Default to "default"
-}: {
-  products: Product[]
-  title: string
-  titleVariant?: "default" | "gradient" | "elegant" | "modern" | "premium"
-  titleSubtitle?: string
-  titleIcon?: React.ReactNode
-  titleUnderlineWidth?: string
-  titleAnimated?: boolean
-  titleShowDecorations?: boolean
   titleUnderlineVariant?: "default" | "wide" | "full"
-}) {
-  return (
-    <div className="container mx-auto py-8">
-      <SectionTitle
-        title={title}
-        subtitle={titleSubtitle}
-        variant={titleVariant}
-        icon={titleIcon}
-        underlineWidth={titleUnderlineWidth}
-        animated={titleAnimated}
-        showDecorations={titleShowDecorations}
-        underlineVariant={titleUnderlineVariant} // Pass the new prop
-      />
-      <Carousel
-        opts={{
-          align: "start",
-        }}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-4">
-          {products.map((product) => (
-            <CarouselItem key={product._id} className="pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
-              <ProductCard product={product} />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious className="hidden md:flex" />
-        <CarouselNext className="hidden md:flex" />
-      </Carousel>
-    </div>
-  )
 }
 
-// Server Component for data fetching and rendering the client carousel
-export async function ProductCarouselSection({
+export function ProductCarouselSection({
   title,
   category,
   section,
@@ -86,27 +34,56 @@ export async function ProductCarouselSection({
   titleUnderlineWidth,
   titleAnimated = true,
   titleShowDecorations = true,
-  titleUnderlineVariant = "default", // Default to "default"
+  titleUnderlineVariant = "default",
 }: ProductCarouselSectionProps) {
-  const products = await getProducts(category, section)
+  // Conditional API calls based on props
+  console.log(category)
+  const {
+    data: bestsellerData,
+    isLoading: isBestsellerLoading,
+  } = useGetBestSellersQuery(undefined, { skip: section !== "bestSeller" })
 
-  return (
-    <Suspense
-      fallback={
-        <ProductCarouselSkeleton
-          title={title}
-          titleVariant={titleVariant}
-          titleSubtitle={titleSubtitle}
-          titleIcon={titleIcon}
-          titleUnderlineWidth={titleUnderlineWidth}
-          titleAnimated={titleAnimated}
-          titleShowDecorations={titleShowDecorations}
-          titleUnderlineVariant={titleUnderlineVariant} // Pass the new prop
-        />
-      }
-    >
-      <ProductCarouselClient
-        products={products}
+  const {
+    data: featuredData,
+    isLoading: isFeaturedLoading,
+  } = useGetFeaturedProductsQuery(undefined, { skip: section !== "featured" })
+
+  const {
+    data: newArrivalsData,
+    isLoading: isNewArrivalsLoading,
+  } = useGetNewArrivalsQuery(undefined, { skip: section !== "newArrivals" })
+
+  const {
+    data: categoryData,
+    isLoading: isCategoryLoading,
+  } = useGetProductsByCategoryQuery(
+    { categoryId: category || "", params: { limit: 12 } },
+    { skip: !category }
+  )
+
+  // Extract products and loading state based on section/category
+  let products: any[] = []
+  let isLoading = false
+
+  if (section === "bestSeller") {
+    products = bestsellerData?.data || []
+    isLoading = isBestsellerLoading
+  } else if (section === "featured") {
+    products = featuredData || []
+    isLoading = isFeaturedLoading
+  } else if (section === "newArrivals") {
+    products = newArrivalsData || []
+    isLoading = isNewArrivalsLoading
+  } else if (category) {
+    products = categoryData?.data || []
+    isLoading = isCategoryLoading
+  }
+  console.log(categoryData)
+
+  // Skeleton fallback while loading
+  if (isLoading) {
+    return (
+      <ProductCarouselSkeleton
         title={title}
         titleVariant={titleVariant}
         titleSubtitle={titleSubtitle}
@@ -114,61 +91,26 @@ export async function ProductCarouselSection({
         titleUnderlineWidth={titleUnderlineWidth}
         titleAnimated={titleAnimated}
         titleShowDecorations={titleShowDecorations}
-        titleUnderlineVariant={titleUnderlineVariant} // Pass the new prop
+        titleUnderlineVariant={titleUnderlineVariant}
       />
-    </Suspense>
-  )
-}
+    )
+  }
 
-// Enhanced Skeleton Loader for Product Carousel
-function ProductCarouselSkeleton({
-  title,
-  titleVariant = "default",
-  titleSubtitle,
-  titleIcon,
-  titleUnderlineWidth,
-  titleAnimated = true,
-  titleShowDecorations = true,
-  titleUnderlineVariant = "default", // Default to "default"
-}: {
-  title: string
-  titleVariant?: "default" | "gradient" | "elegant" | "modern" | "premium"
-  titleSubtitle?: string
-  titleIcon?: React.ReactNode
-  titleUnderlineWidth?: string
-  titleAnimated?: boolean
-  titleShowDecorations?: boolean
-  titleUnderlineVariant?: "default" | "wide" | "full"
-}) {
+  // No products? Render nothing or a simple message
+  if (!products?.length) return null
+
+  // Render the carousel
   return (
-    <div className="container mx-auto py-8">
-      <SectionTitle
-        title={title}
-        subtitle={titleSubtitle}
-        variant={titleVariant}
-        icon={titleIcon}
-        underlineWidth={titleUnderlineWidth}
-        animated={titleAnimated}
-        showDecorations={titleShowDecorations}
-        underlineVariant={titleUnderlineVariant} // Pass the new prop
-      />
-      <div className="flex space-x-4 overflow-hidden">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="min-w-[calc(50%-1rem)] md:min-w-[calc(33%-1rem)] lg:min-w-[calc(25%-1rem)] p-2">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <Skeleton className="w-full h-64 rounded-t-xl" />
-              <div className="p-4 space-y-3">
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-                <div className="flex gap-2 pt-2">
-                  <Skeleton className="h-10 w-10 rounded-full" />
-                  <Skeleton className="h-10 flex-1 rounded-lg" />
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <ProductCarouselClient
+      products={products}
+      title={title}
+      titleVariant={titleVariant}
+      titleSubtitle={titleSubtitle}
+      titleIcon={titleIcon}
+      titleUnderlineWidth={titleUnderlineWidth}
+      titleAnimated={titleAnimated}
+      titleShowDecorations={titleShowDecorations}
+      titleUnderlineVariant={titleUnderlineVariant}
+    />
   )
 }

@@ -3,8 +3,8 @@ import { IProductResponse } from "@/types/product.types";
 export async function getProductBySlug(slug: string): Promise<IProductResponse | null> {
   try {
     const res = await fetch(
-    //   `${process.env.NEXT_PUBLIC_API_BASE_URL}/products/get-product-by-slug/${slug}`,
-      `http://localhost:7302/api/products/get-product-by-slug/${slug}`,
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/products/get-product-by-slug/${slug}`,
+      // `http://localhost:7302/api/products/get-product-by-slug/${slug}`,
       {
         method: "GET",
         // Force SSR fetch (avoid caching stale data for SEO)

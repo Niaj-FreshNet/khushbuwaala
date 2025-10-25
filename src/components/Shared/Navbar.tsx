@@ -99,9 +99,9 @@ export function Navbar() {
             }}
           >
             {/* Enhanced announcement bar with animation */}
-            <div className="bg-gradient-to-r from-red-600 via-red-500 to-pink-600 text-white text-center py-2.5 px-4 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-red-600 via-red-500 to-pink-600 text-white text-center py-1 px-4 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
-              <div className="relative flex items-center justify-center gap-2 text-sm font-medium">
+              <div className="relative flex items-center justify-center gap-2 text-xs font-medium">
                 <Sparkles className="h-4 w-4 animate-pulse" />
                 <span className="hidden sm:inline">Free shipping on orders over ৳1000 • Premium quality guaranteed</span>
                 <span className="sm:hidden">Free shipping over ৳1000</span>
@@ -119,15 +119,21 @@ export function Navbar() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="relative h-12 w-12 hover:bg-red-50 hover:text-red-600 transition-all duration-300 rounded-xl group overflow-hidden"
+                  className="relative h-12 w-12 hover:text-red-600 transition-all duration-300 rounded-xl group overflow-hidden"
                   aria-label="Open navigation menu"
                   onClick={handlers.toggleDrawer}
                 >
-                  <Menu className={`h-6 w-6 transition-all duration-300 ${drawerOpen ? 'rotate-90 scale-110' : 'group-hover:scale-110'}`} />
+                  {/* Background layers */}
                   {drawerOpen && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-red-100 to-pink-100 rounded-xl animate-pulse"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl animate-pulse z-0"></div>
                   )}
-                  <div className="absolute inset-0 bg-red-50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                  <div className="absolute inset-0 bg-red-50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300 z-0"></div>
+
+                  {/* Menu icon */}
+                  <Menu
+                    className={`relative z-10 h-6 w-6 transition-all duration-300 ${drawerOpen ? 'rotate-90 scale-110' : 'group-hover:scale-110'
+                      }`}
+                  />
                 </Button>
               </div>
 
@@ -139,7 +145,7 @@ export function Navbar() {
                   title="KhushbuWaala - Premium Perfumes and Attars"
                   aria-label="KhushbuWaala homepage"
                 >
-                  <div className="absolute -inset-2 bg-gradient-to-r from-red-600 to-pink-600 rounded-xl blur opacity-0 group-hover:opacity-20 transition duration-500"></div>
+                  <div className="absolute -inset-2 bg-gradient-to-r rounded-xl blur opacity-0 group-hover:opacity-20 transition duration-500"></div>
                   <Image
                     src="/images/khushbuwaala.webp"
                     alt="KhushbuWaala - Premium Perfumes"
@@ -158,7 +164,7 @@ export function Navbar() {
                   title="KhushbuWaala - Premium Perfumes and Attars"
                   aria-label="KhushbuWaala homepage"
                 >
-                  <div className="absolute -inset-2 bg-gradient-to-r from-red-600 to-pink-600 rounded-xl blur opacity-0 group-hover:opacity-20 transition duration-500"></div>
+                  <div className="absolute -inset-2 bg-gradient-to-r rounded-xl blur opacity-0 group-hover:opacity-20 transition duration-500"></div>
                   <Image
                     src="/images/khushbuwaala.webp"
                     alt="KhushbuWaala - Premium Perfumes"
@@ -172,7 +178,7 @@ export function Navbar() {
               {/* Enhanced Desktop Navigation */}
               <div className="hidden lg:flex flex-grow justify-center">
                 <ul
-                  className="flex items-center justify-center flex-grow space-x-6 text-gray-800 font-semibold text-sm"
+                  className="flex items-center justify-center flex-grow space-x-2 text-gray-800 font-semibold text-sm"
                   role="menubar"
                 >
                   <li role="none">
@@ -303,8 +309,8 @@ export function Navbar() {
                 >
                   <Search className="h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 z-10" />
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-100/50 to-indigo-100/50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-200/30 to-transparent animate-shimmer"></div>
+                  <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-blue-200/30 to-transparent animate-shimmer"></div>
                   </div>
                 </Button>
 
@@ -323,8 +329,8 @@ export function Navbar() {
                       </Badge>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-r from-pink-100/50 to-red-100/50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-pink-200/30 to-transparent animate-shimmer"></div>
+                    <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-pink-200/30 to-transparent animate-shimmer"></div>
                     </div>
                   </Button>
                 </Link>
@@ -342,8 +348,8 @@ export function Navbar() {
                     {counts.cart > 99 ? '99+' : counts.cart}
                   </Badge>
                   <div className="absolute inset-0 bg-gradient-to-r from-green-100/50 to-emerald-100/50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-green-200/30 to-transparent animate-shimmer"></div>
+                  <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-green-200/30 to-transparent animate-shimmer"></div>
                   </div>
                 </Button>
 
@@ -357,8 +363,8 @@ export function Navbar() {
                   >
                     <MapPin className="h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:animate-bounce z-10" />
                     <div className="absolute inset-0 bg-gradient-to-r from-purple-100/50 to-violet-100/50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300"></div>
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-200/30 to-transparent animate-shimmer"></div>
+                    <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-purple-200/30 to-transparent animate-shimmer"></div>
                     </div>
                   </Button>
                 </Link>

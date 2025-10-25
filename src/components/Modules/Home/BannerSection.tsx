@@ -12,11 +12,10 @@ interface BannerProps {
   text: string
   buttonText: string
   link: string
-  // Art direction approach - different images for different breakpoints
   images: {
-    mobile: string // 768px width, 400px height - portrait/square crop
-    tablet?: string // 1024px width, 500px height - landscape crop
-    desktop: string // 1920px width, 600px height - wide landscape crop
+    mobile: string
+    tablet?: string
+    desktop: string
   }
   variant?: "primary" | "secondary" | "tertiary"
   overlayPattern?: "gradient" | "geometric" | "radial"
@@ -28,7 +27,6 @@ interface BannerProps {
   }>
 }
 
-// Client Component with advanced interactions
 export function BannerSection({
   heading,
   text,
@@ -42,10 +40,11 @@ export function BannerSection({
   stats
 }: BannerProps) {
   const [scrollY, setScrollY] = useState(0)
-  const [isVisible, setIsVisible] = useState(false)
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isVisible, setIsVisible] = useState(false) // FIX: start false, animate when in view
+  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 })
+  const [hasLoaded, setHasLoaded] = useState(false)
 
-  // Parallax effect
+  // Parallax + mouse tracking
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY)
     const handleMouseMove = (e: MouseEvent) => {
@@ -55,26 +54,31 @@ export function BannerSection({
       })
     }
 
-    window.addEventListener('scroll', handleScroll)
-    window.addEventListener('mousemove', handleMouseMove)
-    
-    // Intersection Observer for reveal animation
+    window.addEventListener("scroll", handleScroll)
+    window.addEventListener("mousemove", handleMouseMove)
+
+    // Intersection Observer — trigger animation only once when visible
     const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold: 0.1 }
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.unobserve(entry.target) // stop observing after shown
+        }
+      },
+      { threshold: 0.3 }
     )
 
-    const bannerElement = document.getElementById('banner-section')
+    const bannerElement = document.getElementById("banner-section")
     if (bannerElement) observer.observe(bannerElement)
 
     return () => {
-      window.removeEventListener('scroll', handleScroll)
-      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener("mousemove", handleMouseMove)
       if (bannerElement) observer.unobserve(bannerElement)
     }
   }, [])
 
-  // Dynamic styling based on variant
+  // Variant styling
   const getVariantStyles = () => {
     switch (variant) {
       case "primary":
@@ -121,65 +125,73 @@ export function BannerSection({
   return (
     <section
       id="banner-section"
-      className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden my-8 group"
+      className={cn(
+        "relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden mt-12 mb-4 group transition-opacity duration-700",
+        hasLoaded ? "opacity-100" : "opacity-0"
+      )}
       aria-labelledby="banner-heading"
     >
-      {/* Optimized Background Images with Parallax */}
-      <div 
+      {/* Background Images */}
+      <div
         className="absolute inset-0 transition-transform duration-700"
-        style={{
-          transform: `translateY(${scrollY * 0.5}px) scale(${1 + scrollY * 0.0002})`
-        }}
+        // style={{
+        //   transform: `translateY(${scrollY * 0.1}px) scale(${1 + scrollY * 0.00005})`
+        // }}
       >
-        {/* Mobile Image (up to 768px) */}
-        <div className="block md:hidden">
+        <div className="absolute inset-0 min-h-full block md:hidden">
           <Image
             src={images.mobile || "/placeholder.svg"}
             alt={heading}
             fill
             sizes="100vw"
-            className="object-cover"
+            className="object-cover transition-opacity duration-700"
             priority
             quality={85}
+            onLoadingComplete={() => setHasLoaded(true)}
           />
         </div>
-
-        {/* Tablet Image (768px to 1024px) */}
-        <div className="hidden md:block lg:hidden">
+        <div className="absolute inset-0 min-h-full hidden md:block lg:hidden">
           <Image
             src={images.tablet || images.desktop}
             alt={heading}
             fill
             sizes="100vw"
-            className="object-cover"
+            className="object-cover transition-opacity duration-700"
             priority
             quality={90}
+            onLoadingComplete={() => setHasLoaded(true)}
           />
         </div>
-
-        {/* Desktop Image (1024px+) */}
-        <div className="hidden lg:block">
+        <div className="absolute inset-0 min-h-full hidden lg:block">
           <Image
             src={images.desktop}
             alt={heading}
             fill
             sizes="100vw"
-            className="object-cover"
+            className="object-cover transition-opacity duration-700"
             priority
             quality={95}
+            onLoadingComplete={() => setHasLoaded(true)}
           />
         </div>
       </div>
 
-      {/* Enhanced Overlay with Mouse Interaction */}
-      <div 
+      {/* Overlay */}
+      <div
         className={cn("absolute inset-0 transition-all duration-500", styles.overlay)}
         style={{
-          background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(255,255,255,0.1) 0%, transparent 50%), ${styles.overlay.replace('bg-gradient-to-br', 'linear-gradient(135deg)')}`
+          // background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(255,255,255,0.1) 0%, transparent 50%), ${styles.overlay.replace(
+          //   "bg-gradient-to-br",
+          //   "linear-gradient(135deg)"
+          // )}`
+          background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(255,255,255,0.1) 0%, transparent 50%), ${styles.overlay.replace(
+            "bg-gradient-to-br",
+            "linear-gradient(135deg)"
+          )}`
         }}
       />
 
-      {/* Animated Particles */}
+      {/* Floating particles */}
       <div className="absolute inset-0 overflow-hidden">
         {styles.particleColors.map((color, index) => (
           <div
@@ -198,12 +210,13 @@ export function BannerSection({
       {/* Main Content */}
       <div className="relative h-full flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center space-y-8">
-          {/* Decorative Element */}
-          <div 
+          <div
             className={cn(
               "inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md border border-white/20 text-sm font-medium transition-all duration-700",
               styles.decorativeColor,
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              hasLoaded && isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-4"
             )}
           >
             <Sparkles className="h-4 w-4" />
@@ -211,41 +224,51 @@ export function BannerSection({
             <Star className="h-4 w-4" />
           </div>
 
-          {/* Enhanced Heading */}
           <h1
             id="banner-heading"
             className={cn(
               "text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight transition-all duration-1000 delay-200",
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+              hasLoaded && isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-8"
             )}
           >
-            <span className={cn("bg-gradient-to-r bg-clip-text text-transparent", styles.accent)}>
-              {heading.split(' ')[0]}
-            </span>{' '}
-            {heading.split(' ').slice(1).join(' ')}
+            <span
+              className={cn("bg-gradient-to-r bg-clip-text text-transparent", styles.accent)}
+            >
+              {heading.split(" ")[0]}
+            </span>{" "}
+            {heading.split(" ").slice(1).join(" ")}
           </h1>
 
-          {/* Enhanced Description */}
-          <p 
+          <p
             className={cn(
-              "text-lg md:text-xl lg:text-2xl text-gray-200 max-w-2xl mx-auto leading-relaxed transition-all duration-1000 delay-400",
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+              "text-md md:text-lg lg:text-xl text-gray-200 max-w-2xl mx-auto leading-relaxed transition-all duration-1000 delay-400",
+              hasLoaded && isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-8"
             )}
           >
             {text}
           </p>
 
-          {/* Enhanced Stats Section */}
           {stats && (
-            <div 
+            <div
               className={cn(
                 "grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto transition-all duration-1000 delay-600",
-                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+                hasLoaded && isVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-8"
               )}
             >
               {stats.map((stat, index) => (
                 <div key={index} className="text-center">
-                  <div className={cn("text-2xl md:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent", styles.accent)}>
+                  <div
+                    className={cn(
+                      "text-2xl md:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent",
+                      styles.accent
+                    )}
+                  >
                     {stat.value}
                   </div>
                   <div className="text-sm text-gray-300 mt-1">{stat.label}</div>
@@ -254,22 +277,22 @@ export function BannerSection({
             </div>
           )}
 
-          {/* Enhanced Action Buttons */}
-          <div 
+          <div
             className={cn(
               "flex flex-col sm:flex-row gap-4 justify-center items-center transition-all duration-1000 delay-700",
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+              hasLoaded && isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-8"
             )}
           >
             <Button
               asChild
               variant={styles.buttonStyle as any}
-              size="xl"
+              size="lg"
               className={cn(
-                "group/button shadow-2xl transition-all duration-300 hover:scale-105",
+                "bg-white group/button shadow-2xl transition-all duration-300 hover:scale-105",
                 styles.glowColor
               )}
-              hapticFeedback
             >
               <Link href={link}>
                 <span className="relative z-10">{buttonText}</span>
@@ -279,10 +302,10 @@ export function BannerSection({
 
             {showVideoButton && videoUrl && (
               <Button
-                variant="glass"
-                size="xl"
+                variant="ghost"
+                size="lg"
                 className="group/play"
-                onClick={() => window.open(videoUrl, '_blank')}
+                onClick={() => window.open(videoUrl, "_blank")}
               >
                 <Play className="h-5 w-5 mr-2 transition-transform duration-300 group-hover/play:scale-110" />
                 Watch Video
@@ -290,11 +313,12 @@ export function BannerSection({
             )}
           </div>
 
-          {/* Scroll Indicator */}
-          <div 
+          <div
             className={cn(
               "absolute bottom-8 left-1/2 transform -translate-x-1/2 transition-all duration-1000 delay-1000",
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              hasLoaded && isVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-4"
             )}
           >
             <div className="animate-bounce">
@@ -304,7 +328,7 @@ export function BannerSection({
         </div>
       </div>
 
-      {/* Enhanced Geometric Patterns */}
+      {/* Patterns */}
       {overlayPattern === "geometric" && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-32 h-32 border border-white/10 rotate-45 animate-spin-slow" />
@@ -313,9 +337,8 @@ export function BannerSection({
         </div>
       )}
 
-      {/* Radial Pattern */}
       {overlayPattern === "radial" && (
-        <div 
+        <div
           className="absolute inset-0 opacity-20"
           style={{
             background: `radial-gradient(circle at center, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)`
@@ -323,7 +346,7 @@ export function BannerSection({
         />
       )}
 
-      {/* Enhanced Edge Fade */}
+      {/* Edge fade */}
       <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/30 to-transparent" />
       <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/20 to-transparent" />
     </section>
