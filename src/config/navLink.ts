@@ -4,7 +4,7 @@ import { FaUsers, FaCalculator, FaShop } from 'react-icons/fa6';
 import { GiNewspaper } from 'react-icons/gi';
 import { GoPlus, GoPlusCircle, GoReport } from 'react-icons/go';
 import { LuCalendarDays } from 'react-icons/lu';
-import { MdDetails, MdOutlineCategory, MdOutlinePayments } from 'react-icons/md';
+import { MdDetails, MdOutlineCategory, MdOutlineHistory, MdOutlinePayments } from 'react-icons/md';
 import { PiNewspaperThin } from 'react-icons/pi';
 import { RiDashboardFill } from 'react-icons/ri';
 
@@ -24,25 +24,58 @@ interface NavLink {
 // Navigation links for all roles
 export const navLinks: NavLink[] = [
   // USER: Basic user functionality
-  {
-    name: 'My Profile',
-    href: '/dashboard',
-    icon: RiDashboardFill,
-    roles: ['USER', 'SALESMAN', 'ADMIN', 'SUPER_ADMIN'],
-  },
-  {
-    name: 'Order History',
-    href: '/dashboard/order-list',
-    icon: LuCalendarDays,
-    roles: ['USER', 'SALESMAN', 'ADMIN', 'SUPER_ADMIN'],
-  },
-  {
-    name: 'Password Change',
-    href: '/dashboard/password',
-    icon: CiSettings,
-    roles: ['USER', 'SALESMAN', 'ADMIN', 'SUPER_ADMIN'],
-  },
+  // {
+  //   name: 'My Profile',
+  //   href: '/dashboard',
+  //   icon: RiDashboardFill,
+  //   roles: ['USER', 'SALESMAN', 'ADMIN', 'SUPER_ADMIN'],
+  // },
+  // {
+  //   name: 'Order History',
+  //   href: '/dashboard/order-list',
+  //   icon: LuCalendarDays,
+  //   roles: ['USER', 'SALESMAN', 'ADMIN', 'SUPER_ADMIN'],
+  // },
+  // {
+  //   name: 'Password Change',
+  //   href: '/dashboard/password',
+  //   icon: CiSettings,
+  //   roles: ['USER', 'SALESMAN', 'ADMIN', 'SUPER_ADMIN'],
+  // },
   // SALESMAN: Sales-related features
+  {
+    name: 'Products',
+    href: '#',
+    icon: FaShop,
+    roles: ['ADMIN', 'SUPER_ADMIN'],
+    subItems: [
+      { name: 'Add Product', href: '/dashboard/products/add', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      { name: 'Product List', href: '/dashboard/products', icon: FaShop, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      // { name: 'Add Variant (Size/Scent)', href: '/dashboard/variants/add', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      // { name: 'Variants List', href: '/dashboard/variants', icon: MdDetails, roles: ['ADMIN', 'SUPER_ADMIN'], },
+    ],
+  },
+  // ADMIN & SUPER_ADMIN: Company management  
+  {
+    name: 'Categories',
+    href: '#',
+    icon: MdOutlineCategory,
+    roles: ['ADMIN', 'SUPER_ADMIN'],
+    subItems: [
+      { name: 'Add Category', href: '/dashboard/categories/add', icon: GoPlusCircle, roles: ['ADMIN', 'SUPER_ADMIN'] },
+      { name: 'Category List', href: '/dashboard/categories', icon: MdOutlineCategory, roles: ['ADMIN', 'SUPER_ADMIN'] },
+      { name: 'Add Fragrance Family', href: '/dashboard/fragrance-families/add', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'] },
+      { name: 'Fragrance Families List', href: '/dashboard/fragrance-families', icon: CiFolderOn, roles: ['ADMIN', 'SUPER_ADMIN'] },
+      { name: 'Add Material', href: '/dashboard/materials/add', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'] },
+      { name: 'Materials List', href: '/dashboard/materials', icon: CiFolderOn, roles: ['ADMIN', 'SUPER_ADMIN'] },
+    ],
+  },
+  {
+    name: 'Orders',
+    href: '/dashboard/orders',
+    icon: MdOutlinePayments,
+    roles: ['ADMIN', 'SUPER_ADMIN'],
+  },
   {
     name: 'Manual Sales',
     href: '#',
@@ -69,37 +102,21 @@ export const navLinks: NavLink[] = [
       },
       {
         name: 'Sales Report',
-        href: '/dashboard/sales-report',
+        href: '/dashboard/sales/sales-report',
         icon: GoReport,
         roles: ['SALESMAN', 'ADMIN', 'SUPER_ADMIN'],
       },
     ],
   },
-  // ADMIN & SUPER_ADMIN: Company management
   {
-    name: 'Categories & Fragrances',
+    name: 'Expenses',
     href: '#',
-    icon: MdOutlineCategory,
+    icon: GoPlusCircle,
     roles: ['ADMIN', 'SUPER_ADMIN'],
     subItems: [
-      { name: 'Add Category', href: '/dashboard/categories/add', icon: GoPlusCircle, roles: ['ADMIN', 'SUPER_ADMIN'] },
-      { name: 'Category List', href: '/dashboard/categories', icon: MdOutlineCategory, roles: ['ADMIN', 'SUPER_ADMIN'] },
-      { name: 'Add Fragrance Family', href: '/dashboard/fragrance-families/add', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'] },
-      { name: 'Fragrance Families List', href: '/dashboard/fragrance-families', icon: CiFolderOn, roles: ['ADMIN', 'SUPER_ADMIN'] },
-      { name: 'Add Material', href: '/dashboard/materials/add', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'] },
-      { name: 'Materials List', href: '/dashboard/materials', icon: CiFolderOn, roles: ['ADMIN', 'SUPER_ADMIN'] },
-    ],
-  },
-  {
-    name: 'Products',
-    href: '#',
-    icon: FaShop,
-    roles: ['ADMIN', 'SUPER_ADMIN'],
-    subItems: [
-      { name: 'Add Product', href: '/dashboard/products/add', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'], },
-      { name: 'Product List', href: '/dashboard/products', icon: FaShop, roles: ['ADMIN', 'SUPER_ADMIN'], },
-      { name: 'Add Variant (Size/Scent)', href: '/dashboard/variants/add', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'], },
-      { name: 'Variants List', href: '/dashboard/variants', icon: MdDetails, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      { name: 'Add Expense', href: '/dashboard/expense/add-expense', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      { name: 'Expense List', href: '/dashboard/expense', icon: MdDetails, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      { name: 'Expenses Report', href: '/dashboard/expense/expense-report', icon: GoReport, roles: ['ADMIN', 'SUPER_ADMIN'], },
     ],
   },
   {
@@ -108,39 +125,13 @@ export const navLinks: NavLink[] = [
     icon: CiFolderOn,
     roles: ['ADMIN', 'SUPER_ADMIN'],
     subItems: [
-      { name: 'Stock Management', href: '/dashboard/stock-management', icon: MdDetails, roles: ['ADMIN', 'SUPER_ADMIN'], },
-      { name: 'Low Stock Alerts', href: '/dashboard/low-stock-alerts', icon: GoReport, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      { name: 'Add Stock', href: '/dashboard/stock/add', icon: MdDetails, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      { name: 'Stock Management', href: '/dashboard/stock', icon: MdDetails, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      { name: 'Low Stock Alerts', href: '/dashboard/stock/low-stock-alertz', icon: GoReport, roles: ['ADMIN', 'SUPER_ADMIN'], },
     ],
   },
   {
-    name: 'Suppliers',
-    href: '#',
-    icon: FaUsers,
-    roles: ['ADMIN', 'SUPER_ADMIN'],
-    subItems: [
-      { name: 'Add Supplier', href: '/dashboard/add-supplier', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'], },
-      { name: 'Suppliers List', href: '/dashboard/suppliers-list', icon: FaUsers, roles: ['ADMIN', 'SUPER_ADMIN'], },
-    ],
-  },
-  {
-    name: 'Orders',
-    href: '/dashboard/orders',
-    icon: MdOutlinePayments,
-    roles: ['ADMIN', 'SUPER_ADMIN'],
-  },
-  {
-    name: 'Expenses',
-    href: '#',
-    icon: GoPlusCircle,
-    roles: ['ADMIN', 'SUPER_ADMIN'],
-    subItems: [
-      { name: 'Add Expense', href: '/dashboard/add-expense', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'], },
-      { name: 'Expense List', href: '/dashboard/expense-list', icon: MdDetails, roles: ['ADMIN', 'SUPER_ADMIN'], },
-      { name: 'Expenses Report', href: '/dashboard/expense-report', icon: GoReport, roles: ['ADMIN', 'SUPER_ADMIN'], },
-    ],
-  },
-  {
-    name: 'Promotions & Discounts',
+    name: 'Discounts',
     href: '#',
     icon: GoPlusCircle,
     roles: ['ADMIN', 'SUPER_ADMIN'],
@@ -150,23 +141,33 @@ export const navLinks: NavLink[] = [
     ],
   },
   {
-    name: 'Blog & Content',
+    name: 'Blogs',
     href: '#',
     icon: PiNewspaperThin,
     roles: ['ADMIN', 'SUPER_ADMIN'],
     subItems: [
-      { name: 'Add Blog', href: '/dashboard/add-blog', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'], },
-      { name: 'All Blogs', href: '/dashboard/all-blog', icon: GiNewspaper, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      { name: 'Add Blog', href: '/dashboard/blogs/add', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      { name: 'All Blogs', href: '/dashboard/blogs', icon: GiNewspaper, roles: ['ADMIN', 'SUPER_ADMIN'], },
     ],
   },
   {
-    name: 'Reviews & Ratings',
+    name: 'Reviews',
     href: '/dashboard/reviews',
     icon: FaUsers,
     roles: ['ADMIN', 'SUPER_ADMIN'],
   },
   {
-    name: 'Analytics & Reports',
+    name: 'Suppliers',
+    href: '#',
+    icon: FaUsers,
+    roles: ['ADMIN', 'SUPER_ADMIN'],
+    subItems: [
+      { name: 'Add Supplier', href: '/dashboard/suppliers/add', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      { name: 'Suppliers List', href: '/dashboard/suppliers', icon: FaUsers, roles: ['ADMIN', 'SUPER_ADMIN'], },
+    ],
+  },
+  {
+    name: 'Analytics',
     href: '/dashboard/analytics',
     icon: FaCalculator,
     roles: ['ADMIN', 'SUPER_ADMIN'],
@@ -207,7 +208,7 @@ export const navLinks: NavLink[] = [
     roles: ['SUPER_ADMIN'],
   },
   {
-    name: 'Ledger & Accounting',
+    name: 'Ledger',
     href: '/dashboard/ledger',
     icon: FaCalculator,
     roles: ['SUPER_ADMIN'],

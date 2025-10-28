@@ -72,6 +72,16 @@ const salesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Sales"], // Invalidate 'Sales' to refetch all sales after adding
     }),
+
+    // ✅ Get order by ID (Admin)
+    getSaleById: builder.query({
+      query: (id) => ({
+        url: `/sales/get-sale-by-id/${id}`,
+        method: "GET",
+      }),
+      providesTags: ['Sales'],
+    }),
+
   }),
   overrideExisting: false,
 
@@ -86,6 +96,7 @@ export const {
 
   useUpdateSalesMutation, // Export the update mutation hook
   useAddSaleMutation, // Export the new add sale mutation hook
+  useGetSaleByIdQuery,
 
 } = salesApi;
 

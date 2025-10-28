@@ -169,7 +169,6 @@ const AddProductPage = () => {
             onSubmit={handleSubmit}
             submitButtonText="Add Product"
             submitButtonClassName="bg-[#FB923C] hover:bg-[#ff8a29]"
-            successMessage='Product added successfully!'
             errorMessage='Failed to add product. Please try again.'
             resetButtonText="Cancel"
             resetButtonClassName="border-[#FB923C] text-[#FB923C]"

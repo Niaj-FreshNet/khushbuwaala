@@ -62,6 +62,10 @@ export interface IProduct {
 
   categoryId: string;
   published: boolean;
+  
+  reviews: IReview[];
+  averageRating: number;
+  reviewCount: number;
 
   supplier: string;
   stock?: number; // float at product-level
@@ -133,6 +137,22 @@ export interface IProductQuery {
   [key: string]: unknown;
 }
 
+export interface IReview {
+  id: string;
+  rating: number;
+  title: string;
+  comment: string;
+  isPublished: boolean;
+  productId: string;
+  userId?: string;
+  user?: {
+    name: string;
+    imageUrl: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Response Interfaces
 export interface IProductResponse {
   id: string;
@@ -170,6 +190,10 @@ export interface IProductResponse {
 
   materialIds: string[];
   fragranceIds: string[];
+
+  reviews: IReview[];
+  averageRating: number;
+  reviewCount: number;
 
   supplier: string;
   stock?: number;

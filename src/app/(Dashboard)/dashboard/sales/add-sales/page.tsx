@@ -117,7 +117,7 @@ const AddSalesPage = () => {
                 cartItemIds: createdCartIds,
                 amount: values.amount,
                 isPaid,
-                saleBy: user?.role,
+                saleBy: user?.name,
                 orderSource: "MANUAL",
                 saleType: 'SINGLE',
                 customerInfo: {

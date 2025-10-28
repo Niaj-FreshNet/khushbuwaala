@@ -37,43 +37,96 @@ export default function SideBar({
   console.log('user:', user?.role)
 
 
-  // Skeleton Loader for Nav + SubItems
+  // Skeleton Loader for Nav + SubItems (more realistic layout)
   const SkeletonNav = () => (
-    <div className="flex-1 p-4 space-y-3">
-      {[...Array(5)].map((_, idx) => (
-        <div key={idx} className="space-y-2">
-          {/* Main item */}
-          <div
-            className={cn(
-              'h-6 rounded-md animate-pulse',
-              dark ? 'bg-gray-700' : 'bg-gray-300',
-              isShort ? 'w-8 mx-auto' : 'w-full'
-            )}
-          ></div>
-          {/* Sub-items */}
-          {!isShort &&
-            [...Array(2)].map((_, subIdx) => (
+    <div className="flex flex-col justify-between h-full p-4">
+      <div className="space-y-4">
+        {[...Array(8)].map((_, idx) => (
+          <div key={idx} className="space-y-2">
+            {/* Main Nav Item */}
+            <div
+              className={cn(
+                'flex items-center gap-3 rounded-md animate-pulse px-2 py-2',
+                dark ? 'bg-gray-600' : 'bg-gray-200',
+                isShort ? 'justify-center' : ''
+              )}
+            >
+              {/* Icon Placeholder */}
               <div
-                key={subIdx}
                 className={cn(
-                  'h-4 rounded-md ml-4 animate-pulse',
-                  dark ? 'bg-gray-600' : 'bg-gray-200',
-                  'w-3/4'
+                  'rounded-md',
+                  dark ? 'bg-gray-600' : 'bg-gray-300',
+                  'h-5 w-5'
                 )}
               ></div>
-            ))}
-        </div>
-      ))}
-      {/* Logout Button */}
+
+              {/* Label Placeholder */}
+              {!isShort && (
+                <div
+                  className={cn(
+                    'h-4 rounded-md',
+                    dark ? 'bg-gray-600' : 'bg-gray-300',
+                    'w-24'
+                  )}
+                ></div>
+              )}
+            </div>
+
+            {/* Sub-items */}
+            {!isShort &&
+              [...Array(2)].map((_, subIdx) => (
+                <div
+                  key={subIdx}
+                  className="flex items-center gap-3 ml-8 animate-pulse"
+                >
+                  <div
+                    className={cn(
+                      'rounded-md',
+                      dark ? 'bg-gray-700' : 'bg-gray-300',
+                      'h-3 w-3'
+                    )}
+                  ></div>
+                  <div
+                    className={cn(
+                      'h-3 rounded-md',
+                      dark ? 'bg-gray-700' : 'bg-gray-300',
+                      'w-20'
+                    )}
+                  ></div>
+                </div>
+              ))}
+          </div>
+        ))}
+      </div>
+
+      {/* Logout button mimic */}
       <div
         className={cn(
-          'h-10 mt-auto rounded-md animate-pulse',
-          dark ? 'bg-red-700' : 'bg-red-300',
-          isShort ? 'w-8 mx-auto' : 'w-full'
+          'flex items-center gap-3 rounded-md mt-6 animate-pulse px-3 py-2',
+          dark ? 'bg-red-800' : 'bg-red-300',
+          isShort ? 'justify-center' : 'justify-start'
         )}
-      ></div>
+      >
+        <div
+          className={cn(
+            'rounded-md',
+            dark ? 'bg-red-600' : 'bg-red-400',
+            'h-5 w-5'
+          )}
+        ></div>
+        {!isShort && (
+          <div
+            className={cn(
+              'h-4 rounded-md',
+              dark ? 'bg-red-600' : 'bg-red-400',
+              'w-16'
+            )}
+          ></div>
+        )}
+      </div>
     </div>
   );
+
 
   if (!user) {
     return (

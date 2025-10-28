@@ -1,50 +1,22 @@
+// src/components/ProductAccordion.tsx
+
 "use client";
-import React, { useState } from "react";
-import { ChevronDown, Star, Shield, Award, Truck, CheckCircle, ThumbsUp, Calendar, Verified, Heart, MessageCircle, Info, Package, Sparkles, Clock, Globe } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { ChevronDown, Star, Shield, Award, Truck, CheckCircle, Calendar, Verified, Sparkles, Clock, Globe, Info, Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
-import { IProduct } from "@/types/product.types";
+import { IProduct, IReview } from "@/types/product.types";
+import { useGetProductReviewsQuery, useCreateReviewMutation } from "@/redux/store/api/review/reviewApi";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/redux/store/hooks/useAuth";
+import { toast } from "sonner";
 
 interface ProductAccordionProps {
   product: Partial<IProduct>;
 }
-
-// Enhanced dummy reviews
-const dummyReviews = [
-  {
-    id: 1,
-    name: "Aarif Rahman",
-    rating: 5,
-    date: "2024-01-15",
-    verified: true,
-    comment: "Excellent longevity and the projection is outstanding. I've been using this for 3 months and it's become my signature scent. Perfect for office and evening events.",
-    helpful: 12,
-    pros: ["Long-lasting", "Great projection", "Professional scent"],
-    cons: []
-  },
-  {
-    id: 2,
-    name: "Sara Haque",
-    rating: 4,
-    date: "2024-01-08",
-    verified: true,
-    comment: "Very elegant scent with beautiful floral notes. Could be a bit stronger on the base notes, but overall a wonderful fragrance. Fast delivery and authentic product.",
-    helpful: 8,
-    pros: ["Elegant scent", "Authentic quality", "Fast delivery"],
-    cons: ["Could be stronger"]
-  },
-  {
-    id: 3,
-    name: "Mahin Islam",
-    rating: 5,
-    date: "2024-01-02",
-    verified: true,
-    comment: "Wore it at a wedding — received tons of compliments! The fragrance is sophisticated and unique. KhushbuWaala's service is excellent too.",
-    helpful: 15,
-    pros: ["Unique scent", "Gets compliments", "Excellent service"],
-    cons: []
-  }
-];
 
 interface AccordionItemProps {
   title: string;
@@ -63,7 +35,7 @@ const AccordionItem = ({
   isOpen,
   onToggle,
   badge,
-  'data-section': dataSection
+  'data-section': dataSection,
 }: AccordionItemProps) => (
   <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
     <button
@@ -85,8 +57,7 @@ const AccordionItem = ({
         </div>
       </div>
       <ChevronDown
-        className={`w-6 h-6 text-gray-400 transition-transform duration-300 ${isOpen ? 'transform rotate-180' : ''
-          }`}
+        className={`w-6 h-6 text-gray-400 transition-transform duration-300 ${isOpen ? 'transform rotate-180' : ''}`}
       />
     </button>
     <AnimatePresence>
@@ -109,12 +80,85 @@ const AccordionItem = ({
 
 export default function ProductAccordion({ product }: ProductAccordionProps) {
   const [openSection, setOpenSection] = useState<string>("");
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [newReview, setNewReview] = useState({
+    rating: 0,
+    title: "",
+    comment: "",
+  });
+  const { user, isAuthenticated } = useAuth();
+
+  // ✅ Fetch reviews
+  const {
+    data,
+    isLoading: loadingReviews,
+    isError,
+    error,
+    refetch,
+  } = useGetProductReviewsQuery(product?.id, {
+    skip: !product?.id,
+  });
+
+  const reviews = Array.isArray(data?.data) ? data.data : [];
+
+  // ✅ Mutation for creating a new review
+  const [createReview] = useCreateReviewMutation();
 
   const toggleSection = (section: string) => {
     setOpenSection(openSection === section ? "" : section);
   };
 
-  const avgRating = dummyReviews.reduce((acc, review) => acc + review.rating, 0) / dummyReviews.length;
+  // ✅ Show error toast if API fails
+  useEffect(() => {
+    if (isError && error) {
+      toast(error?.data?.message || "Failed to load reviews");
+    }
+  }, [isError, error]);
+
+  // Calculate average rating
+  const avgRating = reviews.length > 0
+    ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
+    : 0;
+
+  // Handle review form submission
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      toast("Please log in to submit a review.");
+      return;
+    }
+    if (newReview.rating < 1 || newReview.rating > 5) {
+      toast("Rating must be between 1 and 5.",);
+      return;
+    }
+    if (!newReview.title.trim() || !newReview.comment.trim()) {
+      toast("Title and comment are required.");
+    }
+    setSubmitting(true);
+    try {
+      await createReview({
+        rating: newReview.rating,
+        title: newReview.title,
+        comment: newReview.comment,
+        productId: product.id!,
+        userId: user?.id,
+      }).unwrap();
+
+      setNewReview({ rating: 0, title: "", comment: "" });
+      toast("Your review has been submitted and is pending approval.");
+
+      await refetch(); // ✅ Refresh reviews list
+    } catch (err: any) {
+      toast(error.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Handle rating selection
+  const handleRatingSelect = (rating: number) => {
+    setNewReview((prev) => ({ ...prev, rating }));
+  };
 
   return (
     <div className="space-y-6">
@@ -124,7 +168,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
           { id: 'description', label: 'Description', icon: Info },
           { id: 'details', label: 'Details', icon: Package },
           { id: 'reviews', label: 'Reviews', icon: Star },
-          { id: 'shipping', label: 'Shipping', icon: Truck }
+          { id: 'shipping', label: 'Shipping', icon: Truck },
         ].map((section) => (
           <button
             key={section.id}
@@ -152,31 +196,11 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
           <div>
             <h4 className="font-semibold text-gray-900 mb-3">Product Description</h4>
             <p className="text-gray-700 leading-relaxed">
-              {product.description || `Experience the luxury of ${product.name}, a premium ${product.gender === 'male' ? "men's" : "women's"
+              {product.description ||
+                `Experience the luxury of ${product.name}, a premium ${product.gender === 'male' ? "men's" : "women's"
                 } fragrance that embodies sophistication and elegance. This exquisite scent is perfect for those who appreciate fine fragrances and want to make a lasting impression.`}
             </p>
           </div>
-
-          {/* {product.perfumeNotes && (
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-purple-600" />
-                Fragrance Notes
-              </h4>
-              <div className="bg-white rounded-xl p-4 border border-purple-100">
-                <div className="space-y-1">
-                  {product.perfumeNotes.split("\n").map((line, index) => {
-                    const [title, ...rest] = line.split(":");
-                    return (
-                      <p key={index} className="text-gray-700">
-                        <span className="font-semibold">{title}:</span>{rest.join(":")}
-                      </p>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )} */}
 
           {product.perfumeNotes && typeof product.perfumeNotes === "object" && (
             <div>
@@ -188,7 +212,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
                 <div className="space-y-1">
                   {Object.entries(product.perfumeNotes).map(([title, note]) => (
                     <p key={title} className="text-gray-700">
-                      <span className="font-semibold">{title}:</span> {note}
+                      <span className="font-semibold">{title}:</span> {Array.isArray(note) ? note.join(", ") : note}
                     </p>
                   ))}
                 </div>
@@ -246,7 +270,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Available Sizes</span>
                   <span className="font-medium text-gray-900">
-                    {product.variants![0].unit === 'ml' ? '3ml, 6ml, 12ml, 25ml' : '3gm, 6gm, 12gm'}
+                    {product.variants!.map((v) => `${v.size}${v.unit}`).join(", ")}
                   </span>
                 </div>
               )}
@@ -258,20 +282,20 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-gray-600">Longevity</span>
-                <span className="font-medium text-gray-900">6-8 hours</span>
+                <span className="font-medium text-gray-900">{product.longevity || "6-8 hours"}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Projection</span>
-                <span className="font-medium text-gray-900">Moderate to Strong</span>
+                <span className="font-medium text-gray-900">{product.projection || "Moderate to Strong"}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Sillage</span>
-                <span className="font-medium text-gray-900">Good</span>
+                <span className="font-medium text-gray-900">{product.sillage || "Good"}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Best For</span>
                 <span className="font-medium text-gray-900">
-                  {product.gender === 'male' ? 'Office, Evening' : 'Daily, Special Occasions'}
+                  {product.bestFor?.join(", ") || (product.gender === 'male' ? 'Office, Evening' : 'Daily, Special Occasions')}
                 </span>
               </div>
             </div>
@@ -283,12 +307,12 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
       <AccordionItem
         title="Customer Reviews"
         icon={Star}
-        badge={`${dummyReviews.length} reviews`}
+        badge={`${reviews.length} reviews`}
         isOpen={openSection === "reviews"}
         onToggle={() => toggleSection("reviews")}
       >
         <div className="space-y-6">
-          {/* Enhanced Rating Summary */}
+          {/* Rating Summary */}
           <div className="bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-50 rounded-2xl p-8 border border-yellow-200 shadow-sm">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="text-center">
@@ -303,13 +327,13 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
                     />
                   ))}
                 </div>
-                <div className="text-gray-700 font-medium">Based on {dummyReviews.length} verified reviews</div>
+                <div className="text-gray-700 font-medium">Based on {reviews.length} verified reviews</div>
               </div>
 
               <div className="space-y-3">
                 {[5, 4, 3, 2, 1].map((rating) => {
-                  const count = dummyReviews.filter(r => r.rating === rating).length;
-                  const percentage = (count / dummyReviews.length) * 100;
+                  const count = reviews.filter((r) => r.rating === rating).length;
+                  const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
                   return (
                     <div key={rating} className="flex items-center gap-4">
                       <div className="flex items-center gap-1 w-14">
@@ -330,82 +354,102 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
             </div>
           </div>
 
-          {/* Individual Reviews */}
-          <div className="space-y-6">
-            {dummyReviews.map((review) => (
-              <div key={review.id} className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                      {review.name.charAt(0)}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h5 className="font-bold text-gray-900 text-lg">{review.name}</h5>
-                        {review.verified && (
-                          <Badge variant="secondary" className="text-xs bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border border-green-200">
-                            <Verified className="w-3 h-3 mr-1" />
-                            Verified Purchase
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-5 h-5 ${i < review.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'}`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-sm text-gray-500 font-medium">{review.date}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <p className="text-gray-700 mb-4 leading-relaxed">{review.comment}</p>
-
-                {(review.pros.length > 0 || review.cons.length > 0) && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    {review.pros.length > 0 && (
-                      <div>
-                        <h6 className="text-sm font-semibold text-green-700 mb-2">Pros</h6>
-                        <div className="space-y-1">
-                          {review.pros.map((pro, idx) => (
-                            <div key={idx} className="flex items-center gap-2 text-sm text-green-600">
-                              <CheckCircle className="w-3 h-3" />
-                              {pro}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {review.cons.length > 0 && (
-                      <div>
-                        <h6 className="text-sm font-semibold text-red-700 mb-2">Cons</h6>
-                        <div className="space-y-1">
-                          {review.cons.map((con, idx) => (
-                            <div key={idx} className="flex items-center gap-2 text-sm text-red-600">
-                              <span className="w-3 h-3 text-center">×</span>
-                              {con}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors duration-200">
-                    <ThumbsUp className="w-4 h-4" />
-                    Helpful ({review.helpful})
-                  </button>
+          {/* Review Submission Form */}
+          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+            <h4 className="font-semibold text-gray-900 mb-4">Write a Review</h4>
+            <form onSubmit={handleSubmitReview} className="space-y-4">
+              <div>
+                <Label htmlFor="rating">Your Rating</Label>
+                <div className="flex gap-1 mt-2">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-6 h-6 cursor-pointer ${i < newReview.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'
+                        }`}
+                      onClick={() => handleRatingSelect(i + 1)}
+                    />
+                  ))}
                 </div>
               </div>
-            ))}
+              <div>
+                <Label htmlFor="title">Review Title</Label>
+                <Input
+                  id="title"
+                  value={newReview.title}
+                  onChange={(e) => setNewReview({ ...newReview, title: e.target.value })}
+                  placeholder="Enter a title for your review"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="comment">Your Review</Label>
+                <Textarea
+                  id="comment"
+                  value={newReview.comment}
+                  onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                  placeholder="Share your experience with this product"
+                  className="mt-1"
+                  rows={4}
+                />
+              </div>
+              <Button type="submit" disabled={submitting} className="bg-blue-600 hover:bg-blue-700">
+                {submitting ? "Submitting..." : "Submit Review"}
+              </Button>
+            </form>
           </div>
+
+          {/* Individual Reviews */}
+          {loadingReviews ? (
+            <div className="text-center text-gray-600">Loading reviews...</div>
+          ) : reviews.length === 0 ? (
+            <div className="text-center text-gray-600">No reviews yet. Be the first to review this product!</div>
+          ) : (
+            <div className="space-y-6">
+              {reviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                        {review.user.name.charAt(0)}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h5 className="font-bold text-gray-900 text-lg">{review.user.name}</h5>
+                          {review.isPublished && (
+                            <Badge
+                              variant="secondary"
+                              className="text-xs bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border border-green-200"
+                            >
+                              <Verified className="w-3 h-3 mr-1" />
+                              Verified Review
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-5 h-5 ${i < review.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'}`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-500 font-medium">
+                            {new Date(review.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <h6 className="font-semibold text-gray-900 mb-2">{review.title}</h6>
+                  <p className="text-gray-700 mb-4 leading-relaxed">{review.comment}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </AccordionItem>
 

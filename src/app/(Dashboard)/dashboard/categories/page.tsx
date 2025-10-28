@@ -7,10 +7,9 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import {
-    useGetAllCategoriesQuery,
+    useGetAllCategoriesAdminQuery,
     useDeleteCategoryMutation,
     useUpdateCategoryMutation,
-    useGetAllCategoriesAdminQuery,
 } from '@/redux/store/api/category/categoryApi';
 import {
     Table,
@@ -31,6 +30,7 @@ import { Switch } from '@/components/ui/switch';
 import { FormCheckbox } from '@/components/ReusableUI/FormCheckbox';
 import { categorySchema } from '@/schemas/category.schema';
 import { FormCheckboxGroup } from '@/components/ReusableUI/FormCheckboxGroup';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function CategoryList() {
     const { data, isLoading } = useGetAllCategoriesAdminQuery();
@@ -38,18 +38,17 @@ export default function CategoryList() {
     const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryMutation();
     const router = useRouter();
 
-    // ✅ Dummy sizes array to render map
     const sizes = [
-            { id: '3', size: '3' },
-            { id: '6', size: '6' },
-            { id: '10', size: '10' },
-            { id: '12', size: '12' },
-            { id: '15', size: '15' },
-            { id: '25', size: '25' },
-            { id: '30', size: '30' },
-            { id: '50', size: '50' },
-            { id: '100', size: '100' },
-        ];
+        { id: '3', size: '3' },
+        { id: '6', size: '6' },
+        { id: '10', size: '10' },
+        { id: '12', size: '12' },
+        { id: '15', size: '15' },
+        { id: '25', size: '25' },
+        { id: '30', size: '30' },
+        { id: '50', size: '50' },
+        { id: '100', size: '100' },
+    ];
 
     const allCategories = data?.data?.data || [];
     const meta = data?.data?.meta;
@@ -160,6 +159,7 @@ export default function CategoryList() {
                     </Button>
                 </Link>
             </div>
+
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -171,49 +171,69 @@ export default function CategoryList() {
                         <TableHead>Actions</TableHead>
                     </TableRow>
                 </TableHeader>
+
                 <TableBody>
-                    {filteredCategories.map((category: any) => (
-                        <TableRow key={category.id}>
-                            <TableCell className="capitalize">{category.categoryName.toLowerCase()}</TableCell>
-                            <TableCell>
-                                <Image
-                                    src={category.imageUrl || '/placeholder.svg'}
-                                    alt="Category"
-                                    width={60}
-                                    height={40}
-                                    className="rounded object-cover"
-                                />
-                            </TableCell>
-                            <TableCell>{category.sizes?.join(', ')}</TableCell>
-                            <TableCell>{category.unit}</TableCell>
-                            <TableCell>
-                                <Switch
-                                    checked={category.published}
-                                    onCheckedChange={async (checked) => {
-                                        try {
-                                            await updateCategory({
-                                                id: category.id,
-                                                updatedData: { published: checked },
-                                            }).unwrap();
-                                            toast.success('Status updated successfully');
-                                        } catch {
-                                            toast.error('Failed to update status');
-                                        }
-                                    }}
-                                />
-                            </TableCell>
-                            <TableCell>
-                                <Button variant="ghost" onClick={() => handleEdit(category)}>
-                                    <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button variant="ghost" className="text-red-600" onClick={() => handleDelete(category.id)}>
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </TableCell>
-                        </TableRow>
-                    ))}
+                    {isLoading ? (
+                        // ✅ Skeleton loader rows
+                        Array.from({ length: 6 }).map((_, i) => (
+                            <TableRow key={i}>
+                                <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                                <TableCell><Skeleton className="h-10 w-16 rounded" /></TableCell>
+                                <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                                <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                                <TableCell><Skeleton className="h-6 w-12 rounded-full" /></TableCell>
+                                <TableCell className="flex gap-2">
+                                    <Skeleton className="h-8 w-8 rounded" />
+                                    <Skeleton className="h-8 w-8 rounded" />
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    ) : (
+                        filteredCategories.map((category: any) => (
+                            <TableRow key={category.id}>
+                                <TableCell className="capitalize">{category.categoryName.toLowerCase()}</TableCell>
+                                <TableCell>
+                                    <Image
+                                        src={category.imageUrl || '/placeholder.svg'}
+                                        alt="Category"
+                                        width={60}
+                                        height={40}
+                                        className="rounded object-cover"
+                                    />
+                                </TableCell>
+                                <TableCell>{category.sizes?.join(', ')}</TableCell>
+                                <TableCell>{category.unit}</TableCell>
+                                <TableCell>
+                                    <Switch
+                                        checked={category.published}
+                                        onCheckedChange={async (checked) => {
+                                            try {
+                                                await updateCategory({
+                                                    id: category.id,
+                                                    updatedData: { published: checked },
+                                                }).unwrap();
+                                                toast.success('Status updated successfully');
+                                            } catch {
+                                                toast.error('Failed to update status');
+                                            }
+                                        }}
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <Button variant="ghost" onClick={() => handleEdit(category)}>
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" className="text-red-600" onClick={() => handleDelete(category.id)}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    )}
                 </TableBody>
             </Table>
+
+            {/* Edit Modal */}
             <Dialog open={editModalOpen} onOpenChange={(open) => {
                 setEditModalOpen(open);
                 if (!open) {
@@ -235,15 +255,13 @@ export default function CategoryList() {
                         }}
                         onSubmit={handleUpdate}
                         onReset={() => {
-                            // ✅ Close modal & clear previews
                             setEditModalOpen(false);
                             setImageFile(null);
                             setImagePreview(null);
                         }}
-                        // successMessage="Category updated successfully!"
                         errorMessage="Failed to update category"
                         submitButtonText="Update Category"
-                        resetButtonText='Reset'
+                        resetButtonText="Reset"
                         submitButtonClassName="bg-orange-400 hover:bg-orange-500"
                         resetButtonClassName="border-orange-400 text-orange-400"
                     >
@@ -257,7 +275,6 @@ export default function CategoryList() {
                         <FormCheckboxGroup
                             name="sizes"
                             label="Sizes"
-                            // options={['30 ML', '50 ML', '100 ML']}
                             options={sizes.map(f => ({ label: f.size, value: f.id }))}
                         />
                         <FormInput
@@ -273,7 +290,9 @@ export default function CategoryList() {
                             inputClassName="border-orange-400 focus:ring-orange-300"
                         />
                         <div>
-                            <label className="text-sm font-medium text-gray-700">Category Image <span className="text-red-500">*</span></label>
+                            <label className="text-sm font-medium text-gray-700">
+                                Category Image <span className="text-red-500">*</span>
+                            </label>
                             <div className="mt-1 border-2 border-dashed border-orange-400 rounded-md p-4 text-center">
                                 <input
                                     type="file"
@@ -290,7 +309,13 @@ export default function CategoryList() {
                             </div>
                             {imagePreview && (
                                 <div className="mt-4">
-                                    <Image src={imagePreview} alt="Preview" width={80} height={80} className="max-h-20 rounded" />
+                                    <Image
+                                        src={imagePreview}
+                                        alt="Preview"
+                                        width={80}
+                                        height={80}
+                                        className="max-h-20 rounded"
+                                    />
                                 </div>
                             )}
                         </div>
@@ -298,6 +323,6 @@ export default function CategoryList() {
                     </FormWrapper>
                 </DialogContent>
             </Dialog>
-        </div >
+        </div>
     );
 }

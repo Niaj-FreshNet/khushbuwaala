@@ -15,7 +15,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 interface FormInputProps {
   name: string;
   label: string;
-  type?: 'text' | 'number' | 'email' | 'password' | 'select' | 'file' | 'checkbox' | 'radio' | 'textarea';
+  type?: 'text' | 'number' | 'email' | 'password' | 'select' | 'file' | 'checkbox' | 'radio' | 'textarea' | 'datetime-local';
   placeholder?: string;
   required?: boolean;
   options?: { value: string; label: string }[];

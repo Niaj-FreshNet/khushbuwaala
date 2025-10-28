@@ -2,15 +2,31 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { Search, Printer, Eye, MoreHorizontal } from 'lucide-react';
 import OrderDetailsModal from './_components/OrderDetailsModal';
-import { useGetAllOrdersQuery, useUpdateOrderStatusMutation } from '@/redux/store/api/order/ordersApi';
+import {
+  useGetAllOrdersQuery,
+  useUpdateOrderStatusMutation,
+} from '@/redux/store/api/order/ordersApi';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Order {
   id: string;
@@ -31,6 +47,7 @@ const OrderList = () => {
   const { data, isLoading } = useGetAllOrdersQuery({ searchTerm, page, limit });
   const [updateOrder] = useUpdateOrderStatusMutation();
 
+  // ✅ Corrected structure
   const allOrders: Order[] = useMemo(() => data?.data?.data || [], [data]);
   const meta = data?.data?.meta;
 
@@ -60,17 +77,20 @@ const OrderList = () => {
   return (
     <div className="p-6 bg-gray-50">
       <div className="max-w-7xl mx-auto">
+        {/* 🔍 Search and Print */}
         <div className="flex justify-between items-center mb-6">
-          <Input
-            placeholder="Search by Customer..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setPage(1);
-            }}
-            className="w-80 border-[#FB923C] focus:ring-[#FB923C]"
-            prefix={<Search className="w-4 h-4 text-gray-500" />}
-          />
+          <div className="flex items-center w-80 relative">
+            <Search className="absolute left-3 w-4 h-4 text-gray-500" />
+            <Input
+              placeholder="Search by Customer..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
+              className="pl-9 border-[#FB923C] focus:ring-[#FB923C]"
+            />
+          </div>
           <Button
             className="bg-[#FB923C] hover:bg-[#ff8a29] text-white"
             onClick={handlePrint}
@@ -78,6 +98,8 @@ const OrderList = () => {
             <Printer className="w-4 h-4 mr-2" /> Print / Download
           </Button>
         </div>
+
+        {/* 📋 Table */}
         <Table className="border-[#FB923C]">
           <TableHeader>
             <TableRow>
@@ -90,51 +112,105 @@ const OrderList = () => {
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
-            {allOrders.map((order) => (
-              <TableRow key={order.id}>
-                <TableCell>{order.id.slice(0, 8)}...</TableCell>
-                <TableCell>{order.orderTime ? new Date(order.orderTime).toLocaleString() : 'N/A'}</TableCell>
-                <TableCell>{order.customer?.name}</TableCell>
-                <TableCell>{order.method}</TableCell>
-                <TableCell>{order.amount} BDT</TableCell>
-                <TableCell>
-                  <Badge
-                    variant={order.status === 'DELIVERED' ? 'success' : order.status === 'CANCEL' ? 'destructive' : 'default'}
-                    className={order.status === 'DELIVERED' ? 'bg-[#4CD964]' : order.status === 'CANCEL' ? 'bg-red-500' : 'bg-blue-500'}
-                  >
-                    {order.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleViewDetails(order.id)}>
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'DELIVERED')}>
-                          Delivered
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'CANCEL')}>
-                          Cancel
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+            {isLoading ? (
+              // 🦴 Skeleton rows during loading
+              Array.from({ length: 6 }).map((_, idx) => (
+                <TableRow key={idx}>
+                  {Array.from({ length: 7 }).map((__, cellIdx) => (
+                    <TableCell key={cellIdx}>
+                      <Skeleton className="h-5 w-full rounded-md" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : allOrders.length === 0 ? (
+              // 🚫 No data message
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-6 text-gray-500">
+                  No orders found.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              // ✅ Actual data rows
+              allOrders.map((order) => (
+                <TableRow key={order.id}>
+                  <TableCell>{order.id.slice(0, 8)}...</TableCell>
+                  <TableCell>
+                    {order.orderTime
+                      ? new Date(order.orderTime).toLocaleString()
+                      : 'N/A'}
+                  </TableCell>
+                  <TableCell>{order.customer?.name}</TableCell>
+                  <TableCell>{order.method}</TableCell>
+                  <TableCell>{order.amount} BDT</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        order.status === 'DELIVERED'
+                          ? 'success'
+                          : order.status === 'CANCEL'
+                          ? 'destructive'
+                          : 'default'
+                      }
+                      className={
+                        order.status === 'DELIVERED'
+                          ? 'bg-[#4CD964]'
+                          : order.status === 'CANCEL'
+                          ? 'bg-red-500'
+                          : 'bg-blue-500'
+                      }
+                    >
+                      {order.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleViewDetails(order.id)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleUpdateStatus(order.id, 'DELIVERED')
+                            }
+                          >
+                            Delivered
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleUpdateStatus(order.id, 'CANCEL')
+                            }
+                          >
+                            Cancel
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
+
+        {/* 📄 Pagination */}
         {meta && (
           <div className="flex justify-between items-center mt-4">
-            <p className="text-sm text-gray-600">Showing {allOrders.length} of {meta.total} orders</p>
+            <p className="text-sm text-gray-600">
+              Showing {allOrders.length} of {meta.total} orders
+            </p>
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -155,6 +231,8 @@ const OrderList = () => {
             </div>
           </div>
         )}
+
+        {/* 🪟 Order Details Modal */}
         <OrderDetailsModal
           orderId={selectedOrderId || ''}
           visible={isModalVisible}

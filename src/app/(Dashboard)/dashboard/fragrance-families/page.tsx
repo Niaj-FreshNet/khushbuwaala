@@ -25,6 +25,7 @@ import FormWrapper from '@/components/ReusableUI/FormWrapper';
 import FormInput from '@/components/ReusableUI/FormInput';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Search, Plus, Edit, Trash2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const fragranceSchema = z.object({
     fragranceName: z.string().min(1, 'Fragrance name is required'),
@@ -37,7 +38,6 @@ export default function FragranceList() {
     const router = useRouter();
 
     const allFragrances = data?.data?.data || [];
-    const meta = data?.data?.meta;
 
     const [filteredFragrances, setFilteredFragrances] = useState(allFragrances);
     const [searchTerm, setSearchTerm] = useState('');
@@ -79,7 +79,8 @@ export default function FragranceList() {
             await updateFragrance({
                 id: editingFragrance.id,
                 updatedData: { fragranceName: data.fragranceName }
-            }).unwrap(); setEditModalOpen(false);
+            }).unwrap();
+            setEditModalOpen(false);
         } catch (error) {
             console.error('Error updating fragrance:', error);
         }
@@ -103,6 +104,7 @@ export default function FragranceList() {
                     </Button>
                 </Link>
             </div>
+
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -111,21 +113,34 @@ export default function FragranceList() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {filteredFragrances.map((fragrance: any) => (
-                        <TableRow key={fragrance.id}>
-                            <TableCell className="capitalize">{fragrance.fragranceName}</TableCell>
-                            <TableCell>
-                                <Button variant="ghost" onClick={() => handleEdit(fragrance)}>
-                                    <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button variant="ghost" className="text-red-600" onClick={() => handleDelete(fragrance.id)}>
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </TableCell>
-                        </TableRow>
-                    ))}
+                    {isLoading ? (
+                        Array.from({ length: 5 }).map((_, i) => (
+                            <TableRow key={i}>
+                                <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                                <TableCell className="flex gap-2">
+                                    <Skeleton className="h-8 w-8 rounded" />
+                                    <Skeleton className="h-8 w-8 rounded" />
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    ) : (
+                        filteredFragrances.map((fragrance: any) => (
+                            <TableRow key={fragrance.id}>
+                                <TableCell className="capitalize">{fragrance.fragranceName}</TableCell>
+                                <TableCell>
+                                    <Button variant="ghost" onClick={() => handleEdit(fragrance)}>
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" className="text-red-600" onClick={() => handleDelete(fragrance.id)}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    )}
                 </TableBody>
             </Table>
+
             <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
                 <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>

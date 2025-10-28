@@ -39,7 +39,7 @@ export function ProductCarouselSection({
   // Conditional API calls based on props
   console.log(category)
   const {
-    data: bestsellerData,
+    data: bestSellerData,
     isLoading: isBestsellerLoading,
   } = useGetBestSellersQuery(undefined, { skip: section !== "bestSeller" })
 
@@ -66,7 +66,7 @@ export function ProductCarouselSection({
   let isLoading = false
 
   if (section === "bestSeller") {
-    products = bestsellerData?.data || []
+    products = bestSellerData?.data || []
     isLoading = isBestsellerLoading
   } else if (section === "featured") {
     products = featuredData || []

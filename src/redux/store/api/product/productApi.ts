@@ -217,6 +217,12 @@ export const productApi = baseApi.injectEndpoints({
       query: () => '/products/get-best-sellers',
       providesTags: ['Product'],
     }),
+
+    // New endpoint for stock logs
+    getStockLogs: builder.query<StockLog[], string>({
+      query: (productId) => `/products/get-stock-logs/${productId}`,
+      providesTags: ['Product'],
+    }),
   }),
   overrideExisting: false,
 });
@@ -242,6 +248,7 @@ export const {
   useGetProductAnalyticsQuery,
   useGetLowStockProductsQuery,
   useGetBestSellersQuery,
+  useGetStockLogsQuery,
 } = productApi;
 
 export default productApi;
