@@ -12,6 +12,7 @@ interface BlogData {
     metaTitle?: string;
     metaDescription?: string;
     keywords?: string;
+    slug?: string;
 }
 
 interface BlogResponse {
@@ -41,6 +42,7 @@ interface SingleBlogResponse {
         metaTitle?: string;
         metaDescription?: string;
         keywords?: string;
+        slug?: string;
     }[];
 }
 

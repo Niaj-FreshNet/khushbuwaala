@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation';
-import { useGetBlogQuery } from '@/redux/api/blog/blogApi';
+import { useGetBlogQuery } from '@/redux/store/api/blog/blogApi';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { generateMetadata as generateMetadataUtil } from 'next';
+// import { generateMetadata as generateMetadataUtil } from 'next';
 
 interface Props {
     params: { slug: string };
