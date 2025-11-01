@@ -204,7 +204,7 @@ export function ShopProducts({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  console.log("products", products);
+  // console.log("products", products);
 
   const gridColsClass =
     {

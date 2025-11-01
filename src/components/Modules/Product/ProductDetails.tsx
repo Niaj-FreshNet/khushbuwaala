@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/context/CartContext";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
 import { IDiscount, IProduct, IProductVariant } from "@/types/product.types";
+import { useRouter } from "next/navigation";
 // import { useWishlist } from "@/context/WishlistContext";
 
 interface ProductDetailsProps {
@@ -16,6 +17,8 @@ interface ProductDetailsProps {
 
 export default function ProductDetails({ product, onReadMore }: ProductDetailsProps) {
   const cart = useCart()
+  const router = useRouter()
+  // console.log('product:', product)
   // const sizeKeys = product.variantPrices
   //   ? Object.keys(product.variantPrices).filter(
   //     size => !(product.measurement === "ml" && size.trim().toLowerCase() === "100 ml")
@@ -46,11 +49,11 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
     ? `${selection.selectedVariant.size} ${selection.selectedVariant.unit.toLowerCase()}`
     : fallbackSelectedSize;
 
-  const price = selection?.selectedVariant
-    ? `${selection.selectedVariant.price}`
-    : 0;
+  // const price = selection?.selectedVariant
+  //   ? `${selection.selectedVariant.price}`
+  //   : 0;
 
-  const selectedPrice = Number(price)
+  // const selectedPrice = Number(price)
   // console.log(selectedPrice)
 
   // 🧩 Dynamically find the selected variant and its price
@@ -99,23 +102,30 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
   const currentVariant = getCurrentVariant();
   const currentPrice = currentVariant?.price ?? product.minPrice ?? 0;
 
-  // Get active discount (checks dates, variant first)
+  // ✅ Get active discount (variant first, then product)
   const getActiveDiscount = (
     product: Partial<IProduct>,
     variant?: IProductVariant
   ): IDiscount | null => {
     const now = new Date();
-    const discounts = variant?.discounts?.length
-      ? variant.discounts
-      : product.discounts;
 
-    if (!discounts || discounts.length === 0) return null;
+    // Check both variant and product discounts
+    const variantDiscounts = variant?.discounts ?? [];
+    const productDiscounts = product.discounts ?? [];
 
-    return discounts.find(d => {
+    const allDiscounts = [...variantDiscounts, ...productDiscounts];
+    // console.log(allDiscounts);
+
+    if (!allDiscounts.length) return null;
+
+    // ✅ Define the variable before returning
+    const activeDiscount = allDiscounts.find(d => {
       const startOk = !d.startDate || new Date(d.startDate) <= now;
       const endOk = !d.endDate || new Date(d.endDate) >= now;
       return startOk && endOk;
-    }) || null;
+    });
+
+    return activeDiscount || null;
   };
 
   const discount = getActiveDiscount(product, currentVariant);
@@ -135,6 +145,7 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
   const totalDiscounted = discountedPrice * quantity;
 
   const activeDiscount = getActiveDiscount(product, currentVariant);
+  // console.log(activeDiscount)
 
   const discountValue = activeDiscount?.type === "percentage"
     ? activeDiscount.value
@@ -147,7 +158,11 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
     setQuantity(next);
   };
 
+  // ✅ Determine selected variant price (before discount)
+  const price = selection?.selectedVariant?.price ?? product.minPrice ?? 0;
 
+  // ✅ Get final price after checking discount
+  const selectedPrice = discount ? discountedPrice : price;
 
   // const totalVariantStock = product.variants?.reduce(
   //   (sum, v) => sum + (v.stock ?? 0),
@@ -162,9 +177,15 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
     cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
   };
 
+  const handleBuyNow = async () => {
+    if (isOutOfStock) return;
+    // cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize, selectedPrice);
+    cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
+    router.push('/checkout')
+  };
 
   return (
-    <div className="space-y-8 lg:space-y-10">``
+    <div className="space-y-8 lg:space-y-10">
       {/* Header Section */}
       <div className="space-y-6">
         {/* Brand and Category Tags */}
@@ -180,12 +201,12 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
               For {product.specification === 'male' ? 'Men' : 'Women'}
             </Badge>
           )} */}
-          {/* {product.discount && product.discount > 0 ? (
+          {product.discount && product.discount > 0 ? (
             <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 animate-pulse shadow-lg">
               <Tag className="w-3 h-3 mr-2" />
               {product.discount}% OFF
             </Badge>
-          ) : null} */}
+          ) : null}
           {activeDiscount ? (
             <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 animate-pulse shadow-lg">
               <Tag className="w-3 h-3 mr-2" />
@@ -491,8 +512,8 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
         </Button>
 
         {/* Secondary Actions */}
-        <div className="grid grid-cols-2 gap-6">
-          {/* <Button
+        {/* <div className="grid grid-cols-2 gap-6">
+          <Button
             variant="outline"
             size="lg"
             onClick={toggleWishlist}
@@ -503,7 +524,7 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
           >
             <Heart className={`w-5 h-5 mr-2 ${isWishlisted ? "fill-current" : ""}`} />
             {isWishlisted ? "Saved" : "Wishlist"}
-          </Button> */}
+          </Button>
 
           <Button
             variant="outline"
@@ -516,23 +537,20 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
               Ask Expert
             </a>
           </Button>
-        </div>
+        </div> */}
 
         {/* Buy Now Button */}
-        <Button
-          // size="xl"
-          disabled={isOutOfStock}
-          className="w-full h-16 text-xl font-bold bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white shadow-2xl shadow-orange-500/30 hover:shadow-orange-600/50 transform transition-all duration-300 hover:scale-[1.02] border-0 rounded-2xl"
-          onClick={() => {
-            if (!isOutOfStock) {
-              cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize, selectedPrice)
-              // Navigate to checkout is handled by pages that observe checkoutMode
-            }
-          }}
-        >
-          <Zap className="w-6 h-6 mr-3" />
-          Buy Now - Express Checkout
-        </Button>
+        {!isOutOfStock && (
+          <Button
+            // size="xl"
+            disabled={isOutOfStock}
+            className="w-full h-16 text-xl font-bold bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white shadow-2xl shadow-orange-500/30 hover:shadow-orange-600/50 transform transition-all duration-300 hover:scale-[1.02] border-0 rounded-2xl"
+            onClick={handleBuyNow}
+          >
+            <Zap className="w-6 h-6 mr-3" />
+            Buy Now
+          </Button>
+        )}
       </div>
 
       {/* Trust Indicators */}

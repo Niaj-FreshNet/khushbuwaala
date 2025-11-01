@@ -7,15 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useGetStockLogsQuery } from '@/redux/store/api/product/productApi';
 import { Skeleton } from '@/components/ui/skeleton';
-
-interface StockLog {
-  id: string;
-  productId: string;
-  change: number;
-  reason: string;
-  createdAt: string;
-  product: { name: string };
-}
+import { StockLog } from '@/types/product.types';
 
 const StockLogsPage = () => {
   const { productId } = useParams();

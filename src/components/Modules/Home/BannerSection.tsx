@@ -338,7 +338,7 @@ export function BannerSection({
 
           <div
             className={cn(
-              "absolute bottom-8 left-1/2 transform -translate-x-1/2 transition-all duration-1000 delay-1000",
+              "absolute bottom-2 md:bottom-12 left-1/2 transform -translate-x-1/2 transition-all duration-1000 delay-1000",
               hasLoaded && isVisible
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-4"
@@ -370,8 +370,8 @@ export function BannerSection({
       )}
 
       {/* Edge fade */}
-      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/30 to-transparent" />
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/20 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-12 md:h-28 bg-gradient-to-t from-black/30 to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-12 md:h-28 bg-gradient-to-b from-black/20 to-transparent" />
     </section>
   )
 }

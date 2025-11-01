@@ -1,4 +1,4 @@
-import { IProduct, IProductResponse, IProductVariant } from "@/types/product.types";
+import { IDiscount, IProduct, IProductResponse, IProductVariant } from "@/types/product.types";
 
 function formatDate(date: string | Date | undefined) {
   if (!date) return "";
@@ -36,6 +36,20 @@ export default function mapProductResponseToProduct(
     stock: product.stock || 0,
     variants: product.variants?.map<IProductVariant>(v => ({
       id: v.id,
+      discounts:
+          v.discounts?.map<IDiscount>((d) => ({
+            id: d.id,
+            productId: d.productId,
+            variantId: d.variantId,
+            code: d.code,
+            type: d.type,
+            value: d.value,
+            maxUsage: d.maxUsage,
+            startDate: formatDate(d.startDate),
+            endDate: formatDate(d.endDate),
+            createdAt: formatDate(d.createdAt),
+            updatedAt: formatDate(d.updatedAt),
+          })) || [],
       sku: v.sku,
       unit: v.unit,
       size: v.size,
@@ -45,7 +59,20 @@ export default function mapProductResponseToProduct(
       updatedAt: formatDate(v.updatedAt),
     })),
     
-    discounts: [], // map if you have product-level discounts
+    discounts:
+          product.discounts?.map<IDiscount>((d) => ({
+            id: d.id,
+            productId: d.productId,
+            variantId: d.variantId,
+            code: d.code,
+            type: d.type,
+            value: d.value,
+            maxUsage: d.maxUsage,
+            startDate: formatDate(d.startDate),
+            endDate: formatDate(d.endDate),
+            createdAt: formatDate(d.createdAt),
+            updatedAt: formatDate(d.updatedAt),
+          })) || [], // map if you have product-level discounts
     minPrice: product.minPrice,
     maxPrice: product.maxPrice,
     totalStock: product.totalStock,

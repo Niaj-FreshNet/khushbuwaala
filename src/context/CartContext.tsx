@@ -3,7 +3,7 @@
 import { createContext, useContext, type ReactNode, useCallback } from "react";
 import { useCart as useReduxCart } from "@/redux/store/hooks/useCart";
 import type { IProductResponse } from "@/types/product.types";
-import type { CartItem } from "@/redux/store/features/cart/cartSlice";
+import { CartItem } from "@/types/cart.types";
 
 interface CartContextType {
   cartItems: CartItem[];

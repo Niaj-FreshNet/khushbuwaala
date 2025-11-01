@@ -22,7 +22,7 @@ interface IProductResponseProps {
 // Enhanced category mapping for breadcrumbs
 const getCategoryInfo = (category: string) => {
     const categoryMap: Record<string, { name: string; href: string }> = {
-        'inspiredPerfumeOil': { name: 'Inspired Perfume Oils', href: '/inspired-perfume-oils' },
+        'inspiredPerfumeOil': { name: 'Inspired Perfume Oils', href: '/inspired-perfume-oil' },
         'artificialOud': { name: 'Artificial Oud', href: '/artificial-oud' },
         'naturalCollection': { name: 'Natural Collection', href: '/natural-collection' },
         'orientalCollection': { name: 'Oriental Collection', href: '/oriental-collection' },
@@ -41,7 +41,7 @@ const generateBreadcrumbs = (product: IProduct): BreadcrumbItem[] => {
     return [
         { name: 'Home', href: '/' },
         { name: categoryInfo.name, href: categoryInfo.href },
-        { name: product.name, href: `/products/${product.slug}`, current: true },
+        { name: product.name, href: `/product/${product.slug}`, current: true },
     ];
 };
 
@@ -108,7 +108,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-50/40 to-transparent rounded-full blur-3xl pointer-events-none"></div>
                         <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-purple-50/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
 
-                        <div className="relative max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-8">
+                        <div className="relative max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-2 lg:py-4">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 xl:gap-20 items-start">
                                 {/* Product Gallery */}
                                 <div className="w-full order-1 lg:order-1">

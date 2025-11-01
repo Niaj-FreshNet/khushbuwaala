@@ -166,7 +166,7 @@ export default function CategoryList() {
                         <TableHead>Name</TableHead>
                         <TableHead>Image</TableHead>
                         <TableHead>Sizes</TableHead>
-                        <TableHead>Unit</TableHead>
+                        {/* <TableHead>Unit</TableHead> */}
                         <TableHead>Publish</TableHead>
                         <TableHead>Actions</TableHead>
                     </TableRow>
@@ -201,8 +201,9 @@ export default function CategoryList() {
                                         className="rounded object-cover"
                                     />
                                 </TableCell>
-                                <TableCell>{category.sizes?.join(', ')}</TableCell>
-                                <TableCell>{category.unit}</TableCell>
+                                <TableCell>
+                                    {category.sizes?.map(size => `${size} ${category.unit.toLowerCase()}`).join(', ')}
+                                </TableCell>
                                 <TableCell>
                                     <Switch
                                         checked={category.published}

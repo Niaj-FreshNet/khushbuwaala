@@ -1,4 +1,5 @@
 // File: config/navLinks.ts
+import { MinusCircle } from 'lucide-react';
 import { CiFolderOn, CiSettings } from 'react-icons/ci';
 import { FaUsers, FaCalculator, FaShop } from 'react-icons/fa6';
 import { GiNewspaper } from 'react-icons/gi';
@@ -100,12 +101,12 @@ export const navLinks: NavLink[] = [
         icon: MdDetails,
         roles: ['SALESMAN', 'ADMIN', 'SUPER_ADMIN'],
       },
-      {
-        name: 'Sales Report',
-        href: '/dashboard/sales/sales-report',
-        icon: GoReport,
-        roles: ['SALESMAN', 'ADMIN', 'SUPER_ADMIN'],
-      },
+      // {
+      //   name: 'Sales Report',
+      //   href: '/dashboard/sales/sales-report',
+      //   icon: GoReport,
+      //   roles: ['SALESMAN', 'ADMIN', 'SUPER_ADMIN'],
+      // },
     ],
   },
   {
@@ -114,9 +115,9 @@ export const navLinks: NavLink[] = [
     icon: GoPlusCircle,
     roles: ['ADMIN', 'SUPER_ADMIN'],
     subItems: [
-      { name: 'Add Expense', href: '/dashboard/expense/add-expense', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      { name: 'Add Expense', href: '/dashboard/expense/add', icon: MinusCircle, roles: ['ADMIN', 'SUPER_ADMIN'], },
       { name: 'Expense List', href: '/dashboard/expense', icon: MdDetails, roles: ['ADMIN', 'SUPER_ADMIN'], },
-      { name: 'Expenses Report', href: '/dashboard/expense/expense-report', icon: GoReport, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      // { name: 'Expenses Report', href: '/dashboard/expense/expense-report', icon: GoReport, roles: ['ADMIN', 'SUPER_ADMIN'], },
     ],
   },
   {
@@ -136,8 +137,8 @@ export const navLinks: NavLink[] = [
     icon: GoPlusCircle,
     roles: ['ADMIN', 'SUPER_ADMIN'],
     subItems: [
-      { name: 'Add Promotion', href: '/dashboard/add-promotion', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'], },
-      { name: 'Promotions List', href: '/dashboard/promotions-list', icon: MdDetails, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      { name: 'Add Discount', href: '/dashboard/discounts/add', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      { name: 'Discounts & Promotions', href: '/dashboard/discounts', icon: MdDetails, roles: ['ADMIN', 'SUPER_ADMIN'], },
     ],
   },
   {
@@ -170,25 +171,29 @@ export const navLinks: NavLink[] = [
     name: 'Analytics',
     href: '/dashboard/analytics',
     icon: FaCalculator,
-    roles: ['ADMIN', 'SUPER_ADMIN'],
+    // roles: ['ADMIN', 'SUPER_ADMIN'],
+    roles: ['SUPER_ADMIN'],
   },
   {
     name: 'Customers',
     href: '/dashboard/customer-list',
     icon: FaUsers,
-    roles: ['ADMIN', 'SUPER_ADMIN'],
+    // roles: ['ADMIN', 'SUPER_ADMIN'],
+    roles: ['SUPER_ADMIN'],
   },
   {
     name: 'Profile',
     href: '/dashboard/admin-profile',
     icon: CiSettings,
-    roles: ['ADMIN', 'SUPER_ADMIN'],
+    // roles: ['ADMIN', 'SUPER_ADMIN'],
+    roles: ['SUPER_ADMIN'],
   },
   {
     name: 'Passwords Change',
     href: '/dashboard/admin-passwords',
     icon: CiSettings,
-    roles: ['ADMIN', 'SUPER_ADMIN'],
+    // roles: ['ADMIN', 'SUPER_ADMIN'],
+    roles: ['SUPER_ADMIN'],
   },
   // SUPER_ADMIN: Business-critical routes
   {

@@ -23,25 +23,25 @@ export default function Login() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-const handleSubmit = async (data: { email: string; password: string }) => {
-  try {
-    const res = await logIn(data).unwrap();
-    const accessToken = res?.data?.accessToken;
+  const handleSubmit = async (data: { email: string; password: string }) => {
+    try {
+      const res = await logIn(data).unwrap();
+      const accessToken = res?.data?.accessToken;
 
-    if (!accessToken) throw new Error('Token missing');
+      if (!accessToken) throw new Error('Token missing');
 
-    const decoded = jwtDecode<TUser>(accessToken);
-    console.log(decoded)
+      const decoded = jwtDecode<TUser>(accessToken);
+      console.log(decoded)
 
-    // Dispatch BEFORE navigating or calling API
-    dispatch(setUser({ user: decoded, accessToken }));
-    console.log('dispatched')
+      // Dispatch BEFORE navigating or calling API
+      dispatch(setUser({ user: decoded, accessToken }));
+      console.log('dispatched')
 
-    router.push('/dashboard'); // ✅ Only navigate after token is in Redux
-  } catch (error: any) {
-    toast.error(error?.data?.message || 'Login failed. Please check your credentials.');
-  }
-};
+      router.push('/dashboard'); // ✅ Only navigate after token is in Redux
+    } catch (error: any) {
+      toast.error(error?.data?.message || 'Login failed. Please check your credentials.');
+    }
+  };
 
 
   return (
@@ -84,9 +84,8 @@ const handleSubmit = async (data: { email: string; password: string }) => {
         </Link>
       </p>
       <p className="text-center mt-2 text-sm">
-        Forgot your password?{' '}
         <Link href="/forgot-password" className="text-indigo-600 font-semibold hover:underline">
-          Reset Password
+          Forgot your password?
         </Link>
       </p>
     </AuthLayout>

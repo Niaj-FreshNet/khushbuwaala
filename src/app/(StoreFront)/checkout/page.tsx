@@ -80,7 +80,7 @@ const districts = [
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { cartItems, calculateSubtotal, clearCart } = useCart()
+  const { cartItems, checkoutItem, checkoutMode, calculateSubtotal, proceedToCartCheckout, clearCart } = useCart()
   const dispatch = useAppDispatch()
   const { handleCreateOrder, loading: isPlacingOrder } = useOrder()
 
@@ -99,7 +99,7 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState("")
   const [notes, setNotes] = useState("")
 
-  const [agreeToTerms, setAgreeToTerms] = useState(false)
+  const [agreeToTerms, setAgreeToTerms] = useState(true)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // --- Promotions ---
@@ -119,11 +119,48 @@ export default function CheckoutPage() {
   }, [])
 
   // --- Items to display ---
-  const itemsToDisplay = useMemo(() => cartItems, [cartItems])
+  const itemsToDisplay = useMemo(() => {
+    if (checkoutMode && checkoutItem) {
+      return [
+        {
+          id: checkoutItem.product.id,
+          quantity: checkoutItem.quantity,
+          selectedSize: checkoutItem.selectedSize,
+          product: checkoutItem.product,
+        },
+      ]
+    }
+    return cartItems
+  }, [checkoutMode, checkoutItem, cartItems])
+  // console.log(itemsToDisplay)
 
   // --- Shipping & totals ---
+  // 🧩 Shipping logic
+  useEffect(() => {
+    if (!selectedDistrict) return;
+
+    if (selectedDistrict === "Dhaka") {
+      if (shippingMethod !== "insideDhaka") {
+        setShippingMethod("insideDhaka");
+        toast.info("Dhaka is inside Dhaka — shipping set automatically to Inside Dhaka.");
+      }
+    } else {
+      if (shippingMethod !== "outsideDhaka") {
+        setShippingMethod("outsideDhaka");
+        toast.info(`${selectedDistrict} is outside Dhaka — shipping set automatically to Outside Dhaka.`);
+      }
+    }
+  }, [selectedDistrict]);
+
   const shippingCost = useMemo(() => (shippingMethod === "outsideDhaka" ? 110 : 50), [shippingMethod])
-  const subtotal = calculateSubtotal()
+
+  const subtotal = useMemo(() => {
+    if (checkoutMode && checkoutItem) {
+      return checkoutItem.selectedPrice * checkoutItem.quantity
+    }
+    return calculateSubtotal()
+  }, [checkoutMode, checkoutItem, calculateSubtotal])
+
   const estimatedTaxes = 0
   const discountedSubtotal = Math.max(0, subtotal - discount)
   const total = discountedSubtotal + estimatedTaxes + shippingCost
@@ -183,6 +220,7 @@ export default function CheckoutPage() {
     const cartItemIds = itemsToDisplay
       .map((item) => item.cartItemId)
       .filter(Boolean) as string[] // ensure only valid strings
+    console.log(cartItemIds)
 
     const payload: IOrderPayload = {
       cartItemIds,
@@ -200,8 +238,9 @@ export default function CheckoutPage() {
 
     try {
       const res: IOrderResponse = await handleCreateOrder(payload)
-      clearCart()
+      proceedToCartCheckout()
       router.push(`/thank-you?order=${encodeURIComponent(res.data.id)}`)
+      clearCart()
     } catch (err) {
       console.error(err)
       toast.error("Failed to place order. Please try again.")
@@ -391,9 +430,31 @@ export default function CheckoutPage() {
                 <CardTitle className="text-md">Shipping Method</CardTitle>
               </CardHeader>
               <CardContent>
-                <RadioGroup
+                {/* <RadioGroup
                   value={shippingMethod}
                   onValueChange={(v) => setShippingMethod(v as ShippingMethod)}
+                  className="gap-3" */}
+                <RadioGroup
+                  value={shippingMethod}
+                  onValueChange={(v) => {
+                    // 🧩 Handle restricted manual change
+                    if (!selectedDistrict) {
+                      toast.warning("Please select your district first.");
+                      return;
+                    }
+
+                    if (selectedDistrict === "Dhaka" && v === "outsideDhaka") {
+                      toast.error("Dhaka is inside Dhaka. You cannot choose Outside Dhaka shipping.");
+                      return;
+                    }
+
+                    if (selectedDistrict !== "Dhaka" && v === "insideDhaka") {
+                      toast.error(`${selectedDistrict} is outside Dhaka. You cannot choose Inside Dhaka shipping.`);
+                      return;
+                    }
+
+                    setShippingMethod(v as ShippingMethod);
+                  }}
                   className="gap-3"
                 >
                   <label className="flex items-center gap-3 border rounded-md p-3 hover:bg-gray-50 transition-colors">

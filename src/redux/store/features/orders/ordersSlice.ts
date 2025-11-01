@@ -89,12 +89,19 @@ const ordersSlice = createSlice({
       })
 
     // ✅ Get my orders
+    // builder
+    //   .addMatcher(orderApi.endpoints.getMyOrders.matchFulfilled, (state, { payload }) => {
+    //     payload.forEach((order) => {
+    //       state.byId[order.id] = order
+    //     })
+    //   })
     builder
       .addMatcher(orderApi.endpoints.getMyOrders.matchFulfilled, (state, { payload }) => {
-        payload.forEach((order) => {
-          state.byId[order.id] = order
-        })
-      })
+        const ordersArray = payload?.data?.data || [];
+        ordersArray.forEach((order) => {
+          state.byId[order.id] = order;
+        });
+      });
   },
 })
 
@@ -104,8 +111,8 @@ export const { setOrder, clearLastOrder } = ordersSlice.actions
 export const selectLastOrder = (state: RootState) => state.orders.lastOrder
 export const selectOrderById =
   (orderId: string) =>
-  (state: RootState): Order | IOrderResponse | undefined =>
-    state.orders.byId[orderId]
+    (state: RootState): Order | IOrderResponse | undefined =>
+      state.orders.byId[orderId]
 export const selectOrderLoading = (state: RootState) => state.orders.loading
 export const selectOrderError = (state: RootState) => state.orders.error
 

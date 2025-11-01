@@ -1,4 +1,4 @@
-import { IProductAnalytics, IProductQuery, IProductResponse, IProductSearchResult, IRelatedProductsResponse, ITrendingProduct, LowStockProduct } from "@/types/product.types";
+import { IProductAnalytics, IProductQuery, IProductResponse, IProductSearchResult, IRelatedProductsResponse, ITrendingProduct, LowStockProduct, StockLog } from "@/types/product.types";
 import baseApi from "../baseApi";
 
 interface ApiResponse<T> {

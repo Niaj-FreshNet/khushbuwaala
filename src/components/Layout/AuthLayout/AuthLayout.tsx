@@ -18,8 +18,6 @@ export default function AuthLayout({ children, title, className }: AuthLayoutPro
       <div className={cn('w-full max-w-md bg-white rounded-3xl shadow-lg p-8', className)}>
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 mb-6 justify-center text-indigo-600 font-bold text-xl">
-          <BiIdCard size={30} />
-          <span>PerfumeHub</span>
         </Link>
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-900">{title}</h1>
         {children}

@@ -77,7 +77,6 @@ export default function HomePage() {
         <ProductCarouselSection
           title="Inspired Perfume Oils"
           category="68f2498c71690fc44bcc1af4"
-          linkPath="/inspired-perfume-oil"
           titleVariant="gradient"
           titleSubtitle="Designer-inspired fragrances at affordable prices"
           titleIcon={<Sparkles className="h-6 w-6" />}

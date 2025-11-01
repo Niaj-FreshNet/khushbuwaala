@@ -70,7 +70,7 @@ const BulkSalesPage = () => {
       method: '',
       isPaid: true,
       status: '',
-      saleBy: user?.role || '',
+      saleBy: user?.name || '',
       reference: '',
       cartItems: [{ productId: '', size: '', price: 0, quantity: 1 }],
     },
@@ -103,7 +103,7 @@ const BulkSalesPage = () => {
         method: '',
         isPaid: true,
         status: '',
-        saleBy: user?.role || '',
+        saleBy: user?.name || '',
         reference: '',
         cartItems: [{ productId: '', size: '', price: 0, quantity: 1 }],
       },
@@ -186,7 +186,7 @@ const BulkSalesPage = () => {
         cartItemIds: createdCartIds,
         amount: values.amount,
         isPaid: sales[0].isPaid, // use sale state
-        saleBy: user?.role,
+        saleBy: user?.name,
         orderSource: "MANUAL",
         saleType: "BULK",
         customerInfo: {
@@ -198,12 +198,12 @@ const BulkSalesPage = () => {
         },
       };
 
-      console.log("🧾 Final Sale Payload:", payload);
+      // console.log("🧾 Final Sale Payload:", payload);
 
       const res = await createOrder(payload).unwrap();
 
-      if (res?.data?.success) {
-        toast.success("✅ Sale created successfully!");
+      if (res?.success) {
+        toast.success("Sale created successfully!");
         setSales([
           {
             saleTime: new Date().toISOString(),
@@ -215,16 +215,16 @@ const BulkSalesPage = () => {
             method: "",
             isPaid: true,
             status: "",
-            saleBy: user?.role || "",
+            saleBy: user?.name || "",
             reference: "",
             cartItems: [{ productId: "", size: "", price: 0, quantity: 1 }],
           },
         ]);
       } else {
-        toast.error("❌ Sale creation failed");
+        toast.error("Sale creation failed");
       }
     } catch (error) {
-      console.error("❌ Sale creation error:", error);
+      console.error("Sale creation error:", error);
       toast.error("Failed to create sale");
     }
   };
@@ -253,6 +253,7 @@ const BulkSalesPage = () => {
             submitButtonClassName="bg-[#FB923C] hover:bg-[#ff8a29] text-white"
             resetButtonText="Cancel"
             resetButtonClassName="border-[#FB923C] text-[#FB923C]"
+            resetOnSuccess
           >
             <Card className="border-[#FB923C] mb-6">
               <CardHeader className="flex justify-between items-center">
@@ -278,7 +279,7 @@ const BulkSalesPage = () => {
                       <span className="text-sm text-gray-600">{sale.isPaid ? 'Paid' : 'Due'}</span>
                     </div>
 
-                    <FormInput name={`saleBy`} label="Sale By" type="text" disabled value={user?.role} inputClassName="border-[#FB923C] cursor-not-allowed" />
+                    <FormInput name={`saleBy`} label="Sale By" type="text" disabled value={user?.name} inputClassName="border-[#FB923C] cursor-not-allowed" />
 
                     {/* Cart Items */}
                     <Label className="text-sm font-medium text-gray-700">Cart Items</Label>

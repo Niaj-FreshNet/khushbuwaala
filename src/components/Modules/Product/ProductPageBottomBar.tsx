@@ -5,11 +5,13 @@ import { Badge, Heart, MessageSquare, ShoppingCart, Tag, Zap } from "lucide-reac
 import { useMemo, useState } from "react";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
 import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
-import { toggleWishlist, selectIsInWishlist } from "@/redux/store/features/wishlist/wishlistSlice";
+// import { toggleWishlist, selectIsInWishlist } from "@/redux/store/features/wishlist/wishlistSlice";
 import { IDiscount, IProduct, IProductVariant } from "@/types/product.types";
+import { useRouter } from "next/navigation";
 
 export default function ProductPageBottomBar({ product }: { product: IProduct }) {
     const cart = useCart()
+    const router = useRouter()
     // const sizeKeys = product.variantPrices
     //     ? Object.keys(product.variantPrices)
     //     : product.measurement === "ml"
@@ -35,11 +37,11 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
         ? `${selection.selectedVariant.size} ${selection.selectedVariant.unit.toLowerCase()}`
         : fallbackSelectedSize;
 
-  const price = selection?.selectedVariant
-    ? `${selection.selectedVariant.price}`
-    : 0;
+    //   const price = selection?.selectedVariant
+    //     ? `${selection.selectedVariant.price}`
+    //     : 0;
 
-  const selectedPrice = Number(price)
+    //   const selectedPrice = Number(price)
 
     const setSelectedSize = (size: string) => {
         if (!selection) return setFallbackSelectedSize(size);
@@ -104,6 +106,12 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
         ? activeDiscount.value
         : 0;
 
+    // ✅ Determine selected variant price (before discount)
+    const price = selection?.selectedVariant?.price ?? product.minPrice ?? 0;
+
+    // ✅ Get final price after checking discount
+    const selectedPrice = discount ? discountedPrice : price;
+
     const handleQuantityChange = (type: "increment" | "decrement") => {
         const next = type === "increment"
             ? Math.min(quantity + 1, 10)
@@ -121,10 +129,10 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
     // const isOutOfStock = (product.totalStock ?? 0) <= 0 || (totalVariantStock ?? 0) <= 0;
     const isOutOfStock = (product.totalStock ?? 0) <= 0;
 
-  const handleAddToCart = async () => {
-    if (isOutOfStock) return;
-    cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
-  };
+    const handleAddToCart = async () => {
+        if (isOutOfStock) return;
+        cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
+    };
 
     return (
         <>
@@ -179,7 +187,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                     {isWishlisted ? "Saved" : "Wishlist"}
                                 </button> */}
 
-                                <a
+                                {/* <a
                                     href="https://wa.me/8801566395807"
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -187,7 +195,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                 >
                                     <MessageSquare className="w-5 h-5" />
                                     Ask Expert
-                                </a>
+                                </a> */}
 
                                 <button
                                     disabled={isOutOfStock}
@@ -206,7 +214,9 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                     disabled={isOutOfStock}
                                     onClick={() => {
                                         if (!isOutOfStock) {
-                                            cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize, selectedPrice)
+                                            // cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize, selectedPrice)
+                                            cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
+                                            router.push('/checkout')
                                         }
                                     }}
                                     className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white py-4 px-8 rounded-2xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
@@ -265,7 +275,9 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                 disabled={isOutOfStock}
                                 onClick={() => {
                                     if (!isOutOfStock) {
-                                        cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize, selectedPrice)
+                                        // cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize, selectedPrice)
+                                        cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
+                                        router.push('/checkout')
                                     }
                                 }}
                                 className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white py-3 px-8 rounded-2xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation active:scale-95 flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"

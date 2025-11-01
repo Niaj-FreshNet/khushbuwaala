@@ -86,14 +86,14 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
           </div>
 
           {/* Enhanced Image Counter Badge */}
-          {images.length > 1 && (
-            <div className="absolute top-6 left-6 bg-gradient-to-r from-gray-900 to-gray-800 text-white px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm shadow-lg">
+          {/* {images.length > 1 && (
+            <div className="absolute top-2 left-6 bg-gradient-to-r from-gray-900 to-gray-800 text-white px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm shadow-lg">
               {activeIdx + 1} / {images.length}
             </div>
-          )}
+          )} */}
 
           {/* Enhanced Control Buttons */}
-          <div className="absolute top-6 right-6 flex gap-3">
+          <div className="absolute top-2 right-6 flex gap-3">
             {/* 360° Rotation Button */}
             {images.length > 1 && (
               <button
@@ -108,7 +108,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
                 aria-label="Toggle 360° view"
                 title="360° View"
               >
-                <RotateCw size={20} className={isRotating ? 'animate-spin' : ''} />
+                <RotateCw size={16} className={isRotating ? 'animate-spin' : ''} />
               </button>
             )}
 
@@ -125,7 +125,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
               aria-label="Toggle zoom"
               title="Zoom In/Out"
             >
-              <Search size={20} />
+              <Search size={16} />
             </button>
 
             {/* Expand Button */}
@@ -138,7 +138,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
               aria-label="Expand image"
               title="Full Screen"
             >
-              <Maximize2 size={20} />
+              <Maximize2 size={16} />
             </button>
           </div>
 
@@ -219,9 +219,9 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
                 )}
 
                 {/* Thumbnail index */}
-                <div className="absolute bottom-1 right-1 bg-white/90 text-gray-700 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                {/* <div className="absolute bottom-1 right-1 bg-white/90 text-gray-700 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
                   {idx + 1}
-                </div>
+                </div> */}
               </button>
             ))}
           </div>

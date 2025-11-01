@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     "KhushbuWaala shop",
     "Bangladesh perfume",
   ].join(", "),
-  alternates: { canonical: "https://khushbuwaala.com/inspired-perfume-oils" },
+  alternates: { canonical: "https://khushbuwaala.com/inspired-perfume-oil" },
 };
 
 // Structured Data (Optional)
@@ -31,7 +31,7 @@ const shopStructuredData = {
   name: "Inspired Perfume Oils",
   description:
     "Explore KhushbuWaala's curated collection of inspired perfume oils and fragrances",
-  url: "https://khushbuwaala.com/inspired-perfume-oils",
+  url: "https://khushbuwaala.com/inspired-perfume-oil",
   mainEntity: {
     "@type": "ItemList",
     name: "Perfume Oil Products",
@@ -41,7 +41,7 @@ const shopStructuredData = {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: "https://khushbuwaala.com" },
-      { "@type": "ListItem", position: 2, name: "Inspired Perfume Oils", item: "https://khushbuwaala.com/inspired-perfume-oils" },
+      { "@type": "ListItem", position: 2, name: "Inspired Perfume Oils", item: "https://khushbuwaala.com/inspired-perfume-oil" },
     ],
   },
 };

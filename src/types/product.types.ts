@@ -3,6 +3,7 @@
 
 export interface IDiscount {
   id: string;
+  productId: string;
   code?: string;
   type: "percentage" | "fixed";
   value: number;
@@ -10,6 +11,15 @@ export interface IDiscount {
   startDate?: string;
   endDate?: string;
   variantId?: string; // null means product-level discount
+}
+
+export interface StockLog {
+  id: string;
+  productId: string;
+  change: number;
+  reason: string;
+  createdAt: string;
+  product: { name: string };
 }
 
 export interface IProductVariant {
@@ -71,6 +81,7 @@ export interface IProduct {
   stock?: number; // float at product-level
   variants: IProductVariant[];
   discounts?: IDiscount[]; // product-level discounts
+  discount?: number;
 
   // Computed fields
   minPrice: number;

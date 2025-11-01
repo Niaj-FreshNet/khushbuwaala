@@ -88,7 +88,7 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
 // Utility function to generate category breadcrumbs
 export function generateCategoryBreadcrumbs(category: string, productName?: string): BreadcrumbItem[] {
   const categoryMap: { [key: string]: { name: string; href: string } } = {
-    inspiredPerfumeOil: { name: "Inspired Perfume Oils", href: "/inspired-perfume-oils" },
+    inspiredPerfumeOil: { name: "Inspired Perfume Oil", href: "/inspired-perfume-oil" },
     oriental: { name: "Oriental Collection", href: "/oriental-collection" },
     artificialOud: { name: "Artificial Oud", href: "/artificial-oud" },
     natural: { name: "Natural Collection", href: "/natural-collection" },

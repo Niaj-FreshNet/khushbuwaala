@@ -1,11 +1,12 @@
 
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Suspense } from "react"
+import { Suspense, useState } from "react"
 import type React from "react"
 import { SectionTitle } from "./SectionTitle"
 import { ProductCard } from "@/components/ReusableUI/ProductCard"
 import { IProductResponse } from "@/types/product.types"
+import { ProductQuickView } from "@/components/ReusableUI/ProductQuickView"
 
 // Client Component for the Carousel functionality
 export function ProductCarouselClient({
@@ -29,6 +30,19 @@ export function ProductCarouselClient({
   titleShowDecorations?: boolean
   titleUnderlineVariant?: "default" | "wide" | "full"
 }) {
+  const [quickViewProduct, setQuickViewProduct] = useState<IProductResponse | null>(null);
+    const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  
+    const handleQuickView = (product: IProductResponse) => {
+      setQuickViewProduct(product);
+      setIsQuickViewOpen(true);
+    };
+
+  const handleCloseQuickView = () => {
+    setIsQuickViewOpen(false);
+    setQuickViewProduct(null);
+  };
+
   return (
     <div className="container mx-auto py-2">
       <SectionTitle
@@ -50,13 +64,23 @@ export function ProductCarouselClient({
         <CarouselContent className="-ml-4">
           {products.map((product) => (
             <CarouselItem key={product.id} className="pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
-              <ProductCard product={product} />
+              <ProductCard
+                className="py-0"
+                key={product.id}
+                product={product}
+                // layout={columns === 1 ? "list" : "grid"}
+                // showDescription={columns === 1}
+                onQuickView={() => handleQuickView(product)}
+              />
             </CarouselItem>
           ))}
         </CarouselContent>
         <CarouselPrevious className="hidden md:flex" />
         <CarouselNext className="hidden md:flex" />
       </Carousel>
+      {quickViewProduct && (
+        <ProductQuickView product={quickViewProduct} open={isQuickViewOpen} onOpenChange={setIsQuickViewOpen} />
+      )}
     </div>
   )
 }

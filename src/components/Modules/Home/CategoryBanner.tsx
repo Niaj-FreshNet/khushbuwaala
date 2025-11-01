@@ -15,7 +15,7 @@ interface CategoryCardProps {
 function CategoryCard({ CategoryName, CategoryImage, CategoryLink, description }: CategoryCardProps) {
   return (
     <div className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1">
-      <div className="relative w-full h-56 md:h-64">
+      <div className="relative w-full h-60 md:h-64">
         <Image
           src={CategoryImage || "/placeholder.svg"}
           alt={CategoryName}

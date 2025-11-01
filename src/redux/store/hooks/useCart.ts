@@ -15,7 +15,8 @@ import {
 } from '../features/cart/cartSlice'
 import type { IProductResponse } from '@/types/product.types'
 import { useAddToCartMutation, useUpdateCartItemMutation, useRemoveCartItemMutation } from '@/redux/store/api/cart/cartApi'
-import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
+// import { toast } from 'sonner'
 
 export const useCart = () => {
   const dispatch = useAppDispatch()
@@ -30,11 +31,13 @@ export const useCart = () => {
   const [updateCartItemApi] = useUpdateCartItemMutation()
   const [removeCartItemApi] = useRemoveCartItemMutation()
 
+  const router = useRouter()
+
   // -------------------- CART ACTIONS --------------------
   const addToCart = useCallback(
     async (product: IProductResponse, quantity: number, selectedSize: string, selectedPrice: number) => {
       dispatch(addToCartAction({ product, quantity, selectedSize, selectedPrice }))
-      toast.success(`${product.name} added to cart!`)
+      // toast.success(`${product.name} added to cart!`)
 
       try {
         const variant = product?.variants?.find(
@@ -69,7 +72,7 @@ export const useCart = () => {
   const removeFromCart = useCallback(
     async (productId: string, size: string, productName?: string, cartItenId?: string) => {
       dispatch(removeFromCartAction({ productId, size }))
-      if (productName) toast.info(`${productName} removed from cart`)
+      // if (productName) toast.info(`${productName} removed from cart`)
 
       if (cartItenId) {
         try {
@@ -116,6 +119,7 @@ export const useCart = () => {
   const setCheckoutOnlyItem = useCallback(
     (product: IProductResponse, quantity: number, selectedSize: string, selectedPrice: number) => {
       dispatch(setCheckoutOnlyItemAction({ product, quantity, selectedSize, selectedPrice }))
+      router.push('/checkout')
     },
     [dispatch]
   )

@@ -75,7 +75,7 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
           return (
             <Link
               key={p.id}
-              href={`/products/${p.slug}`}
+              href={`/product/${p.slug}`}
               className="group relative block rounded-xl overflow-hidden border border-gray-200 hover:shadow-md transition-shadow"
             >
               <div className="relative aspect-square bg-gray-50">
