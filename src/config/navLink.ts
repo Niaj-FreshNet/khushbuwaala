@@ -112,10 +112,10 @@ export const navLinks: NavLink[] = [
   {
     name: 'Expenses',
     href: '#',
-    icon: GoPlusCircle,
+    icon: MinusCircle,
     roles: ['ADMIN', 'SUPER_ADMIN'],
     subItems: [
-      { name: 'Add Expense', href: '/dashboard/expense/add', icon: MinusCircle, roles: ['ADMIN', 'SUPER_ADMIN'], },
+      { name: 'Add Expense', href: '/dashboard/expense/add', icon: GoPlus, roles: ['ADMIN', 'SUPER_ADMIN'], },
       { name: 'Expense List', href: '/dashboard/expense', icon: MdDetails, roles: ['ADMIN', 'SUPER_ADMIN'], },
       // { name: 'Expenses Report', href: '/dashboard/expense/expense-report', icon: GoReport, roles: ['ADMIN', 'SUPER_ADMIN'], },
     ],
