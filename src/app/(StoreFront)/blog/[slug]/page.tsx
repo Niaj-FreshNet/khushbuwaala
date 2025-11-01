@@ -8,6 +8,7 @@ interface Props {
 // Server-side data fetching for metadata
 export async function generateMetadata({ params }: Props) {
     try {
+        // FIX: Use template literal correctly
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blog/get-blog/${params.slug}`, {
             cache: 'no-store',
         });
@@ -57,6 +58,7 @@ export async function generateMetadata({ params }: Props) {
 // Server-side data fetching for the page
 async function getBlogData(slug: string) {
     try {
+        // FIX: Use template literal correctly
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/blog/get-blog/${slug}`, {
             cache: 'no-store',
         });

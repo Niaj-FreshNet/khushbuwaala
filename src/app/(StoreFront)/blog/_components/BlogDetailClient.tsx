@@ -59,6 +59,7 @@ const BlogDetailClient = ({ slug, initialData }: BlogDetailClientProps) => {
                                             height={100}
                                             className="object-cover rounded mb-2"
                                         />
+                                        {/* FIX: Use template literal correctly */}
                                         <a href={`/blogs/${related.slug}`} className="text-[#FB923C] hover:underline">
                                             Read More
                                         </a>

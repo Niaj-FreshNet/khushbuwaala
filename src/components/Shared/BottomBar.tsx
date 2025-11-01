@@ -210,9 +210,9 @@ export default function BottomBar() {
                         </span>
 
                         {/* Active indicator */}
-                        {isActive && (
+                        {/* {isActive && (
                           <div className="absolute -bottom-1 w-1 h-1 bg-red-500 rounded-full animate-pulse" />
-                        )}
+                        )} */}
                       </Link>
                     </Button>
                   ) : (
