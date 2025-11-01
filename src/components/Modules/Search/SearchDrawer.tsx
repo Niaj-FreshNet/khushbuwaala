@@ -300,7 +300,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                 ) : products.length > 0 ? (
                   <div className="space-y-4">
                     {products.map((product) => (
-                      <Link key={product.id} href={`/product/${product.slug}`}>
+                      <Link key={product.id} href={`/product/${product.slug}`} onClick={onClose}>
                         <div className="group flex gap-4 p-4 mb-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-lg cursor-pointer transition-all duration-300 bg-white">
                           <div className="w-20 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 group-hover:shadow-md transition-shadow duration-300">
                             <img
