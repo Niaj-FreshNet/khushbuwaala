@@ -34,7 +34,7 @@ export default function SideBar({
   const router = useRouter();
   const { user } = useAuth();
   const [logoutApi] = useLogoutMutation();
-  console.log('user:', user?.role)
+  // console.log('user:', user?.role)
 
 
   // Skeleton Loader for Nav + SubItems (more realistic layout)
@@ -214,6 +214,7 @@ export default function SideBar({
             setIsShort={setIsShort}
             additionalRoutes={additionalRoutes}
             navLink={combinedNavLinks}
+            role={user?.role}
           />
         </div>
         <button

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { LuChevronDown, LuChevronUp, LuChevronsLeft, LuChevronsRight } from 'react-icons/lu';
 import { NavLink } from '@/types/navlink.types';
+import { useAuth } from '@/redux/store/hooks/useAuth';
 
 interface MainNavLinkProps {
   navLink: NavLink[];
@@ -13,6 +14,7 @@ interface MainNavLinkProps {
   isShort: boolean;
   setIsShort: React.Dispatch<React.SetStateAction<boolean>>;
   dark?: boolean;
+  role?: string;
 }
 
 export default function MainNavLink({
@@ -21,6 +23,7 @@ export default function MainNavLink({
   isShort,
   setIsShort,
   dark = true,
+  role
 }: MainNavLinkProps) {
   const pathname = usePathname();
   const [openSubMenus, setOpenSubMenus] = useState<string[]>([]);
@@ -50,7 +53,7 @@ export default function MainNavLink({
               dark ? 'text-white' : 'text-gray-900'
             )}
           >
-            Admin
+            {role}
           </h2>
         )}
 
