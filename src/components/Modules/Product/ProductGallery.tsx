@@ -55,7 +55,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
       <div className="relative group">
         {/* Enhanced Showcase Background */}
         <div
-          className="relative rounded-3xl p-0 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/20 shadow-2xl border border-blue-100/50 backdrop-blur-sm aspect-[4/5] min-h-[500px] flex items-center justify-center cursor-pointer overflow-hidden"
+          className="relative rounded-xl p-0 bg-gradient-to-br from-white via-blue-50/30 to-purple-50/20 shadow-lg border border-blue-100/50 backdrop-blur-sm aspect-[4/5] min-h-[500px] flex items-center justify-center cursor-pointer overflow-hidden"
           onClick={() => setLightbox(true)}
           onMouseMove={handleMouseMove}
           onMouseEnter={() => setZoom(true)}
@@ -185,17 +185,17 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
       {images.length > 1 && (
         <div className="space-y-4">
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Product Views</h3>
+            <h3 className="text-md font-semibold text-gray-900 mb-1">Product Views</h3>
             <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide justify-center">
+          <div className="flex gap-4 overflow-x-auto py-2 scrollbar-hide justify-center">
             {images.map((src, idx) => (
               <button
                 key={idx}
-                className={`relative flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all duration-300 w-20 h-20 md:w-24 md:h-24 ${activeIdx === idx
-                    ? "border-blue-500 ring-4 ring-blue-200/50 scale-110 shadow-xl"
-                    : "border-gray-300 hover:border-blue-400 hover:scale-105 hover:shadow-lg"
+                className={`relative flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all duration-300 w-20 h-20 md:w-24 md:h-24 ${activeIdx === idx
+                    ? "border-blue-500 ring-4 ring-blue-200/50 scale-110 shadow-lg"
+                    : "border-gray-300 hover:border-blue-400 hover:scale-105 hover:shadow-md"
                   }`}
                 onClick={() => {
                   setActiveIdx(idx);
@@ -212,11 +212,11 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
                   className="object-cover w-full h-full"
                   loading="lazy"
                 />
-                {activeIdx === idx && (
+                {/* {activeIdx === idx && (
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
                     <div className="w-3 h-3 bg-white rounded-full shadow-lg border-2 border-blue-500"></div>
                   </div>
-                )}
+                )} */}
 
                 {/* Thumbnail index */}
                 {/* <div className="absolute bottom-1 right-1 bg-white/90 text-gray-700 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-sm">

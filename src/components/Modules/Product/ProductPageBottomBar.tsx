@@ -161,19 +161,24 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                         <h3 className="font-bold text-gray-900 text-lg">{product.name}</h3>
                                         <div className="text-2xl font-bold text-gray-900">
                                             ৳{discountedPrice.toLocaleString()}
-                                            {/* {(product.discount && discountedPrice !== currentPrice) && (
+                                            {(product.discount && discountedPrice !== currentPrice) && (
                                                 <span className="text-lg text-gray-500 line-through ml-2">
                                                     ৳{currentPrice.toLocaleString()}
                                                 </span>
-                                            )} */}
-                                            {activeDiscount ? (
+                                            )}
+                                            {(totalDiscounted !== totalCurrent) && (
+                                                <span className="text-sm text-gray-500 line-through ml-2">
+                                                    ৳{totalCurrent.toLocaleString()}
+                                                </span>
+                                            )}
+                                            {/* {activeDiscount ? (
                                                 <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 animate-pulse shadow-lg">
                                                     <Tag className="w-3 h-3 mr-2" />
                                                     {activeDiscount.type === "percentage"
                                                         ? `${activeDiscount.value}% OFF`
                                                         : `৳${activeDiscount.value} OFF`}
                                                 </Badge>
-                                            ) : null}
+                                            ) : null} */}
                                         </div>
                                     </div>
                                 </div>
@@ -247,14 +252,14 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                 <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
                             </button> */}
 
-                            <a
+                            {/* <a
                                 href="https://wa.me/8801566395807"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-14 h-14 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 text-green-600 rounded-2xl flex items-center justify-center hover:bg-green-100 transition-all duration-300 touch-manipulation active:scale-95 shadow-lg"
                             >
                                 <MessageSquare className="w-5 h-5" />
-                            </a>
+                            </a> */}
                         </div>
 
                         <div className="flex items-center justify-between">

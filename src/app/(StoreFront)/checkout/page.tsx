@@ -45,13 +45,34 @@ interface IOrderPayload {
   cartItemIds: string[]
   amount: number
   isPaid?: boolean
+  method: string
   orderSource?: "WEBSITE"
   saleType?: "SINGLE"
+  shippingCost?: number
+  additionalNotes?: string
   customerInfo?: {
     name?: string
     phone?: string
     email?: string
     address?: string
+    district?: string
+    thana?: string
+  }
+  shippingAddress?: {
+    name?: string
+    phone?: string
+    email?: string
+    address?: string
+    district?: string
+    thana?: string
+  }
+  billingAddress?: {
+    name?: string
+    phone?: string
+    email?: string
+    address?: string
+    district?: string
+    thana?: string
   }
 }
 
@@ -97,7 +118,7 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState("")
   const [contactNumber, setContactNumber] = useState("")
   const [email, setEmail] = useState("")
-  const [notes, setNotes] = useState("")
+  const [additionalNotes, setAdditionalNotes] = useState("")
 
   const [agreeToTerms, setAgreeToTerms] = useState(true)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -226,14 +247,44 @@ export default function CheckoutPage() {
       cartItemIds,
       amount: total,
       isPaid: paymentMethod !== "cashOnDelivery",
+      method: paymentMethod,
       orderSource: "WEBSITE",
       saleType: "SINGLE",
+      shippingCost: Number(shippingCost),
+      additionalNotes: additionalNotes,
       customerInfo: {
         name,
         phone: contactNumber,
         email,
         address,
+        district: selectedDistrict,
+        thana: customThana,
       },
+      shippingAddress: {
+        name,
+        phone: contactNumber,
+        email,
+        address,
+        district: selectedDistrict,
+        thana: customThana,
+      },
+      billingAddress:
+        billingType === "sameAsShipping"
+          ? {
+            name,
+            phone: contactNumber,
+            email,
+            address,
+            district: selectedDistrict,
+            thana: customThana,
+          }
+          : {
+            name: billingName,
+            phone: billingContactNumber,
+            address: billingAddress,
+            district: billingDistrict,
+            thana: billingThana,
+          },
     }
 
     try {
@@ -485,8 +536,8 @@ export default function CheckoutPage() {
                     placeholder="Add any specific instructions or notes for your order"
                     rows={4}
                     className="w-full p-3 border rounded-md bg-white"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
+                    value={additionalNotes}
+                    onChange={(e) => setAdditionalNotes(e.target.value)}
                   />
                 </div>
               </CardContent>
@@ -583,7 +634,7 @@ export default function CheckoutPage() {
             <div className="space-y-3">
               <Button
                 variant="default"
-                className="w-full h-14 text-lg font-bold"
+                className="w-full h-14 text-lg font-bold cursor-pointer"
                 onClick={handleSubmit}
                 disabled={isPlacingOrder}
               >

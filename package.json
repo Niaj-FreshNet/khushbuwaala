@@ -32,6 +32,7 @@
     "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.12",
+    "html2pdf.js": "^0.12.1",
     "jodit-react": "^5.2.31",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",

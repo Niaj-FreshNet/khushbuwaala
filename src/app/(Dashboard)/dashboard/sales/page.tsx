@@ -27,19 +27,26 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  Receipt,
+  Download,
 } from 'lucide-react';
 import {
   useGetAllSalesQuery,
   useUpdateSalesMutation,
+  useGetSaleByIdQuery,
 } from '@/redux/store/api/sales/salesApi';
 import { Skeleton } from '@/components/ui/skeleton';
 import SaleDetailsModal from './_components/SaleDetailsModal';
+import SalesInvoice from './_components/SalesInvoice';
 
 interface Sale {
   id: string;
+  invoice: string;
   orderTime: string;
-  salesman?: { name: string } | null;
   orderSource: string;
+  saleType: string;
+  method: string;
+  salesman?: { name: string; email: string } | null;
   amount: number;
   status: string;
   isPaid: boolean;
@@ -55,6 +62,8 @@ const SaleListPage = () => {
   const [limit] = useState(10);
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [invoiceSaleId, setInvoiceSaleId] = useState<string | null>(null);
+  const [isInvoiceVisible, setIsInvoiceVisible] = useState(false);
 
   // Sorting
   const [sortField, setSortField] = useState<SortField>('orderTime');
@@ -62,6 +71,11 @@ const SaleListPage = () => {
 
   const { data, isLoading } = useGetAllSalesQuery({ searchTerm, page, limit });
   const [updateSale] = useUpdateSalesMutation();
+
+  // Fetch sale data for invoice
+  const { data: invoiceData } = useGetSaleByIdQuery(invoiceSaleId || '', {
+    skip: !invoiceSaleId,
+  });
 
   const allSales: Sale[] = useMemo(() => data?.data?.data || [], [data]);
   const meta = data?.data?.meta;
@@ -122,6 +136,11 @@ const SaleListPage = () => {
     setIsModalVisible(true);
   };
 
+  const handleViewInvoice = (saleId: string) => {
+    setInvoiceSaleId(saleId);
+    setIsInvoiceVisible(true);
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -153,21 +172,23 @@ const SaleListPage = () => {
         <Table className="border-[#FB923C]">
           <TableHeader>
             <TableRow>
-              <TableHead>Sale ID</TableHead>
+              <TableHead>Sr.</TableHead>
+              <TableHead>Invoice</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead
                 onClick={() => toggleSort('orderTime')}
                 className="cursor-pointer select-none"
               >
                 Sale Time {renderSortIcon('orderTime')}
               </TableHead>
-              <TableHead>Salesman</TableHead>
-              <TableHead>Method</TableHead>
+              <TableHead>Sold By</TableHead>
               <TableHead
                 onClick={() => toggleSort('amount')}
                 className="cursor-pointer select-none"
               >
                 Amount {renderSortIcon('amount')}
               </TableHead>
+              <TableHead>Method</TableHead>
               <TableHead
                 onClick={() => toggleSort('status')}
                 className="cursor-pointer select-none"
@@ -183,7 +204,7 @@ const SaleListPage = () => {
             {isLoading ? (
               [...Array(6)].map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell colSpan={8}>
+                  <TableCell colSpan={10}>
                     <Skeleton className="w-full h-6 my-2" />
                   </TableCell>
                 </TableRow>
@@ -191,39 +212,53 @@ const SaleListPage = () => {
             ) : sortedSales.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={8}
+                  colSpan={10}
                   className="text-center py-6 text-gray-500"
                 >
                   No sales found.
                 </TableCell>
               </TableRow>
             ) : (
-              sortedSales.map((sale) => (
+              sortedSales.map((sale, index) => (
                 <TableRow key={sale.id}>
-                  <TableCell>{sale.id.slice(0, 8)}...</TableCell>
+                  <TableCell>{index + 1}.</TableCell>
+                  <TableCell>#{sale.invoice}</TableCell>
+                  <TableCell>{sale.saleType}</TableCell>
                   <TableCell>
                     {sale.orderTime
                       ? new Date(sale.orderTime).toLocaleString()
                       : 'N/A'}
                   </TableCell>
                   <TableCell>{sale.salesman?.name || 'N/A'}</TableCell>
-                  <TableCell>{sale.orderSource}</TableCell>
                   <TableCell>{sale.amount} BDT</TableCell>
+                  <TableCell>
+                    {sale.method
+                      ? sale.method.charAt(0).toUpperCase() + sale.method.slice(1).toLowerCase()
+                      : 'N/A'}
+                  </TableCell>
                   <TableCell>
                     <Badge
                       variant={
                         sale.status === 'COMPLETED'
                           ? 'success'
                           : sale.status === 'CANCEL'
-                          ? 'destructive'
-                          : 'default'
+                            ? 'destructive'
+                            : sale.status === 'DELIVERED'
+                              ? 'outline'
+                              : sale.status === 'PROCESSING'
+                                ? 'secondary'
+                                : 'default'
                       }
                       className={
                         sale.status === 'COMPLETED'
-                          ? 'bg-[#4CD964]'
+                          ? 'bg-[#4CD964] text-white'
                           : sale.status === 'CANCEL'
-                          ? 'bg-red-500'
-                          : 'bg-orange-500'
+                            ? 'bg-red-500 text-white'
+                            : sale.status === 'DELIVERED'
+                              ? 'bg-blue-500 text-white'
+                              : sale.status === 'PROCESSING'
+                                ? 'bg-yellow-500 text-white'
+                                : 'bg-orange-500 text-white'
                       }
                     >
                       {sale.status}
@@ -241,26 +276,37 @@ const SaleListPage = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleViewDetails(sale.id)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            className='cursor-pointer bg-gray-100 hover:bg-gray-200'
+                            variant="ghost"
+                            size="icon"
+                          >
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           <DropdownMenuItem
                             onClick={() =>
+                              handleUpdateStatus(sale.id, 'PROCESSING')
+                            }
+                          >
+                            Processing
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
                               handleUpdateStatus(sale.id, 'COMPLETED')
                             }
                           >
                             Completed
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleUpdateStatus(sale.id, 'DELIVERED')
+                            }
+                          >
+                            Delivered
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() =>
@@ -278,6 +324,24 @@ const SaleListPage = () => {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
+                      <Button
+                        className='cursor-pointer bg-gray-100 hover:bg-gray-200'
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleViewDetails(sale.id)}
+                        title="View Details"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        className='cursor-pointer bg-[#fda055] hover:bg-[#ff9742] text-white'
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleViewInvoice(sale.id)}
+                        title="View Invoice"
+                      >
+                        <Download className="w-4 h-4" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -319,6 +383,18 @@ const SaleListPage = () => {
           visible={isModalVisible}
           onClose={() => setIsModalVisible(false)}
         />
+
+        {/* Invoice Modal */}
+        {invoiceData?.data && (
+          <SalesInvoice
+            sale={invoiceData.data}
+            visible={isInvoiceVisible}
+            onClose={() => {
+              setIsInvoiceVisible(false);
+              setInvoiceSaleId(null);
+            }}
+          />
+        )}
       </div>
     </div>
   );

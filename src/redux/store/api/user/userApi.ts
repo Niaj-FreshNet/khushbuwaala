@@ -21,6 +21,15 @@ const userApi = baseApi.injectEndpoints({
             providesTags: ['User'],
         }),
 
+        getUserById: builder.query({
+            query: (id) => ({
+                url: `/user/get-user-by-id/${id}`,
+                transformResponse: (response: { success: boolean; data: TUser[] }) => response.data,
+                method: 'GET'
+            }),
+            providesTags: ['User'],
+        }),
+
         updateUserProfile: builder.mutation<
             TUser, // response type
             { id: string; updates: Partial<TUser> } // request type
@@ -48,6 +57,8 @@ const userApi = baseApi.injectEndpoints({
 export const {
     useGetAllUsersQuery,
     useGetUserProfileQuery,
+    useGetUserByIdQuery,
+    useLazyGetUserByIdQuery,
     useUpdateUserProfileMutation,
     useChangePasswordMutation,
 } = userApi;

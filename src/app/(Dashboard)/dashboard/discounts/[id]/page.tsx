@@ -1,4 +1,4 @@
-import DiscountFormPage from "../../add/page";
+import DiscountFormPage from "../add/page";
 
 export default function Page() {
     return (

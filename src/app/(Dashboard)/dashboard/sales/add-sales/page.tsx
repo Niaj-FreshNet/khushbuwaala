@@ -25,13 +25,14 @@ import FormInput from '@/components/ReusableUI/FormInput';
 import productApi, { useGetAllProductsQuery } from '@/redux/store/api/product/productApi';
 import { IProductResponse, IProductVariantResponse } from '@/types/product.types';
 import { useAuth } from '@/redux/store/hooks/useAuth';
-import { useCreateOrderMutation } from '@/redux/store/api/order/ordersApi';
 import { useAddToCartMutation } from '@/redux/store/api/cart/cartApi';
+import { useAddSaleMutation } from '@/redux/store/api/sales/salesApi';
 
 // ---------------- Validation Schema ----------------
 const cartItemSchema = z.object({
     productId: z.string().min(1, 'Product is required'),
     size: z.string().optional(),
+    unit: z.string().optional(),
     price: z.number().min(0, 'Price must be non-negative'),
     quantity: z.number().min(1, 'At least 1 quantity required')
 });
@@ -59,12 +60,12 @@ const AddSalesPage = () => {
     const { data: allProductsData } = useGetAllProductsQuery({ limit: 100 });
     const allProducts = allProductsData?.data || [];
     const [addToCart] = useAddToCartMutation();
-    const [createOrder] = useCreateOrderMutation();
+    const [addSale] = useAddSaleMutation();
     const [getProductVariants] = productApi.useLazyGetProductVariantsQuery();
 
     const [isPaid, setIsPaid] = useState(true);
     const [cartItems, setCartItems] = useState<FormValues['cartItems']>([
-        { productId: '', size: '', price: 0, quantity: 1 }
+        { productId: '', size: '', unit: '', price: 0, quantity: 1 }
     ]);
     const [variantsMap, setVariantsMap] = useState<Record<string, IProductVariantResponse[]>>({});
     const [loadingProductId, setLoadingProductId] = useState<string | null>(null);
@@ -95,9 +96,14 @@ const AddSalesPage = () => {
             const createdCartIds: string[] = [];
 
             for (const item of validCartItems) {
+                const variants = variantsMap[item.productId] || [];
+                const selectedVariant = variants.find(v => v.id === item.size);
+
                 const res = await addToCart({
                     productId: item.productId,
-                    variantId: item.size || null,
+                    variantId: selectedVariant?.id || null,
+                    size: selectedVariant?.size || item.size || null,   // ✅ actual size from variant
+                    unit: selectedVariant?.unit || item.unit || null,   // ✅ actual unit from variant
                     quantity: item.quantity,
                     price: item.price,
                 }).unwrap();
@@ -117,26 +123,27 @@ const AddSalesPage = () => {
                 cartItemIds: createdCartIds,
                 amount: values.amount,
                 isPaid,
+                method: values.method,
                 saleBy: user?.name,
-                orderSource: "MANUAL",
+                orderSource: "SHOWROOM",
                 saleType: 'SINGLE',
                 customerInfo: {
                     name: values.customerName,
                     phone: values.phone,
                     address: values.address || "",
-                    email: values.email || null,
+                    email: values.email || "",
                     reference: values.reference || "",
                 },
             };
 
             // console.log("🧾 Final Sale Payload:", payload);
 
-            const res = await createOrder(payload).unwrap();
+            const res = await addSale(payload).unwrap();
             // console.log(res)
 
             if (res?.success) {
                 toast.success("Sale created successfully!");
-                setCartItems([{ productId: "", size: "", price: 0, quantity: 1 }]);
+                setCartItems([{ productId: "", size: "", unit: "", price: 0, quantity: 1 }]);
             } else {
                 toast.error("Sale creation failed");
             }
@@ -147,7 +154,7 @@ const AddSalesPage = () => {
     };
     // ---------------- Cart item handlers ----------------
     const handleAddCartItem = () =>
-        setCartItems([...cartItems, { productId: '', size: '', price: 0, quantity: 1 }]);
+        setCartItems([...cartItems, { productId: '', size: '', unit: '', price: 0, quantity: 1 }]);
     const handleRemoveCartItem = (i: number) =>
         setCartItems((prev) => (prev.length > 1 ? prev.filter((_, idx) => idx !== i) : prev));
 

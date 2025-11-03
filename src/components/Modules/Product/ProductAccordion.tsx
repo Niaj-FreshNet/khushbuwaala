@@ -161,7 +161,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Section Navigation */}
       <div className="flex flex-wrap justify-center gap-2 p-2 bg-gray-50 rounded-2xl border border-gray-200">
         {[
@@ -174,8 +174,8 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
             key={section.id}
             onClick={() => toggleSection(section.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${openSection === section.id
-              ? 'bg-white text-gray-900 shadow-md border border-gray-200'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+              ? 'bg-white text-gray-900 shadow-sm border border-gray-200'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-white'
               }`}
           >
             <section.icon className="w-4 h-4" />

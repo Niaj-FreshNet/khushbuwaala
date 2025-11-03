@@ -103,7 +103,7 @@ export default function SideBar({
       <div
         className={cn(
           'flex items-center gap-3 rounded-md mt-6 animate-pulse px-3 py-2',
-          dark ? 'bg-red-800' : 'bg-red-300',
+          dark ? 'bg-red-700' : 'bg-red-300',
           isShort ? 'justify-center' : 'justify-start'
         )}
       >

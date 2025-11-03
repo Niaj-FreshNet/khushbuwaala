@@ -8,9 +8,10 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import OrderReceipt from "@/components/Modules/Orders/OrderReceipt"
 import { useAppSelector } from "@/redux/store/hooks"
 import { selectLastOrder, selectOrderById } from "@/redux/store/features/orders/ordersSlice"
+import OrderInvoiceModal from "@/components/Modules/Orders/OrderInvoiceModal"
+// import OrderInvoice from "@/components/Modules/Orders/OrderInvoice"
 
 export default function ThankYouPage() {
   const params = useSearchParams()
@@ -23,6 +24,7 @@ export default function ThankYouPage() {
 
   const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false)
   const [isReceiptOpen, setIsReceiptOpen] = useState(false)
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
 
   // Scroll to top on mount
   useEffect(() => {
@@ -64,13 +66,13 @@ export default function ThankYouPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
+    <div className="min-h-screen bg-gray-50 pt-24">
       {/* Header */}
       <div className="container mx-auto px-4 mb-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Alhamdulillah! Order Confirmed</h1>
-            <p className="text-gray-600 mt-1 text-sm">Order ID: <span className="font-semibold">{order.id}</span></p>
+            <h1 className="text-xl md:text-2xl font-semibold text-gray-900">Order Confirmed! Alhamdulillah...</h1>
+            <p className="text-gray-600 mt-1 text-md">Order ID: <span className="font-semibold">#{order.invoice}</span></p>
           </div>
         </div>
       </div>
@@ -142,13 +144,13 @@ export default function ThankYouPage() {
             <CardContent className="space-y-2 text-sm text-gray-700">
               <p>Your order is confirmed. We’ll notify you when it ships.</p>
               <p>
-                Payment Method: <span className="font-medium">
+                Payment Method: <span className="font-semibold">
                   {order.isPaid ? 'Online Payment' : 'Cash on Delivery'}
                 </span>
               </p>
-              <p>Order Status: <span className="font-medium">{order.status}</span></p>
+              <p>Order Status: <span className="font-semibold">{order.status}</span></p>
               <div className="pt-2">
-                <Button variant="outline" onClick={() => setIsReceiptOpen(true)}>View Invoice</Button>
+                <Button variant="outline" className="cursor-pointer" onClick={() => setIsInvoiceOpen(true)}>View Invoice</Button>
               </div>
             </CardContent>
           </Card>
@@ -162,7 +164,9 @@ export default function ThankYouPage() {
                 <div className="border rounded-lg p-4 bg-gray-50">
                   <p className="text-sm font-semibold mb-2">Contact Information</p>
                   <Separator className="mb-3" />
-                  <p className="text-sm">{order.name || 'N/A'}</p>
+                  <p className="text-sm pb-0.5">{order.shipping?.name || 'N/A'}</p>
+                  <p className="text-sm pb-0.5">{order.shipping?.address || 'N/A'}</p>
+                  <p className="text-sm">{order.shipping?.phone || 'N/A'}</p>
                 </div>
                 <div className="border rounded-lg p-4 bg-gray-50">
                   <p className="text-sm font-semibold mb-2">Payment Summary</p>
@@ -234,7 +238,10 @@ export default function ThankYouPage() {
           </div>
         </div>
       </div>
-      <OrderReceipt order={order} isOpen={isReceiptOpen} onClose={() => setIsReceiptOpen(false)} />
+      {/* <OrderReceipt order={order} isOpen={isReceiptOpen} onClose={() => setIsReceiptOpen(false)} /> */}
+
+      {/* Invoice Modal */}
+      {isInvoiceOpen && <OrderInvoiceModal order={order} isInvoiceOpen={isInvoiceOpen} setIsInvoiceOpen={setIsInvoiceOpen} />}
     </div>
   )
 }

@@ -106,7 +106,7 @@ export default function DiscountList() {
                   </TableCell>
                   <TableCell>{d.maxUsage || '∞'}</TableCell>
                   <TableCell className="flex gap-2">
-                    <Link href={`/dashboard/discounts/edit/${d.id}`}>
+                    <Link href={`/dashboard/discounts/${d.id}`}>
                       <Button size="icon" variant="ghost">
                         <Edit className="w-4 h-4" />
                       </Button>

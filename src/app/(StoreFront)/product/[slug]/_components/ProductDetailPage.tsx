@@ -109,7 +109,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                         <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-purple-50/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
 
                         <div className="relative max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-2 lg:py-4">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 xl:gap-20 items-start">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 lg:gap-8 xl:gap-12 items-start">
                                 {/* Product Gallery */}
                                 <div className="w-full order-1 lg:order-1">
                                     <div className="sticky top-20 lg:top-16">
@@ -129,7 +129,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
 
                     {/* Product Information Section */}
                     <section className="bg-white relative">
-                        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+                        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
                             <div className="text-left mb-4 flex items-center gap-3">
                                 {/* <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
@@ -137,10 +137,10 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
             </div>
             <h3 className="text-xl font-bold text-gray-900">Quantity</h3>
           </div> */}
-                                <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6">
+                                <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
                                     <Info className="w-5 h-5 text-white" />
                                 </div>
-                                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+                                <h2 className="text-xl md:text-2xl font-bold text-gray-900 m">
                                     Product Details
                                 </h2>
                                 {/* <p className="text-lg text-gray-600 max-w-3xl leading-relaxed">

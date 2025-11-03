@@ -233,6 +233,7 @@ export const {
   useGetAllProductsQuery,
   useGetAllProductsAdminQuery,
   useGetProductQuery,
+  useLazyGetProductQuery,
   useGetProductBySlugQuery,
   useUpdateProductMutation,
   useDeleteProductMutation,

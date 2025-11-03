@@ -2,12 +2,13 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Heart, Tag, Shield, Truck, Clock, Star, Award, Sparkles, Zap, CheckCircle, Minus, Plus, Info, Gift, Crown, FileCheck, Phone, MessageSquare } from "lucide-react";
+import { ShoppingCart, Heart, Tag, Shield, Truck, Clock, Star, Award, Sparkles, Zap, CheckCircle, Minus, Plus, Info, Gift, Crown, FileCheck, Phone, MessageSquare, CreditCard, CreditCardIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/context/CartContext";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
 import { IDiscount, IProduct, IProductVariant } from "@/types/product.types";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 // import { useWishlist } from "@/context/WishlistContext";
 
 interface ProductDetailsProps {
@@ -18,21 +19,13 @@ interface ProductDetailsProps {
 export default function ProductDetails({ product, onReadMore }: ProductDetailsProps) {
   const cart = useCart()
   const router = useRouter()
-  // console.log('product:', product)
-  // const sizeKeys = product.variantPrices
-  //   ? Object.keys(product.variantPrices).filter(
-  //     size => !(product.measurement === "ml" && size.trim().toLowerCase() === "100 ml")
-  //   )
-  //   : product.measurement === "ml"
-  //     ? ["3 ml", "6 ml", "12 ml", "25 ml"]
-  //     : ["3 gm", "6 gm", "12 gm"];
+
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
 
   const sizeKeys = product.variants?.length
     ? product.variants.map(v => `${v.size} ${v.unit.toLowerCase()}`)
-    : ["3 ml", "6 ml", "12 ml", "25 ml"]
-  // : product.measurement === "ml"
-  // ? ["3 ml", "6 ml", "12 ml", "25 ml"]
-  // : ["3 gm", "6 gm", "12 gm"];
+    : [''];
 
   const selection = useProductSelectionOptional();
   // const wishlist = useWishlist();
@@ -90,7 +83,7 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
   // }
 
   // Available sizes based on product data
-  const availableSizes = sizeKeys;
+  const availableSizes = sizeKeys.slice(0, 4);
 
   // Get current variant
   const getCurrentVariant = () => {
@@ -174,20 +167,25 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
 
   const handleAddToCart = async () => {
     if (isOutOfStock) return;
-    cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
+    setIsAddingToCart(true);
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    cart?.addToCart?.(product as any, quantity, selectedSize, currentPrice);
+    setIsAddingToCart(false);
   };
 
   const handleBuyNow = async () => {
     if (isOutOfStock) return;
-    // cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize, selectedPrice);
-    cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
-    router.push('/checkout')
+    setIsBuyingNow(true);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    cart?.addToCart?.(product as any, quantity, selectedSize, currentPrice);
+    router.push("/checkout");
+    setIsBuyingNow(false);
   };
 
   return (
-    <div className="space-y-8 lg:space-y-10">
+    <div className="space-y-4 lg:space-y-6">
       {/* Header Section */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Brand and Category Tags */}
         <div className="flex items-center gap-3 flex-wrap">
           {/* {product.brand && (
@@ -202,13 +200,13 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
             </Badge>
           )} */}
           {product.discount && product.discount > 0 ? (
-            <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 animate-pulse shadow-lg">
+            <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 animate-pulse shadow-md">
               <Tag className="w-3 h-3 mr-2" />
               {product.discount}% OFF
             </Badge>
           ) : null}
           {activeDiscount ? (
-            <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 animate-pulse shadow-lg">
+            <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 animate-pulse shadow-md">
               <Tag className="w-3 h-3 mr-2" />
               {activeDiscount.type === "percentage"
                 ? `${activeDiscount.value}% OFF`
@@ -239,14 +237,14 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
               <span className="text-gray-600">127 reviews</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-xl">
+          <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg">
             <CheckCircle className="w-4 h-4" />
             <span className="font-semibold text-sm">In Stock</span>
           </div>
         </div> */}
 
         {/* Price Section */}
-        <div className="relative p-8 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl border border-blue-100 shadow-lg overflow-hidden">
+        <div className="relative p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl border border-blue-100 shadow-none overflow-hidden">
           {/* Background decoration */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-200/20 to-transparent rounded-full blur-2xl"></div>
 
@@ -254,7 +252,7 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
             <div className="flex items-baseline gap-4 flex-wrap">
               {/* {product.discount && product.discount > 0 ? (
                 <>
-                  <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
+                  <span className="text-xl md:text-2xl lg:text-4xl font-bold text-gray-900">
                     ৳{discountedPrice.toLocaleString()}
                   </span>
                   <span className="text-2xl text-gray-500 line-through">
@@ -262,13 +260,13 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
                   </span>
                 </>
               ) : (
-                <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
+                <span className="text-xl md:text-2xl lg:text-4xl font-bold text-gray-900">
                   ৳{currentPrice.toLocaleString()}
                 </span>
               )} */}
               {activeDiscount ? (
                 <>
-                  <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
+                  <span className="text-xl md:text-2xl lg:text-4xl font-bold text-gray-900">
                     ৳{discountedPrice.toLocaleString()}
                   </span>
                   <span className="text-2xl text-gray-500 line-through">
@@ -276,7 +274,7 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
                   </span>
                 </>
               ) : (
-                <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900">
+                <span className="text-xl md:text-2xl lg:text-4xl font-bold text-gray-900">
                   ৳{currentPrice.toLocaleString()}
                 </span>
               )}
@@ -307,12 +305,12 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
       </div>
 
       {/* Product Description */}
-      <div className="p-6 bg-white rounded-3xl border border-gray-200 shadow-sm">
+      <div className="p-6 bg-white rounded-2xl border border-gray-200 shadow-none">
         <div className="flex items-center gap-3 mb-4">
-          {/* <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+          {/* <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
             <Info className="w-5 h-5 text-white" />
           </div> */}
-          <h3 className="text-xl font-bold text-gray-900">Description</h3>
+          <h3 className="text-lg font-bold text-gray-900">Description</h3>
         </div>
 
         <div className="space-y-4">
@@ -344,7 +342,7 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
 
       {/* Fragrance Notes */}
       {product.accords && product.accords.length > 0 && (
-        <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-3xl border border-purple-100 shadow-sm">
+        <div className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100 shadow-none">
           <h3 className="font-semibold text-purple-800 mb-4 flex items-center gap-2 text-lg">
             <Sparkles className="w-5 h-5" />
             Fragrance
@@ -363,12 +361,12 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
       )}
 
       {/* Size Selection */}
-      <div className="space-y-6 p-6 bg-white rounded-3xl border border-gray-200 shadow-sm">
+      <div className="space-y-6 p-6 bg-white rounded-2xl border border-gray-200 shadow-none">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+          <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
             <Gift className="w-5 h-5 text-white" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900">Choose Size</h3>
+          <h3 className="text-lg font-bold text-gray-900">Choose Size</h3>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -376,9 +374,9 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
             <button
               key={size}
               onClick={() => setSelectedSize(size)}
-              className={`group relative p-6 rounded-2xl border-2 transition-all duration-300 transform hover:scale-105 ${selectedSize === size
-                ? "border-blue-500 bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-700 shadow-xl scale-105 ring-2 ring-blue-200"
-                : "border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50 hover:shadow-lg"
+              className={`group relative p-4 rounded-xl border-2 transition-all duration-300 transform hover:scale-105 ${selectedSize === size
+                ? "border-blue-500 bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-700 shadow-md scale-105 ring-2 ring-blue-200"
+                : "border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"
                 }`}
             >
               {selectedSize === size && (
@@ -414,13 +412,32 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
       </div>
 
       {/* Quantity Selection */}
-      <div className="space-y-6 p-6 bg-white rounded-3xl border border-gray-200 shadow-sm">
+      <div className="space-y-0 p-4 bg-white rounded-2xl border border-gray-200 shadow-none">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+            <div className="w-9 h-9 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
               <Plus className="w-5 h-5 text-white" />
             </div>
             <h3 className="text-xl font-bold text-gray-900">Quantity</h3>
+          </div>
+          <div className="hidden md:flex items-center border-2 border-gray-200 rounded-2xl bg-gray-50 shadow-inner">
+            <button
+              onClick={() => handleQuantityChange("decrement")}
+              disabled={quantity <= 1}
+              className="p-4 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 hover:bg-gray-100 rounded-l-xl"
+            >
+              <Minus className="w-6 h-6" />
+            </button>
+            <div className="px-8 py-4 bg-white border-x border-gray-200">
+              <span className="font-bold text-gray-900 text-2xl">{quantity}</span>
+            </div>
+            <button
+              onClick={() => handleQuantityChange("increment")}
+              disabled={quantity >= 10}
+              className="p-4 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 hover:bg-gray-100 rounded-r-xl"
+            >
+              <Plus className="w-6 h-6" />
+            </button>
           </div>
           <div className="text-right">
             <div className="text-sm text-gray-600 font-medium">Total</div>
@@ -428,7 +445,7 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
           </div>
         </div>
 
-        <div className="flex items-center justify-center">
+        <div className="flex md:hidden items-center justify-center">
           <div className="flex items-center border-2 border-gray-200 rounded-2xl bg-gray-50 shadow-inner">
             <button
               onClick={() => handleQuantityChange("decrement")}
@@ -452,7 +469,7 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
       </div>
 
       {/* Fragrance Performance */}
-      {/* <div className="p-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 rounded-3xl border border-amber-100 shadow-sm">
+      {/* <div className="p-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 rounded-2xl border border-amber-100 shadow-none">
         <div className="flex items-center gap-2 mb-6">
           <Award className="w-6 h-6 text-amber-600" />
           <h3 className="text-lg font-semibold text-amber-800">Fragrance Performance</h3>
@@ -496,23 +513,71 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
       </div> */}
 
       {/* Action Buttons */}
-      <div id="action-buttons" className="space-y-6">
-        {/* Primary CTA */}
+      <div
+        id="action-buttons"
+        className="flex flex-col sm:flex-row gap-4 sm:gap-5 mt-6 sm:mt-8 w-full"
+      >
+        {/* Add to Cart */}
         <Button
-          // size="xl"
-          disabled={isOutOfStock}
-          className={`w-full h-16 text-xl font-bold shadow-2xl transform transition-all duration-300 hover:scale-[1.02] ${isOutOfStock
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-800 text-white border-0 shadow-blue-500/30 hover:shadow-blue-600/50"
-            } rounded-2xl`}
+          className={cn(
+            `flex-1 h-14 sm:h-16 text-lg sm:text-xl font-bold rounded-2xl border-0 
+      transition-all duration-300 transform hover:scale-[1.03] active:scale-[0.97]
+      shadow-md sm:shadow-xl 
+      backdrop-blur-sm hover:backdrop-blur-md`,
+            isOutOfStock
+              ? "bg-gray-400 cursor-not-allowed text-white shadow-none"
+              : isAddingToCart
+                ? "bg-gray-400 cursor-not-allowed text-white"
+                : "bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-700 text-white shadow-blue-500/30 hover:shadow-blue-600/50"
+          )}
           onClick={handleAddToCart}
+          disabled={isOutOfStock || isAddingToCart || isBuyingNow}
         >
-          <ShoppingCart className="w-6 h-6 mr-3" />
-          {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+          {isAddingToCart ? (
+            <div className="flex items-center justify-center gap-3">
+              <div className="animate-spin h-5 w-5 border-b-2 border-white rounded-full"></div>
+              <span className="tracking-wide">Adding...</span>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center gap-3">
+              <ShoppingCart className="w-8 h-8" />
+              <span>{isOutOfStock ? "Out of Stock" : "Add to Cart"}</span>
+            </div>
+          )}
         </Button>
 
-        {/* Secondary Actions */}
-        {/* <div className="grid grid-cols-2 gap-6">
+        {/* Buy Now */}
+        {!isOutOfStock && (
+          <Button
+            className={cn(
+              `flex-1 h-14 sm:h-16 text-lg sm:text-xl font-bold rounded-2xl border-0 
+        transition-all duration-300 transform hover:scale-[1.03] active:scale-[0.97]
+        shadow-md sm:shadow-xl 
+        backdrop-blur-sm hover:backdrop-blur-md`,
+              isBuyingNow
+                ? "bg-gray-400 cursor-not-allowed text-white shadow-none"
+                : "bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white shadow-orange-500/30 hover:shadow-orange-600/50"
+            )}
+            onClick={handleBuyNow}
+            disabled={isAddingToCart || isBuyingNow}
+          >
+            {isBuyingNow ? (
+              <div className="flex items-center justify-center gap-3">
+                <div className="animate-spin h-5 w-5 border-b-2 border-white rounded-full"></div>
+                <span className="tracking-wide">Processing...</span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center gap-3">
+                <Zap className="w-8 h-8" />
+                <span>Buy Now</span>
+              </div>
+            )}
+          </Button>
+        )}
+      </div>
+
+      {/* Secondary Actions */}
+      {/* <div className="grid grid-cols-2 gap-6">
           <Button
             variant="outline"
             size="lg"
@@ -539,22 +604,8 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
           </Button>
         </div> */}
 
-        {/* Buy Now Button */}
-        {!isOutOfStock && (
-          <Button
-            // size="xl"
-            disabled={isOutOfStock}
-            className="w-full h-16 text-xl font-bold bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white shadow-2xl shadow-orange-500/30 hover:shadow-orange-600/50 transform transition-all duration-300 hover:scale-[1.02] border-0 rounded-2xl"
-            onClick={handleBuyNow}
-          >
-            <Zap className="w-6 h-6 mr-3" />
-            Buy Now
-          </Button>
-        )}
-      </div>
-
       {/* Trust Indicators */}
-      <div className="grid grid-cols-2 gap-4 p-6 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 rounded-3xl border border-emerald-100 shadow-sm">
+      <div className="grid grid-cols-2 gap-3 p-4 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 rounded-2xl border border-emerald-100 shadow-none">
         <div className="flex items-center gap-3 p-3 bg-white/60 rounded-2xl">
           <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center shadow-sm">
             <Shield className="w-6 h-6 text-emerald-600" />
@@ -594,7 +645,7 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
       </div>
 
       {/* Delivery Information */}
-      {/* <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-3xl border border-blue-100 shadow-sm">
+      {/* <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 shadow-sm">
         <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center gap-2">
           <Truck className="w-5 h-5" />
           Delivery & Returns

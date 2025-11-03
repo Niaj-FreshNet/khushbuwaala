@@ -46,6 +46,8 @@ export const useCart = () => {
         const response = await addToCartApi({
           productId: product.id,
           variantId: variant?.id || null,
+          size: variant?.size || null,
+          unit: variant?.unit || null,
           quantity,
         }).unwrap()
         // console.log('response', response)

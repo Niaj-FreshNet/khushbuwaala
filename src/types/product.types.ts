@@ -210,6 +210,7 @@ export interface IProductResponse {
   stock?: number;
   variants: IProductVariantResponse[];
   discounts?: IDiscount[];
+  price?: number;
 
   // Computed fields
   minPrice: number;
