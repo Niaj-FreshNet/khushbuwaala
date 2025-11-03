@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
-import { Search, Printer, Eye, MoreHorizontal } from 'lucide-react';
+import { Search, Printer, Eye, MoreHorizontal, Download } from 'lucide-react';
 import OrderDetailsModal from './_components/OrderDetailsModal';
 import {
   useGetAllOrdersQuery,
@@ -31,6 +31,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface Order {
   id: string;
   orderTime: string;
+  invoice: string;
   customer: { name: string };
   method: string;
   amount: number;
@@ -103,12 +104,14 @@ const OrderList = () => {
         <Table className="border-[#FB923C]">
           <TableHeader>
             <TableRow>
-              <TableHead>Order ID</TableHead>
+              <TableHead>Sr.</TableHead>
+              <TableHead>Invoice</TableHead>
               <TableHead>Order Time</TableHead>
               <TableHead>Customer</TableHead>
               <TableHead>Method</TableHead>
               <TableHead>Amount</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Payment Status</TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
@@ -134,9 +137,10 @@ const OrderList = () => {
               </TableRow>
             ) : (
               // ✅ Actual data rows
-              allOrders.map((order) => (
+              allOrders.map((order, index) => (
                 <TableRow key={order.id}>
-                  <TableCell>{order.id.slice(0, 8)}...</TableCell>
+                  <TableCell>{index + 1}.</TableCell>
+                  <TableCell>#{order.invoice}</TableCell>
                   <TableCell>
                     {order.orderTime
                       ? new Date(order.orderTime).toLocaleString()
@@ -148,45 +152,81 @@ const OrderList = () => {
                   <TableCell>
                     <Badge
                       variant={
-                        order.status === 'DELIVERED'
+                        order.status === 'COMPLETED'
                           ? 'success'
                           : order.status === 'CANCEL'
-                          ? 'destructive'
-                          : 'default'
+                            ? 'destructive'
+                            : order.status === 'DELIVERED'
+                              ? 'outline'
+                              : order.status === 'PROCESSING'
+                                ? 'secondary'
+                                : 'default'
                       }
                       className={
-                        order.status === 'DELIVERED'
-                          ? 'bg-[#4CD964]'
+                        order.status === 'COMPLETED'
+                          ? 'bg-[#4CD964] text-white'
                           : order.status === 'CANCEL'
-                          ? 'bg-red-500'
-                          : 'bg-blue-500'
+                            ? 'bg-red-500 text-white'
+                            : order.status === 'DELIVERED'
+                              ? 'bg-blue-500 text-white'
+                              : order.status === 'PROCESSING'
+                                ? 'bg-yellow-500 text-white'
+                                : 'bg-orange-500 text-white'
                       }
                     >
                       {order.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
+                    <Badge
+                      variant={order.isPaid ? 'success' : 'destructive'}
+                      className={
+                        order.isPaid ? 'bg-[#4CD964]' : 'bg-red-500'
+                      }
+                    >
+                      {order.isPaid ? 'PAID' : 'DUE'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
                     <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleViewDetails(order.id)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
+                          <Button
+                            className='cursor-pointer bg-gray-100 hover:bg-gray-200'
+                            variant="ghost"
+                            size="icon"
+                          >
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           <DropdownMenuItem
                             onClick={() =>
+                              handleUpdateStatus(order.id, 'PROCESSING')
+                            }
+                          >
+                            Processing
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleUpdateStatus(order.id, 'COMPLETED')
+                            }
+                          >
+                            Completed
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
                               handleUpdateStatus(order.id, 'DELIVERED')
                             }
                           >
                             Delivered
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleUpdateStatus(order.id, 'PENDING')
+                            }
+                          >
+                            Pending
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() =>
@@ -197,6 +237,14 @@ const OrderList = () => {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
+                      <Button
+                        className='cursor-pointer bg-gray-100 hover:bg-gray-200'
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleViewDetails(order.id)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>

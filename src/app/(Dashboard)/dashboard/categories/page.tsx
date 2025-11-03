@@ -48,6 +48,8 @@ export default function CategoryList() {
         { id: '30', size: '30' },
         { id: '50', size: '50' },
         { id: '100', size: '100' },
+        { id: '500', size: '500' },
+        { id: '1000', size: '1000' },
     ];
 
     const allCategories = data?.data?.data || [];
