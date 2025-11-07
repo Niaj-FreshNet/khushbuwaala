@@ -76,7 +76,7 @@ export default function HomePage() {
       <div className="pt-4 pb-8">
         <ProductCarouselSection
           title="Inspired Perfume Oils"
-          category="68f2498c71690fc44bcc1af4"
+          category="6904ac7b7a035c41185d272a"
           titleVariant="gradient"
           titleSubtitle="Designer-inspired fragrances at affordable prices"
           titleIcon={<Sparkles className="h-6 w-6" />}
@@ -100,7 +100,7 @@ export default function HomePage() {
       <div className="pt-4 pb-8">
         <ProductCarouselSection
           title="Arabian Attar"
-          category="68f210a763b8b512ce3acd7d"
+          category="6904acd47a035c41185d272c"
           linkPath="/oriental-attar"
           titleVariant="elegant"
           titleSubtitle="Traditional Middle Eastern fragrances"
@@ -125,7 +125,7 @@ export default function HomePage() {
       <div className="pt-4 pb-8">
         <ProductCarouselSection
           title="Artificial Oud"
-          category="68f249b171690fc44bcc1af5"
+          category="6904ab807a035c41185d2729"
           linkPath="/artificial-oud"
           titleVariant="modern"
           titleSubtitle="Premium oud alternatives"

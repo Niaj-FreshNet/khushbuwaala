@@ -17,7 +17,7 @@ export const fragranceApi = baseApi.injectEndpoints({
 
         // Get all fragrances
         getAllFragrances: builder.query<FragranceApiResponse, { page?: number; limit?: number }>({
-            query: ({ page = 1, limit = 10 }) => ({
+            query: ({ page = 1, limit = 100 }) => ({
                 url: '/fragrances/get-all-fragrances',
                 params: { page, limit },
             }),
