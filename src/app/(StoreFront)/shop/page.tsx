@@ -145,6 +145,7 @@ export default async function ShopPage({
             sortBy,
         })
     );
+    console.log('data', data)
 
     const products: IProductResponse[] = data?.data || [];
     const totalPages = data?.meta.totalPage || 1;

@@ -93,67 +93,114 @@ export function ShopProducts({
     { skip: page === initialPage } // Skip initial fetch to use server data
   );
 
-  const products = page === initialPage && !isFetching ? initialProducts : data?.data || [];
-  const totalFilteredProducts = data?.meta.total || initialProducts.length;
+  const products =
+    page === initialPage && !isFetching
+      ? initialProducts
+      : data?.data || [];
+
+  const totalFilteredProducts = data?.meta.total ?? totalPages * limit;
 
   // Update URL with page and filters
+  // useEffect(() => {
+  //   const params = new URLSearchParams(searchParams.toString());
+  //   if (page > 1) params.set("page", page.toString());
+  //   // if (filters.selectedCategories.length) params.set("category", filters.selectedCategories.join(","));
+  //   if (filters.selectedSpecification && filters.selectedSpecification !== "all")
+  //     params.set("specification", filters.selectedSpecification);
+  //   if (filters.selectedSmells.length) params.set("smells", filters.selectedSmells.join(","));
+  //   if (filters.priceRange[0] !== 100) params.set("priceMin", filters.priceRange[0].toString());
+  //   if (filters.priceRange[1] !== 5000) params.set("priceMax", filters.priceRange[1].toString());
+  //   if (sortOption !== "new-to-old") params.set("sortBy", sortOption);
+  //   // if (section) params.set("section", section);
+
+  //   // ✅ Keep SEO-friendly path for "new-arrivals"
+  //   // const basePath = pathname === "/new-arrivals" ? "/new-arrivals" : "/shop";
+
+  //   // Only set section param if not already on new-arrivals page
+  //   // if (section && pathname !== "/new-arrivals") {
+  //   //   params.set("section", section);
+  //   // } else {
+  //   //   params.delete("section");
+  //   // }
+
+  //   // Use pathname as base, but remove category if it matches the page's category
+  //   const basePath = pathname;
+  //   if (category) {
+  //     // Remove category from params if it's already implied by the page
+  //     params.delete("category");
+  //   }
+  //   if (category) {
+  //     params.delete("section");
+  //   }
+
+  //   const url = `${basePath}${params.toString() ? `?${params.toString()}` : ""}`;
+
+  //   // const url = `${basePath}${params.toString() ? `?${params.toString()}` : ""}`;
+
+  //   // const url = `/shop${params.toString() ? `?${params.toString()}` : ""}`;
+  //   router.push(url, { scroll: false });
+  // }, [page, filters, sortOption, section, router, searchParams, pathname, category, section]);
+
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams();
+
     if (page > 1) params.set("page", page.toString());
-    // if (filters.selectedCategories.length) params.set("category", filters.selectedCategories.join(","));
-    if (filters.selectedSpecification && filters.selectedSpecification !== "all")
+    else params.delete("page");
+    if (filters.selectedCategories.length)
+      params.set("category", filters.selectedCategories.join(","));
+    if (filters.selectedSpecification !== "all")
       params.set("specification", filters.selectedSpecification);
-    if (filters.selectedSmells.length) params.set("smells", filters.selectedSmells.join(","));
-    if (filters.priceRange[0] !== 100) params.set("priceMin", filters.priceRange[0].toString());
-    if (filters.priceRange[1] !== 5000) params.set("priceMax", filters.priceRange[1].toString());
-    if (sortOption !== "new-to-old") params.set("sortBy", sortOption);
-    // if (section) params.set("section", section);
+    if (filters.selectedSmells.length)
+      params.set("smells", filters.selectedSmells.join(","));
+    if (filters.priceRange[0] !== 100)
+      params.set("priceMin", filters.priceRange[0].toString());
+    if (filters.priceRange[1] !== 5000)
+      params.set("priceMax", filters.priceRange[1].toString());
+    if (sortOption !== "new-to-old")
+      params.set("sortBy", sortOption);
 
-    // ✅ Keep SEO-friendly path for "new-arrivals"
-    // const basePath = pathname === "/new-arrivals" ? "/new-arrivals" : "/shop";
+    if (section) params.set("section", section);
 
-    // Only set section param if not already on new-arrivals page
-    // if (section && pathname !== "/new-arrivals") {
-    //   params.set("section", section);
-    // } else {
-    //   params.delete("section");
-    // }
+    const url = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
 
-    // Use pathname as base, but remove category if it matches the page's category
-    const basePath = pathname;
-    if (category) {
-      // Remove category from params if it's already implied by the page
-      params.delete("category");
-    }
-    if (category) {
-      params.delete("section");
-    }
-
-    const url = `${basePath}${params.toString() ? `?${params.toString()}` : ""}`;
-
-    // const url = `${basePath}${params.toString() ? `?${params.toString()}` : ""}`;
-
-    // const url = `/shop${params.toString() ? `?${params.toString()}` : ""}`;
-    router.push(url, { scroll: false });
-  }, [page, filters, sortOption, section, router, searchParams, pathname, category, section]);
+    router.replace(url, { scroll: false }); // ⚡ prevent double reload
+  }, [page, filters, sortOption, section]);
 
   // Infinite scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      if (
-        window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 &&
-        visibleProductsCount < totalFilteredProducts &&
-        !isFetching
-      ) {
-        setVisibleProductsCount((prev) => Math.min(prev + limit, totalFilteredProducts));
-        if (visibleProductsCount + limit > page * limit) {
-          setPage((prev) => prev + 1);
-        }
-      }
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [visibleProductsCount, totalFilteredProducts, isFetching, page, limit]);
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     if (
+  //       window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 &&
+  //       visibleProductsCount < totalFilteredProducts &&
+  //       !isFetching
+  //     ) {
+  //       setVisibleProductsCount((prev) => Math.min(prev + limit, totalFilteredProducts));
+  //       if (visibleProductsCount + limit > page * limit) {
+  //         setPage((prev) => prev + 1);
+  //       }
+  //     }
+  //   };
+  //   window.addEventListener("scroll", handleScroll);
+  //   return () => window.removeEventListener("scroll", handleScroll);
+  // }, [visibleProductsCount, totalFilteredProducts, isFetching, page, limit]);
+
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     const reachedBottom =
+  //       window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
+
+  //     if (!reachedBottom) return;
+  //     if (isFetching) return;
+
+  //     const nextPage = page + 1;
+  //     if (nextPage <= totalPages) {
+  //       setPage(nextPage);
+  //     }
+  //   };
+
+  //   window.addEventListener("scroll", handleScroll);
+  //   return () => window.removeEventListener("scroll", handleScroll);
+  // }, [page, totalPages, isFetching]);
 
   const handleQuickView = (product: IProductResponse) => {
     setQuickViewProduct(product);
@@ -371,7 +418,7 @@ export function ShopProducts({
       )}
 
       {/* Load More Button */}
-      {totalFilteredProducts > visibleProductsCount && (
+      {/* {totalFilteredProducts > visibleProductsCount && (
         <div className="text-center mt-8">
           <p className="text-sm text-gray-600 mb-6">
             You&apos;ve viewed{" "}
@@ -392,7 +439,45 @@ export function ShopProducts({
             )}
           </Button>
         </div>
-      )}
+      )} */}
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center gap-2 mt-10">
+
+        <Button
+          variant="outline"
+          disabled={page <= 1}
+          onClick={() => setPage(page - 1)}
+          className="px-4 py-2 rounded-lg"
+        >
+          Previous
+        </Button>
+
+        {[...Array(totalPages)].map((_, i) => {
+          const pageNum = i + 1;
+          return (
+            <Button
+              key={pageNum}
+              onClick={() => setPage(pageNum)}
+              className={`px-4 py-2 rounded-lg ${page === pageNum
+                  ? "bg-red-600 text-white hover:bg-red-700"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+            >
+              {pageNum}
+            </Button>
+          );
+        })}
+
+        <Button
+          variant="outline"
+          disabled={page >= totalPages}
+          onClick={() => setPage(page + 1)}
+          className="px-4 py-2 rounded-lg"
+        >
+          Next
+        </Button>
+      </div>
 
       {/* Filter and Sort Sheets */}
       <FilterSheet
