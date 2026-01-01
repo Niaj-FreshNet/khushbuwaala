@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Upload, X } from 'lucide-react';
-import JoditEditor from 'jodit-react';
+import dynamic from 'next/dynamic';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,6 +33,8 @@ interface FormValues {
   imageAltText?: string;
   isPublish: boolean;
 }
+
+const JoditEditor = dynamic(() => import('jodit-react'), { ssr: false });
 
 const joditConfig = {
   readonly: false,
@@ -268,7 +270,7 @@ const AddBlog = () => {
                     value={content}
                     config={joditConfig}
                     onBlur={(newContent) => setContent(newContent)}
-                    onChange={() => {}}
+                    onChange={() => { }}
                   />
                 </div>
               </div>
