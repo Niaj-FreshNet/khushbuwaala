@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Slider } from "@/components/ui/slider"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -42,14 +42,35 @@ export function FilterSheet({
   const [selectedSmells, setSelectedSmells] = useState<string[]>([]);
   const [selectedSpecification, setSelectedSpecification] = useState<string>("all");
 
-  const handleApply = () => {
-    onApplyFilters({
+  // inside FilterSheet
+  const prevFiltersRef = useRef({
+    priceRange,
+    selectedCategories,
+    selectedSmells,
+    selectedSpecification,
+  });
+
+  useEffect(() => {
+    const currentFilters = {
       priceRange,
       selectedCategories,
       selectedSmells,
       selectedSpecification,
-    });
-  };
+    };
+
+    // Only call onApplyFilters if filters actually changed
+    const filtersChanged =
+      prevFiltersRef.current.priceRange[0] !== currentFilters.priceRange[0] ||
+      prevFiltersRef.current.priceRange[1] !== currentFilters.priceRange[1] ||
+      prevFiltersRef.current.selectedSpecification !== currentFilters.selectedSpecification ||
+      prevFiltersRef.current.selectedCategories.join(",") !== currentFilters.selectedCategories.join(",") ||
+      prevFiltersRef.current.selectedSmells.join(",") !== currentFilters.selectedSmells.join(",");
+
+    if (filtersChanged) {
+      onApplyFilters(currentFilters);
+      prevFiltersRef.current = currentFilters;
+    }
+  }, [priceRange, selectedCategories, selectedSmells, selectedSpecification, onApplyFilters]);
 
   const handleReset = () => {
     setPriceRange([100, 5000]);

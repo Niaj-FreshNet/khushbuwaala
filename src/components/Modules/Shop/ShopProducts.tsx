@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ProductQueryParams, useGetAllProductsQuery } from "@/redux/store/api/product/productApi";
+import { useGetAllProductsQuery } from "@/redux/store/api/product/productApi";
 import { IProductResponse } from "@/types/product.types";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,9 +22,9 @@ import { ProductQuickView } from "@/components/ReusableUI/ProductQuickView";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 interface ShopProductProps {
-  initialProducts: IProductResponse[];
+  // initialProducts: IProductResponse[];
   initialPage: number;
-  totalPages: number;
+  // totalPages: number;
   category?: string;
   specification?: string;
   section?: string;
@@ -34,30 +34,20 @@ interface ShopProductProps {
   sortBy?: string;
 }
 
-export function ShopProducts({
-  initialProducts,
-  initialPage,
-  totalPages,
-  category,
-  specification,
-  section,
-  priceMin,
-  priceMax,
-  smells,
-  sortBy,
-}: ShopProductProps) {
+export function ShopProducts(props: ShopProductProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const [page, setPage] = useState(initialPage);
+  // const [page, setPage] = useState(initialPage);
+  const [page, setPage] = useState(props.initialPage);
   const limit = 20;
   const [filters, setFilters] = useState({
-    priceRange: [priceMin || 100, priceMax || 5000],
-    selectedCategories: category ? [category] : [],
-    selectedSmells: smells ? smells.split(",") : [],
-    selectedSpecification: specification || "all",
+    priceRange: [props.priceMin || 100, props.priceMax || 5000],
+    selectedCategories: props.category ? [props.category] : [],
+    selectedSmells: props.smells ? props.smells.split(",") : [],
+    selectedSpecification: props.specification || "all",
   });
-  const [sortOption, setSortOption] = useState(sortBy || "new-to-old");
+  const [sortOption, setSortOption] = useState(props.sortBy || "new-to-old");
   const [columns, setColumns] = useState(2);
   const [visibleProductsCount, setVisibleProductsCount] = useState(limit);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -78,26 +68,58 @@ export function ShopProducts({
     "new-to-old": "newest",
   };
 
-  const { data, error, isLoading, isFetching } = useGetAllProductsQuery(
-    {
-      page,
-      limit,
-      category: filters.selectedCategories.join(","),
-      specification: filters.selectedSpecification === "all" ? undefined : filters.selectedSpecification,
-      priceMin: filters.priceRange[0],
-      priceMax: filters.priceRange[1],
-      smells: filters.selectedSmells.join(","),
-      sortBy: sortMap[sortOption] as ProductQueryParams["sortBy"],
-      section,
-    },
-    { skip: page === initialPage } // Skip initial fetch to use server data
-  );
+  // useEffect(() => {
+  //   // Read URL params whenever they change
+  //   const params = new URLSearchParams(searchParams.toString());
 
-  const products =
-    page === initialPage && !isFetching
-      ? initialProducts
-      : data?.data || [];
+  //   const urlFilters = {
+  //     selectedCategories: params.get("category")?.split(",") || [],
+  //     selectedSpecification: params.get("specification") || "all",
+  //     selectedSmells: params.get("smells")?.split(",") || [],
+  //     priceRange: [
+  //       Number(params.get("priceMin") || 100),
+  //       Number(params.get("priceMax") || 5000),
+  //     ],
+  //   };
 
+  //   setFilters(urlFilters);
+  //   setPage(Number(params.get("page") || 1));
+  // }, [searchParams]);
+
+  // const { data, error, isLoading, isFetching } = useGetAllProductsQuery(
+  //   {
+  //     page,
+  //     limit,
+  //     category: filters.selectedCategories.join(","),
+  //     specification: filters.selectedSpecification === "all" ? undefined : filters.selectedSpecification,
+  //     priceMin: filters.priceRange[0],
+  //     priceMax: filters.priceRange[1],
+  //     smells: filters.selectedSmells.join(","),
+  //     sortBy: sortMap[sortOption] as ProductQueryParams["sortBy"],
+  //     section,
+  //   },
+  //   { skip: page === initialPage } // Skip initial fetch to use server data
+  // );
+  // ✅ Fetch products using updated filters and sortOption
+  const { data, isLoading, isFetching, error } = useGetAllProductsQuery({
+    page,
+    limit,
+    category: filters.selectedCategories.join(",") || undefined,
+    specification: filters.selectedSpecification === "all" ? undefined : filters.selectedSpecification,
+    section: props.section,
+    priceMin: filters.priceRange[0],
+    priceMax: filters.priceRange[1],
+    smells: filters.selectedSmells.join(",") || undefined,
+    sortBy: sortMap[sortOption] as any,
+  });
+
+  // const products =
+  //   page === initialPage && !isFetching
+  //     ? initialProducts
+  //     : data?.data || [];
+  const products = data?.data || [];
+
+  const totalPages = data?.meta.totalPage || 1;
   const totalFilteredProducts = data?.meta.total ?? totalPages * limit;
 
   // Update URL with page and filters
@@ -141,30 +163,44 @@ export function ShopProducts({
   //   router.push(url, { scroll: false });
   // }, [page, filters, sortOption, section, router, searchParams, pathname, category, section]);
 
+  // ✅ Update URL when filters, sorting, or page changes
+  // useEffect(() => {
+  //   const params = new URLSearchParams();
+
+  //   if (page > 1) params.set("page", page.toString());
+  //   if (filters.selectedCategories.length)
+  //     params.set("category", filters.selectedCategories.join(","));
+  //   if (filters.selectedSpecification !== "all")
+  //     params.set("specification", filters.selectedSpecification);
+  //   if (filters.selectedSmells.length)
+  //     params.set("smells", filters.selectedSmells.join(","));
+  //   if (filters.priceRange[0] !== 100)
+  //     params.set("priceMin", filters.priceRange[0].toString());
+  //   if (filters.priceRange[1] !== 5000)
+  //     params.set("priceMax", filters.priceRange[1].toString());
+  //   if (sortOption !== "new-to-old")
+  //     params.set("sortBy", sortOption);
+  //   if (props.section) params.set("section", props.section);
+
+  //   const url = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
+  //   router.replace(url, { scroll: false });
+  // }, [page, filters, sortOption, props.section, pathname, router]);
+
   useEffect(() => {
     const params = new URLSearchParams();
 
     if (page > 1) params.set("page", page.toString());
-    else params.delete("page");
-    if (filters.selectedCategories.length)
-      params.set("category", filters.selectedCategories.join(","));
-    if (filters.selectedSpecification !== "all")
-      params.set("specification", filters.selectedSpecification);
-    if (filters.selectedSmells.length)
-      params.set("smells", filters.selectedSmells.join(","));
-    if (filters.priceRange[0] !== 100)
-      params.set("priceMin", filters.priceRange[0].toString());
-    if (filters.priceRange[1] !== 5000)
-      params.set("priceMax", filters.priceRange[1].toString());
-    if (sortOption !== "new-to-old")
-      params.set("sortBy", sortOption);
-
-    if (section) params.set("section", section);
+    if (filters.selectedCategories.length) params.set("category", filters.selectedCategories.join(","));
+    if (filters.selectedSpecification !== "all") params.set("specification", filters.selectedSpecification);
+    if (filters.selectedSmells.length) params.set("smells", filters.selectedSmells.join(","));
+    if (filters.priceRange[0] !== 100) params.set("priceMin", filters.priceRange[0].toString());
+    if (filters.priceRange[1] !== 5000) params.set("priceMax", filters.priceRange[1].toString());
+    if (sortOption !== "new-to-old") params.set("sortBy", sortOption);
+    if (props.section) params.set("section", props.section);
 
     const url = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
-
-    router.replace(url, { scroll: false }); // ⚡ prevent double reload
-  }, [page, filters, sortOption, section]);
+    router.replace(url, { scroll: false });
+  }, [page, filters, sortOption, props.section, pathname, router]);
 
   // Infinite scroll
   // useEffect(() => {
@@ -267,6 +303,52 @@ export function ShopProducts({
       className="container mx-auto py-8 px-4 relative"
       aria-labelledby="shop-products-heading"
     >
+      {/* Hidden crawlable pagination links for SEO */}
+      {page > 1 && (
+        <link
+          rel="prev"
+          href={`/shop?page=${page - 1}`}
+        />
+      )}
+      {page < totalPages && (
+        <link
+          rel="next"
+          href={`/shop?page=${page + 1}`}
+        />
+      )}
+
+      {/* Structured Data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: "Premium Perfume Oil Collection",
+            description: "Explore KhushbuWaala's curated collection of world-class perfume oils and fragrances",
+            url: `https://khushbuwaala.com/shop${page > 1 ? `?page=${page}` : ""}`,
+            mainEntity: {
+              "@type": "ItemList",
+              name: "Perfume Oil Products",
+              description: "Premium quality perfume oils and fragrances",
+              itemListElement: products.map((product, index) => ({
+                "@type": "ListItem",
+                position: index + 1 + (page - 1) * limit, // paginate properly
+                url: `https://khushbuwaala.com/product/${product.slug}`,
+                name: product.name,
+              })),
+            },
+            breadcrumb: {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Home", item: "https://khushbuwaala.com" },
+                { "@type": "ListItem", position: 2, name: "Shop", item: "https://khushbuwaala.com/shop" },
+              ],
+            },
+          }),
+        }}
+      />
+
       <h2 id="shop-products-heading" className="sr-only">
         All Products
       </h2>
@@ -460,8 +542,8 @@ export function ShopProducts({
               key={pageNum}
               onClick={() => setPage(pageNum)}
               className={`px-4 py-2 rounded-lg ${page === pageNum
-                  ? "bg-red-600 text-white hover:bg-red-700"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                ? "bg-red-600 text-white hover:bg-red-700"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
             >
               {pageNum}
@@ -484,7 +566,7 @@ export function ShopProducts({
         visible={isFilterSheetVisible}
         onClose={setIsFilterSheetVisible}
         onApplyFilters={handleApplyFilters}
-        initialFilters={{ category }}
+        initialFilters={{ category: props.category }}
       />
       <SortSheet
         visible={isSortSheetVisible}

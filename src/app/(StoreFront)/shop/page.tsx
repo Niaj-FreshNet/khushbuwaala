@@ -2,13 +2,15 @@ import { Suspense } from "react";
 import { Metadata } from "next";
 import { NoticeBar } from "@/components/Modules/Shop/NoticeBar";
 import { ShopBanner } from "@/components/Modules/Shop/ShopBanner";
-import { ShopProducts } from "@/components/Modules/Shop/ShopProducts";
-import { initializeStore } from "@/redux/store/ssrStore";
-import { productApi } from "@/redux/store/api/product/productApi";
-import { IProductResponse } from "@/types/product.types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ClientShopProducts } from "@/components/Modules/Shop/ClientShopProducts";
 
-// Dynamic metadata for SEO
+// ❌ SSR Redux intentionally disabled for performance
+// import { initializeStore } from "@/redux/store/ssrStore";
+// import { productApi } from "@/redux/store/api/product/productApi";
+// import { IProductResponse } from "@/types/product.types";
+
+// =================== SEO METADATA ===================
 export async function generateMetadata({
     searchParams: rawSearchParams,
 }: {
@@ -76,44 +78,13 @@ export async function generateMetadata({
     };
 }
 
-// Structured data
-const shopStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: "Premium Perfume Oil Collection",
-    description: "Explore KhushbuWaala's curated collection of world-class perfume oils and fragrances",
-    url: "https://khushbuwaala.com/shop",
-    mainEntity: {
-        "@type": "ItemList",
-        name: "Perfume Oil Products",
-        description: "Premium quality perfume oils and fragrances",
-    },
-    breadcrumb: {
-        "@type": "BreadcrumbList",
-        itemListElement: [
-            {
-                "@type": "ListItem",
-                position: 1,
-                name: "Home",
-                item: "https://khushbuwaala.com"
-            },
-            {
-                "@type": "ListItem",
-                position: 2,
-                name: "Shop",
-                item: "https://khushbuwaala.com/shop"
-            },
-        ],
-    },
-};
-
 export default async function ShopPage({
     searchParams: rawSearchParams
 }: {
     searchParams: Record<string, string | undefined>
 }) {
     const searchParams = await Promise.resolve(rawSearchParams); // ✅ async-safe
-    const store = initializeStore();
+    // const store = initializeStore();
 
     const page = Number(searchParams.page) || 1;
     const category = searchParams.category;
@@ -132,23 +103,23 @@ export default async function ShopPage({
         | undefined;
 
     // Prefetch products
-    const { data } = await store.dispatch(
-        productApi.endpoints.getAllProducts.initiate({
-            page,
-            limit: 20,
-            category,
-            specification,
-            section,
-            priceMin,
-            priceMax,
-            smells,
-            sortBy,
-        })
-    );
-    console.log('data', data)
+    // const { data } = await store.dispatch(
+    //     productApi.endpoints.getAllProducts.initiate({
+    //         page,
+    //         limit: 20,
+    //         category,
+    //         specification,
+    //         section,
+    //         priceMin,
+    //         priceMax,
+    //         smells,
+    //         sortBy,
+    //     })
+    // );
+    // console.log('data', data)
 
-    const products: IProductResponse[] = data?.data || [];
-    const totalPages = data?.meta.totalPage || 1;
+    // const products: IProductResponse[] = data?.data || [];
+    // const totalPages = data?.meta.totalPage || 1;
 
     const notices = [
         "🚚 Free Nationwide Shipping on Orders Over ৳1000",
@@ -158,9 +129,59 @@ export default async function ShopPage({
         "💝 Special Gift Wrapping Available for All Orders",
     ];
 
+    // =================== STRUCTURED DATA ===================
+    // Before returning JSX in ShopPage
+    const shopStructuredData = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: "Premium Perfume Oil Collection",
+        description: "Explore KhushbuWaala's curated collection of world-class perfume oils and fragrances",
+        url: "https://khushbuwaala.com/shop",
+        mainEntity: {
+            "@type": "ItemList",
+            name: "Perfume Oil Products",
+            description: "Premium quality perfume oils and fragrances",
+            itemListElement: [], // will be dynamically filled inside ShopProducts
+        },
+        breadcrumb: {
+            "@type": "BreadcrumbList",
+            itemListElement: [
+                {
+                    "@type": "ListItem",
+                    position: 1,
+                    name: "Home",
+                    item: "https://khushbuwaala.com"
+                },
+                {
+                    "@type": "ListItem",
+                    position: 2,
+                    name: "Shop",
+                    item: "https://khushbuwaala.com/shop"
+                },
+            ],
+        },
+    };
+
     return (
         <>
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(shopStructuredData) }} />
+            {/* Hidden crawlable pagination links */}
+            {page > 1 && (
+                <link
+                    rel="prev"
+                    href={`/shop?page=${page - 1}`}
+                />
+            )}
+            {page < 100 && (
+                <link
+                    rel="next"
+                    href={`/shop?page=${page + 1}`}
+                />
+            )}
+
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(shopStructuredData) }}
+            />
             <div className="w-full mx-auto">
                 <ShopBanner
                     heading="Best Quality Perfume Oil Collection"
@@ -176,10 +197,10 @@ export default async function ShopPage({
                 </div>
                 <div id="products" className="bg-white pt-0 pb-8">
                     <Suspense fallback={<ShopProductsSkeleton />}>
-                        <ShopProducts
-                            initialProducts={products}
+                        <ClientShopProducts
+                            // initialProducts={products}
                             initialPage={page}
-                            totalPages={totalPages}
+                            // totalPages={totalPages}
                             category={category}
                             specification={specification}
                             section={section}
