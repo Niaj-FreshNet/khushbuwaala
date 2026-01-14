@@ -4,11 +4,10 @@ export async function getProductBySlug(slug: string): Promise<IProductResponse |
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/products/get-product-by-slug/${slug}`,
-      // `http://localhost:7302/api/products/get-product-by-slug/${slug}`,
       {
         method: "GET",
-        // Force SSR fetch (avoid caching stale data for SEO)
-        next: { revalidate: 60 }, // revalidate every 1 min (adjust as needed)
+        // Use revalidate for ISR (Incremental Static Regeneration)
+        next: { revalidate: 3600 }, // 1 hour - adjust based on how often products update
         headers: {
           "Content-Type": "application/json",
         },
@@ -16,11 +15,16 @@ export async function getProductBySlug(slug: string): Promise<IProductResponse |
     );
 
     if (!res.ok) {
+      console.error(`❌ Failed to fetch product: ${res.status} ${res.statusText}`);
       return null;
     }
 
-    const data: IProductResponse = await res.json();
-    return data;
+    const apiResponse = await res.json();
+    
+    // Extract the actual product data from the API response
+    // Based on your API structure: { success, statusCode, message, data }
+    return apiResponse.data || null;
+    
   } catch (error) {
     console.error("❌ Error fetching product by slug:", error);
     return null;

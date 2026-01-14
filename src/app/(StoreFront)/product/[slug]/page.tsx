@@ -1,39 +1,70 @@
-import React from "react";
+import { Metadata } from "next";
 import { getProductBySlug } from "@/lib/Functions/ServerFn";
 import HydrateProduct from "./_components/HydrateProduct";
+import { notFound } from "next/navigation";
 
 interface Props {
   params: { slug: string };
 }
 
-export default async function ProductPage({ params }: { params: { slug: string } }) {
-  // Use await destructuring
-  const { slug } = await params; // <-- notice the await
+// Generate metadata for SEO
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
   const product = await getProductBySlug(slug);
 
   if (!product) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="text-center max-w-md">
-          <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-red-100 to-pink-100 rounded-full flex items-center justify-center">
-            <span className="text-4xl">🔍</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Product Not Found
-          </h1>
-          <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-            We couldn't find the perfume you're looking for.
-          </p>
-          <a
-            href="/shop"
-            className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-pink-500 to-red-500 text-white font-semibold rounded-2xl hover:from-pink-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-          >
-            Browse Our Collection
-          </a>
-        </div>
-      </div>
-    );
+    return {
+      title: "Product Not Found",
+      description: "The product you're looking for could not be found.",
+    };
   }
 
-  return <HydrateProduct initialData={product} slug={params.slug} />;
+  // Extract first image for Open Graph
+  const firstImage = product.primaryImage || "/default-product-image.jpg";
+
+  return {
+    title: `${product.name} - KhushbuWaala`,
+    description: product.description?.substring(0, 160) || `Buy ${product.name} online`,
+    keywords: [
+      product.name,
+      product.brand,
+      typeof product.category === "string"
+        ? product.category
+        : product.category?.categoryName,
+      "perfume",
+      "fragrance",
+      "KhushbuWaala",
+    ].filter((k): k is string => Boolean(k)),
+    openGraph: {
+      type: "website",
+      title: product.name,
+      description: product.description || `Buy ${product.name} online`,
+      images: [
+        {
+          url: firstImage,
+          width: 800,
+          height: 600,
+          alt: product.name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description: product.description || `Buy ${product.name} online`,
+      images: [firstImage],
+    },
+  };
+}
+
+export default async function ProductPage({ params }: Props) {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
+
+  // Use Next.js notFound() for better UX and SEO
+  if (!product) {
+    notFound();
+  }
+
+  return <HydrateProduct initialData={product} slug={slug} />;
 }

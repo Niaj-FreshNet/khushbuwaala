@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Heart, Tag, Shield, Truck, Clock, Star, Award, Sparkles, Zap, CheckCircle, Minus, Plus, Info, Gift, Crown, FileCheck, Phone, MessageSquare, CreditCard, CreditCardIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -56,7 +56,15 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
   //   ) || null;
 
   // const selectedPrice = selectedVariant?.price ?? 0; // ✅ selected variant price (default 0 if none found)
-  // console.log('selectedPrice: ', selectedPrice) ///showing the price in console
+  // console.log('selectedPrice: ', selectedPrice) ///showin
+  // g the price in console
+  const setSelectedVariant = (variant: IProductVariant) => {
+    if (selection) {
+      selection.setSelectedVariant(variant);
+    } else {
+      setFallbackSelectedSize(`${variant.size} ${variant.unit.toLowerCase()}`);
+    }
+  };
 
   const setSelectedSize = (size: string) => {
     if (!selection) return setFallbackSelectedSize(size);
@@ -82,8 +90,16 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
   //   toggle()
   // }
 
+
+
+  const sortedVariants = useMemo(() => {
+    return [...(product.variants ?? [])].sort(
+      (a, b) => a.size - b.size
+    );
+  }, [product.variants]);
+
   // Available sizes based on product data
-  const availableSizes = sizeKeys.slice(0, 4);
+  const availableSizes = sortedVariants.slice(0, 4);
 
   // Get current variant
   const getCurrentVariant = () => {
@@ -408,6 +424,39 @@ export default function ProductDetails({ product, onReadMore }: ProductDetailsPr
               </div>
             </button>
           ))}
+          {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+  {availableVariants.map((variant) => {
+    const label = `${variant.size} ${variant.unit.toLowerCase()}`;
+    const isSelected =
+      selectedSize === label;
+
+    return (
+      <button
+        key={label}
+        onClick={() => setSelectedVariant(variant)}
+        className={`group relative p-4 rounded-xl border-2 transition-all duration-300
+          ${isSelected
+            ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
+            : "border-gray-200 hover:border-blue-300"
+          }`}
+      >
+        {isSelected && (
+          <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-4 h-4 text-white" />
+          </div>
+        )}
+
+        <div className="text-center">
+          <div className="font-bold text-lg">{label}</div>
+          <div className="text-sm text-gray-500">
+            ৳{variant.price.toLocaleString()}
+          </div>
+        </div>
+      </button>
+    );
+  })}
+</div> */}
+
         </div>
       </div>
 

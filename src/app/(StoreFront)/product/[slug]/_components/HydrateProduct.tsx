@@ -1,11 +1,9 @@
 "use client";
-
 import React from "react";
 import { IProductResponse } from "@/types/product.types";
 import ProductDetailPage from "./ProductDetailPage";
 import ProductPageLoading from "../loading";
 import { useGetProductBySlugQuery } from "@/redux/store/api/product/productApi";
-
 
 interface Props {
   initialData: IProductResponse;
@@ -13,21 +11,17 @@ interface Props {
 }
 
 export default function HydrateProduct({ initialData, slug }: Props) {
-  const { data: productResponse, isLoading, isFetching = { data: initialData } as any } =
-    useGetProductBySlugQuery(slug, {
-      skip: !slug,
-    });
+  // Use initialData to hydrate RTK Query cache
+  const { data: productResponse, isLoading } = useGetProductBySlugQuery(slug, {
+    skip: !slug,
+  });
 
-  // Use fallback initial data if API hasn't returned yet
+  // Use server-fetched data immediately, then update when client-side fetch completes
   const product = productResponse?.data || initialData;
 
-  // Show loading state if it's still fetching for the first time
-  if (isLoading && !productResponse) return <ProductPageLoading />;
-
-  // Optionally, you could show a "skeleton" or smaller loading UI when refetching
-  if (isFetching && productResponse) {
-    // e.g., show a subtle loader or shimmer on the product page
-    return <ProductDetailPage product={product} />;
+  // Only show loading on initial mount if no initial data
+  if (isLoading && !initialData) {
+    return <ProductPageLoading />;
   }
 
   return <ProductDetailPage product={product} />;
