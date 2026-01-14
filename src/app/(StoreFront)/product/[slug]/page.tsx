@@ -1,52 +1,37 @@
 import { Metadata } from "next";
-import { getProductBySlug } from "@/lib/Functions/ServerFn";
-import HydrateProduct from "./_components/HydrateProduct";
 import { notFound } from "next/navigation";
+import { getProductBySlug } from "@/lib/Functions/ServerFn";
+import ProductDetailPage from "./_components/ProductDetailPage";
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
-// Generate metadata for SEO
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug } = await params; // ✅ unwrap
   const product = await getProductBySlug(slug);
 
   if (!product) {
     return {
-      title: "Product Not Found",
+      title: "Product Not Found - KhushbuWaala",
       description: "The product you're looking for could not be found.",
     };
   }
 
-  // Extract first image for Open Graph
   const firstImage = product.primaryImage || "/default-product-image.jpg";
 
   return {
-    title: `${product.name} - KhushbuWaala`,
-    description: product.description?.substring(0, 160) || `Buy ${product.name} online`,
-    keywords: [
-      product.name,
-      product.brand,
-      typeof product.category === "string"
-        ? product.category
-        : product.category?.categoryName,
-      "perfume",
-      "fragrance",
-      "KhushbuWaala",
-    ].filter((k): k is string => Boolean(k)),
+    title: `${product.name} - Premium Perfume | KhushbuWaala`,
+    description:
+      product.description?.substring(0, 160) ||
+      `Buy ${product.name} premium perfume online. Authentic fragrances with fast delivery across Bangladesh.`,
+    alternates: { canonical: `/product/${slug}` },
     openGraph: {
       type: "website",
       title: product.name,
-      description: product.description || `Buy ${product.name} online`,
-      images: [
-        {
-          url: firstImage,
-          width: 800,
-          height: 600,
-          alt: product.name,
-        },
-      ],
+      description: product.description || `Buy ${product.name} online at KhushbuWaala`,
+      images: [{ url: firstImage, width: 1200, height: 630, alt: product.name }],
+      siteName: "KhushbuWaala",
     },
     twitter: {
       card: "summary_large_image",
@@ -54,17 +39,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: product.description || `Buy ${product.name} online`,
       images: [firstImage],
     },
+    robots: { index: true, follow: true },
   };
 }
 
 export default async function ProductPage({ params }: Props) {
-  const { slug } = await params;
+  const { slug } = await params; // ✅ unwrap
   const product = await getProductBySlug(slug);
 
-  // Use Next.js notFound() for better UX and SEO
-  if (!product) {
-    notFound();
-  }
+  if (!product) return notFound();
 
-  return <HydrateProduct initialData={product} slug={slug} />;
+  return <ProductDetailPage product={product} />;
 }
+
+export const revalidate = 3600;

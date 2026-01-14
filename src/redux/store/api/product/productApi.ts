@@ -149,6 +149,7 @@ export const productApi = baseApi.injectEndpoints({
     // Get Related Products
     getRelatedProducts: builder.query<IRelatedProductsResponse, string>({
       query: (productId) => `/products/get-related-products/${productId}`,
+      transformResponse: (response: any) => response.data,
       providesTags: ['Product'],
     }),
 

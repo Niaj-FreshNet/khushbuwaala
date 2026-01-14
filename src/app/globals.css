@@ -116,6 +116,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -123,30 +124,36 @@
 
 /* Enhanced Custom Animations */
 @keyframes float {
+
   0%,
   100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   50% {
     transform: translateY(-10px) rotate(180deg);
   }
 }
 
 @keyframes float-delayed {
+
   0%,
   100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   50% {
     transform: translateY(-15px) rotate(-180deg);
   }
 }
 
 @keyframes float-slow {
+
   0%,
   100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   50% {
     transform: translateY(-8px) rotate(90deg);
   }
@@ -156,6 +163,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -165,16 +173,19 @@
   0% {
     transform: translateX(-100%);
   }
+
   100% {
     transform: translateX(100%);
   }
 }
 
 @keyframes pulse-glow {
+
   0%,
   100% {
     box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
   }
+
   50% {
     box-shadow: 0 0 40px rgba(239, 68, 68, 0.6);
   }
@@ -309,6 +320,7 @@
   0% {
     background-position: -200px 0;
   }
+
   100% {
     background-position: calc(200px + 100%) 0;
   }
@@ -359,6 +371,7 @@
 
 /* Enhanced Product Page Utilities */
 @layer utilities {
+
   /* Line clamping for text truncation */
   .line-clamp-1 {
     display: -webkit-box;
@@ -366,14 +379,14 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  
+
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  
+
   .line-clamp-3 {
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -382,27 +395,71 @@
   }
 
   /* Animation delay utilities */
-  .delay-100 { animation-delay: 100ms; }
-  .delay-200 { animation-delay: 200ms; }
-  .delay-300 { animation-delay: 300ms; }
-  .delay-500 { animation-delay: 500ms; }
-  .delay-700 { animation-delay: 700ms; }
-  .delay-1000 { animation-delay: 1000ms; }
-  .delay-\[400ms\] { animation-delay: 400ms; }
-  .delay-\[600ms\] { animation-delay: 600ms; }
-  .delay-\[1200ms\] { animation-delay: 1200ms; }
-  .delay-\[1300ms\] { animation-delay: 1300ms; }
-  .delay-\[1400ms\] { animation-delay: 1400ms; }
-  .delay-\[1500ms\] { animation-delay: 1500ms; }
-  .delay-\[1600ms\] { animation-delay: 1600ms; }
-  .delay-\[1700ms\] { animation-delay: 1700ms; }
-  .delay-\[1800ms\] { animation-delay: 1800ms; }
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .delay-500 {
+    animation-delay: 500ms;
+  }
+
+  .delay-700 {
+    animation-delay: 700ms;
+  }
+
+  .delay-1000 {
+    animation-delay: 1000ms;
+  }
+
+  .delay-\[400ms\] {
+    animation-delay: 400ms;
+  }
+
+  .delay-\[600ms\] {
+    animation-delay: 600ms;
+  }
+
+  .delay-\[1200ms\] {
+    animation-delay: 1200ms;
+  }
+
+  .delay-\[1300ms\] {
+    animation-delay: 1300ms;
+  }
+
+  .delay-\[1400ms\] {
+    animation-delay: 1400ms;
+  }
+
+  .delay-\[1500ms\] {
+    animation-delay: 1500ms;
+  }
+
+  .delay-\[1600ms\] {
+    animation-delay: 1600ms;
+  }
+
+  .delay-\[1700ms\] {
+    animation-delay: 1700ms;
+  }
+
+  .delay-\[1800ms\] {
+    animation-delay: 1800ms;
+  }
 
   /* Gradient backgrounds for perfume aesthetics */
   .bg-gradient-radial {
     background: radial-gradient(ellipse at center, var(--tw-gradient-stops));
   }
-  
+
   .bg-gradient-perfume {
     background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 25%, #f3e8ff 50%, #ede9fe 75%, #e0e7ff 100%);
   }
@@ -412,22 +469,22 @@
     scrollbar-width: thin;
     scrollbar-color: #cbd5e1 #f1f5f9;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-track {
     background: #f1f5f9;
     border-radius: 6px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 6px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
   }
@@ -436,11 +493,11 @@
   .animate-fade-in {
     animation: fadeIn 0.6s ease-in-out;
   }
-  
+
   .animate-slide-up {
     animation: slideUp 0.4s ease-out;
   }
-  
+
   .animate-scale-in {
     animation: scaleIn 0.3s ease-out;
   }
@@ -463,7 +520,7 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     transition: box-shadow 0.3s ease, transform 0.3s ease;
   }
-  
+
   .product-card-shadow:hover {
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     transform: translateY(-4px);
@@ -475,6 +532,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -485,6 +543,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -496,6 +555,7 @@
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -507,6 +567,7 @@
   0% {
     background-position: -468px 0;
   }
+
   100% {
     background-position: 468px 0;
   }
@@ -557,22 +618,25 @@
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   .mobile-spacing {
     padding: 1rem;
   }
-  
+
   /* Better mobile tap targets */
-  button, .btn {
+  button,
+  .btn {
     min-height: 44px;
     touch-action: manipulation;
   }
-  
+
   /* Prevent zoom on inputs */
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     font-size: 16px;
   }
-  
+
   /* Smooth scrolling */
   * {
     -webkit-overflow-scrolling: touch;
@@ -593,4 +657,37 @@
 
 .safe-area-top {
   padding-top: env(safe-area-inset-top);
+}
+
+@keyframes skel-shimmer {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(220%); }
+}
+
+/* Modern "alive" skeleton shimmer overlay */
+.skel-live {
+  position: relative;
+  overflow: hidden;
+}
+
+.skel-live::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  animation: skel-shimmer var(--skel-speed, 1400ms) ease-in-out infinite;
+  animation-delay: var(--skel-delay, 0ms);
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .skel-live::after {
+    animation: none;
+  }
 }

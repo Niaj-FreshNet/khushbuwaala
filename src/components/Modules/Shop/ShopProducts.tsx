@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useGetAllProductsQuery } from "@/redux/store/api/product/productApi";
 import { IProductResponse } from "@/types/product.types";
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,25 @@ export function ShopProducts(props: ShopProductProps) {
   const pathname = usePathname();
   // const [page, setPage] = useState(initialPage);
   const [page, setPage] = useState(props.initialPage);
+
+  const productsTopRef = useRef<HTMLDivElement | null>(null);
+  const prevKeyRef = useRef<string>("");
+
+  const [pageTransitionLoading, setPageTransitionLoading] = useState(false);
+
+  const routeKey = `${pathname}?${searchParams.toString()}`;
+
+  const scrollToProductsTop = () => {
+    if (!productsTopRef.current) return;
+
+    const y =
+      productsTopRef.current.getBoundingClientRect().top +
+      window.scrollY -
+      210; // 👈 this is the offset from top (adjust 80–160 as you like)
+
+    window.scrollTo({ top: y, behavior: "auto" });
+  };
+
   const limit = 20;
   const [filters, setFilters] = useState({
     priceRange: [props.priceMin || 100, props.priceMax || 5000],
@@ -112,6 +131,27 @@ export function ShopProducts(props: ShopProductProps) {
     smells: filters.selectedSmells.join(",") || undefined,
     sortBy: sortMap[sortOption] as any,
   });
+
+  // ✅ show loading + scroll to products top whenever URL changes
+  useEffect(() => {
+    if (prevKeyRef.current === routeKey) return;
+    prevKeyRef.current = routeKey;
+
+    setPageTransitionLoading(true);
+
+    requestAnimationFrame(() => {
+      scrollToProductsTop();
+    });
+  }, [routeKey]);
+
+  // ✅ stop loading when new data finished fetching
+  useEffect(() => {
+    if (!isFetching && !isLoading) {
+      setPageTransitionLoading(false);
+    }
+  }, [isFetching, isLoading]);
+
+  const shouldShowLoading = isLoading || isFetching || pageTransitionLoading;
 
   // const products =
   //   page === initialPage && !isFetching
@@ -441,7 +481,9 @@ export function ShopProducts(props: ShopProductProps) {
       </div>
 
       {/* Product List */}
-      {isLoading ? (
+      <div ref={productsTopRef} />
+
+      {shouldShowLoading ? (
         <div className={`grid gap-6 ${gridColsClass}`}>
           {[...Array(12)].map((_, i) => (
             <div
