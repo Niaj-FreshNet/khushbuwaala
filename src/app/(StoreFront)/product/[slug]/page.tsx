@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description:
       product.description?.substring(0, 160) ||
       `Buy ${product.name} premium perfume online. Authentic fragrances with fast delivery across Bangladesh.`,
-    alternates: { canonical: `/product/${slug}` },
+alternates: { canonical: new URL(`/product/${slug}`, metadata.metadataBase) },
     openGraph: {
       type: "website",
       title: product.name,
