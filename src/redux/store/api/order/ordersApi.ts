@@ -16,6 +16,7 @@ export interface IOrderPayload {
 
 export interface IOrderResponse {
   id: string
+  invoice: string
   amount: number
   isPaid: boolean
   status: string

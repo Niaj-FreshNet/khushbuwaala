@@ -1,15 +1,18 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Inter } from "next/font/google" // Using Inter as a placeholder for fontSans/fontSerif
+import { Inter } from "next/font/google"
+import Script from "next/script"
 import "./globals.css"
-import { siteConfig } from "@/config/site" // Ensure this file exists and is correctly configured
-import { Providers } from "@/lib/Providers" // Your client-side providers wrapper
+import { siteConfig } from "@/config/site"
+import { Providers } from "@/lib/Providers"
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
 })
+
+const GTM_ID = "GTM-KDFMX5QL"
 
 // SEO: Structured Data for KhushbuWaala Navigation (moved from navbar)
 const navigationStructuredData = {
@@ -57,8 +60,9 @@ const organizationStructuredData = {
   "@type": "Organization",
   name: "KhushbuWaala",
   url: "https://khushbuwaala.com",
-  logo: "https://khushbuwaala.com/images/khushbuwaala-logo.webp", // Corrected path
-  description: "Premium perfumes, oriental attars, and natural fragrances with authentic quality",
+  logo: "https://khushbuwaala.com/images/khushbuwaala-logo.webp",
+  description:
+    "Premium perfumes, oriental attars, and natural fragrances with authentic quality",
   contactPoint: {
     "@type": "ContactPoint",
     telephone: "+8801566395807",
@@ -67,7 +71,14 @@ const organizationStructuredData = {
     availableLanguage: ["English", "Bengali"],
     hoursAvailable: {
       "@type": "OpeningHoursSpecification",
-      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      dayOfWeek: [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ],
       opens: "09:00",
       closes: "21:00",
     },
@@ -86,7 +97,6 @@ const organizationStructuredData = {
   ],
 }
 
-// SEO: Comprehensive Metadata for the entire site
 export const metadata: Metadata = {
   title: {
     default: `${siteConfig.name} - Premium Perfumes & Attars | Authentic Fragrances`,
@@ -97,7 +107,7 @@ export const metadata: Metadata = {
   authors: siteConfig.authors,
   creator: siteConfig.creator,
   publisher: siteConfig.publisher,
-  robots: "index, follow", // Ensure search engines index and follow links
+  robots: "index, follow",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon-16x16.png",
@@ -124,18 +134,17 @@ export const metadata: Metadata = {
     title: `${siteConfig.name} - Premium Perfumes & Attars`,
     description: siteConfig.description,
     images: [siteConfig.twitterImage],
-    creator: "@yourtwitterhandle", // Replace with your Twitter handle
+    creator: "@yourtwitterhandle",
   },
   verification: siteConfig.verification,
 }
 
-// SEO: Viewport configuration
 export const viewport: Viewport = {
   themeColor: siteConfig.themeColor,
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false, // Prevents zooming for better mobile experience
+  userScalable: false,
 }
 
 export default function RootLayout({
@@ -145,11 +154,38 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="en" // SEO: Specify language for better accessibility and indexing
-      suppressHydrationWarning // Recommended for dark mode setup with next-themes
-      className={`${inter.variable}`} // Using inter.variable as a placeholder for fontSans/fontSerif
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable}`}
     >
-      <body className={`min-h-screen text-foreground bg-background font-sans antialiased ${inter.className}`}>
+      <head>
+        {/* Google Tag Manager - as high in <head> as possible */}
+        <Script
+          id="gtm-script"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${GTM_ID}');`,
+          }}
+        />
+      </head>
+
+      <body
+        className={`min-h-screen text-foreground bg-background font-sans antialiased ${inter.className}`}
+      >
+        {/* Google Tag Manager (noscript) - immediately after opening <body> */}
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
+
         {/* SEO: Structured Data for Website */}
         <script
           type="application/ld+json"
@@ -168,16 +204,23 @@ export default function RootLayout({
             }),
           }}
         />
+
         {/* SEO: Structured Data for Navigation */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(navigationStructuredData) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(navigationStructuredData),
+          }}
         />
+
         {/* SEO: Enhanced Structured Data for Organization */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationStructuredData) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationStructuredData),
+          }}
         />
+
         <Providers>{children}</Providers>
       </body>
     </html>

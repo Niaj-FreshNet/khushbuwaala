@@ -189,9 +189,31 @@ const SaleDetailsModal = ({ saleId, visible, onClose }: SaleDetailsModalProps) =
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <p className="text-sm font-medium text-gray-700">Payment Method</p>
-                                            <p className='font-semibold'>{sale.method
-                                                ? sale.method.charAt(0).toUpperCase() + sale.method.slice(1).toLowerCase()
-                                                : 'N/A'}</p>
+                                            <p className='font-semibold'>
+                                                    {sale.method === 'cashOnDelivery'
+                                                        ? 'Cash On Delivery'
+                                                        : sale.method === 'cash'
+                                                            ? 'Cash'
+                                                            : sale.method === 'onlinePayment'
+                                                                ? 'Online Payment'
+                                                                : sale.method === 'bkashPayment'
+                                                                    ? 'Bkash Payment'
+                                                                    : sale.method === 'bkashPersonal'
+                                                                        ? 'Bkash Personal'
+                                                                        : sale.method === 'nagadPayment'
+                                                                            ? 'Nagad Payment'
+                                                                            : sale.method === 'nagadPersonal'
+                                                                                ? 'Nagad Personal'
+                                                                                : sale.method === 'rocketPayment'
+                                                                                    ? 'Rocket Payment'
+                                                                                    : sale.method === 'rocketPersonal'
+                                                                                        ? 'Rocket Personal'
+                                                                                        : sale.method === 'bankTransfer'
+                                                                                            ? 'Bank Transfer'
+                                                                                            : sale.method === 'cardPayment'
+                                                                                                ? 'Card Payment'
+                                                                                                : 'Unknown'}
+                                            </p>
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium text-gray-700">Payment Status</p>

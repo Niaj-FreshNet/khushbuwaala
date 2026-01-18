@@ -202,11 +202,16 @@ const AddSalesPage = () => {
                                 <FormInput name="amount" label="Amount" type="number" inputClassName="border-[#FB923C]" />
                                 <FormInput name="method" label="Payment Method" type="select" options={[
                                     { value: 'cash', label: 'Cash' },
-                                    { value: 'bkash', label: 'bKash' },
-                                    { value: 'nagad', label: 'Nagad' },
-                                    { value: 'rocket', label: 'Rocket' },
-                                    { value: 'bank', label: 'Bank' },
-                                    { value: 'card', label: 'Card' }
+                                    { value: 'bkashPayment', label: 'Bkash Payment' },
+                                    { value: 'bkashPersonal', label: 'Bkash Personal' },
+                                    { value: 'nagadPayment', label: 'Nagad Payment' },
+                                    { value: 'nagadPersonal', label: 'Nagad Personal' },
+                                    { value: 'rocketPayment', label: 'Rocket Payment' },
+                                    { value: 'rocketPersonal', label: 'Rocket Personal' },
+                                    { value: 'bankTransfer', label: 'Bank Transfer' },
+                                    { value: 'cardPayment', label: 'Card Payment' },
+                                    { value: 'cashOnDelivery', label: 'Cash On Delivery' },
+                                    { value: 'onlinePayment', label: 'Online Payment' },
                                 ]} inputClassName="border-[#FB923C]" />
 
                                 <div className="flex items-center gap-3">

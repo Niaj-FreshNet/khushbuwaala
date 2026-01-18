@@ -232,9 +232,29 @@ const SaleListPage = () => {
                   <TableCell>{sale.salesman?.name || 'N/A'}</TableCell>
                   <TableCell>{sale.amount} BDT</TableCell>
                   <TableCell>
-                    {sale.method
-                      ? sale.method.charAt(0).toUpperCase() + sale.method.slice(1).toLowerCase()
-                      : 'N/A'}
+                    {sale.method === 'cashOnDelivery'
+                      ? 'Cash On Delivery'
+                      : sale.method === 'cash'
+                        ? 'Cash'
+                        : sale.method === 'onlinePayment'
+                          ? 'Online Payment'
+                          : sale.method === 'bkashPayment'
+                            ? 'Bkash Payment'
+                            : sale.method === 'bkashPersonal'
+                              ? 'Bkash Personal'
+                              : sale.method === 'nagadPayment'
+                                ? 'Nagad Payment'
+                                : sale.method === 'nagadPersonal'
+                                  ? 'Nagad Personal'
+                                  : sale.method === 'rocketPayment'
+                                    ? 'Rocket Payment'
+                                    : sale.method === 'rocketPersonal'
+                                      ? 'Rocket Personal'
+                                      : sale.method === 'bankTransfer'
+                                        ? 'Bank Transfer'
+                                        : sale.method === 'cardPayment'
+                                          ? 'Card Payment'
+                                          : 'Unknown'}
                   </TableCell>
                   <TableCell>
                     <Badge
