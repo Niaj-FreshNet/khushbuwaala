@@ -98,6 +98,7 @@ const organizationStructuredData = {
 }
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://khushbuwaala.com"),
   title: {
     default: `${siteConfig.name} - Premium Perfumes & Attars | Authentic Fragrances`,
     template: `%s | ${siteConfig.name}`,
