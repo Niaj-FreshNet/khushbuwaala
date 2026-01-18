@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/lib/Functions/ServerFn";
 import ProductDetailPage from "./_components/ProductDetailPage";
+import { metadata } from "@/app/layout";
 
 interface Props {
   params: Promise<{ slug: string }>;
