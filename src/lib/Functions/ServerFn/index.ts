@@ -5,7 +5,7 @@ import { IProductResponse } from "@/types/product.types";
 export const getProductBySlug = cache(async (slug: string): Promise<IProductResponse | null> => {
   try {
     const res = await fetch(
-      `${process.env.API_BASE_URL}/products/get-product-by-slug/${slug}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/products/get-product-by-slug/${slug}`,
       {
         // ✅ ISR cache
         next: {
