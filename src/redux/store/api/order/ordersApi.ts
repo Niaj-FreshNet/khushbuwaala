@@ -14,35 +14,53 @@ export interface IOrderPayload {
   }
 }
 
-export interface IOrderResponse {
-  id: string
-  invoice: string
-  amount: number
-  isPaid: boolean
-  status: string
-  orderSource: string
-  createdAt: string
-  updatedAt: string
-  customer?: {
-    id: string
-    name: string
-    imageUrl?: string
-  }
-  orderItems?: {
-    id: string
-    quantity: number
-    product?: {
-      id: string
-      name: string
-      primaryImage?: string
-    }
-    variant?: {
-      id: string
-      size?: string
-      price?: number
-    }
-  }[]
-}
+// export interface IOrderResponse {
+//   id: string
+//   invoice: string
+//   amount: number
+//   isPaid: boolean
+//   status: string
+//   orderSource: string
+//   createdAt: string
+//   updatedAt: string
+//   customer?: {
+//     id: string
+//     name: string
+//     imageUrl?: string
+//   }
+//   orderItems?: {
+//     id: string
+//     quantity: number
+//     product?: {
+//       id: string
+//       name: string
+//       primaryImage?: string
+//     }
+//     variant?: {
+//       id: string
+//       size?: string
+//       price?: number
+//     }
+//   }[]
+// }
+
+export type ApiResponse<T> = {
+  success: boolean;
+  message?: string;
+  data: T;
+};
+
+export type IOrderData = {
+  id: string;
+  amount: number;
+  isPaid: boolean;
+  status: string;
+  orderSource: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type IOrderResponse = ApiResponse<IOrderData>;
 
 export interface IPaginatedResponse<T> {
   meta: {

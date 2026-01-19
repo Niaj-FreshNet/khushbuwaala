@@ -23,10 +23,11 @@ import { useAppDispatch } from "@/redux/store/hooks"
 import { useCart } from "@/redux/store/hooks/useCart"
 import { useOrder } from "@/redux/store/hooks/useOrder"
 import StoreContainer from "@/components/Layout/StoreContainer"
+import { useCreateBkashPaymentMutation } from "@/redux/store/api/payment/paymentApi"
 
 // --- Types ---
 type ShippingMethod = "insideDhaka" | "outsideDhaka"
-type PaymentMethod = "sslCommerz" | "cashOnDelivery"
+type PaymentMethod = "bkash" | "cashOnDelivery"
 type BillingType = "sameAsShipping" | "differentBillingAddress"
 
 interface CartItem {
@@ -135,6 +136,9 @@ export default function CheckoutPage() {
   const [billingThana, setBillingThana] = useState("")
   const [billingContactNumber, setBillingContactNumber] = useState("")
 
+  const [createBkashPayment, { isLoading: isBkashRedirecting }] =
+    useCreateBkashPaymentMutation();
+
   useEffect(() => {
     if (typeof window !== "undefined") window.scrollTo(0, 0)
   }, [])
@@ -241,12 +245,17 @@ export default function CheckoutPage() {
     const cartItemIds = itemsToDisplay
       .map((item) => item.cartItemId)
       .filter(Boolean) as string[] // ensure only valid strings
+    // const cartItemIds = itemsToDisplay
+    //   .map((item: any) => item.id)
+    //   .filter(Boolean) as string[]
+
     console.log(cartItemIds)
 
     const payload: IOrderPayload = {
       cartItemIds,
       amount: total,
-      isPaid: paymentMethod !== "cashOnDelivery",
+      // isPaid: paymentMethod !== "cashOnDelivery",
+      isPaid: false, // always false at order create; gateway will mark paid after callback
       method: paymentMethod,
       orderSource: "WEBSITE",
       saleType: "SINGLE",
@@ -288,10 +297,57 @@ export default function CheckoutPage() {
     }
 
     try {
-      const res: IOrderResponse = await handleCreateOrder(payload)
-      proceedToCartCheckout()
-      router.push(`/thank-you?order=${encodeURIComponent(res.data.id)}`)
-      clearCart()
+      // const res: IOrderResponse = await handleCreateOrder(payload)
+      // proceedToCartCheckout()
+      // router.push(`/thank-you?order=${encodeURIComponent(res.data.id)}`)
+      // clearCart()
+
+      const res: any = await handleCreateOrder(payload);
+
+      // ✅ Clear cart state only after order created successfully
+      proceedToCartCheckout();
+
+      const orderId = res?.data?.id || res?.id;
+      if (!orderId) {
+        toast.error("Order created but orderId missing.");
+        return;
+      }
+      const payToken = res?.data?.payToken || res?.payToken;
+      if (!payToken) {
+        toast.error("Order created but payToken missing.");
+        return;
+      }
+
+      // ✅ If COD -> normal flow
+      if (paymentMethod === "cashOnDelivery") {
+        clearCart();
+        router.push(`/thank-you?order=${encodeURIComponent(orderId)}`);
+        return;
+      }
+
+      // ✅ If bKash -> create payment and redirect
+      if (paymentMethod === "bkash") {
+        try {
+          const bkashRes = await createBkashPayment({ orderId, payToken }).unwrap();
+
+          // optional: save for success page verification if you want
+          if (typeof window !== "undefined") {
+            localStorage.setItem("lastBkashOrderId", orderId);
+            localStorage.setItem("lastBkashPaymentID", bkashRes.paymentID);
+          }
+
+          clearCart();
+          window.location.href = bkashRes.bkashURL; // 🔥 redirect to bKash
+          return;
+        } catch (e: any) {
+          console.error(e);
+          toast.error(e?.data?.message || "Failed to start bKash payment.");
+          // Keep order in DB; user can retry from an order details page later
+          router.push(`/thank-you?order=${encodeURIComponent(orderId)}`);
+          return;
+        }
+      }
+
     } catch (err) {
       console.error(err)
       toast.error("Failed to place order. Please try again.")
@@ -607,17 +663,19 @@ export default function CheckoutPage() {
                   onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}
                   className="gap-3"
                 >
-                  <label className="flex items-center gap-3 border rounded-md p-3 opacity-60 cursor-not-allowed">
-                    <RadioGroupItem value="sslCommerz" disabled />
-                    <span className="text-sm">Pay First (Online Payment)</span>
+                  <label className="flex items-center gap-3 border rounded-md p-3 hover:bg-gray-50 transition-colors">
+                    <RadioGroupItem value="bkash" />
+                    <span className="text-sm">Pay with bKash (Online Payment)</span>
                   </label>
+
                   <label className="flex items-center gap-3 border rounded-md p-3 hover:bg-gray-50 transition-colors">
                     <RadioGroupItem value="cashOnDelivery" />
                     <span className="text-sm">Cash on Delivery (COD)</span>
                   </label>
+
                   {paymentMethod === "cashOnDelivery" && (
                     <p className="text-xs text-gray-600 px-1">
-                      Free shipping for items over 1,000 Taka. Shipping charge applied for items below 1,000 Taka.
+                      Shipping charge applied based on location.
                     </p>
                   )}
                 </RadioGroup>
@@ -636,9 +694,11 @@ export default function CheckoutPage() {
                 variant="default"
                 className="w-full h-14 text-lg font-bold cursor-pointer"
                 onClick={handleSubmit}
-                disabled={isPlacingOrder}
+                disabled={isPlacingOrder || isBkashRedirecting}
               >
-                {isPlacingOrder ? "Placing Order..." : "Complete Order"}
+                {isPlacingOrder || isBkashRedirecting
+                  ? "Processing..."
+                  : "Complete Order"}
               </Button>
               <div className="flex items-center justify-center gap-6 text-xs text-gray-600">
                 <div className="flex items-center gap-1"><ShieldCheck className="h-3 w-3 text-green-600" /> SSL Secure</div>
