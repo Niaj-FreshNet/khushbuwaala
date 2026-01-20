@@ -31,12 +31,12 @@ export function ProductCarouselClient({
   titleUnderlineVariant?: "default" | "wide" | "full"
 }) {
   const [quickViewProduct, setQuickViewProduct] = useState<IProductResponse | null>(null);
-    const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-  
-    const handleQuickView = (product: IProductResponse) => {
-      setQuickViewProduct(product);
-      setIsQuickViewOpen(true);
-    };
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  const handleQuickView = (product: IProductResponse) => {
+    setQuickViewProduct(product);
+    setIsQuickViewOpen(true);
+  };
 
   const handleCloseQuickView = () => {
     setIsQuickViewOpen(false);
@@ -61,9 +61,9 @@ export function ProductCarouselClient({
         }}
         className="w-full"
       >
-        <CarouselContent className="-ml-4">
+        <CarouselContent className="-ml-2 sm:-ml-4">
           {products.map((product) => (
-            <CarouselItem key={product.id} className="pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
+            <CarouselItem key={product.id} className="pl-2 sm:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
               <ProductCard
                 className="py-0"
                 key={product.id}

@@ -14,7 +14,8 @@ async function ReviewsGrid({ reviews }: { reviews: Review[] }) {
         {reviews.map((celebrity) => (
           <div key={celebrity.id} className="relative group overflow-hidden rounded-lg shadow-md">
             <Image
-              src={celebrity.image || "/placeholder.svg"}
+              // src={celebrity.image || "/images/crest.png"}
+              src={"/images/crest.png"}
               alt={`Review by celebrity ${celebrity.id}`}
               width={256}
               height={256}
