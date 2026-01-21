@@ -20,6 +20,7 @@ import { SortSheet } from "./SortSheet";
 import { ProductCard } from "@/components/ReusableUI/ProductCard";
 import { ProductQuickView } from "@/components/ReusableUI/ProductQuickView";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { fi } from "zod/v4/locales";
 
 interface ShopProductProps {
   // initialProducts: IProductResponse[];
@@ -28,11 +29,31 @@ interface ShopProductProps {
   category?: string;
   specification?: string;
   section?: string;
-  priceMin?: number;
-  priceMax?: number;
-  smells?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  accords?: string;
+  perfumeNotes?: string;
+  performance?: string;
   sortBy?: string;
 }
+
+type Filters = {
+  priceRange: [number, number];
+  selectedCategories: string[];
+  selectedAccords: string[];
+  selectedPerfumeNotes: string[];
+  selectedPerformance: string[];
+  selectedSpecification: string; // "all" | "male" | "female"
+};
+
+const normalizeFilters = (f: Partial<Filters> | undefined, fallback: Filters): Filters => ({
+  priceRange: (f?.priceRange ?? fallback.priceRange) as [number, number],
+  selectedCategories: Array.isArray(f?.selectedCategories) ? f!.selectedCategories : fallback.selectedCategories,
+  selectedAccords: Array.isArray(f?.selectedAccords) ? f!.selectedAccords : fallback.selectedAccords,
+  selectedPerfumeNotes: Array.isArray(f?.selectedPerfumeNotes) ? f!.selectedPerfumeNotes : fallback.selectedPerfumeNotes,
+  selectedPerformance: Array.isArray(f?.selectedPerformance) ? f!.selectedPerformance : fallback.selectedPerformance,
+  selectedSpecification: typeof f?.selectedSpecification === "string" ? f!.selectedSpecification : fallback.selectedSpecification,
+});
 
 export function ShopProducts(props: ShopProductProps) {
   const router = useRouter();
@@ -60,12 +81,18 @@ export function ShopProducts(props: ShopProductProps) {
   };
 
   const limit = 20;
-  const [filters, setFilters] = useState({
-    priceRange: [props.priceMin || 100, props.priceMax || 5000],
+
+  const initialFilters: Filters = {
+    priceRange: [props.minPrice || 100, props.maxPrice || 5000],
     selectedCategories: props.category ? [props.category] : [],
-    selectedSmells: props.smells ? props.smells.split(",") : [],
+    selectedAccords: props.accords ? props.accords.split(",") : [],
+    selectedPerfumeNotes: props.perfumeNotes ? props.perfumeNotes.split(",") : [],
+    selectedPerformance: props.performance ? props.performance.split(",") : [],
     selectedSpecification: props.specification || "all",
-  });
+  };
+
+  const [filters, setFilters] = useState<Filters>(initialFilters);
+
   const [sortOption, setSortOption] = useState(props.sortBy || "new-to-old");
   const [columns, setColumns] = useState(2);
   const [visibleProductsCount, setVisibleProductsCount] = useState(limit);
@@ -75,16 +102,24 @@ export function ShopProducts(props: ShopProductProps) {
   const [quickViewProduct, setQuickViewProduct] = useState<IProductResponse | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
-  const sortMap: { [key: string]: string } = {
+  type SortBy = "name" | "price_asc" | "price_desc" | "newest" | "oldest" | "popularity";
+
+  const sortMap: Record<string, SortBy> = {
     newArrival: "newest",
     featured: "popularity",
     onSale: "price_asc",
     "a-z": "name",
-    "z-a": "name_desc",
+    "z-a": "name",         // or add name_desc to backend union if you need
     "low-to-high": "price_asc",
     "high-to-low": "price_desc",
     "old-to-new": "oldest",
     "new-to-old": "newest",
+  };
+
+  const genderMap: Record<string, string | undefined> = {
+    all: undefined,
+    male: "MALE",
+    female: "FEMALE",
   };
 
   // useEffect(() => {
@@ -96,8 +131,8 @@ export function ShopProducts(props: ShopProductProps) {
   //     selectedSpecification: params.get("specification") || "all",
   //     selectedSmells: params.get("smells")?.split(",") || [],
   //     priceRange: [
-  //       Number(params.get("priceMin") || 100),
-  //       Number(params.get("priceMax") || 5000),
+  //       Number(params.get("minPrice") || 100),
+  //       Number(params.get("maxPrice") || 5000),
   //     ],
   //   };
 
@@ -111,8 +146,8 @@ export function ShopProducts(props: ShopProductProps) {
   //     limit,
   //     category: filters.selectedCategories.join(","),
   //     specification: filters.selectedSpecification === "all" ? undefined : filters.selectedSpecification,
-  //     priceMin: filters.priceRange[0],
-  //     priceMax: filters.priceRange[1],
+  //     minPrice: filters.priceRange[0],
+  //     maxPrice: filters.priceRange[1],
   //     smells: filters.selectedSmells.join(","),
   //     sortBy: sortMap[sortOption] as ProductQueryParams["sortBy"],
   //     section,
@@ -124,11 +159,15 @@ export function ShopProducts(props: ShopProductProps) {
     page,
     limit,
     category: filters.selectedCategories.join(",") || undefined,
-    specification: filters.selectedSpecification === "all" ? undefined : filters.selectedSpecification,
+    gender: filters.selectedSpecification === "all"
+      ? undefined
+      : filters.selectedSpecification.toUpperCase(), // "MALE" | "FEMALE"
     section: props.section,
-    priceMin: filters.priceRange[0],
-    priceMax: filters.priceRange[1],
-    smells: filters.selectedSmells.join(",") || undefined,
+    minPrice: filters.priceRange[0],
+    maxPrice: filters.priceRange[1],
+    accords: filters.selectedAccords.join(",") || undefined,
+    perfumeNotes: filters.selectedPerfumeNotes.join(",") || undefined,
+    performance: filters.selectedPerformance.join(",") || undefined,
     sortBy: sortMap[sortOption] as any,
   });
 
@@ -170,8 +209,8 @@ export function ShopProducts(props: ShopProductProps) {
   //   if (filters.selectedSpecification && filters.selectedSpecification !== "all")
   //     params.set("specification", filters.selectedSpecification);
   //   if (filters.selectedSmells.length) params.set("smells", filters.selectedSmells.join(","));
-  //   if (filters.priceRange[0] !== 100) params.set("priceMin", filters.priceRange[0].toString());
-  //   if (filters.priceRange[1] !== 5000) params.set("priceMax", filters.priceRange[1].toString());
+  //   if (filters.priceRange[0] !== 100) params.set("minPrice", filters.priceRange[0].toString());
+  //   if (filters.priceRange[1] !== 5000) params.set("maxPrice", filters.priceRange[1].toString());
   //   if (sortOption !== "new-to-old") params.set("sortBy", sortOption);
   //   // if (section) params.set("section", section);
 
@@ -215,9 +254,9 @@ export function ShopProducts(props: ShopProductProps) {
   //   if (filters.selectedSmells.length)
   //     params.set("smells", filters.selectedSmells.join(","));
   //   if (filters.priceRange[0] !== 100)
-  //     params.set("priceMin", filters.priceRange[0].toString());
+  //     params.set("minPrice", filters.priceRange[0].toString());
   //   if (filters.priceRange[1] !== 5000)
-  //     params.set("priceMax", filters.priceRange[1].toString());
+  //     params.set("maxPrice", filters.priceRange[1].toString());
   //   if (sortOption !== "new-to-old")
   //     params.set("sortBy", sortOption);
   //   if (props.section) params.set("section", props.section);
@@ -232,9 +271,11 @@ export function ShopProducts(props: ShopProductProps) {
     if (page > 1) params.set("page", page.toString());
     if (filters.selectedCategories.length) params.set("category", filters.selectedCategories.join(","));
     if (filters.selectedSpecification !== "all") params.set("specification", filters.selectedSpecification);
-    if (filters.selectedSmells.length) params.set("smells", filters.selectedSmells.join(","));
-    if (filters.priceRange[0] !== 100) params.set("priceMin", filters.priceRange[0].toString());
-    if (filters.priceRange[1] !== 5000) params.set("priceMax", filters.priceRange[1].toString());
+    if (filters.selectedAccords.length) params.set("accords", filters.selectedAccords.join(","));
+    if (filters.selectedPerfumeNotes.length) params.set("perfumeNotes", filters.selectedPerfumeNotes.join(","));
+    if (filters.selectedPerformance.length) params.set("performance", filters.selectedPerformance.join(","));
+    if (filters.priceRange[0] !== 100) params.set("minPrice", filters.priceRange[0].toString());
+    if (filters.priceRange[1] !== 5000) params.set("maxPrice", filters.priceRange[1].toString());
     if (sortOption !== "new-to-old") params.set("sortBy", sortOption);
     if (props.section) params.set("section", props.section);
 
@@ -288,8 +329,8 @@ export function ShopProducts(props: ShopProductProps) {
     setQuickViewProduct(null);
   };
 
-  const handleApplyFilters = (newFilters: typeof filters) => {
-    setFilters(newFilters);
+  const handleApplyFilters = (newFilters: Partial<Filters>) => {
+    setFilters(prev => normalizeFilters(newFilters, prev));
     setPage(1);
     setVisibleProductsCount(limit);
   };

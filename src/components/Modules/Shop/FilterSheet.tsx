@@ -39,50 +39,72 @@ export function FilterSheet({
 }: FilterSheetProps) {
   const [priceRange, setPriceRange] = useState<[number, number]>([100, 5000]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialFilters?.category ? [initialFilters.category] : []);
-  const [selectedSmells, setSelectedSmells] = useState<string[]>([]);
   const [selectedSpecification, setSelectedSpecification] = useState<string>("all");
+  const [selectedAccords, setSelectedAccords] = useState<string[]>([]);
+  const [selectedPerfumeNotes, setSelectedPerfumeNotes] = useState<string[]>([]);
+  const [selectedPerformance, setSelectedPerformance] = useState<string[]>([]);
 
   // inside FilterSheet
   const prevFiltersRef = useRef({
     priceRange,
     selectedCategories,
-    selectedSmells,
     selectedSpecification,
+    selectedAccords,
+    selectedPerfumeNotes,
+    selectedPerformance,
   });
 
   useEffect(() => {
     const currentFilters = {
       priceRange,
       selectedCategories,
-      selectedSmells,
       selectedSpecification,
+      selectedAccords,
+      selectedPerfumeNotes,
+      selectedPerformance,
     };
 
-    // Only call onApplyFilters if filters actually changed
-    const filtersChanged =
+    const changed =
       prevFiltersRef.current.priceRange[0] !== currentFilters.priceRange[0] ||
       prevFiltersRef.current.priceRange[1] !== currentFilters.priceRange[1] ||
       prevFiltersRef.current.selectedSpecification !== currentFilters.selectedSpecification ||
       prevFiltersRef.current.selectedCategories.join(",") !== currentFilters.selectedCategories.join(",") ||
-      prevFiltersRef.current.selectedSmells.join(",") !== currentFilters.selectedSmells.join(",");
+      prevFiltersRef.current.selectedAccords.join(",") !== currentFilters.selectedAccords.join(",") ||
+      prevFiltersRef.current.selectedPerfumeNotes.join(",") !== currentFilters.selectedPerfumeNotes.join(",") ||
+      prevFiltersRef.current.selectedPerformance.join(",") !== currentFilters.selectedPerformance.join(",");
 
-    if (filtersChanged) {
+    if (changed) {
       onApplyFilters(currentFilters);
       prevFiltersRef.current = currentFilters;
     }
-  }, [priceRange, selectedCategories, selectedSmells, selectedSpecification, onApplyFilters]);
+  }, [
+    priceRange,
+    selectedCategories,
+    selectedSpecification,
+    selectedAccords,
+    selectedPerfumeNotes,
+    selectedPerformance,
+    onApplyFilters,
+  ]);
 
   const handleReset = () => {
-    setPriceRange([100, 5000]);
-    setSelectedCategories([]);
-    setSelectedSmells([]);
-    setSelectedSpecification("all");
-    onApplyFilters({
-      priceRange: [100, 5000],
+    const resetFilters = {
+      priceRange: [100, 5000] as [number, number],
       selectedCategories: [],
-      selectedSmells: [],
       selectedSpecification: "all",
-    });
+      selectedAccords: [],
+      selectedPerfumeNotes: [],
+      selectedPerformance: [],
+    };
+
+    setPriceRange(resetFilters.priceRange);
+    setSelectedCategories(resetFilters.selectedCategories);
+    setSelectedSpecification(resetFilters.selectedSpecification);
+    setSelectedAccords(resetFilters.selectedAccords);
+    setSelectedPerfumeNotes(resetFilters.selectedPerfumeNotes);
+    setSelectedPerformance(resetFilters.selectedPerformance);
+
+    onApplyFilters(resetFilters);
   };
 
   const smellTypes = {
@@ -151,17 +173,17 @@ export function FilterSheet({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Categories</SelectItem>
-                    <SelectItem value="inspiredPerfumeOil">
+                    <SelectItem value="INSPIRED PERFUME OIL">
                       Inspired Perfume Oil
                     </SelectItem>
-                    <SelectItem value="oriental">
+                    <SelectItem value="ORIENTAL">
                       Oriental & Arabian Attar
                     </SelectItem>
-                    <SelectItem value="artificialOud">
+                    <SelectItem value="ARTIFICIAL OUD">
                       Artificial Oud
                     </SelectItem>
-                    <SelectItem value="natural">Natural Collections</SelectItem>
-                    <SelectItem value="brand">Brand</SelectItem>
+                    <SelectItem value="NATURAL">Natural Collections</SelectItem>
+                    <SelectItem value="BRAND">Brand</SelectItem>
                   </SelectContent>
                 </Select>
               </CollapsibleContent>
@@ -171,38 +193,52 @@ export function FilterSheet({
 
             <Collapsible defaultOpen>
               <CollapsibleContent>
-                {Object.entries(smellTypes).map(([groupName, smells]) => (
-                  <div key={groupName} className="mb-6">
-                    <h5 className="text-md font-semibold text-gray-800 mb-0 capitalize">
-                      {groupName.replace(/([A-Z])/g, " $1")}
-                    </h5>
-                    <div className="h-1 w-64 lg:w-72 mb-4 rounded-full bg-gradient-to-r from-pink-500 via-pink-600 to-purple-600" />
-                    <div className="grid grid-cols-2 gap-2">
-                      {smells.map((smell) => (
-                        <div
-                          key={smell}
-                          className="flex items-center space-x-2"
-                        >
-                          <Checkbox
-                            id={`smell-${smell}`}
-                            checked={selectedSmells.includes(smell)}
-                            onCheckedChange={(checked) => {
-                              setSelectedSmells((prev) =>
-                                checked ? [...prev, smell] : prev.filter((s) => s !== smell)
-                              )
-                            }}
-                          />
-                          <Label
-                            htmlFor={`smell-${smell}`}
-                            className="text-sm text-gray-600 cursor-pointer"
-                          >
-                            {smell}
-                          </Label>
-                        </div>
-                      ))}
+                {Object.entries(smellTypes).map(([groupName, smells]) => {
+                  const selected =
+                    groupName === "smellAccords"
+                      ? selectedAccords
+                      : groupName === "perfumeNotes"
+                        ? selectedPerfumeNotes
+                        : selectedPerformance;
+
+                  const setSelected =
+                    groupName === "smellAccords"
+                      ? setSelectedAccords
+                      : groupName === "perfumeNotes"
+                        ? setSelectedPerfumeNotes
+                        : setSelectedPerformance;
+
+                  return (
+                    <div key={groupName} className="mb-6">
+                      <h5 className="text-md font-semibold text-gray-800 mb-0 capitalize">
+                        {groupName.replace(/([A-Z])/g, " $1")}
+                      </h5>
+                      <div className="h-1 w-64 lg:w-72 mb-4 rounded-full bg-gradient-to-r from-pink-500 via-pink-600 to-purple-600" />
+
+                      <div className="grid grid-cols-2 gap-2">
+                        {smells.map((smell) => (
+                          <div key={smell} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`${groupName}-${smell}`}
+                              checked={selected.includes(smell)}
+                              onCheckedChange={(checked) => {
+                                setSelected((prev) =>
+                                  checked ? [...prev, smell] : prev.filter((s) => s !== smell)
+                                );
+                              }}
+                            />
+                            <Label
+                              htmlFor={`${groupName}-${smell}`}
+                              className="text-sm text-gray-600 cursor-pointer"
+                            >
+                              {smell}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </CollapsibleContent>
             </Collapsible>
 
