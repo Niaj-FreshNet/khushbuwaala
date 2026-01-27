@@ -11,15 +11,15 @@ interface RelatedProductsProps {
 }
 
 export default function RelatedProducts({ product }: RelatedProductsProps) {
-  console.log("Rendering RelatedProducts component");
-  console.log("Current product ID:", product.id);
+  // console.log("Rendering RelatedProducts component");
+  // console.log("Current product ID:", product.id);
 
   const { data, isLoading } = useGetRelatedProductsQuery(product?.id!, {
-  skip: !product?.id,
-});
+    skip: !product?.id,
+  });
 
-  console.log("Related products isLoading:", isLoading);
-  console.log("Related products data:", data);
+  // console.log("Related products isLoading:", isLoading);
+  // console.log("Related products data:", data);
 
   if (isLoading) {
     return (
@@ -37,20 +37,22 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
     );
   }
 
-  if (!data) return null;
+  // Flatten related products arrays
+  if (!data?.data) return null;
 
   // Flatten related products arrays
   const relatedProducts = [
-    ...(data.sameBrand ?? []),
-    ...(data.sameCategory ?? []),
-    ...(data.similarAccords ?? []),
-    ...(data.recentlyViewed ?? []),
+    ...(data.data.sameCategory ?? []),
+    ...(data.data.similarAccords ?? []),
   ];
 
+  console.log('relatedProducts', relatedProducts)
   // Deduplicate products by ID
   const uniqueProducts = Array.from(
     new Map(relatedProducts.map((p) => [p.id, p])).values()
   );
+
+  // console.log(uniqueProducts)
 
   if (!uniqueProducts.length) return null;
 
@@ -119,9 +121,8 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
 
                 <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                   <span
-                    className={`text-xs font-medium ${
-                      p.inStock ? "text-green-600" : "text-red-600"
-                    }`}
+                    className={`text-xs font-medium ${p.inStock ? "text-green-600" : "text-red-600"
+                      }`}
                   >
                     {p.inStock ? "In Stock" : "Out of Stock"}
                   </span>
