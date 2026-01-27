@@ -36,7 +36,7 @@ export function CarouselSlider() {
   ]
 
   return (
-    <section className="w-full overflow-hidden relative" aria-label="Hero Carousel of Perfumes">
+    <section className="w-full overflow-hidden relative mb-6" aria-label="Hero Carousel of Perfumes">
       <Carousel
         plugins={[plugin.current]}
         className="w-full"
@@ -65,7 +65,7 @@ export function CarouselSlider() {
                   {slide.buttonText && slide.buttonLink && (
                     <Button
                       asChild
-                      className="px-8 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white font-semibold transition-all duration-300 ease-in-out hover:scale-105 hover:from-red-700 hover:to-pink-700 rounded-full shadow-lg animate-in fade-in zoom-in-95 duration-700 delay-300"
+                      className="px-8 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white font-semibold transition-all duration-300 ease-in-out hover:scale-105 hover:from-red-700 hover:to-pink-700 rounded-full shadow-lg animate-in fade-in zoom-in-95 delay-300"
                     >
                       <Link href={slide.buttonLink} aria-label={slide.buttonText}>
                         {slide.buttonText} <ArrowRight className="ml-2 h-4 w-4" />

@@ -1,53 +1,6 @@
-import Image from "next/image"
-import Link from "next/link"
+import { CategoryCard } from "./CategoryCard"
 import { SectionTitle } from "./SectionTitle"
-import { Button } from "@/components/ui/button"
-import { ArrowRight } from "lucide-react"
 
-interface CategoryCardProps {
-  CategoryName: string
-  CategoryImage: string
-  CategoryLink: string
-  description: string
-}
-
-// Server Component - Purely presentational
-function CategoryCard({ CategoryName, CategoryImage, CategoryLink, description }: CategoryCardProps) {
-  return (
-    <div className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1">
-      <div className="relative w-full h-48 md:h-64">
-        <Image
-          src={CategoryImage || "/placeholder.svg"}
-          alt={CategoryName}
-          fill
-          sizes="(max-width: 768px) 50vw, 25vw"
-          className="object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        {/* Enhanced Overlay for Text and Button */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-6 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
-          <h3 className="text-white text-2xl md:text-3xl font-bold mb-2 drop-shadow-lg">{CategoryName}</h3>
-          <p className="text-gray-200 text-sm md:text-base mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
-            {description}
-          </p>
-          <Button
-            asChild
-            className="w-fit px-6 py-2 bg-white text-red-600 font-semibold rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-105"
-          >
-            <Link 
-              href={CategoryLink}
-              aria-label={`Explore ${CategoryName} category`}
-              title={`Shop ${CategoryName}`}
-            >
-              Shop Now <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Server Component - Purely presentational
 export function CategoryBanner() {
   const categories = [
     {
@@ -77,18 +30,26 @@ export function CategoryBanner() {
   ]
 
   return (
-    <section className="py-12 px-4 bg-gray-50" aria-labelledby="categories-heading">
-      <SectionTitle
-        title="Shop by Categories"
-        subtitle="Explore our diverse range of exquisite fragrances"
-        underlineWidth="w-48"
-        className="mb-8"
-        variant="modern"
-      />
-      <div className="max-w-screen-xl mx-auto grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {categories.map((category) => (
-          <CategoryCard key={category.CategoryName} {...category} />
-        ))}
+    <section className="py-10 sm:py-12" aria-labelledby="categories-heading">
+      {/* Keep title aligned nicely (with padding),
+          but grid below goes full-bleed on mobile */}
+      <div className="px-4">
+        <SectionTitle
+          title="Shop by Categories"
+          subtitle="Explore our diverse range of exquisite fragrances"
+          underlineWidth="w-48"
+          className="mb-4"
+          variant="modern"
+        />
+      </div>
+
+      {/* Full-bleed grid on mobile */}
+      <div className="max-w-screen-xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 sm:gap-5 lg:gap-6">
+          {categories.map((category) => (
+            <CategoryCard key={category.CategoryName} {...category} />
+          ))}
+        </div>
       </div>
     </section>
   )

@@ -24,13 +24,16 @@ import {
   X,
   ExternalLink,
   CreditCard,
+  Tag,
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
-import { IProductResponse } from "@/types/product.types"
+import { IProductResponse, IDiscount, IProductVariant } from "@/types/product.types"
 import { useAppDispatch } from "@/redux/store/hooks"
 import { addToCart } from "@/redux/store/features/cart/cartSlice"
-import { toggleWishlist } from "@/redux/store/features/wishlist/wishlistSlice"
+import { useRouter } from "next/navigation"
+import { useCart } from "@/context/CartContext"
+import { useWishlist } from "@/context/WishlistContext"
 
 interface ProductQuickViewProps {
   product: IProductResponse
@@ -40,13 +43,15 @@ interface ProductQuickViewProps {
 }
 
 export function ProductQuickView({ product, trigger, open, onOpenChange }: ProductQuickViewProps) {
+  const router = useRouter()
+  const cart = useCart()
+  const wishlist = useWishlist()
   const [selectedSize, setSelectedSize] = useState<string>("")
   const [quantity, setQuantity] = useState(1)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const [isBuyingNow, setIsBuyingNow] = useState(false)
   const [imageError, setImageError] = useState(false)
-  const [isWishlisted, setIsWishlisted] = useState(false)
   const [isImageZoomed, setIsImageZoomed] = useState(false)
 
   const dispatch = useAppDispatch()
@@ -58,9 +63,9 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
 
   useEffect(() => {
     if (product.variants && product.variants.length > 0) {
-      setSelectedSize(product.variants[0].size.toString() + "ml")
+      setSelectedSize(`${product.variants[0].size} ${product.variants[0].unit.toLowerCase()}`)
     } else {
-      setSelectedSize("3ml")
+      setSelectedSize("3 ml")
     }
   }, [product])
 
@@ -74,51 +79,137 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
       .replace("BDT", "৳")
   }
 
-  const getCurrentPrice = () => {
-    if (product.variants && selectedSize) {
-      const sizeNum = Number(selectedSize.replace("ml", ""));
-      const variant = product.variants.find(v => v.size === sizeNum);
-      return variant ? variant.price : product.minPrice;
+  const isWishlisted = wishlist?.isInWishlist?.(product.id) ?? false;
+
+  // ✅ Get current variant based on selected size
+  const getCurrentVariant = (): IProductVariant | undefined => {
+    return product.variants?.find(
+      v => `${v.size} ${v.unit.toLowerCase()}` === selectedSize
+    );
+  };
+
+  const currentVariant = getCurrentVariant();
+  const originalPrice = currentVariant?.price ?? product.minPrice ?? 0;
+
+  // ✅ Get active discount (variant first, then product)
+  const getActiveDiscount = (
+    product: IProductResponse,
+    variant?: IProductVariant
+  ): IDiscount | null => {
+    const now = new Date();
+
+    // Check both variant and product discounts
+    const variantDiscounts = variant?.discounts ?? [];
+    const productDiscounts = product.discounts ?? [];
+    const allDiscounts = [...variantDiscounts, ...productDiscounts];
+
+    if (!allDiscounts.length) return null;
+
+    const activeDiscount = allDiscounts.find(d => {
+      const startOk = !d.startDate || new Date(d.startDate) <= now;
+      const endOk = !d.endDate || new Date(d.endDate) >= now;
+      return startOk && endOk;
+    });
+
+    return activeDiscount || null;
+  };
+
+  const activeDiscount = getActiveDiscount(product, currentVariant);
+
+  // ✅ Calculate discounted price
+  let discountedPrice = originalPrice;
+  if (activeDiscount) {
+    if (activeDiscount.type === "percentage") {
+      discountedPrice = originalPrice - (originalPrice * activeDiscount.value) / 100;
+    } else if (activeDiscount.type === "fixed") {
+      discountedPrice = Math.max(0, originalPrice - activeDiscount.value);
     }
-    return product.minPrice
   }
 
+  // ✅ Final price to use
+  const currentPrice = discountedPrice;
+  const savings = originalPrice - discountedPrice;
+  const selectedPrice = currentPrice;
+
+  const isOutOfStock = (product.totalStock ?? 0) <= 0;
+
   const handleAddToCart = async () => {
+    if (isOutOfStock) return;
     setIsAddingToCart(true)
     await new Promise((resolve) => setTimeout(resolve, 600))
-    dispatch(addToCart({ product, quantity, selectedSize: selectedSize || "3ml" }))
-    toast.success("Added to Cart!", {
-      description: `${product.name} (${selectedSize}) × ${quantity} added to your cart.`,
-      duration: 3000,
-    })
+    cart?.addToCart?.(
+      product,
+      quantity,
+      selectedSize || "3 ml",
+      selectedPrice // ✅ Use discounted price
+    )
+    // toast.success("Added to Cart!", {
+    //   description: `${product.name} (${selectedSize}) × ${quantity} added to your cart.`,
+    //   duration: 3000,
+    // })
     setIsAddingToCart(false)
   }
 
   const handleBuyNow = async () => {
+    if (isOutOfStock) return;
     setIsBuyingNow(true)
     await new Promise((resolve) => setTimeout(resolve, 800))
-    toast.success("Redirecting to Checkout!", {
-      description: `Processing ${product.name} (${selectedSize}) × ${quantity}`,
-      duration: 3000,
-    })
+    // cart?.setCheckoutOnlyItem?.(
+    //   product,
+    //   quantity,
+    //   selectedSize || "3 ml",
+    //   selectedPrice // ✅ Use discounted price
+    // )
+    cart?.addToCart?.(
+      product,
+      quantity,
+      selectedSize || "3 ml",
+      selectedPrice // ✅ Use discounted price
+    )
+    router.push('/checkout')
+    // toast.success("Redirecting to Checkout!", {
+    //   description: `Processing ${product.name} (${selectedSize}) × ${quantity}`,
+    //   duration: 3000,
+    // })
     setIsBuyingNow(false)
   }
+  // const handleAddToCart = async () => {
+  //   if (isOutOfStock) return;
+  //   cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
+  // };
 
-  const handleViewFullDetails = () => {
+  // const handleBuyNow = async () => {
+  //   if (isOutOfStock) return;
+  //   cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize, selectedPrice);
+  // };
+
+  const handleViewFullDetails = async () => {
+    router.push(`/product/${product.slug}`)
     toast.info("Navigating to Product Details", {
       description: "Opening full product page...",
       duration: 2000,
     })
   }
 
-  const handleAddToWishlist = () => {
-    dispatch(toggleWishlist(product))
-    setIsWishlisted(!isWishlisted)
-    toast.success(isWishlisted ? "Removed from Wishlist!" : "Added to Wishlist!", {
-      description: `${product.name} has been ${isWishlisted ? "removed from" : "added to"} your wishlist.`,
-      duration: 3000,
-    })
-  }
+  // const handleAddToWishlist = () => {
+  //   setIsWishlisted(!isWishlisted)
+  //   toast.success(isWishlisted ? "Removed from Wishlist!" : "Added to Wishlist!", {
+  //     description: `${product.name} has been ${isWishlisted ? "removed from" : "added to"} your wishlist.`,
+  //     duration: 2000,
+  //   })
+  // }
+  const handleToggleWishlist = (e?: React.MouseEvent) => {
+    e?.stopPropagation?.();
+    e?.preventDefault?.();
+    if (!wishlist) return;
+    if (isWishlisted) {
+      wishlist.removeFromWishlist?.(product.id);
+      // toast.success("Removed from wishlist");
+    } else {
+      wishlist.addToWishlist?.(product as any);
+      // toast.success("Added to wishlist");
+    }
+  };
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length)
@@ -128,7 +219,9 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
   }
 
-  const sizeOptions = product.variants ? product.variants.map(v => v.size + "ml") : ["3ml", "6ml", "12ml"]
+  const sizeOptions = product.variants
+    ? product.variants.map(v => `${v.size} ${v.unit.toLowerCase()}`)
+    : ["3 ml", "6 ml", "12 ml"]
 
   return (
     <>
@@ -159,6 +252,18 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                 >
                   <Maximize2 className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
+
+                {/* ✅ Discount Badge on Image */}
+                {activeDiscount && (
+                  <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10">
+                    <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 shadow-lg animate-pulse">
+                      <Tag className="h-3 w-3 mr-1" />
+                      {activeDiscount.type === "percentage"
+                        ? `${activeDiscount.value}% OFF`
+                        : `৳${activeDiscount.value} OFF`}
+                    </Badge>
+                  </div>
+                )}
 
                 {/* Image Navigation */}
                 {images.length > 1 && (
@@ -193,21 +298,10 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                           index === currentImageIndex ? "bg-white shadow-lg" : "bg-white/50 hover:bg-white/75",
                         )}
                         onClick={() => setCurrentImageIndex(index)}
-                      >
-                      </Button>
+                      />
                     ))}
                   </div>
                 )}
-
-                {/* Premium Badge */}
-                {/* {product.category === "premium" && (
-                  <div className="absolute top-2 sm:top-4 left-2 sm:left-4">
-                    <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white border-0 text-xs sm:text-sm">
-                      <Sparkles className="h-2 w-2 sm:h-3 sm:w-3 mr-1" />
-                      Premium
-                    </Badge>
-                  </div>
-                )} */}
               </div>
 
               {/* Thumbnail Gallery */}
@@ -248,26 +342,6 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                       <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight break-words">
                         {product.name}
                       </h1>
-
-                      {/* Rating */}
-                      {/* {product.rating && (
-                        <div className="flex items-center gap-2 mt-2">
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={cn(
-                                  "h-3 w-3 sm:h-4 sm:w-4",
-                                  i < Math.floor(product.rating!) ? "text-yellow-400 fill-current" : "text-gray-300",
-                                )}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-xs sm:text-sm text-gray-600">
-                            {product.rating} ({product.reviewCount || 0} reviews)
-                          </span>
-                        </div>
-                      )} */}
                     </div>
 
                     <div className="flex gap-2">
@@ -292,22 +366,50 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                             ? "bg-red-50 border-red-200 text-red-600 hover:bg-red-100"
                             : "hover:bg-red-50 hover:border-red-200",
                         )}
-                        onClick={handleAddToWishlist}
+                        onClick={handleToggleWishlist}
                       >
                         <Heart className={cn("h-4 w-4 sm:h-5 sm:w-5", isWishlisted && "fill-current")} />
                       </Button>
                     </div>
                   </div>
 
-                  {/* Price */}
-                  <div className="space-y-1">
-                    <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-                      {formatPrice(getCurrentPrice())}
+                  {/* ✅ Price with Discount */}
+                  <div className="space-y-2">
+                    <div className="flex items-baseline gap-3 flex-wrap">
+                      {activeDiscount ? (
+                        <>
+                          <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+                            {formatPrice(currentPrice)}
+                          </div>
+                          <div className="text-lg sm:text-xl text-gray-500 line-through decoration-red-500 decoration-2">
+                            {formatPrice(originalPrice)}
+                          </div>
+                          <Badge className="bg-green-100 text-green-700 px-2 py-1 text-xs font-bold border-green-200">
+                            Save {formatPrice(savings)}
+                          </Badge>
+                        </>
+                      ) : (
+                        <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+                          {formatPrice(currentPrice)}
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+
+                    {/* <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse flex-shrink-0"></div>
                       <span className="break-words">In Stock • Free shipping on orders over ৳500</span>
-                    </div>
+                    </div> */}
+
+                    {/* ✅ Discount Info */}
+                    {activeDiscount && (
+                      <div className="p-2 sm:p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                        <div className="text-xs sm:text-sm text-green-700 font-medium">
+                          🎉 Special Offer: {activeDiscount.type === "percentage"
+                            ? `${activeDiscount.value}% discount applied!`
+                            : `৳${activeDiscount.value} flat discount applied!`}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -318,25 +420,40 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                     Size Options
                   </h3>
                   <div className="grid grid-cols-3 gap-2">
-                    {sizeOptions.map((size) => (
-                      <button
-                        key={size}
-                        className={cn(
-                          "p-2 sm:p-3 rounded-lg border-2 text-xs sm:text-sm font-medium transition-all duration-200 hover:shadow-md touch-manipulation",
-                          selectedSize === size
-                            ? "border-red-500 bg-red-50 text-red-700"
-                            : "border-gray-200 hover:border-gray-300",
-                        )}
-                        onClick={() => setSelectedSize(size)}
-                      >
-                        <div className="font-semibold">{size}</div>
-                        {product.variants?.find(v => v.size + "ml" === size)?.price && (
-                          <div className="text-xs text-gray-500 mt-1 break-words">
-                            {formatPrice(product.variants.find(v => v.size + "ml" === size)?.price || 0)}
-                          </div>
-                        )}
-                      </button>
-                    ))}
+                    {sizeOptions.map((size) => {
+                      const variant = product.variants?.find(v => `${v.size} ${v.unit.toLowerCase()}` === size);
+                      const variantDiscount = getActiveDiscount(product, variant);
+                      const hasDiscount = variantDiscount !== null;
+
+                      return (
+                        <button
+                          key={size}
+                          className={cn(
+                            "relative p-2 sm:p-3 rounded-lg border-2 text-xs sm:text-sm font-medium transition-all duration-200 hover:shadow-md touch-manipulation",
+                            selectedSize === size
+                              ? "border-red-500 bg-red-50 text-red-700"
+                              : "border-gray-200 hover:border-gray-300",
+                          )}
+                          onClick={() => setSelectedSize(size)}
+                        >
+                          {/* ✅ Discount badge on size option */}
+                          {hasDiscount && (
+                            <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                              {variantDiscount!.type === "percentage"
+                                ? `-${variantDiscount!.value}%`
+                                : `-৳${variantDiscount!.value}`}
+                            </div>
+                          )}
+
+                          <div className="font-semibold">{size}</div>
+                          {variant?.price && (
+                            <div className="text-xs text-gray-500 mt-1 break-words">
+                              {formatPrice(variant.price)}
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -368,21 +485,8 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                       <Eye className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500 flex-shrink-0" />
                       Description
                     </h3>
-                    <p className="text-gray-700 leading-relaxed text-xs sm:text-sm">{product.description}</p>
-                  </div>
-                )}
-
-                {/* Perfume Notes */}
-                {product.perfumeNotes && (
-                  <div className="space-y-2 sm:space-y-3">
-                    <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm sm:text-base">
-                      <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 flex-shrink-0" />
-                      Fragrance Notes
-                    </h3>
-                    <p className="text-gray-700 leading-relaxed text-xs sm:text-sm">
-                      Top: {product.perfumeNotes.top.join(", ")} <br />
-                      Middle: {product.perfumeNotes.middle.join(", ")} <br />
-                      Base: {product.perfumeNotes.base.join(", ")}
+                    <p className="text-gray-700 leading-relaxed text-xs sm:text-sm line-clamp-3">
+                      {product.description}
                     </p>
                   </div>
                 )}
@@ -446,7 +550,6 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                 )}
               </Button>
 
-              {/* Buy Now Button */}
               <Button
                 className={cn(
                   "flex-1 h-10 sm:h-12 text-sm sm:text-base font-semibold rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] touch-manipulation",
@@ -473,8 +576,15 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
               </Button>
             </div>
 
+            {/* ✅ Total with savings */}
             <div className="text-center text-xs text-gray-500">
-              ✨ Total: {formatPrice(getCurrentPrice() * quantity)} • 30-day return policy
+              ✨ Total: {formatPrice(currentPrice * quantity)}
+              {savings > 0 && (
+                <span className="text-green-600 font-semibold ml-1">
+                  (Save {formatPrice(savings * quantity)})
+                </span>
+              )}
+              {" • 30-day return policy"}
             </div>
           </div>
         </DialogContent>
@@ -503,7 +613,6 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
               />
             </div>
 
-            {/* Navigation in zoom mode */}
             {images.length > 1 && (
               <>
                 <Button
@@ -525,7 +634,6 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
               </>
             )}
 
-            {/* Image counter */}
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
               {currentImageIndex + 1} / {images.length}
             </div>

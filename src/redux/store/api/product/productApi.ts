@@ -1,4 +1,4 @@
-import { IProductAnalytics, IProductQuery, IProductResponse, IProductSearchResult, IRelatedProductsResponse, ITrendingProduct, LowStockProduct } from "@/types/product.types";
+import { IProductAnalytics, IProductQuery, IProductResponse, IProductSearchResult, IRelatedProductsResponse, ITrendingProduct, LowStockProduct, StockLog } from "@/types/product.types";
 import baseApi from "../baseApi";
 
 interface ApiResponse<T> {
@@ -149,6 +149,7 @@ export const productApi = baseApi.injectEndpoints({
     // Get Related Products
     getRelatedProducts: builder.query<IRelatedProductsResponse, string>({
       query: (productId) => `/products/get-related-products/${productId}`,
+      transformResponse: (response: any) => response.data,
       providesTags: ['Product'],
     }),
 
@@ -210,11 +211,21 @@ export const productApi = baseApi.injectEndpoints({
     }),
 
     // Get Bestsellers
-    getBestsellers: builder.query<ITrendingProduct[], void>({
-      query: () => '/products/get-bestsellers',
+    getBestSellers: builder.query<
+      { success: boolean; statusCode: number; message: string; data: ITrendingProduct[] },
+      void
+    >({
+      query: () => '/products/get-best-sellers',
+      providesTags: ['Product'],
+    }),
+
+    // New endpoint for stock logs
+    getStockLogs: builder.query<StockLog[], string>({
+      query: (productId) => `/products/get-stock-logs/${productId}`,
       providesTags: ['Product'],
     }),
   }),
+  overrideExisting: false,
 });
 
 // Export hooks for usage in components
@@ -223,6 +234,7 @@ export const {
   useGetAllProductsQuery,
   useGetAllProductsAdminQuery,
   useGetProductQuery,
+  useLazyGetProductQuery,
   useGetProductBySlugQuery,
   useUpdateProductMutation,
   useDeleteProductMutation,
@@ -237,7 +249,8 @@ export const {
   useUpdateProductStockMutation,
   useGetProductAnalyticsQuery,
   useGetLowStockProductsQuery,
-  useGetBestsellersQuery,
+  useGetBestSellersQuery,
+  useGetStockLogsQuery,
 } = productApi;
 
 export default productApi;

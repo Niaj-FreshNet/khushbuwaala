@@ -4,10 +4,10 @@ import type React from "react"
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Home, Package, Gift, Info, Heart, MapPin, ChevronRight, Sparkles, Star } from "lucide-react"
+import { Home, Package, Gift, Info, Heart, MapPin, ChevronRight, Sparkles, Star, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Sheet, SheetClose, SheetContent } from "@/components/ui/sheet"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
@@ -128,10 +128,26 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="left" className="w-80 p-0 bg-gradient-to-b from-white to-gray-50">
+      <SheetContent side="left"
+        className="w-80 p-0 bg-gradient-to-b from-white to-gray-50 [&>button]:hidden"
+      >
+        {/* Custom Close Button */}
+        <SheetClose asChild>
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 flex items-center justify-center w-9 h-9 rounded-full 
+    bg-gradient-to-r from-red-100 to-pink-100 text-red-600 
+    hover:from-red-200 hover:to-pink-200 hover:text-red-700
+    shadow-sm transition-all duration-300 focus:outline-none focus:ring-0"
+            aria-label="Close menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </SheetClose>
+
         {/* Header with enhanced branding */}
         <div className="p-6 border-b bg-gradient-to-r from-red-50 to-red-100">
-          <Link href="/" onClick={onClose} className="flex items-center space-x-3 group">
+          <Link href="/" onClick={onClose} className="flex items-center justify-center space-x-0 group">
             <div className="relative">
               <Image
                 src="/images/khushbuwaala.webp"
@@ -140,17 +156,17 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                 width={140}
                 height={40}
               />
-              <div className="absolute -inset-1 bg-gradient-to-r from-red-600 to-pink-600 rounded-lg blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r rounded-lg blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
             </div>
-            <div className="flex flex-col">
+            {/* <div className="flex flex-col">
               <span className="text-sm font-semibold text-gray-900">KhushbuWaala</span>
               <span className="text-xs text-gray-600">Premium Fragrances</span>
-            </div>
+            </div> */}
           </Link>
         </div>
 
         {/* Navigation Menu with enhanced styling */}
-        <ScrollArea className="flex-1 px-4 py-6">
+        <ScrollArea className="flex-1 px-4 py-0 overflow-y-auto">
           <nav aria-label="Mobile navigation menu">
             <ul className="space-y-2">
               {menuItems.map((item) => (
@@ -183,9 +199,8 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                               </Badge>
                             )}
                             <ChevronRight
-                              className={`h-4 w-4 transition-transform duration-300 ${
-                                openSubmenu === item.key ? "rotate-90" : ""
-                              }`}
+                              className={`h-4 w-4 transition-transform duration-300 ${openSubmenu === item.key ? "rotate-90" : ""
+                                }`}
                             />
                           </div>
                         </Button>
@@ -248,10 +263,10 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
         {/* Enhanced Footer */}
         <div className="p-6 border-t bg-gradient-to-r from-gray-50 to-gray-100">
           <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-2">
+            {/* <div className="flex items-center justify-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               <span className="text-sm font-medium text-gray-700">Always Available</span>
-            </div>
+            </div> */}
             <p className="text-xs text-gray-500">© 2024 KhushbuWaala</p>
             <p className="text-xs text-gray-400 mt-1">Premium Perfumes & Attars</p>
           </div>

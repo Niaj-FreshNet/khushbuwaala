@@ -3,6 +3,7 @@
 
 export interface IDiscount {
   id: string;
+  productId: string;
   code?: string;
   type: "percentage" | "fixed";
   value: number;
@@ -12,8 +13,17 @@ export interface IDiscount {
   variantId?: string; // null means product-level discount
 }
 
-export interface IProductVariant {
+export interface StockLog {
   id: string;
+  productId: string;
+  change: number;
+  reason: string;
+  createdAt: string;
+  product: { name: string };
+}
+
+export interface IProductVariant {
+  id?: string;
   sku: string;
   unit: string;
   size: number;
@@ -23,6 +33,14 @@ export interface IProductVariant {
 
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface VariantForForm extends Omit<IProductVariant, "size"> {
+  size: string; // force size to be string here
+  price: number;
+  stock?: number;
+  unit: string;
+  sku: string;
 }
 
 // Product Creation Interface
@@ -54,10 +72,16 @@ export interface IProduct {
 
   categoryId: string;
   published: boolean;
+  
+  reviews: IReview[];
+  averageRating: number;
+  reviewCount: number;
 
+  supplier: string;
   stock?: number; // float at product-level
   variants: IProductVariant[];
   discounts?: IDiscount[]; // product-level discounts
+  discount?: number;
 
   // Computed fields
   minPrice: number;
@@ -124,6 +148,22 @@ export interface IProductQuery {
   [key: string]: unknown;
 }
 
+export interface IReview {
+  id: string;
+  rating: number;
+  title: string;
+  comment: string;
+  isPublished: boolean;
+  productId: string;
+  userId?: string;
+  user?: {
+    name: string;
+    imageUrl: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Response Interfaces
 export interface IProductResponse {
   id: string;
@@ -140,7 +180,7 @@ export interface IProductResponse {
   // Perfume specifications
   origin?: string;
   brand?: string;
-  gender?: string;
+  gender?: 'UNISEX' | 'MALE' | 'FEMALE';
   perfumeNotes?: {
     top: string[];
     middle: string[];
@@ -159,9 +199,18 @@ export interface IProductResponse {
     imageUrl: string;
   };
 
+  materialIds: string[];
+  fragranceIds: string[];
+
+  reviews: IReview[];
+  averageRating: number;
+  reviewCount: number;
+
+  supplier: string;
   stock?: number;
   variants: IProductVariantResponse[];
   discounts?: IDiscount[];
+  price?: number;
 
   // Computed fields
   minPrice: number;
@@ -180,7 +229,7 @@ export interface IProductVariantResponse {
   size: number;
   price: number;
   stock?: number;
-  productId: string;
+  productId?: string;
   createdAt: Date;
   updatedAt: Date;
 }

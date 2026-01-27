@@ -42,6 +42,7 @@ export function SectionTitle({
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
+          // setTimeout(() => setIsVisible(true), 100)
           setIsVisible(true)
         }
       },
@@ -127,7 +128,7 @@ export function SectionTitle({
   const underlineStyles = getUnderlineStyles()
 
   return (
-    <div ref={titleRef} className={cn("text-center py-8 relative overflow-hidden", styles.container, className)}>
+    <div ref={titleRef} className={cn("text-center py-4 relative overflow-hidden", styles.container, className)}>
       {/* Background Decorations */}
       {showDecorations && (
         <>
@@ -171,7 +172,7 @@ export function SectionTitle({
       {/* Icon and Title Container */}
       <div className="relative z-10">
         {/* Icon */}
-        {icon && (
+        {/* {icon && (
           <div
             className={cn(
               "flex justify-center mb-4 transform transition-all duration-700",
@@ -182,7 +183,7 @@ export function SectionTitle({
               <div className="text-red-600">{icon}</div>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Main Title */}
         <h2
@@ -222,7 +223,7 @@ export function SectionTitle({
         {subtitle && (
           <p
             className={cn(
-              "text-gray-600 text-lg md:text-xl mb-4 max-w-2xl mx-auto transform transition-all duration-700",
+              "text-gray-600 text-md md:text-lg mb-4 max-w-2xl mx-auto transform transition-all duration-700",
               animated && (isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"),
             )}
             style={{ transitionDelay: "0.2s" }}

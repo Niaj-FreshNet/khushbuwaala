@@ -64,7 +64,7 @@ export function ShopBanner({
 
   return (
     <section
-      className="relative w-full h-[320px] md:h-[450px] lg:h-[550px] overflow-hidden mt-16 group"
+      className="relative w-full h-[320px] md:h-[450px] lg:h-[550px] overflow-hidden mt-10 group"
       aria-labelledby="shop-banner-heading"
     >
       {/* Enhanced Background Images with Parallax Effect */}

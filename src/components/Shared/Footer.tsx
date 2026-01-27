@@ -92,6 +92,12 @@ export const Footer = () => {
           badge: "24/7",
           description: "We're here to help",
         },
+        {
+          label: "Store Locator",
+          href: "/stores",
+          icon: <MapPin className="h-4 w-4" />,
+          description: "Find stores near you",
+        },
       ],
     },
     {
@@ -100,15 +106,10 @@ export const Footer = () => {
       underlineWidth: "w-16",
       links: [
         { label: "About Us", href: "/about", description: "Our story and mission" },
+        { label: "Blog", href: "/blog", description: "Know about perfumes" },
         { label: "News & Updates", href: "/news", description: "Latest company news" },
         { label: "Our Values", href: "/manifesto", description: "What we believe in" },
         { label: "Careers", href: "/career", badge: "Hiring", description: "Join our team" },
-        {
-          label: "Store Locator",
-          href: "/stores",
-          icon: <MapPin className="h-4 w-4" />,
-          description: "Find stores near you",
-        },
       ],
     },
     {
@@ -175,7 +176,7 @@ export const Footer = () => {
                 height={48}
               />
             </Link>
-            <p className="mt-4 text-gray-600 max-w-md mx-auto">
+            <p className="mt-4 text-gray-600 text-sm max-w-md mx-auto">
               Crafting exceptional fragrances that tell your unique story. Premium quality, authentic ingredients,
               unforgettable scents.
             </p>

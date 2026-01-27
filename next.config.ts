@@ -1,36 +1,25 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
+
   images: {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "i.ibb.co.com",
-        port: "",
+        hostname: "res.cloudinary.com",
         pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "i.ibb.co",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "placeholder.svg",
-        port: "",
         pathname: "/**",
       },
     ],
-    domains: ["i.ibb.co.com", "i.ibb.co", "placeholder.svg"],
-    unoptimized: true,
+    domains: ["res.cloudinary.com", "i.ibb.co"],
   },
+
   experimental: {
     optimizePackageImports: ["@radix-ui/react-icons"],
   },

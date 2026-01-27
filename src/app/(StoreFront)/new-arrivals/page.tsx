@@ -1,39 +1,40 @@
+import { Suspense } from "react";
+import { Metadata } from "next";
 import { NoticeBar } from "@/components/Modules/Shop/NoticeBar";
 import { ShopBanner } from "@/components/Modules/Shop/ShopBanner";
 import { ShopProducts } from "@/components/Modules/Shop/ShopProducts";
-import type { Metadata } from "next";
+import { initializeStore } from "@/redux/store/ssrStore";
+import { productApi } from "@/redux/store/api/product/productApi";
+import { IProductResponse } from "@/types/product.types";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// SEO: Enhanced page-specific metadata
+// ✅ SEO Metadata
 export const metadata: Metadata = {
-  title: "Shop - Premium Perfume Oil Collection | KhushbuWaala",
+  title: "New Arrivals - Latest Perfume Oil Collection | KhushbuWaala",
   description:
-    "Discover KhushbuWaala's world-class perfume oil collection. Premium quality fragrances with free nationwide shipping on orders over ৳1000. Up to 50% off selected items!",
+    "Discover the newest perfume oils from KhushbuWaala. Premium quality, inspired and oriental fragrances — freshly added to our collection!",
   keywords: [
-    "perfume oil",
+    "new perfume arrivals",
+    "latest perfume oil",
+    "KhushbuWaala new collection",
     "premium fragrance",
     "attar collection",
-    "KhushbuWaala shop",
-    "online perfume store",
-    "natural fragrance",
-    "oriental perfume",
-    "inspired perfume oil",
-    "artificial oud",
     "Bangladesh perfume",
   ].join(", "),
   alternates: {
-    canonical: "https://khushbuwaala.com/shop",
+    canonical: "https://khushbuwaala.com/new-arrivals",
   },
   openGraph: {
-    title: "Shop - Premium Perfume Oil Collection | KhushbuWaala",
+    title: "New Arrivals - Latest Perfume Oil Collection | KhushbuWaala",
     description:
-      "Explore our curated collection of world-class perfume oils. Premium quality, authentic fragrances with fast delivery across Bangladesh.",
-    url: "https://khushbuwaala.com/shop",
+      "Explore KhushbuWaala's latest perfume oil arrivals. Authentic, luxurious, and freshly added fragrances.",
+    url: "https://khushbuwaala.com/new-arrivals",
     images: [
       {
         url: "/images/n111.webp",
         width: 1920,
         height: 550,
-        alt: "KhushbuWaala Premium Perfume Oil Collection",
+        alt: "KhushbuWaala New Perfume Arrivals",
       },
     ],
     type: "website",
@@ -41,9 +42,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Shop Premium Perfume Oils | KhushbuWaala",
+    title: "New Perfume Arrivals | KhushbuWaala",
     description:
-      "Discover authentic fragrances with free shipping on orders over ৳1000",
+      "Shop the latest perfume oils freshly added to KhushbuWaala’s premium fragrance collection.",
     images: ["/images/n111.webp"],
   },
   robots: {
@@ -59,18 +60,18 @@ export const metadata: Metadata = {
   },
 };
 
-// Enhanced structured data for the shop page
-const shopStructuredData = {
+// ✅ Structured Data
+const newArrivalStructuredData = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
-  name: "Premium Perfume Oil Collection",
+  name: "New Arrivals - Perfume Oil Collection",
   description:
-    "Explore KhushbuWaala's curated collection of world-class perfume oils and fragrances",
-  url: "https://khushbuwaala.com/shop",
+    "Discover the newest perfume oils and fragrances from KhushbuWaala’s premium collection.",
+  url: "https://khushbuwaala.com/new-arrivals",
   mainEntity: {
     "@type": "ItemList",
-    name: "Perfume Oil Products",
-    description: "Premium quality perfume oils and fragrances",
+    name: "New Perfume Oil Products",
+    description: "Premium quality new arrival perfume oils and fragrances",
   },
   breadcrumb: {
     "@type": "BreadcrumbList",
@@ -84,17 +85,23 @@ const shopStructuredData = {
       {
         "@type": "ListItem",
         position: 2,
-        name: "Shop",
-        item: "https://khushbuwaala.com/shop",
+        name: "New Arrivals",
+        item: "https://khushbuwaala.com/new-arrivals",
       },
     ],
   },
 };
 
-export default function ForWomenPage() {
+// ✅ Page Component
+export default async function NewArrivalsPage() {
+  const store = initializeStore();
 
-  const section = "newArrival";
+  // Fetch only new arrival products from API
+  const { data } = await store.dispatch(productApi.endpoints.getNewArrivals.initiate(undefined));
 
+  const products: IProductResponse[] = data || [];
+
+  // Static notices reused from Shop page
   const notices = [
     "🚚 Free Nationwide Shipping on Orders Over ৳1000",
     "🔥 Up to 50% Off on Selected Premium Items",
@@ -104,33 +111,74 @@ export default function ForWomenPage() {
   ];
 
   return (
-    <div className="w-full mx-auto">
-      {/* Shop Banner */}
-      <ShopBanner
-        heading="Get The Latest Perfume Oil Editions"
-        text="Choose Your Desired Perfume Oil from New Arrivals"
-        buttonText={"Shop Now"}
-        link={"/oriental-collection"}
-        images={{
-          desktop: "/images/n111.png",
-          mobile: "/images/n1.webp",
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(newArrivalStructuredData),
         }}
-        altText="Banner displaying the best quality perfume oil collection"
-        variant="premium"
       />
-
-      {/* Enhanced Notice Bar */}
-      <div className="py-8 bg-gradient-to-r from-gray-50 via-white to-gray-50">
-        <NoticeBar
-          heading="Womens Perfume Oil"
-          notices={notices}
-          interval={4500}
+      <div className="w-full mx-auto">
+        {/* ✅ Banner */}
+        <ShopBanner
+          heading="Get The Latest Perfume Oil Editions"
+          text="Choose Your Desired Perfume Oil from Our New Arrivals"
+          buttonText="Shop Now"
+          link="/shop"
+          images={{
+            desktop: "/images/n111.png",
+            mobile: "/images/n1.webp",
+          }}
+          altText="Banner displaying the newest perfume oil arrivals"
+          variant="premium"
         />
-      </div>
 
-      {/* Enhanced Shop Products Section */}
-      <div id="products" className="bg-white pt-0 pb-8">
-        <ShopProducts section={section} />
+        {/* ✅ Notice Bar */}
+        <div className="py-8 bg-gradient-to-r from-gray-50 via-white to-gray-50">
+          <NoticeBar
+            heading="New Arrival Perfume Oils"
+            notices={notices}
+            interval={4500}
+          />
+        </div>
+
+        {/* ✅ Product Section */}
+        <div id="products" className="bg-white pt-0 pb-8">
+          <Suspense fallback={<ShopProductsSkeleton />}>
+            <ShopProducts
+              initialProducts={products}
+              section="newArrival"
+              totalPages={1}
+              initialPage={1}
+            />
+          </Suspense>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ✅ Skeleton Loader
+function ShopProductsSkeleton() {
+  return (
+    <div className="container mx-auto py-8 px-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className="border border-gray-100 rounded-xl shadow-sm overflow-hidden"
+          >
+            <Skeleton className="w-full h-64 rounded-t-xl" />
+            <div className="p-4 space-y-3">
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+              <div className="flex gap-2 pt-2">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton className="h-10 flex-1 rounded-lg" />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

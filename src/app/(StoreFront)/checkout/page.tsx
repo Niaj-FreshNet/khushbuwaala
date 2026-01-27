@@ -19,17 +19,75 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ShieldCheck, Truck, CreditCard, Percent, Info, Phone } from "lucide-react"
 import { toast } from "sonner"
-
-import { useCart } from "@/lib/store/hooks/useCart"
-import { useCreateOrderMutation } from "@/redux/store/api/order/ordersApi"
-import { useAppDispatch } from "@/lib/store/hooks"
-import { setOrder } from "@/lib/store/features/orders/ordersSlice"
+import { useAppDispatch } from "@/redux/store/hooks"
+import { useCart } from "@/redux/store/hooks/useCart"
+import { useOrder } from "@/redux/store/hooks/useOrder"
 import StoreContainer from "@/components/Layout/StoreContainer"
+import { useCreateBkashPaymentMutation } from "@/redux/store/api/payment/paymentApi"
 
+// --- Types ---
 type ShippingMethod = "insideDhaka" | "outsideDhaka"
-type PaymentMethod = "sslCommerz" | "cashOnDelivery"
+type PaymentMethod = "bkash" | "cashOnDelivery"
 type BillingType = "sameAsShipping" | "differentBillingAddress"
 
+interface CartItem {
+  id: string
+  quantity: number
+  selectedSize?: string
+  product?: {
+    id: string
+    name: string
+    primaryImage: string
+    variants?: { size: number; unit: string; price: number }[]
+  }
+}
+
+interface IOrderPayload {
+  cartItemIds: string[]
+  amount: number
+  isPaid?: boolean
+  method: string
+  orderSource?: "WEBSITE"
+  saleType?: "SINGLE"
+  shippingCost?: number
+  additionalNotes?: string
+  customerInfo?: {
+    name?: string
+    phone?: string
+    email?: string
+    address?: string
+    district?: string
+    thana?: string
+  }
+  shippingAddress?: {
+    name?: string
+    phone?: string
+    email?: string
+    address?: string
+    district?: string
+    thana?: string
+  }
+  billingAddress?: {
+    name?: string
+    phone?: string
+    email?: string
+    address?: string
+    district?: string
+    thana?: string
+  }
+}
+
+interface IOrderResponse {
+  id: string
+  amount: number
+  isPaid: boolean
+  status: string
+  orderSource: string
+  createdAt: string
+  updatedAt: string
+}
+
+// --- Districts ---
 const districts = [
   "Bagerhat", "Bandarban", "Barguna", "Barishal", "Bhola", "Bogura", "Brahmanbaria", "Chandpur",
   "Chattogram", "Chuadanga", "Cox's Bazar", "Cumilla", "Dhaka", "Dinajpur", "Faridpur", "Feni",
@@ -44,11 +102,11 @@ const districts = [
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { cartItems, calculateSubtotal, checkoutMode, checkoutItem, clearCart } = useCart()
-  const [createOrder, { isLoading: isPlacingOrder }] = useCreateOrderMutation()
+  const { cartItems, checkoutItem, checkoutMode, calculateSubtotal, proceedToCartCheckout, clearCart } = useCart()
   const dispatch = useAppDispatch()
+  const { handleCreateOrder, loading: isPlacingOrder } = useOrder()
 
-  // UI state
+  // --- UI state ---
   const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false)
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod>("insideDhaka")
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cashOnDelivery")
@@ -56,43 +114,80 @@ export default function CheckoutPage() {
   const [selectedDistrict, setSelectedDistrict] = useState<string | undefined>(undefined)
   const [customThana, setCustomThana] = useState("")
 
-  // Form state
+  // --- Form state ---
   const [name, setName] = useState("")
   const [address, setAddress] = useState("")
   const [contactNumber, setContactNumber] = useState("")
   const [email, setEmail] = useState("")
-  const [notes, setNotes] = useState("")
+  const [additionalNotes, setAdditionalNotes] = useState("")
 
-  // UX state
-  const [agreeToTerms, setAgreeToTerms] = useState(false)
+  const [agreeToTerms, setAgreeToTerms] = useState(true)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Promotions
+  // --- Promotions ---
   const [promoCode, setPromoCode] = useState("")
   const [appliedPromoCode, setAppliedPromoCode] = useState<string | null>(null)
   const [discount, setDiscount] = useState(0)
 
-  // Billing details (when different)
+  // --- Billing details ---
   const [billingName, setBillingName] = useState("")
   const [billingAddress, setBillingAddress] = useState("")
   const [billingDistrict, setBillingDistrict] = useState("")
   const [billingThana, setBillingThana] = useState("")
   const [billingContactNumber, setBillingContactNumber] = useState("")
 
+  const [createBkashPayment, { isLoading: isBkashRedirecting }] =
+    useCreateBkashPaymentMutation();
+
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.scrollTo(0, 0)
-    }
+    if (typeof window !== "undefined") window.scrollTo(0, 0)
   }, [])
 
+  // --- Items to display ---
   const itemsToDisplay = useMemo(() => {
-    return checkoutMode && checkoutItem ? [checkoutItem] : cartItems
+    if (checkoutMode && checkoutItem) {
+      return [
+        {
+          id: checkoutItem.product.id,
+          quantity: checkoutItem.quantity,
+          selectedSize: checkoutItem.selectedSize,
+          product: checkoutItem.product,
+        },
+      ]
+    }
+    return cartItems
   }, [checkoutMode, checkoutItem, cartItems])
+  // console.log(itemsToDisplay)
+
+  // --- Shipping & totals ---
+  // 🧩 Shipping logic
+  useEffect(() => {
+    if (!selectedDistrict) return;
+
+    if (selectedDistrict === "Dhaka") {
+      if (shippingMethod !== "insideDhaka") {
+        setShippingMethod("insideDhaka");
+        toast.info("Dhaka is inside Dhaka — shipping set automatically to Inside Dhaka.");
+      }
+    } else {
+      if (shippingMethod !== "outsideDhaka") {
+        setShippingMethod("outsideDhaka");
+        toast.info(`${selectedDistrict} is outside Dhaka — shipping set automatically to Outside Dhaka.`);
+      }
+    }
+  }, [selectedDistrict]);
 
   const shippingCost = useMemo(() => (shippingMethod === "outsideDhaka" ? 110 : 50), [shippingMethod])
-  const subtotal = useMemo(() => calculateSubtotal(), [calculateSubtotal])
+
+  const subtotal = useMemo(() => {
+    if (checkoutMode && checkoutItem) {
+      return checkoutItem.selectedPrice * checkoutItem.quantity
+    }
+    return calculateSubtotal()
+  }, [checkoutMode, checkoutItem, calculateSubtotal])
+
   const estimatedTaxes = 0
-  const discountedSubtotal = useMemo(() => Math.max(0, subtotal - discount), [subtotal, discount])
+  const discountedSubtotal = Math.max(0, subtotal - discount)
   const total = discountedSubtotal + estimatedTaxes + shippingCost
 
   const formatBDT = (amount: number) =>
@@ -105,48 +200,38 @@ export default function CheckoutPage() {
       .replace("BDT", "৳")
       .trim()
 
+  // --- Validation ---
   const validateForm = () => {
     const nextErrors: Record<string, string> = {}
     if (!name.trim()) nextErrors.name = "Please enter your full name."
     if (!address.trim()) nextErrors.address = "Please enter your full address."
     if (!selectedDistrict) nextErrors.district = "Please select your district."
-    const phone = contactNumber.replace(/\D/g, "")
-    if (phone.length < 10) nextErrors.contactNumber = "Please enter a valid phone number."
+    if (contactNumber.replace(/\D/g, "").length < 10)
+      nextErrors.contactNumber = "Please enter a valid phone number."
     setErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
   }
 
+  // --- Promo code ---
   const applyPromo = () => {
-    if (!promoCode.trim()) {
-      toast.error("Enter a promo code to apply")
-      return
-    }
+    if (!promoCode.trim()) return toast.error("Enter a promo code")
     if (appliedPromoCode) {
       setAppliedPromoCode(null)
       setDiscount(0)
       setPromoCode("")
-      toast.success("Promo removed")
-      return
+      return toast.success("Promo removed")
     }
     const code = promoCode.trim().toUpperCase()
     let newDiscount = 0
-    if (code === "WELCOME10") {
-      newDiscount = Math.min(subtotal * 0.1, 300)
-    } else if (code === "SAVE100") {
-      newDiscount = 100
-    } else {
-      toast.error("Invalid promo code")
-      return
-    }
-    if (subtotal <= 0) {
-      toast.error("Your cart is empty")
-      return
-    }
+    if (code === "WELCOME10") newDiscount = Math.min(subtotal * 0.1, 300)
+    else if (code === "SAVE100") newDiscount = 100
+    else return toast.error("Invalid promo code")
     setAppliedPromoCode(code)
     setDiscount(newDiscount)
     toast.success(`Promo applied: -${formatBDT(newDiscount)}`)
   }
 
+  // --- Submit order ---
   const handleSubmit = async () => {
     if (!validateForm()) {
       toast.error("Please fix the highlighted fields")
@@ -157,47 +242,115 @@ export default function CheckoutPage() {
       return
     }
 
-    const orderDetails = {
-      cartItems: itemsToDisplay,
-      subtotal,
-      discount,
-      shippingCost,
-      estimatedTaxes,
-      total,
-      paymentMethod,
-      shippingMethod,
-      postStatus: "Pending",
-      paymentStatus: paymentMethod === "cashOnDelivery" ? "Due" : "Paid",
-      notes,
-      promoCode: appliedPromoCode,
-      contactInfo: { email },
+    const cartItemIds = itemsToDisplay
+      .map((item) => item.cartItemId)
+      .filter(Boolean) as string[] // ensure only valid strings
+    // const cartItemIds = itemsToDisplay
+    //   .map((item: any) => item.id)
+    //   .filter(Boolean) as string[]
+
+    console.log(cartItemIds)
+
+    const payload: IOrderPayload = {
+      cartItemIds,
+      amount: total,
+      // isPaid: paymentMethod !== "cashOnDelivery",
+      isPaid: false, // always false at order create; gateway will mark paid after callback
+      method: paymentMethod,
+      orderSource: "WEBSITE",
+      saleType: "SINGLE",
+      shippingCost: Number(shippingCost),
+      additionalNotes: additionalNotes,
+      customerInfo: {
+        name,
+        phone: contactNumber,
+        email,
+        address,
+        district: selectedDistrict,
+        thana: customThana,
+      },
       shippingAddress: {
         name,
+        phone: contactNumber,
+        email,
         address,
-        district: selectedDistrict as string,
+        district: selectedDistrict,
         thana: customThana,
-        contactNumber,
       },
       billingAddress:
         billingType === "sameAsShipping"
-          ? { name, address, district: selectedDistrict as string, thana: customThana, contactNumber }
+          ? {
+            name,
+            phone: contactNumber,
+            email,
+            address,
+            district: selectedDistrict,
+            thana: customThana,
+          }
           : {
             name: billingName,
+            phone: billingContactNumber,
             address: billingAddress,
             district: billingDistrict,
             thana: billingThana,
-            contactNumber: billingContactNumber,
           },
     }
 
     try {
-      const data = await createOrder(orderDetails).unwrap()
-      dispatch(setOrder({ ...orderDetails, orderId: data.orderId, createdAt: new Date().toISOString() }))
-      clearCart()
-      router.push(`/thank-you?orderId=${encodeURIComponent(data.orderId)}`)
+      // const res: IOrderResponse = await handleCreateOrder(payload)
+      // proceedToCartCheckout()
+      // router.push(`/thank-you?order=${encodeURIComponent(res.data.id)}`)
+      // clearCart()
+
+      const res: any = await handleCreateOrder(payload);
+
+      // ✅ Clear cart state only after order created successfully
+      proceedToCartCheckout();
+
+      const orderId = res?.data?.id || res?.id;
+      if (!orderId) {
+        toast.error("Order created but orderId missing.");
+        return;
+      }
+      const payToken = res?.data?.payToken || res?.payToken;
+      if (!payToken) {
+        toast.error("Order created but payToken missing.");
+        return;
+      }
+
+      // ✅ If COD -> normal flow
+      if (paymentMethod === "cashOnDelivery") {
+        clearCart();
+        router.push(`/thank-you?order=${encodeURIComponent(orderId)}`);
+        return;
+      }
+
+      // ✅ If bKash -> create payment and redirect
+      if (paymentMethod === "bkash") {
+        try {
+          const bkashRes = await createBkashPayment({ orderId, payToken }).unwrap();
+
+          // optional: save for success page verification if you want
+          if (typeof window !== "undefined") {
+            localStorage.setItem("lastBkashOrderId", orderId);
+            localStorage.setItem("lastBkashPaymentID", bkashRes.paymentID);
+          }
+
+          clearCart();
+          window.location.href = bkashRes.bkashURL; // 🔥 redirect to bKash
+          return;
+        } catch (e: any) {
+          console.error(e);
+          toast.error(e?.data?.message || "Failed to start bKash payment.");
+          // Keep order in DB; user can retry from an order details page later
+          router.push(`/thank-you?order=${encodeURIComponent(orderId)}`);
+          return;
+        }
+      }
+
     } catch (err) {
       console.error(err)
-      alert("Failed to complete the order. Please try again.")
+      toast.error("Failed to place order. Please try again.")
     }
   }
 
@@ -239,21 +392,19 @@ export default function CheckoutPage() {
               <Card>
                 <CardContent className="p-4 space-y-3">
                   {itemsToDisplay.map((product, idx) => {
-                    const unit = product.variantPrices?.[product.size] ?? product.price ?? 0
-                    const line = unit * product.quantity
                     return (
-                      <div key={`${product._id}-${product.size}-${idx}`} className="flex items-start gap-3">
+                      <div key={`${product.product?.id}-${product.selectedSize}-${idx}`} className="flex items-start gap-3">
                         <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100">
-                          <Image src={product.primaryImage} alt={product.name} fill className="object-cover" />
+                          <Image src={product.product?.primaryImage} alt={product.product?.name} fill className="object-cover" />
                           <div className="absolute -top-2 -right-2 text-xs bg-gray-200 text-black rounded-full px-2 py-0.5">
                             {product.quantity}
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{product.name}</p>
-                          <p className="text-xs text-gray-500">Size: {product.size}</p>
+                          <p className="text-sm font-medium truncate">{product.product?.name}</p>
+                          <p className="text-xs text-gray-500">Size: {product.selectedSize}</p>
                         </div>
-                        <div className="text-sm font-medium">{formatBDT(line)}</div>
+                        <div className="text-sm font-medium">{formatBDT(subtotal)}</div>
                       </div>
                     )
                   })}
@@ -386,9 +537,31 @@ export default function CheckoutPage() {
                 <CardTitle className="text-md">Shipping Method</CardTitle>
               </CardHeader>
               <CardContent>
-                <RadioGroup
+                {/* <RadioGroup
                   value={shippingMethod}
                   onValueChange={(v) => setShippingMethod(v as ShippingMethod)}
+                  className="gap-3" */}
+                <RadioGroup
+                  value={shippingMethod}
+                  onValueChange={(v) => {
+                    // 🧩 Handle restricted manual change
+                    if (!selectedDistrict) {
+                      toast.warning("Please select your district first.");
+                      return;
+                    }
+
+                    if (selectedDistrict === "Dhaka" && v === "outsideDhaka") {
+                      toast.error("Dhaka is inside Dhaka. You cannot choose Outside Dhaka shipping.");
+                      return;
+                    }
+
+                    if (selectedDistrict !== "Dhaka" && v === "insideDhaka") {
+                      toast.error(`${selectedDistrict} is outside Dhaka. You cannot choose Inside Dhaka shipping.`);
+                      return;
+                    }
+
+                    setShippingMethod(v as ShippingMethod);
+                  }}
                   className="gap-3"
                 >
                   <label className="flex items-center gap-3 border rounded-md p-3 hover:bg-gray-50 transition-colors">
@@ -419,8 +592,8 @@ export default function CheckoutPage() {
                     placeholder="Add any specific instructions or notes for your order"
                     rows={4}
                     className="w-full p-3 border rounded-md bg-white"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
+                    value={additionalNotes}
+                    onChange={(e) => setAdditionalNotes(e.target.value)}
                   />
                 </div>
               </CardContent>
@@ -490,33 +663,42 @@ export default function CheckoutPage() {
                   onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}
                   className="gap-3"
                 >
-                  <label className="flex items-center gap-3 border rounded-md p-3 opacity-60 cursor-not-allowed">
-                    <RadioGroupItem value="sslCommerz" disabled />
-                    <span className="text-sm">Pay First (Online Payment)</span>
+                  <label className="flex items-center gap-3 border rounded-md p-3 hover:bg-gray-50 transition-colors">
+                    <RadioGroupItem value="bkash" />
+                    <span className="text-sm">Pay with bKash (Online Payment)</span>
                   </label>
+
                   <label className="flex items-center gap-3 border rounded-md p-3 hover:bg-gray-50 transition-colors">
                     <RadioGroupItem value="cashOnDelivery" />
                     <span className="text-sm">Cash on Delivery (COD)</span>
                   </label>
+
                   {paymentMethod === "cashOnDelivery" && (
                     <p className="text-xs text-gray-600 px-1">
-                      Free shipping for items over 1,000 Taka. Shipping charge applied for items below 1,000 Taka.
+                      Shipping charge applied based on location.
                     </p>
                   )}
                 </RadioGroup>
-              
-              <div className="flex items-center gap-2 pt-2">
-                <Checkbox id="terms" checked={agreeToTerms} onCheckedChange={(v) => setAgreeToTerms(Boolean(v))} />
-                <label htmlFor="terms" className="text-sm text-gray-600">
-                  I agree to the Terms & Conditions and Privacy Policy
-                </label>
-              </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <Checkbox id="terms" checked={agreeToTerms} onCheckedChange={(v) => setAgreeToTerms(Boolean(v))} />
+                  <label htmlFor="terms" className="text-sm text-gray-600">
+                    I agree to the Terms & Conditions and Privacy Policy
+                  </label>
+                </div>
               </CardContent>
             </Card>
 
             <div className="space-y-3">
-              <Button onClick={handleSubmit} className="w-full h-14 text-lg font-bold" variant="gradient" disabled={isPlacingOrder || !agreeToTerms}>
-                {isPlacingOrder ? "Placing Order…" : "Complete Order"}
+              <Button
+                variant="default"
+                className="w-full h-14 text-lg font-bold cursor-pointer"
+                onClick={handleSubmit}
+                disabled={isPlacingOrder || isBkashRedirecting}
+              >
+                {isPlacingOrder || isBkashRedirecting
+                  ? "Processing..."
+                  : "Complete Order"}
               </Button>
               <div className="flex items-center justify-center gap-6 text-xs text-gray-600">
                 <div className="flex items-center gap-1"><ShieldCheck className="h-3 w-3 text-green-600" /> SSL Secure</div>
@@ -536,19 +718,35 @@ export default function CheckoutPage() {
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
                     {itemsToDisplay.map((product, idx) => {
-                      const unit = product.variantPrices?.[product.size] ?? product.price ?? 0
-                      const line = unit * product.quantity
+
+                      // 🧩 Extract size and unit from selectedSize like "100 ml"
+                      const [sizeValue, sizeUnit] = product?.selectedSize?.split(" ") || [];
+
+                      // 🧩 Find the matching variant by size and unit
+                      const matchedVariant = product?.product?.variants?.find(
+                        (v: any) =>
+                          Number(v.size) === Number(sizeValue) &&
+                          v.unit?.toLowerCase() === sizeUnit?.toLowerCase()
+                      );
+
+                      // 🧩 Define selectedPrice from the matched variant
+                      const selectedPrice = matchedVariant?.price || 0;
+
+                      // const price = item.variantPrices?.[item.size] || item.price || 0
+                      const price = selectedPrice
+                      const line = price * product.quantity
+
                       return (
-                        <div key={`${product._id}-${product.size}-${idx}`} className="flex items-start gap-3">
+                        <div key={`${product.product?.id}-${product.selectedSize}-${idx}`} className="flex items-start gap-3">
                           <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100">
-                            <Image src={product.primaryImage} alt={product.name} fill className="object-cover" />
+                            <Image src={product.product?.primaryImage} alt={product.product?.name} fill className="object-cover" />
                             <div className="absolute -top-2 -right-2 text-xs bg-gray-200 text-black rounded-full px-2 py-0.5">
                               {product.quantity}
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{product.name}</p>
-                            <p className="text-xs text-gray-500">Size: {product.size}</p>
+                            <p className="text-sm font-medium truncate">{product.product?.name}</p>
+                            <p className="text-xs text-gray-500">Size: {product.selectedSize}</p>
                           </div>
                           <div className="text-sm font-medium">{formatBDT(line)}</div>
                         </div>
