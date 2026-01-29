@@ -1,84 +1,244 @@
 "use client"
 
 import Image from "next/image"
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-import Autoplay from "embla-carousel-autoplay"
-import * as React from "react"
 import Link from "next/link"
+import * as React from "react"
+import Autoplay from "embla-carousel-autoplay"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 
-// Image assets (using placeholder for now)
-const home1 = "/placeholder.svg?height=660&width=1920"
-const home2 = "/placeholder.svg?height=660&width=1920"
+const home1 = "/hero1.png"
+const home2 = "/hero2.png"
+const home3 = "/hero3.png"
 
-// Client Component - Due to carousel interactivity
+type Slide = {
+  src: string
+  alt: string
+  primaryText: string
+  primaryLink: string
+  secondaryText?: string
+  secondaryLink?: string
+}
+
 export function CarouselSlider() {
-  const plugin = React.useRef(Autoplay({ delay: 4000, stopOnInteraction: false }))
+  const reduce = useReducedMotion()
 
-  const slides = [
+  const plugin = React.useRef(
+    Autoplay({ delay: 4500, stopOnInteraction: false, stopOnMouseEnter: true })
+  )
+
+  const slides: Slide[] = [
     {
       src: home1,
-      alt: "Exquisite Perfume Collection",
-      heading: "Discover Your Signature Scent",
-      text: "Explore our curated collection of premium fragrances that define elegance and individuality.",
-      buttonText: "Shop Now",
-      buttonLink: "/shop",
+      alt: "KhushbuWaala Premium Perfumes",
+      primaryText: "Shop Now",
+      primaryLink: "/shop",
+      secondaryText: "Explore Collections",
+      secondaryLink: "/shop",
     },
     {
       src: home2,
-      alt: "Luxury Fragrance Bottles",
-      heading: "Unleash Your Inner Aura",
-      text: "Find the perfect perfume that resonates with your unique personality and leaves a lasting impression.",
-      buttonText: "Explore Collections",
-      buttonLink: "/shop",
+      alt: "KhushbuWaala Attars & Oud",
+      primaryText: "Explore Collections",
+      primaryLink: "/shop",
+      secondaryText: "Best Sellers",
+      secondaryLink: "/shop?section=bestSeller",
+    },
+    {
+      src: home3,
+      alt: "KhushbuWaala Attars & Oud",
+      primaryText: "Explore Collections",
+      primaryLink: "/shop",
+      secondaryText: "Best Sellers",
+      secondaryLink: "/shop?section=bestSeller",
     },
   ]
 
+  const [api, setApi] = React.useState<any>(null)
+  const [active, setActive] = React.useState(0)
+  const [snapCount, setSnapCount] = React.useState(slides.length)
+
+  React.useEffect(() => {
+    if (!api) return
+    setSnapCount(api.scrollSnapList().length)
+    setActive(api.selectedScrollSnap())
+
+    const onSelect = () => setActive(api.selectedScrollSnap())
+    api.on("select", onSelect)
+    api.on("reInit", onSelect)
+
+    return () => {
+      api.off("select", onSelect)
+      api.off("reInit", onSelect)
+    }
+  }, [api])
+
+  const goTo = (index: number) => api?.scrollTo(index)
+
+  // CTA entrance (safe + premium)
+  const ctaWrap = reduce
+    ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
+    : {
+      hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
+      show: {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        transition: { duration: 0.45, ease: "easeOut" },
+      },
+      exit: { opacity: 0, y: 6, transition: { duration: 0.2 } },
+    }
+
   return (
-    <section className="w-full overflow-hidden relative mb-6" aria-label="Hero Carousel of Perfumes">
-      <Carousel
-        plugins={[plugin.current]}
-        className="w-full"
-        onMouseEnter={plugin.current.stop}
-        onMouseLeave={plugin.current.reset}
-      >
+    <section className="w-full overflow-hidden relative mb-6" aria-label="Hero Carousel">
+      <Carousel setApi={setApi} plugins={[plugin.current]} className="w-full">
         <CarouselContent>
           {slides.map((slide, index) => (
             <CarouselItem key={index}>
-              <div className="relative w-full h-[400px] md:h-[660px]">
+              <div className="relative w-full h-[420px] md:h-[660px]">
                 <Image
-                  src={slide.src || "/placeholder.svg"}
+                  src={slide.src}
                   alt={slide.alt}
                   fill
                   sizes="100vw"
                   className="object-cover"
-                  priority={index === 0} // Prioritize the first image
+                  priority={index === 0}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex flex-col items-center justify-center text-center p-4">
-                  <h1 className="text-white text-3xl md:text-6xl font-extrabold drop-shadow-lg mb-4 animate-in fade-in slide-in-from-top-10 duration-700">
-                    {slide.heading}
-                  </h1>
-                  <p className="text-white text-md md:text-xl max-w-2xl drop-shadow-md mb-8 animate-in fade-in slide-in-from-bottom-10 duration-700 delay-200">
-                    {slide.text}
-                  </p>
-                  {slide.buttonText && slide.buttonLink && (
-                    <Button
-                      asChild
-                      className="px-8 py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white font-semibold transition-all duration-300 ease-in-out hover:scale-105 hover:from-red-700 hover:to-pink-700 rounded-full shadow-lg animate-in fade-in zoom-in-95 delay-300"
-                    >
-                      <Link href={slide.buttonLink} aria-label={slide.buttonText}>
-                        {slide.buttonText} <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  )}
+
+                {/* Minimal vignette ONLY for CTA readability (doesn't fight your image text) */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-transparent" />
+
+                {/* CTA Dock: bottom-left on desktop, centered on mobile */}
+                <div className="absolute inset-0 flex items-end">
+                  <div className="container mx-auto px-4 pb-14 sm:pb-12 md:pb-10">
+                    <div className="flex justify-center md:justify-start">
+                      <AnimatePresence mode="wait">
+                        {active === index && (
+                          <motion.div
+                            variants={ctaWrap as any}
+                            initial="hidden"
+                            animate="show"
+                            exit="exit"
+                            className={[
+                              "relative z-20 pointer-events-auto",
+
+                              // size behavior
+                              "w-auto max-w-[92%] md:max-w-[520px]",
+
+                              // layout
+                              "flex items-center gap-2 md:gap-3",
+
+                              // padding (smaller on mobile, bigger on desktop)
+                              "px-3 py-2 md:px-5 md:py-4",
+
+                              // look
+                              "rounded-xl md:rounded-2xl",
+                              "bg-black/25 md:bg-white/10 backdrop-blur-md",
+                              "border border-white/10 md:border-white/15",
+
+                              // lighter shadow on mobile
+                              "shadow-lg md:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
+                            ].join(" ")}
+                          >
+                            {/* Primary CTA */}
+                            <Button
+                              asChild
+                              className="
+h-10 md:h-12
+px-5 md:px-7
+text-sm md:text-base
+rounded-full
+bg-gradient-to-r from-rose-600 to-pink-600
+text-white font-semibold
+shadow-md md:shadow-lg
+hover:scale-[1.03]
+transition-transform
+"
+                            >
+                              <Link href={slide.primaryLink} aria-label={slide.primaryText}>
+                                {slide.primaryText}
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </Link>
+                            </Button>
+
+                            {/* Secondary CTA (ghost/glass) */}
+                            {slide.secondaryText && slide.secondaryLink && (
+                              <Button
+                                asChild
+                                variant="ghost"
+                                className="
+h-10 md:h-12
+px-4 md:px-6
+text-sm md:text-base
+rounded-full
+text-white
+border border-white/20
+hover:bg-white/10
+"
+                              >
+                                <Link href={slide.secondaryLink} aria-label={slide.secondaryText}>
+                                  {slide.secondaryText}
+                                </Link>
+                              </Button>
+                            )}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="absolute left-4 z-10 hidden md:flex bg-white/30 hover:bg-white/50 text-white hover:text-gray-900 rounded-full p-2 transition-all duration-300" />
-        <CarouselNext className="absolute right-4 z-10 hidden md:flex bg-white/30 hover:bg-white/50 text-white hover:text-gray-900 rounded-full p-2 transition-all duration-300" />
+
+        {/* Arrows */}
+        <CarouselPrevious className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-10 hidden md:flex bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/15 backdrop-blur-md transition-all" />
+        <CarouselNext className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-10 hidden md:flex bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/15 backdrop-blur-md transition-all" />
+
+        {/* Dots (mobile-optimized + still tap-friendly) */}
+        <div className="absolute bottom-2 md:bottom-6 left-0 right-0 z-10 flex items-center justify-center">
+          <div className="pointer-events-auto flex items-center gap-1.5 md:gap-2 rounded-full bg-black/20 backdrop-blur-md border border-white/10 px-2.5 py-1.5 md:px-3 md:py-2">
+            {Array.from({ length: snapCount }).map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-label={`Go to slide ${i + 1}`}
+                onClick={() => goTo(i)}
+                className={[
+                  // ✅ tap target (mobile needs ~40px). We use padding wrapper via min size.
+                  "grid place-items-center rounded-full",
+                  "h-7 w-7 md:h-8 md:w-8",
+
+                  // inner dot
+                  "relative",
+                  "transition-transform duration-200",
+                  "active:scale-95",
+                  i === active ? "scale-100" : "scale-95",
+                ].join(" ")}
+              >
+                <span
+                  className={[
+                    "block rounded-full transition-all duration-300",
+                    // ✅ actual visible dot sizes
+                    i === active
+                      ? "w-4 h-1.5 md:w-8 md:h-2 bg-white"
+                      : "w-1.5 h-1.5 md:w-2.5 md:h-2.5 bg-white/45 hover:bg-white/70",
+                  ].join(" ")}
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+
       </Carousel>
     </section>
   )

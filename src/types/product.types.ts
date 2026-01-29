@@ -293,10 +293,12 @@ export interface ITrendingProduct extends IProductResponse {
 
 // Related Products Interface
 export interface IRelatedProductsResponse {
-  sameBrand: IProductResponse[];
-  sameCategory: IProductResponse[];
-  similarAccords: IProductResponse[];
-  recentlyViewed?: IProductResponse[];
+  data: {
+    sameBrand: IProductResponse[];
+    sameCategory: IProductResponse[];
+    similarAccords: IProductResponse[];
+    recentlyViewed?: IProductResponse[];
+  }
 }
 
 export interface LowStockProduct {

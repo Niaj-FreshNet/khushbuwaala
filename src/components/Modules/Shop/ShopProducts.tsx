@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useGetAllProductsQuery } from "@/redux/store/api/product/productApi";
+import { useGetAllProductsQuery, useGetProductsByCategoryIdQuery } from "@/redux/store/api/product/productApi";
 import { IProductResponse } from "@/types/product.types";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,12 +21,15 @@ import { ProductCard } from "@/components/ReusableUI/ProductCard";
 import { ProductQuickView } from "@/components/ReusableUI/ProductQuickView";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { fi } from "zod/v4/locales";
+import { ShopProductsSkeletonGrid } from "./ShopProductsSkeletonGrid";
+import { activeAnimations } from "framer-motion";
 
 interface ShopProductProps {
   // initialProducts: IProductResponse[];
   initialPage: number;
   // totalPages: number;
-  category?: string;
+  categoryId?: string;
+  categoryName?: string;
   specification?: string;
   section?: string;
   minPrice?: number;
@@ -35,6 +38,7 @@ interface ShopProductProps {
   perfumeNotes?: string;
   performance?: string;
   sortBy?: string;
+  lockCategory?: boolean; // ✅ add
 }
 
 type Filters = {
@@ -63,7 +67,6 @@ export function ShopProducts(props: ShopProductProps) {
   const [page, setPage] = useState(props.initialPage);
 
   const productsTopRef = useRef<HTMLDivElement | null>(null);
-  const prevKeyRef = useRef<string>("");
 
   const [pageTransitionLoading, setPageTransitionLoading] = useState(false);
 
@@ -80,11 +83,35 @@ export function ShopProducts(props: ShopProductProps) {
     window.scrollTo({ top: y, behavior: "auto" });
   };
 
+  const scrollToProductsTopNow = () => {
+    if (!productsTopRef.current) return;
+
+    const y =
+      productsTopRef.current.getBoundingClientRect().top +
+      window.scrollY -
+      210;
+
+    window.scrollTo({ top: y, behavior: "auto" });
+  };
+
+  const scrollToProductsTopStable = () => {
+    // 1) immediately
+    scrollToProductsTopNow();
+
+    // 2) next paint
+    requestAnimationFrame(() => {
+      scrollToProductsTopNow();
+
+      // 3) one more paint (handles images/fonts/layout shifts)
+      requestAnimationFrame(scrollToProductsTopNow);
+    });
+  };
+
   const limit = 20;
 
   const initialFilters: Filters = {
     priceRange: [props.minPrice || 100, props.maxPrice || 5000],
-    selectedCategories: props.category ? [props.category] : [],
+    selectedCategories: props.categoryName ? [props.categoryName] : [],
     selectedAccords: props.accords ? props.accords.split(",") : [],
     selectedPerfumeNotes: props.perfumeNotes ? props.perfumeNotes.split(",") : [],
     selectedPerformance: props.performance ? props.performance.split(",") : [],
@@ -101,6 +128,15 @@ export function ShopProducts(props: ShopProductProps) {
   const [isSortSheetVisible, setIsSortSheetVisible] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<IProductResponse | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  const [stableProducts, setStableProducts] = useState<IProductResponse[]>([]);
+  const [hasResolvedOnce, setHasResolvedOnce] = useState(false);
+
+  const LOADING_TIMEOUT_MS = 20_000;
+
+  const [timedOut, setTimedOut] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
 
   type SortBy = "name" | "price_asc" | "price_desc" | "newest" | "oldest" | "popularity";
 
@@ -154,11 +190,41 @@ export function ShopProducts(props: ShopProductProps) {
   //   },
   //   { skip: page === initialPage } // Skip initial fetch to use server data
   // );
-  // ✅ Fetch products using updated filters and sortOption
-  const { data, isLoading, isFetching, error } = useGetAllProductsQuery({
+
+  const isLocked = !!props.lockCategory;
+  const categoryId = props.categoryId;
+
+  const DEFAULT_MIN = 100;
+  const DEFAULT_MAX = 5000;
+  const DEFAULT_SORT = "new-to-old";
+
+  const isFilteringActive =
+    // any checkbox filters
+    filters.selectedAccords.length > 0 ||
+    filters.selectedPerfumeNotes.length > 0 ||
+    filters.selectedPerformance.length > 0 ||
+    // spec
+    filters.selectedSpecification !== "all" ||
+    // price changed
+    filters.priceRange[0] !== DEFAULT_MIN ||
+    filters.priceRange[1] !== DEFAULT_MAX ||
+    // sorting changed
+    sortOption !== DEFAULT_SORT ||
+    // unlocked shop category dropdown changed (only meaningful when not locked)
+    (!props.lockCategory && filters.selectedCategories.length > 0);
+
+  // ✅ the ONLY category we send to backend
+  const apiCategoryForAllProducts = isLocked
+    ? props.categoryName // locked categoryName slug
+    : (filters.selectedCategories.join(",") || undefined);
+
+  // Fetch products using updated filters and sortOption
+
+  // ✅ 1) unlocked -> all products (all-products endpoint)
+  const allQuery = useGetAllProductsQuery({
     page,
     limit,
-    category: filters.selectedCategories.join(",") || undefined,
+    category: apiCategoryForAllProducts,
     gender: filters.selectedSpecification === "all"
       ? undefined
       : filters.selectedSpecification.toUpperCase(), // "MALE" | "FEMALE"
@@ -169,37 +235,118 @@ export function ShopProducts(props: ShopProductProps) {
     perfumeNotes: filters.selectedPerfumeNotes.join(",") || undefined,
     performance: filters.selectedPerformance.join(",") || undefined,
     sortBy: sortMap[sortOption] as any,
-  });
+  },
+    {
+      skip: props.lockCategory ? !isFilteringActive : false, // ✅ don't run when locked
+    },
+  );
+
+  // ✅ 2) locked -> category products (categoryId endpoint)
+  const catQuery = useGetProductsByCategoryIdQuery(
+    {
+      categoryId: categoryId as string,
+      params: {
+        page,
+        limit,
+      },
+    },
+    {
+      skip: !props.lockCategory || !props.categoryId || isFilteringActive, // ✅ don't run when unlocked or missing id
+    }
+  );
+
+  // ✅ choose active query result
+  const active = isLocked
+    ? (isFilteringActive ? allQuery : catQuery)
+    : allQuery;
+  const { data, isLoading, isFetching, error } = active;
+
+  useEffect(() => {
+    // after the first request finishes (success or error), allow empty state
+    if (!isLoading && !isFetching) {
+      setHasResolvedOnce(true);
+    }
+  }, [isLoading, isFetching]);
+
+  // keep last good products (prevents blank during refetch)
+  useEffect(() => {
+    if (Array.isArray(data?.data)) setStableProducts(data.data);
+  }, [data?.data]);
+
+  const products = Array.isArray(data?.data) ? data!.data : stableProducts;
+  const totalPages = data?.meta?.totalPage || 1;
+  const totalFilteredProducts = data?.meta.total ?? totalPages * limit;
 
   // ✅ show loading + scroll to products top whenever URL changes
+  const prevKeyRef = useRef<string | null>(null);
+
   useEffect(() => {
+    if (prevKeyRef.current === null) {
+      prevKeyRef.current = routeKey;
+      return;
+    }
     if (prevKeyRef.current === routeKey) return;
+
     prevKeyRef.current = routeKey;
-
+    scrollToProductsTopStable();
     setPageTransitionLoading(true);
-
-    requestAnimationFrame(() => {
-      scrollToProductsTop();
-    });
   }, [routeKey]);
 
-  // ✅ stop loading when new data finished fetching
+  // useEffect(() => {
+  //   if (isFetching || !isLoading)
+  //     setPageTransitionLoading(false);
+  // }, [isFetching, isLoading]);
+
   useEffect(() => {
-    if (!isFetching && !isLoading) {
+    const busy = isLoading || isFetching || pageTransitionLoading;
+
+    // ✅ if we already have data, stop custom loader immediately
+    if (Array.isArray(data?.data)) {
       setPageTransitionLoading(false);
     }
-  }, [isFetching, isLoading]);
 
-  const shouldShowLoading = isLoading || isFetching || pageTransitionLoading;
+    // ✅ start timer only when busy
+    if (busy && !timedOut) {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+      timeoutRef.current = setTimeout(() => {
+        setTimedOut(true);
+        setPageTransitionLoading(false);
+        setHasResolvedOnce(true);
+      }, LOADING_TIMEOUT_MS);
+
+      return;
+    }
+
+    // ✅ not busy => clear timer
+    if (!busy) {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+      setTimedOut(false);
+      setHasResolvedOnce(true);
+    }
+  }, [isLoading, isFetching, pageTransitionLoading, data?.data]);
+
+  // cleanup effect
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const isBusy = (isLoading || isFetching || pageTransitionLoading) && !timedOut;
+
+  // only show full skeleton when we have nothing yet
+  const showInitialSkeleton = isBusy && products.length === 0;
+
+  const showEmptyState =
+    (hasResolvedOnce || timedOut) && !isBusy && !error && products.length === 0;
+
 
   // const products =
   //   page === initialPage && !isFetching
   //     ? initialProducts
   //     : data?.data || [];
-  const products = data?.data || [];
-
-  const totalPages = data?.meta.totalPage || 1;
-  const totalFilteredProducts = data?.meta.total ?? totalPages * limit;
 
   // Update URL with page and filters
   // useEffect(() => {
@@ -268,12 +415,13 @@ export function ShopProducts(props: ShopProductProps) {
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString()); // keep existing
 
-    // then set/delete what you control
-    if (page > 1) params.set("page", String(page));
-    else params.delete("page");
-    if (filters.selectedCategories.length) params.set("category", filters.selectedCategories.join(","));
-    else params.delete("category");
-    if (filters.selectedSpecification !== "all") params.set("gendeer", filters.selectedSpecification);
+    if (page > 1) params.set("page", page.toString());
+    // if (filters.selectedCategories.length) params.set("category", filters.selectedCategories.join(","));
+    // ✅ only add category to query when NOT locked
+    if (!props.lockCategory && filters.selectedCategories.length) {
+      params.set("category", filters.selectedCategories.join(","));
+    }
+    if (filters.selectedSpecification !== "all") params.set("specification", filters.selectedSpecification);
     if (filters.selectedAccords.length) params.set("accords", filters.selectedAccords.join(","));
     else params.delete("accords");
     if (filters.selectedPerfumeNotes.length) params.set("perfumeNotes", filters.selectedPerfumeNotes.join(","));
@@ -342,13 +490,32 @@ export function ShopProducts(props: ShopProductProps) {
     setQuickViewProduct(null);
   };
 
+  // const handleApplyFilters = (newFilters: Partial<Filters>) => {
+  //   setFilters(prev => normalizeFilters(newFilters, prev));
+  //   setPage(1);
+  //   setVisibleProductsCount(limit);
+  // };
+
   const handleApplyFilters = (newFilters: Partial<Filters>) => {
-    setFilters(prev => normalizeFilters(newFilters, prev));
+    setTimedOut(false);
+    setHasResolvedOnce(false); // optional: treat as fresh attempt
+
+    setFilters((prev) => {
+      const next = normalizeFilters(newFilters, prev);
+      if (props.lockCategory && props.categoryName) {
+        next.selectedCategories = [props.categoryName];
+      }
+      return next;
+    });
+
     setPage(1);
     setVisibleProductsCount(limit);
   };
 
   const handleSortChange = (newSortOption: string) => {
+    setTimedOut(false);
+    setHasResolvedOnce(false);
+
     setSortOption(newSortOption);
     setPage(1);
     setVisibleProductsCount(limit);
@@ -383,6 +550,19 @@ export function ShopProducts(props: ShopProductProps) {
 
   // console.log("products", products);
 
+  // const gridColsClass =
+  //   {
+  //     1: "grid-cols-1",
+  //     2: "grid-cols-2",
+  //     3: "grid-cols-2 md:grid-cols-3",
+  //     4: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
+  //     5: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
+  //   }[columns] || "grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
+
+  const safeCols = typeof window !== "undefined" && window.innerWidth < 640
+    ? 2
+    : columns;
+
   const gridColsClass =
     {
       1: "grid-cols-1",
@@ -390,11 +570,104 @@ export function ShopProducts(props: ShopProductProps) {
       3: "grid-cols-2 md:grid-cols-3",
       4: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
       5: "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
-    }[columns] || "grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
+    }[safeCols] || "grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
+
+  function ErrorUI() {
+    return (
+      <div className="flex flex-col items-center justify-center text-center py-20 bg-white rounded-xl shadow-lg border border-gray-100">
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">
+          Error Loading Perfumes
+        </h3>
+        <p className="text-sm text-gray-600 max-w-sm">
+          Failed to fetch products. Please try again later.
+        </p>
+      </div>
+    );
+  }
+
+  function NoProductsUI({ timedOut }: { timedOut?: boolean }) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center py-20 bg-white rounded-xl shadow-lg border border-gray-100">
+        <FilterIcon className="h-16 w-16 text-gray-300 mb-4" />
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">
+          {timedOut ? "Taking too long" : "No products found"}
+        </h3>
+        <p className="text-sm text-gray-600 max-w-sm">
+          {timedOut
+            ? "The request didn’t finish within 20 seconds. Please try again."
+            : "Try adjusting your filters or sorting options to find what you're looking for."}
+        </p>
+      </div>
+    );
+  }
+
+  /**
+   * Renders the grid + your overlay loader (the nice one).
+   */
+  function ProductsGrid({
+    products,
+    visibleProductsCount,
+    gridColsClass,
+    columns,
+    isBusy,
+    onQuickView,
+  }: {
+    products: IProductResponse[];
+    visibleProductsCount: number;
+    gridColsClass: string;
+    columns: number;
+    isBusy: boolean;
+    onQuickView: (p: IProductResponse) => void;
+  }) {
+    return (
+      <div className="relative">
+        <div
+          className={[
+            `grid gap-2 sm:gap-3 md:gap-4 ${gridColsClass}`,
+            isBusy ? "opacity-60" : "opacity-100",
+            "transition-opacity duration-200",
+          ].join(" ")}
+        >
+          {products.slice(0, visibleProductsCount).map((product) => (
+            <ProductCard
+              className="py-0 px-0 sm:px-0"
+              key={product.id}
+              product={product}
+              layout={columns === 1 ? "list" : "grid"}
+              showDescription={columns === 1}
+              onQuickView={() => onQuickView(product)}
+            />
+          ))}
+        </div>
+
+        {/* ✅ your better loading overlay */}
+        {/* {(pageTransitionLoading || (isFetching && products.length === 0)) && ( */}
+        {isBusy && products.length > 0 && (
+          <div className="absolute inset-0 pointer-events-none">
+            {/* subtle dim */}
+            <div className="absolute inset-0 bg-white/35 backdrop-blur-[1px]" />
+
+            {/* top loading bar */}
+            <div className="absolute left-0 right-0 top-0 h-[3px] overflow-hidden rounded-t-xl">
+              <div className="h-full w-1/2 animate-[loadingbar_1.1s_ease-in-out_infinite] bg-gray-900/70" />
+            </div>
+
+            {/* floating loader */}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2">
+              <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white/90 px-4 py-2 text-sm font-medium text-gray-800 shadow-md">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading products…
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <section
-      className="container mx-auto py-8 px-4 relative"
+      className="container mx-auto py-6 sm:py-8 px-3 sm:px-4 relative"
       aria-labelledby="shop-products-heading"
     >
       {/* Hidden crawlable pagination links for SEO */}
@@ -448,7 +721,7 @@ export function ShopProducts(props: ShopProductProps) {
       </h2>
 
       {/* Enhanced Sticky Controls: Filter, Sort, Column Layout */}
-      <div className="sticky top-0 z-40 flex justify-between items-center bg-white/95 backdrop-blur-xl py-4 px-4 rounded-b-xl shadow-lg mb-8 border border-gray-200/50 transition-all duration-300">
+      <div className="sticky top-0 z-40 flex justify-between items-center bg-white/95 backdrop-blur-xl py-2 sm:py-4 px-2 sm:px-4 rounded-b-xl shadow-lg mb-4 sm:mb-8 border border-gray-200/50 transition-all duration-300">
         <Button
           variant="outline"
           className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-300 bg-transparent rounded-lg px-4 py-2 shadow-sm hover:shadow-md"
@@ -537,63 +810,29 @@ export function ShopProducts(props: ShopProductProps) {
       {/* Product List */}
       <div ref={productsTopRef} />
 
-      {shouldShowLoading ? (
-        <div className={`grid gap-6 ${gridColsClass}`}>
-          {[...Array(12)].map((_, i) => (
-            <div
-              key={i}
-              className="border border-gray-100 rounded-xl shadow-sm overflow-hidden"
-            >
-              <Skeleton className="w-full h-64 rounded-t-xl" />
-              <div className="p-4 space-y-3">
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-                <div className="flex gap-2 pt-2">
-                  <Skeleton className="h-10 w-10 rounded-full" />
-                  <Skeleton className="h-10 flex-1 rounded-lg" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+      {showInitialSkeleton ? (
+        // ✅ First load only (no products yet)
+        <ShopProductsSkeletonGrid colsClass={gridColsClass} />
       ) : error ? (
-        <div className="flex flex-col items-center justify-center text-center py-20 bg-white rounded-xl shadow-lg border border-gray-100">
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">Error Loading Perfumes</h3>
-          <p className="text-sm text-gray-600 max-w-sm">
-            Failed to fetch products. Please try again later.
-          </p>
-        </div>
+        <ErrorUI />
+      ) : products.length > 0 ? (
+        // ✅ Normal render (never blank)
+        <ProductsGrid
+          products={products}
+          visibleProductsCount={visibleProductsCount}
+          gridColsClass={gridColsClass}
+          columns={columns}
+          isBusy={isBusy}
+          onQuickView={handleQuickView}
+        />
+      ) : showEmptyState ? (
+        // ✅ show empty state ONLY after first real resolve
+        <NoProductsUI timedOut={timedOut} />
       ) : (
-        <>
-          {products.length > 0 ? (
-            <div className={`grid gap-4 ${gridColsClass}`}>
-              {products
-                .slice(0, visibleProductsCount)
-                .map((product) => (
-                  <ProductCard
-                    className="py-0"
-                    key={product.id}
-                    product={product}
-                    layout={columns === 1 ? "list" : "grid"}
-                    showDescription={columns === 1}
-                    onQuickView={() => handleQuickView(product)}
-                  />
-                ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center text-center py-20 bg-white rounded-xl shadow-lg border border-gray-100">
-              <FilterIcon className="h-16 w-16 text-gray-300 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                No products found
-              </h3>
-              <p className="text-sm text-gray-600 max-w-sm">
-                Try adjusting your filters or sorting options to find what
-                you&apos;re looking for.
-              </p>
-            </div>
-          )}
-        </>
+        // ✅ fallback during hydration/transient state to prevent flash
+        <ShopProductsSkeletonGrid colsClass={gridColsClass} />
       )}
+
 
       {/* Load More Button */}
       {/* {totalFilteredProducts > visibleProductsCount && (
@@ -626,7 +865,7 @@ export function ShopProducts(props: ShopProductProps) {
           variant="outline"
           disabled={page <= 1}
           onClick={() => setPage(page - 1)}
-          className="px-4 py-2 rounded-lg"
+          className="px-4 py-2 rounded-lg cursor-pointer"
         >
           Previous
         </Button>
@@ -639,7 +878,7 @@ export function ShopProducts(props: ShopProductProps) {
               onClick={() => setPage(pageNum)}
               className={`px-4 py-2 rounded-lg ${page === pageNum
                 ? "bg-red-600 text-white hover:bg-red-700"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer"
                 }`}
             >
               {pageNum}
@@ -651,7 +890,7 @@ export function ShopProducts(props: ShopProductProps) {
           variant="outline"
           disabled={page >= totalPages}
           onClick={() => setPage(page + 1)}
-          className="px-4 py-2 rounded-lg"
+          className="px-4 py-2 rounded-lg cursor-pointer"
         >
           Next
         </Button>
@@ -662,16 +901,19 @@ export function ShopProducts(props: ShopProductProps) {
         visible={isFilterSheetVisible}
         onClose={setIsFilterSheetVisible}
         onApplyFilters={handleApplyFilters}
-        initialFilters={{ category: props.category }}
+        initialFilters={{ categoryName: props.categoryName }}
+        lockCategory={props.lockCategory}
       />
       <SortSheet
         visible={isSortSheetVisible}
         onClose={setIsSortSheetVisible}
         onSortChange={handleSortChange}
       />
-      {quickViewProduct && (
-        <ProductQuickView product={quickViewProduct} open={isQuickViewOpen} onOpenChange={setIsQuickViewOpen} />
-      )}
-    </section>
+      {
+        quickViewProduct && (
+          <ProductQuickView product={quickViewProduct} open={isQuickViewOpen} onOpenChange={setIsQuickViewOpen} />
+        )
+      }
+    </section >
   );
 }

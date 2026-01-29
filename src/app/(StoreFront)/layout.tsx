@@ -16,7 +16,7 @@ export default function Layout({
       {/* Main content area */}
       {/* pt-16 to account for fixed navbar height (h-16) */}
       {/* pb-16 to account for fixed bottom bar height (h-16) on mobile */}
-      <main className="flex-1 w-full max-w-full mx-auto pt-16 pb-16">{children}</main>
+      <main className="flex-1 w-full max-w-full mx-auto pt-16 pb-8">{children}</main>
 
       {/* Footer */}
       <Footer />

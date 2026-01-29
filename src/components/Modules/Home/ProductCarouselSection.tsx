@@ -3,11 +3,12 @@
 import React from "react"
 import {
   useGetBestSellersQuery,
-  useGetProductsByCategoryQuery,
+  useGetProductsByCategoryIdQuery,
   useGetFeaturedProductsQuery,
   useGetNewArrivalsQuery,
 } from "@/redux/store/api/product/productApi"
-import { ProductCarouselClient, ProductCarouselSkeleton } from "./ProductCarouselClient"
+import { ProductCarouselClient } from "./ProductCarouselClient"
+import { ProductCarouselSkeleton } from "./ProductCarouselSkeleton"
 
 interface ProductCarouselSectionProps {
   title: string
@@ -37,7 +38,6 @@ export function ProductCarouselSection({
   titleUnderlineVariant = "default",
 }: ProductCarouselSectionProps) {
   // Conditional API calls based on props
-  console.log(category)
   const {
     data: bestSellerData,
     isLoading: isBestsellerLoading,
@@ -56,7 +56,7 @@ export function ProductCarouselSection({
   const {
     data: categoryData,
     isLoading: isCategoryLoading,
-  } = useGetProductsByCategoryQuery(
+  } = useGetProductsByCategoryIdQuery(
     { categoryId: category || "", params: { limit: 12 } },
     { skip: !category }
   )
@@ -78,7 +78,6 @@ export function ProductCarouselSection({
     products = categoryData?.data || []
     isLoading = isCategoryLoading
   }
-  console.log(categoryData)
 
   // Skeleton fallback while loading
   if (isLoading) {

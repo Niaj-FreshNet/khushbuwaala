@@ -1,31 +1,5 @@
-import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-
-function LiveSkeleton({
-  className = "",
-  delayMs = 0,
-  speedMs = 1400,
-  children,
-}: {
-  className?: string;
-  delayMs?: number;
-  speedMs?: number;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      className={`skel-live ${className}`}
-      style={
-        {
-          ["--skel-delay" as any]: `${delayMs}ms`,
-          ["--skel-speed" as any]: `${speedMs}ms`,
-        } as React.CSSProperties
-      }
-    >
-      {children}
-    </div>
-  );
-}
+import { LiveSkeleton } from "./_components/LiveSkeleton";
 
 export default function ShopLoading() {
   return (

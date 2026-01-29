@@ -134,13 +134,25 @@ export const productApi = baseApi.injectEndpoints({
       providesTags: ['Product'],
     }),
 
-    // Get Products by Category
-    getProductsByCategory: builder.query<
+    // Get Products by Category Id
+    getProductsByCategoryId: builder.query<
       { data: IProductResponse[]; meta: { total: number; totalPage: number } },
       { categoryId: string; params: ProductQueryParams }
     >({
       query: ({ categoryId, params }) => ({
-        url: `/products/get-products-by-category/${categoryId}`,
+        url: `/products/get-products-by-category-id/${categoryId}`,
+        params,
+      }),
+      providesTags: ['Product'],
+    }),
+
+    // Get Products by Category Name (NOT WORKING)
+    getProductsByCategoryName: builder.query<
+      { data: IProductResponse[]; meta: { total: number; totalPage: number } },
+      { categoryName: string; params: ProductQueryParams }
+    >({
+      query: ({ categoryName, params }) => ({
+        url: `/products/get-products-by-category-name/${categoryName}`,
         params,
       }),
       providesTags: ['Product'],
@@ -242,7 +254,8 @@ export const {
   useGetNavbarProductsQuery,
   useGetFeaturedProductsQuery,
   useGetNewArrivalsQuery,
-  useGetProductsByCategoryQuery,
+  useGetProductsByCategoryIdQuery,
+  useGetProductsByCategoryNameQuery,
   useGetRelatedProductsQuery,
   useSearchProductsQuery,
   useGetProductVariantsQuery,
