@@ -807,7 +807,7 @@ export function ProductCard({
 
       <Card
         className={cn(
-          "w-full overflow-hidden group rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 hover:border-red-200",
+          "h-full flex flex-col w-full overflow-hidden group rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 hover:border-red-200",
           className
         )}
       >
@@ -992,7 +992,7 @@ export function ProductCard({
     <Link href={productLink} aria-label={`View ${product.name}`}>
       <Card
         className={cn(
-          "overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-500 group hover:border-red-200 hover:-translate-y-1",
+          "h-full flex flex-col overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-500 group hover:border-red-200 hover:-translate-y-1",
           className
         )}
       >
@@ -1078,7 +1078,7 @@ export function ProductCard({
           )}
 
           {/* wishlist */}
-          <div className="absolute top-2 right-3 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
+          {/* <div className="absolute top-2 right-3 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
             <Button
               variant="ghost"
               size="icon"
@@ -1095,10 +1095,10 @@ export function ProductCard({
             >
               <Heart className="h-4 w-4" fill={isWishlisted ? "currentColor" : "none"} />
             </Button>
-          </div>
+          </div> */}
 
           {/* quick view */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+          {/* <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
             <Button
               size="sm"
               variant="ghost"
@@ -1111,18 +1111,18 @@ export function ProductCard({
             >
               <Eye className="h-4 w-4 mr-2" /> Quick View
             </Button>
-          </div>
+          </div> */}
         </div>
 
-        <CardContent className="px-4 space-y-3">
-          <CardTitle className="text-lg font-semibold line-clamp-2 text-center leading-tight">
+        <CardContent className="p-2 sm:p-3 md:p-4 pb-1 sm:pb-1 md:pb-1 space-y-1.5 sm:space-y-2">
+          <CardTitle className="text-[13px] sm:text-sm md:text-base font-semibold line-clamp-2 text-center leading-snug">
             <span className="block">{product.name}</span>
           </CardTitle>
 
           <div className="text-center space-y-1">
             <div className="flex items-baseline justify-center gap-2">
-              <div className="text-2xl font-bold">{formatPriceBDT(discountedPrice)}</div>
-              {activeDiscount && <div className="text-sm text-gray-500 line-through">{formatPriceBDT(basePrice)}</div>}
+              <div className="text-base sm:text-lg md:text-xl font-bold">{formatPriceBDT(discountedPrice)}</div>
+              {activeDiscount && <div className="text-[11px] sm:text-xs text-gray-500 line-through">{formatPriceBDT(basePrice)}</div>}
             </div>
             {/* <div className="text-xs text-gray-500"> Starting from {defaultSize}</div> */}
             {/* display available sizes */}
@@ -1133,17 +1133,17 @@ export function ProductCard({
 
           {/* Enhanced Smell Tags for Grid */}
           {product.accords && product.accords.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-2">
+            <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
               {product.accords.slice(0, 3).map((note, index) => (
                 <span
                   key={index}
-                  className="px-2 py-1 bg-gradient-to-r from-red-50 to-pink-50 text-red-700 text-xs rounded-full border border-red-100 hover:shadow-md transition-shadow duration-200 cursor-default"
+                  className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-gradient-to-r from-red-50 to-pink-50 text-red-700 text-[10px] sm:text-xs rounded-full border border-red-100 hover:shadow-md transition-shadow duration-200 cursor-default"
                 >
                   {note}
                 </span>
               ))}
               {product.accords.length > 3 && (
-                <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full hover:bg-gray-200 transition-colors cursor-default">
+                <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-gray-100 text-gray-600 text-[10px] sm:text-xs rounded-full hover:bg-gray-200 transition-colors cursor-default">
                   +{product.accords.length - 3}
                 </span>
               )}
@@ -1151,7 +1151,7 @@ export function ProductCard({
           )}
         </CardContent>
 
-        <CardFooter className="px-4 pb-3">
+        <CardFooter className="px-2 sm:px-3 md:px-4 pb-2 sm:pb-3 md:pb-4 pt-0">
           <Button
             //   className="w-full hover:bg-gray-700"
             //   onClick={(e) => {
@@ -1173,10 +1173,10 @@ export function ProductCard({
             //   )}
 
             className={cn(
-              "w-full h-10 rounded-xl font-bold shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]",
+              "w-full h-9 sm:h-10 rounded-lg sm:rounded-xl font-semibold text-[12px] sm:text-sm shadow-md transition-all duration-300 active:scale-[0.98]",
               isAddingToCart
                 ? "bg-gray-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-red-600 via-red-600 to-pink-600 hover:from-red-700 hover:via-red-700 hover:to-pink-700 text-white hover:shadow-xl hover:shadow-red-500/25"
+                : "bg-gradient-to-r from-red-600 via-red-600 to-pink-600 hover:from-red-700 hover:via-red-700 hover:to-pink-700 text-white hover:shadow-lg hover:shadow-red-500/20"
             )}
             onClick={handleAddToCart}
             // disabled={isAddingToCart}
@@ -1189,7 +1189,7 @@ export function ProductCard({
               </>
             ) : (
               <>
-                <ShoppingCart className="h-5 w-5 mr-2" />
+                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
                 Add to Cart
               </>
             )}

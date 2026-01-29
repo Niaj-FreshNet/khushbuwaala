@@ -27,8 +27,9 @@ interface FilterSheetProps {
   onClose: (open: boolean) => void
   onApplyFilters: (filters: any) => void
   initialFilters?: {
-    category?: string;
+    categoryName?: string;
   };
+  lockCategory?: boolean; // ✅ add
 }
 
 export function FilterSheet({
@@ -36,13 +37,36 @@ export function FilterSheet({
   onClose,
   onApplyFilters,
   initialFilters,
+  lockCategory,
 }: FilterSheetProps) {
   const [priceRange, setPriceRange] = useState<[number, number]>([100, 5000]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialFilters?.category ? [initialFilters.category] : []);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialFilters?.categoryName ? [initialFilters.categoryName] : []);
   const [selectedSpecification, setSelectedSpecification] = useState<string>("all");
   const [selectedAccords, setSelectedAccords] = useState<string[]>([]);
   const [selectedPerfumeNotes, setSelectedPerfumeNotes] = useState<string[]>([]);
   const [selectedPerformance, setSelectedPerformance] = useState<string[]>([]);
+
+  // put near the top of component
+  const lockedCategory = initialFilters?.categoryName?.trim() || "";
+
+  // your normal categories should match DB categoryName exactly
+  const CATEGORY_OPTIONS = [
+    { value: "INSPIRED PERFUME OIL", label: "Inspired Perfume Oil" },
+    { value: "ORIENTAL", label: "Oriental & Arabian Attar" },
+    { value: "ARTIFICIAL OUD", label: "Artificial Oud" },
+    { value: "NATURAL", label: "Natural Collections" },
+    { value: "BRAND", label: "Brand" },
+  ];
+
+  // If locked, show only locked option
+  const visibleCategoryOptions =
+    lockCategory && lockedCategory
+      ? [{ value: lockedCategory, label: lockedCategory }]
+      : CATEGORY_OPTIONS;
+
+  // optional: label pretty
+  const getCategoryLabel = (val: string) =>
+    CATEGORY_OPTIONS.find(o => o.value === val)?.label ?? val;
 
   // inside FilterSheet
   const prevFiltersRef = useRef({
@@ -90,7 +114,10 @@ export function FilterSheet({
   const handleReset = () => {
     const resetFilters = {
       priceRange: [100, 5000] as [number, number],
-      selectedCategories: [],
+      selectedCategories:
+        lockCategory && initialFilters?.categoryName
+          ? [initialFilters.categoryName]
+          : [],
       selectedSpecification: "all",
       selectedAccords: [],
       selectedPerfumeNotes: [],
@@ -165,25 +192,27 @@ export function FilterSheet({
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <Select
+                  disabled={!!lockCategory}
                   value={selectedCategories[0] || "all"}
-                  onValueChange={(value) => setSelectedCategories(value === "all" ? [] : [value])}
+                  onValueChange={(value) =>
+                    setSelectedCategories(value === "all" ? [] : [value])
+                  }
                 >
                   <SelectTrigger className="w-full h-10 bg-white border-gray-200 rounded-md">
-                    <SelectValue placeholder="Select Category" />
+                    {/* show locked label nicely */}
+                    <SelectValue placeholder="Select Category">
+                    </SelectValue>
                   </SelectTrigger>
+
                   <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    <SelectItem value="INSPIRED PERFUME OIL">
-                      Inspired Perfume Oil
-                    </SelectItem>
-                    <SelectItem value="ORIENTAL">
-                      Oriental & Arabian Attar
-                    </SelectItem>
-                    <SelectItem value="ARTIFICIAL OUD">
-                      Artificial Oud
-                    </SelectItem>
-                    <SelectItem value="NATURAL">Natural Collections</SelectItem>
-                    <SelectItem value="BRAND">Brand</SelectItem>
+                    {/* Hide "all" when locked (optional but cleaner) */}
+                    {!lockCategory && <SelectItem value="all">All Categories</SelectItem>}
+
+                    {visibleCategoryOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </CollapsibleContent>

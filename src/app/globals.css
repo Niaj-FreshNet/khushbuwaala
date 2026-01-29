@@ -691,3 +691,33 @@
     animation: none;
   }
 }
+
+@keyframes skeleton-shimmer {
+  0% { transform: translateX(-120%) skewX(-12deg); }
+  100% { transform: translateX(220%) skewX(-12deg); }
+}
+
+.skeleton-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%) skewX(-12deg);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.45),
+    transparent
+  );
+  animation: skeleton-shimmer 1.6s infinite;
+  opacity: 0.9;
+}
+
+@keyframes soft-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes loadingbar {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(220%); }
+}

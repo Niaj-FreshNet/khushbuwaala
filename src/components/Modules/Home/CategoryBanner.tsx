@@ -1,5 +1,5 @@
-import { CategoryCard } from "./CategoryCard"
 import { SectionTitle } from "./SectionTitle"
+import { CategoryGridClient } from "./CategoryGridClient"
 
 export function CategoryBanner() {
   const categories = [
@@ -31,8 +31,6 @@ export function CategoryBanner() {
 
   return (
     <section className="py-10 sm:py-12" aria-labelledby="categories-heading">
-      {/* Keep title aligned nicely (with padding),
-          but grid below goes full-bleed on mobile */}
       <div className="px-4">
         <SectionTitle
           title="Shop by Categories"
@@ -43,13 +41,9 @@ export function CategoryBanner() {
         />
       </div>
 
-      {/* Full-bleed grid on mobile */}
       <div className="max-w-screen-xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0 sm:gap-5 lg:gap-6">
-          {categories.map((category) => (
-            <CategoryCard key={category.CategoryName} {...category} />
-          ))}
-        </div>
+        {/* ✅ Client component handles motion + rendering */}
+        <CategoryGridClient categories={categories} />
       </div>
     </section>
   )

@@ -2,8 +2,8 @@ import { Suspense } from "react";
 import { Metadata } from "next";
 import { NoticeBar } from "@/components/Modules/Shop/NoticeBar";
 import { ShopBanner } from "@/components/Modules/Shop/ShopBanner";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ClientShopProducts } from "@/components/Modules/Shop/ClientShopProducts";
+import { ShopShell } from "@/components/Modules/Shop/ShopShell";
 
 // ❌ SSR Redux intentionally disabled for performance
 // import { initializeStore } from "@/redux/store/ssrStore";
@@ -87,12 +87,14 @@ export default async function ShopPage({
     // const store = initializeStore();
 
     const page = Number(searchParams.page) || 1;
-    const category = searchParams.category;
+    const categoryName = searchParams.category;
     const specification = searchParams.specification;
     const section = searchParams.section;
-    const priceMin = searchParams.priceMin ? Number(searchParams.priceMin) : undefined;
-    const priceMax = searchParams.priceMax ? Number(searchParams.priceMax) : undefined;
-    const smells = searchParams.smells;
+    const minPrice = searchParams.minPrice ? Number(searchParams.minPrice) : undefined;
+    const maxPrice = searchParams.maxPrice ? Number(searchParams.maxPrice) : undefined;
+    const accords = searchParams.accords;
+    const perfumeNotes = searchParams.perfumeNotes;
+    const performance = searchParams.performance;
     const sortBy = searchParams.sortBy as
         | "name"
         | "price_asc"
@@ -182,7 +184,27 @@ export default async function ShopPage({
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(shopStructuredData) }}
             />
-            <div className="w-full mx-auto">
+
+            <ShopShell
+                bannerHeading="Best Quality Perfume Oil Collection"
+                bannerText="Choose Your Desired Perfume Oil from World's Best Perfume Oil Collection"
+                bannerImages={{ desktop: "/images/n111.png", mobile: "/images/n1.webp" }}
+                bannerAlt="Banner displaying the best quality perfume oil collection"
+                noticesHeading="World's Finest Perfume Oils"
+                initialPage={page}
+                categoryName={categoryName}
+                specification={specification}
+                section={section}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                accords={accords}
+                perfumeNotes={perfumeNotes}
+                performance={performance}
+                sortBy={sortBy}
+                lockCategory={false}
+            />
+
+            {/* <div className="w-full mx-auto">
                 <ShopBanner
                     heading="Best Quality Perfume Oil Collection"
                     text="Choose Your Desired Perfume Oil from World's Best Perfume Oil Collection"
@@ -196,45 +218,18 @@ export default async function ShopPage({
                     <NoticeBar heading="World's Finest Perfume Oils" notices={notices} interval={4500} />
                 </div>
                 <div id="products" className="bg-white pt-0 pb-8">
-                    <Suspense fallback={<ShopProductsSkeleton />}>
-                        <ClientShopProducts
-                            // initialProducts={products}
-                            initialPage={page}
-                            // totalPages={totalPages}
-                            category={category}
-                            specification={specification}
-                            section={section}
-                            priceMin={priceMin}
-                            priceMax={priceMax}
-                            smells={smells}
-                            sortBy={sortBy}
-                        />
-                    </Suspense>
+                    <ClientShopProducts
+                        initialPage={page}
+                        category={category}
+                        specification={specification}
+                        section={section}
+                        priceMin={minPrice}
+                        priceMax={maxPrice}
+                        smells={smells}
+                        sortBy={sortBy}
+                    />
                 </div>
-            </div>
+            </div> */}
         </>
-    );
-}
-
-// Skeleton component
-function ShopProductsSkeleton() {
-    return (
-        <div className="container mx-auto py-8 px-4">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {[...Array(12)].map((_, i) => (
-                    <div key={i} className="border border-gray-100 rounded-xl shadow-sm overflow-hidden">
-                        <Skeleton className="w-full h-64 rounded-t-xl" />
-                        <div className="p-4 space-y-3">
-                            <Skeleton className="h-6 w-3/4" />
-                            <Skeleton className="h-4 w-1/2" />
-                            <div className="flex gap-2 pt-2">
-                                <Skeleton className="h-10 w-10 rounded-full" />
-                                <Skeleton className="h-10 flex-1 rounded-lg" />
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
     );
 }

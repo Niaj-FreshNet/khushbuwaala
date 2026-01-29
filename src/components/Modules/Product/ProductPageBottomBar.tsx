@@ -137,7 +137,9 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
     return (
         <>
             {/* Universal Sticky CTA */}
-            <div id="sticky-cart" className="fixed bottom-0 left-0 right-0 z-50 transform transition-transform duration-300 ease-in-out">
+            <div
+                id="sticky-cart"
+                className="fixed bottom-0 left-0 right-0 z-50 transform transition-transform duration-300 ease-in-out">
                 {/* Gradient Background */}
                 <div className="absolute inset-0 bg-gradient-to-t from-white via-white/95 to-transparent backdrop-blur-xl"></div>
 

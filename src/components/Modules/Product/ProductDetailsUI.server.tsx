@@ -277,7 +277,7 @@ export default function ProductDetailsUI({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 mt-6 sm:mt-8 w-full">
+      <div id="action-buttons" className="flex flex-col sm:flex-row gap-4 sm:gap-5 mt-6 sm:mt-8 w-full">
         <Button
           className={cn(
             "flex-1 h-14 sm:h-16 text-lg sm:text-xl font-bold rounded-2xl transition-all duration-300 transform hover:scale-[1.03]",

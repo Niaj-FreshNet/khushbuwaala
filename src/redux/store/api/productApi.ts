@@ -114,7 +114,7 @@ export const productApi = baseApi.injectEndpoints({
     }),
 
     // Get Products by Category
-    getProductsByCategory: builder.query<
+    getProductsByCategoryId: builder.query<
       { data: IProductResponse[]; meta: { total: number; totalPage: number } },
       { categoryId: string; params: ProductQueryParams }
     >({
@@ -208,7 +208,7 @@ export const {
   useGetNavbarProductsQuery,
   useGetFeaturedProductsQuery,
   useGetNewArrivalsQuery,
-  useGetProductsByCategoryQuery,
+  useGetProductsByCategoryIdQuery,
   useGetRelatedProductsQuery,
   useSearchProductsQuery,
   useGetProductVariantsQuery,
@@ -328,7 +328,7 @@ export const productApi = baseApi.injectEndpoints({
     }),
 
     // Get Products by Category
-    getProductsByCategory: builder.query<
+    getProductsByCategoryId: builder.query<
       { data: IProductResponse[]; meta: { total: number; totalPage: number } },
       { categoryId: string; params: ProductQueryParams }
     >({
@@ -424,7 +424,7 @@ export const {
   useGetNavbarProductsQuery,
   useGetFeaturedProductsQuery,
   useGetNewArrivalsQuery,
-  useGetProductsByCategoryQuery,
+  useGetProductsByCategoryIdQuery,
   useGetRelatedProductsQuery,
   useSearchProductsQuery,
   useGetProductVariantsQuery,
