@@ -90,9 +90,11 @@ export default async function ShopPage({
     const category = searchParams.category;
     const specification = searchParams.specification;
     const section = searchParams.section;
-    const priceMin = searchParams.priceMin ? Number(searchParams.priceMin) : undefined;
-    const priceMax = searchParams.priceMax ? Number(searchParams.priceMax) : undefined;
-    const smells = searchParams.smells;
+    const minPrice = searchParams.minPrice ? Number(searchParams.minPrice) : undefined;
+    const maxPrice = searchParams.maxPrice ? Number(searchParams.maxPrice) : undefined;
+    const accords = searchParams.accords;
+    const perfumeNotes = searchParams.perfumeNotes;
+    const performance = searchParams.performance;
     const sortBy = searchParams.sortBy as
         | "name"
         | "price_asc"
@@ -204,9 +206,11 @@ export default async function ShopPage({
                             category={category}
                             specification={specification}
                             section={section}
-                            priceMin={priceMin}
-                            priceMax={priceMax}
-                            smells={smells}
+                            minPrice={minPrice}
+                            maxPrice={maxPrice}
+                            accords={accords}
+                            perfumeNotes={perfumeNotes}
+                            performance={performance}
                             sortBy={sortBy}
                         />
                     </Suspense>

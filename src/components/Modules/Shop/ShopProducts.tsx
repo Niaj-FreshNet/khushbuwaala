@@ -266,22 +266,35 @@ export function ShopProducts(props: ShopProductProps) {
   // }, [page, filters, sortOption, props.section, pathname, router]);
 
   useEffect(() => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(searchParams.toString()); // keep existing
 
-    if (page > 1) params.set("page", page.toString());
+    // then set/delete what you control
+    if (page > 1) params.set("page", String(page));
+    else params.delete("page");
     if (filters.selectedCategories.length) params.set("category", filters.selectedCategories.join(","));
-    if (filters.selectedSpecification !== "all") params.set("specification", filters.selectedSpecification);
+    else params.delete("category");
+    if (filters.selectedSpecification !== "all") params.set("gendeer", filters.selectedSpecification);
     if (filters.selectedAccords.length) params.set("accords", filters.selectedAccords.join(","));
+    else params.delete("accords");
     if (filters.selectedPerfumeNotes.length) params.set("perfumeNotes", filters.selectedPerfumeNotes.join(","));
+    else params.delete("perfumeNotes");
     if (filters.selectedPerformance.length) params.set("performance", filters.selectedPerformance.join(","));
+    else params.delete("performance");
     if (filters.priceRange[0] !== 100) params.set("minPrice", filters.priceRange[0].toString());
+    else params.delete("minPrice");
     if (filters.priceRange[1] !== 5000) params.set("maxPrice", filters.priceRange[1].toString());
+    else params.delete("maxPrice");
     if (sortOption !== "new-to-old") params.set("sortBy", sortOption);
+    else params.delete("sortBy");
     if (props.section) params.set("section", props.section);
+    else params.delete("section");
 
-    const url = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
-    router.replace(url, { scroll: false });
-  }, [page, filters, sortOption, props.section, pathname, router]);
+    const nextUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
+    const currentUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+
+    if (nextUrl !== currentUrl) router.replace(nextUrl, { scroll: false });
+  }, [page, filters, sortOption, props.section, pathname, router, searchParams]);
+
 
   // Infinite scroll
   // useEffect(() => {
