@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
 
   images: {
@@ -16,24 +15,16 @@ const nextConfig: NextConfig = {
         hostname: "i.ibb.co",
         pathname: "/**",
       },
-
-      // ✅ ADD THIS
       {
-        protocol: "http", // because your URL is http
+        protocol: "http",
         hostname: "api.khushbuwaala.com",
         pathname: "/**",
       },
       {
-        protocol: "https", // future-proof if you enable SSL later
+        protocol: "https",
         hostname: "api.khushbuwaala.com",
         pathname: "/**",
       },
-    ],
-
-    domains: [
-      "res.cloudinary.com",
-      "i.ibb.co",
-      "api.khushbuwaala.com", // optional but nice to keep
     ],
   },
 
@@ -46,7 +37,7 @@ const nextConfig: NextConfig = {
       {
         source: "/products/:slug",
         destination: "/product/:slug",
-        permanent: true, // ✅ 308 (SEO-friendly)
+        permanent: true,
       },
     ];
   },
