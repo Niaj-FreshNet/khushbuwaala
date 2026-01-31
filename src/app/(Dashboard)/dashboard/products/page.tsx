@@ -53,7 +53,7 @@ const ProductList = () => {
 
   const router = useRouter();
   const { data, isLoading } = useGetAllProductsAdminQuery(
-    { search: query, page: currentPage, limit: pageSize },
+    { searchTerm: query, page: currentPage, limit: pageSize },
     { refetchOnMountOrArgChange: true }
   );
 
