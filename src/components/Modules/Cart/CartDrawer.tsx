@@ -9,11 +9,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Separator } from "@/components/ui/separator"
 import Image from "next/image"
 import { useCart } from "@/redux/store/hooks/useCart"
+import { useEffect, useRef, useState } from "react"
 
 
 // Use real cart from store
-
-
 
 interface CartDrawerProps {
   visible: boolean
@@ -34,6 +33,230 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
     ? cartItems.reduce((sum: number, item: any) => sum + (item?.quantity || 0), 0)
     : 0
 
+  const subtotalRef = useRef<HTMLDivElement | null>(null);
+  const checkoutBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  const [checkoutNudge, setCheckoutNudge] = useState(false);
+
+  const drawCheckoutGuide = () => {
+    if (typeof window === "undefined") return;
+
+    const fromEl = subtotalRef.current;
+    const toEl = checkoutBtnRef.current;
+    if (!fromEl || !toEl) return;
+
+    const from = fromEl.getBoundingClientRect();
+    const to = toEl.getBoundingClientRect();
+
+    // ✅ START POINT: from top-right of the drawer (more noticeable)
+    const x0 = Math.min(window.innerWidth - 20, to.left - 20);
+    const y0 = Math.max(30, to.top - 120); // above checkout, inside top area
+
+    // end near checkout center
+    const x1 = to.left + to.width * 0.5;
+    const y1 = to.top + to.height * 0.5;
+
+    const dx = x1 - x0;
+    const dy = y1 - y0;
+
+    // curve (subtle premium)
+    const curveUp = Math.min(200, Math.max(90, Math.abs(dy) * 0.45));
+    const cx = x0 + dx * 0.35;
+    const cy = y0 + dy * 0.35 - curveUp;
+
+    // SVG overlay
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", "100%");
+    svg.setAttribute("height", "100%");
+    svg.style.position = "fixed";
+    svg.style.left = "0";
+    svg.style.top = "0";
+    svg.style.zIndex = "99999"; // above drawer content
+    svg.style.pointerEvents = "none";
+
+    // marker arrow
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+    marker.setAttribute("id", "kw-checkout-arrow");
+    marker.setAttribute("markerWidth", "14");
+    marker.setAttribute("markerHeight", "14");
+    marker.setAttribute("refX", "10");
+    marker.setAttribute("refY", "4");
+    marker.setAttribute("orient", "auto");
+    const arrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    arrowPath.setAttribute("d", "M0,0 L12,4 L0,8 Z");
+    arrowPath.setAttribute("fill", "rgba(37,99,235,0.95)");
+    marker.appendChild(arrowPath);
+    defs.appendChild(marker);
+    svg.appendChild(defs);
+
+    // ✅ Gradient for stroke (matches checkout button red→pink)
+    const grad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+    grad.setAttribute("id", "kw-checkout-grad");
+    grad.setAttribute("x1", "0%");
+    grad.setAttribute("y1", "0%");
+    grad.setAttribute("x2", "100%");
+    grad.setAttribute("y2", "0%");
+
+    const stop1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    stop1.setAttribute("offset", "0%");
+    stop1.setAttribute("stop-color", "rgba(239,68,68,0.95)"); // red-500
+    const stop2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    stop2.setAttribute("offset", "100%");
+    stop2.setAttribute("stop-color", "rgba(236,72,153,0.95)"); // pink-500
+    grad.appendChild(stop1);
+    grad.appendChild(stop2);
+    defs.appendChild(grad);
+
+    // Path string
+    const d = `M ${x0} ${y0} Q ${cx} ${cy} ${x1} ${y1}`;
+
+    // ✅ 1) Glow stroke behind (thicker + blur-ish via opacity)
+    const glowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    glowPath.setAttribute("d", d);
+    glowPath.setAttribute("fill", "none");
+    glowPath.setAttribute("stroke", "url(#kw-checkout-grad)");
+    glowPath.setAttribute("stroke-width", "10");
+    glowPath.setAttribute("stroke-linecap", "round");
+    glowPath.setAttribute("stroke-dasharray", "10 12");
+    glowPath.setAttribute("opacity", "0.22");
+    svg.appendChild(glowPath);
+
+    // ✅ 2) Main stroke (bold & crisp)
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", d);
+    path.setAttribute("fill", "none");
+    path.setAttribute("stroke", "url(#kw-checkout-grad)");
+    path.setAttribute("stroke-width", "5");
+    path.setAttribute("stroke-linecap", "round");
+    path.setAttribute("stroke-dasharray", "10 12");
+    path.setAttribute("marker-end", "url(#kw-checkout-arrow)");
+    svg.appendChild(path);
+
+    // moving spark dot
+    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    dot.setAttribute("r", "7");
+    dot.setAttribute("fill", "rgba(236,72,153,0.98)");
+    dot.setAttribute("opacity", "0.95");
+
+    const dotGlow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    dotGlow.setAttribute("r", "14");
+    dotGlow.setAttribute("fill", "rgba(239,68,68,0.22)");
+
+    svg.appendChild(dotGlow);
+    svg.appendChild(dot);
+
+    dot.setAttribute("cx", String(x0));
+    dot.setAttribute("cy", String(y0));
+    dotGlow.setAttribute("cx", String(x0));
+    dotGlow.setAttribute("cy", String(y0));
+
+    document.body.appendChild(svg);
+
+    const totalLen = path.getTotalLength();
+    path.style.strokeDasharray = `${totalLen}`;
+    path.style.strokeDashoffset = `${totalLen}`;
+
+    glowPath.style.strokeDasharray = `${totalLen}`;
+    glowPath.style.strokeDashoffset = `${totalLen}`;
+
+    glowPath.animate(
+      [{ strokeDashoffset: totalLen }, { strokeDashoffset: 0 }],
+      { duration: 520, easing: "ease-out", fill: "forwards" }
+    );
+
+    const strokeAnim = path.animate(
+      [{ strokeDashoffset: totalLen }, { strokeDashoffset: 0 }],
+      { duration: 520, easing: "ease-out", fill: "forwards" }
+    );
+
+    // dot travel
+    const start = performance.now();
+    const travelMs = 900;
+
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / travelMs);
+
+      // ✅ p exists ONLY here
+      const p = path.getPointAtLength(totalLen * t);
+
+      dot.setAttribute("cx", String(p.x));
+      dot.setAttribute("cy", String(p.y));
+
+      // ✅ if you added dotGlow
+      dotGlow.setAttribute("cx", String(p.x));
+      dotGlow.setAttribute("cy", String(p.y));
+
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+
+    // spotlight checkout button (WAAPI)
+    const ringAnim = toEl.animate(
+      [
+        { boxShadow: "0 0 0 0 rgba(239,68,68,0)", transform: "scale(1)" },
+        { boxShadow: "0 0 0 8px rgba(239,68,68,0.18)", transform: "scale(1.03)" },
+        { boxShadow: "0 0 0 0 rgba(239,68,68,0)", transform: "scale(1)" },
+      ],
+      { duration: 900, easing: "cubic-bezier(.2,.8,.2,1)" }
+    );
+
+    // cleanup
+    const cleanup = () => {
+      cancelAnimationFrame(raf);
+      try { svg.remove(); } catch { }
+    };
+
+    const kill = window.setTimeout(cleanup, 1600);
+
+    // if user clicks quickly
+    toEl.addEventListener("click", () => {
+      window.clearTimeout(kill);
+      cleanup();
+    }, { once: true });
+
+    // safety if animation finishes earlier
+    strokeAnim.onfinish = () => {
+      // keep it for a bit then remove via timeout
+    };
+
+    ringAnim.onfinish = () => {
+      // no-op
+    };
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const runGuide = () => {
+      // run only if drawer is currently open
+      if (!visible) return;
+
+      setCheckoutNudge(true);
+
+      // ensure DOM + refs ready
+      window.setTimeout(() => {
+        drawCheckoutGuide();
+      }, 120);
+
+      window.setTimeout(() => setCheckoutNudge(false), 1800);
+    };
+
+    // ✅ run when opened by navbar click OR add-to-cart auto open
+    window.addEventListener("kw:cart-opened", runGuide);
+
+    // ✅ also run when visible becomes true (first time / refresh)
+    if (visible) {
+      window.setTimeout(runGuide, 50);
+    }
+
+    return () => {
+      window.removeEventListener("kw:cart-opened", runGuide);
+    };
+  }, [visible]);
+
   const redirectToCart = () => {
     router.push("/cart")
     onClose()
@@ -45,7 +268,12 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
   }
 
   return (
-    <Sheet open={visible} onOpenChange={onClose}>
+    <Sheet
+      open={visible}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
       <SheetContent
         side="right"
         className="w-[320px] md:w-[550px] flex flex-col p-0 bg-gradient-to-b from-white to-gray-50"
@@ -178,7 +406,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
               <Separator />
 
               {/* Subtotal with enhanced styling */}
-              <div className="flex justify-between items-center p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl">
+              <div ref={subtotalRef} className="flex justify-between items-center p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl">
                 <div className="flex flex-col">
                   <span className="text-sm text-gray-600">Subtotal</span>
                   <span className="text-xs text-gray-500">{totalItems} {totalItems === 1 ? "item" : "items"}</span>
@@ -199,6 +427,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
                   View Full Cart
                 </Button>
                 <Button
+                  ref={checkoutBtnRef}
                   className="w-full h-12 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
                   onClick={handleCheckout}
                 >

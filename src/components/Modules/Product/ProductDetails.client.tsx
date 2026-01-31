@@ -6,6 +6,7 @@ import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
 import { IDiscount, IProduct, IProductVariant } from "@/types/product.types";
 import { useRouter } from "next/navigation";
 import ProductDetailsUI from "./ProductDetailsUI.server";
+import flyToCart from "./FlyToCart";
 
 export default function ProductDetailsClient({
   product,
@@ -85,36 +86,67 @@ export default function ProductDetailsClient({
   const onQtyInc = useCallback(() => setQuantity((q) => Math.min(10, q + 1)), [setQuantity]);
 
   const onReadMore = useCallback(() => {
-    document.getElementById("product-accordion")?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+    const el = document.getElementById("product-accordion");
 
-    setTimeout(() => {
-      const btn = document.querySelector('[data-section="description"]') as HTMLButtonElement | null;
-      btn?.click();
-    }, 500);
+    // If not found, just open description (fallback)
+    if (!el) {
+      window.dispatchEvent(new Event("kw:open-description"));
+      return;
+    }
+
+    // ✅ offset for sticky navbar (adjust if needed)
+    const offset = 10;
+
+    const top = el.getBoundingClientRect().top + window.scrollY - offset;
+
+    // ✅ scroll first
+    window.scrollTo({ top, behavior: "smooth" });
+
+    // ✅ then open after scroll begins (prevents layout shift cancelling scroll)
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        window.dispatchEvent(new Event("kw:open-description"));
+      }, 250);
+    });
   }, []);
 
-  const onAddToCart = useCallback(async () => {
-    if (isOutOfStock) return;
-    setIsAddingToCart(true);
+  const onAddToCart = useCallback(
+    async (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (isOutOfStock || isAddingToCart || isBuyingNow) return;
 
-    // remove artificial delays if you want even faster UI
-    cart?.addToCart?.(product as any, quantity, selectedSizeLabel, currentPrice);
+      setIsAddingToCart(true);
+      try {
+        // ✅ fly animation first (from button → cart icon)
+        flyToCart(e.currentTarget, (product as any)?.primaryImage);
 
-    setIsAddingToCart(false);
-  }, [cart, product, quantity, selectedSizeLabel, currentPrice, isOutOfStock]);
+        // If addToCart is sync, this still gives user feedback for a moment
+        cart?.addToCart?.(product as any, quantity, selectedSizeLabel, currentPrice);
+
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("kw:cart-added"));
+        }
+
+        // tiny UX delay so spinner is actually visible (optional but recommended)
+        await new Promise((r) => setTimeout(r, 1000));
+      } finally {
+        setIsAddingToCart(false);
+      }
+    }, [cart, product, quantity, selectedSizeLabel, currentPrice, isOutOfStock, isAddingToCart, isBuyingNow]);
 
   const onBuyNow = useCallback(async () => {
-    if (isOutOfStock) return;
+    if (isOutOfStock || isBuyingNow || isAddingToCart) return;
+
     setIsBuyingNow(true);
+    try {
+      cart?.addToCart?.(product as any, quantity, selectedSizeLabel, currentPrice);
 
-    cart?.addToCart?.(product as any, quantity, selectedSizeLabel, currentPrice);
+      await new Promise((r) => setTimeout(r, 1000));
 
-    startTransition(() => router.push("/checkout"));
-    setIsBuyingNow(false);
-  }, [cart, product, quantity, selectedSizeLabel, currentPrice, router, startTransition, isOutOfStock]);
+      startTransition(() => router.push("/checkout"));
+    } finally {
+      setIsBuyingNow(false);
+    }
+  }, [cart, product, quantity, selectedSizeLabel, currentPrice, router, startTransition, isOutOfStock, isBuyingNow, isAddingToCart]);
 
   return (
     <ProductDetailsUI

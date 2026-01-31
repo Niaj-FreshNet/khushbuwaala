@@ -459,6 +459,7 @@ import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import type { IProductResponse } from "@/types/product.types";
+import flyToCart from "../Modules/Product/FlyToCart";
 
 /* -----------------------------------------------------------------------------
   Reference: original UI (kept commented for your reference)
@@ -651,15 +652,44 @@ export function ProductCard({
   const isWishlisted = wishlist?.isInWishlist?.(productId) ?? false;
 
   // add to cart — uses discounted price if available
+  // const handleAddToCart = async (e?: React.MouseEvent) => {
+  //   e?.stopPropagation?.();
+  //   e?.preventDefault?.();
+
+  //   setIsAddingToCart(true);
+  //   try {
+  //     const selectedPrice = discountedPrice ?? basePrice;
+  //     // console.log(defaultSize)
+  //     cart?.addToCart?.((product as any) as any, 1, defaultSize, selectedPrice);
+  //   } catch (err) {
+  //     console.error("Add to cart failed:", err);
+  //     toast.error("Unable to add to cart");
+  //   } finally {
+  //     setTimeout(() => setIsAddingToCart(false), 700);
+  //   }
+  // };
   const handleAddToCart = async (e?: React.MouseEvent) => {
     e?.stopPropagation?.();
     e?.preventDefault?.();
 
+    // ✅ Start animation from the clicked button (or any element)
+    const fromEl = (e?.currentTarget as HTMLElement) || null;
+
     setIsAddingToCart(true);
+
     try {
       const selectedPrice = discountedPrice ?? basePrice;
-      // console.log(defaultSize)
+
+      // add to cart first (keeps behavior same)
       cart?.addToCart?.((product as any) as any, 1, defaultSize, selectedPrice);
+
+      // ✅ run animation + it will dispatch kw:open-cart at finish()
+      if (fromEl) {
+        flyToCart(fromEl, (product as any).primaryImage);
+      } else {
+        // fallback: open cart if element not found
+        window.dispatchEvent(new CustomEvent("kw:open-cart"));
+      }
     } catch (err) {
       console.error("Add to cart failed:", err);
       toast.error("Unable to add to cart");
@@ -958,6 +988,7 @@ export function ProductCard({
             {/* Enhanced Add to Cart */}
             <div className="mt-6">
               <Button
+                type="button"
                 className={cn(
                   "w-full h-12 rounded-xl font-bold shadow-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]",
                   isAddingToCart
@@ -1153,6 +1184,7 @@ export function ProductCard({
 
         <CardFooter className="px-2 sm:px-3 md:px-4 pb-2 sm:pb-3 md:pb-4 pt-0">
           <Button
+            type="button"
             //   className="w-full hover:bg-gray-700"
             //   onClick={(e) => {
             //     e.preventDefault();
@@ -1179,7 +1211,7 @@ export function ProductCard({
                 : "bg-gradient-to-r from-red-600 via-red-600 to-pink-600 hover:from-red-700 hover:via-red-700 hover:to-pink-700 text-white hover:shadow-lg hover:shadow-red-500/20"
             )}
             onClick={handleAddToCart}
-            // disabled={isAddingToCart}
+            disabled={isAddingToCart}
             aria-label={`Add ${product.name} to cart`}
           >
             {isAddingToCart ? (

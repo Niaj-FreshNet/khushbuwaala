@@ -13,9 +13,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/redux/store/hooks/useAuth";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface ProductAccordionProps {
   product: Partial<IProduct>;
+  initialOpenSection?: string;
 }
 
 interface AccordionItemProps {
@@ -35,42 +37,64 @@ const AccordionItem = ({
   isOpen,
   onToggle,
   badge,
-  'data-section': dataSection,
+  "data-section": dataSection,
 }: AccordionItemProps) => (
-  <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+  <div
+    className={cn(
+      "rounded-2xl border border-gray-200 bg-white overflow-hidden transition-all",
+      isOpen ? "shadow-sm" : "shadow-none"
+    )}
+  >
     <button
+      type="button"
       onClick={onToggle}
       data-section={dataSection}
-      className="w-full p-6 text-left flex items-center justify-between bg-white hover:bg-gray-50 transition-colors duration-200"
+      className={cn(
+        "w-full flex items-center justify-between text-left",
+        // ✅ Tap target + compact padding
+        "px-4 py-3 sm:px-5 sm:py-4",
+        "hover:bg-gray-50 active:bg-gray-50 transition-colors"
+      )}
     >
-      <div className="flex items-center gap-4">
-        <div className="w-10 h-10 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full flex items-center justify-center">
-          <Icon className="w-5 h-5 text-blue-600" />
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full flex items-center justify-center flex-shrink-0">
+          <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
         </div>
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          {badge && (
-            <Badge variant="secondary" className="mt-1 text-xs">
-              {badge}
-            </Badge>
-          )}
+
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">
+              {title}
+            </h3>
+            {badge && (
+              <Badge variant="secondary" className="text-[11px] px-2 py-0.5">
+                {badge}
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
+
       <ChevronDown
-        className={`w-6 h-6 text-gray-400 transition-transform duration-300 ${isOpen ? 'transform rotate-180' : ''}`}
+        className={cn(
+          "w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0",
+          isOpen && "rotate-180"
+        )}
       />
     </button>
-    <AnimatePresence>
+
+    <AnimatePresence initial={false}>
       {isOpen && (
         <motion.div
-          initial={{ height: 0 }}
-          animate={{ height: "auto" }}
-          exit={{ height: 0 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
+          initial={{ height: 0, opacity: 0.5 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0.5 }}
+          transition={{ duration: 0.22, ease: "easeOut" }}
           className="overflow-hidden"
         >
-          <div className="p-6 pt-0 bg-gray-50">
-            {children}
+          {/* ✅ less padding + better mobile background */}
+          <div className="px-4 pb-4 sm:px-5 sm:pb-5 bg-gray-50">
+            <div className="pt-3">{children}</div>
           </div>
         </motion.div>
       )}
@@ -78,8 +102,8 @@ const AccordionItem = ({
   </div>
 );
 
-export default function ProductAccordion({ product }: ProductAccordionProps) {
-  const [openSection, setOpenSection] = useState<string>("");
+export default function ProductAccordion({ product, initialOpenSection }: ProductAccordionProps) {
+  const [openSection, setOpenSection] = useState<string>(initialOpenSection ?? "");
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [newReview, setNewReview] = useState({
     rating: 0,
@@ -104,8 +128,9 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
   // ✅ Mutation for creating a new review
   const [createReview] = useCreateReviewMutation();
 
+  const openOnly = (section: string) => setOpenSection(section);
   const toggleSection = (section: string) => {
-    setOpenSection(openSection === section ? "" : section);
+    setOpenSection((prev) => (prev === section ? "" : section));
   };
 
   // ✅ Show error toast if API fails
@@ -114,6 +139,17 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
       toast(error?.data?.message || "Failed to load reviews");
     }
   }, [isError, error]);
+
+  // useEffect(() => {
+  //   if (typeof window === "undefined") return;
+  //   setOpenSection(window.innerWidth < 640 ? "" : "description");
+  // }, []);
+
+  useEffect(() => {
+    const handler = () => openOnly("description");
+    window.addEventListener("kw:open-description", handler);
+    return () => window.removeEventListener("kw:open-description", handler);
+  }, []);
 
   // Calculate average rating
   const avgRating = reviews.length > 0
@@ -161,27 +197,32 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 sm:space-y-3">
       {/* Section Navigation */}
-      <div className="flex flex-wrap justify-center gap-2 p-2 bg-gray-50 rounded-2xl border border-gray-200">
-        {[
-          { id: 'description', label: 'Description', icon: Info },
-          { id: 'details', label: 'Details', icon: Package },
-          { id: 'reviews', label: 'Reviews', icon: Star },
-          { id: 'shipping', label: 'Shipping', icon: Truck },
-        ].map((section) => (
-          <button
-            key={section.id}
-            onClick={() => toggleSection(section.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${openSection === section.id
-              ? 'bg-white text-gray-900 shadow-sm border border-gray-200'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-white'
-              }`}
-          >
-            <section.icon className="w-4 h-4" />
-            {section.label}
-          </button>
-        ))}
+      <div className="rounded-2xl border border-gray-200 bg-gray-50 p-2">
+        <div className="flex gap-2 overflow-x-auto whitespace-nowrap px-1 py-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {[
+            { id: "description", label: "Description", icon: Info },
+            { id: "reviews", label: "Reviews", icon: Star },
+            { id: "shipping", label: "Shipping", icon: Truck },
+          ].map((section) => (
+            <button
+              key={section.id}
+              type="button"
+              onClick={() => toggleSection(section.id)}
+              className={cn(
+                "flex items-center gap-2 rounded-xl px-3 py-2 text-xs sm:text-sm font-medium transition-all",
+                "border",
+                openSection === section.id
+                  ? "bg-white text-gray-900 border-gray-200 shadow-sm"
+                  : "bg-transparent text-gray-600 border-transparent hover:bg-white hover:border-gray-200"
+              )}
+            >
+              <section.icon className="w-4 h-4" />
+              {section.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Description */}
@@ -193,28 +234,91 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
         data-section="description"
       >
         <div className="space-y-6">
-          <div>
-            <h4 className="font-semibold text-gray-900 mb-3">Product Description</h4>
-            <p className="text-gray-700 leading-relaxed">
-              {product.description ||
-                `Experience the luxury of ${product.name}, a premium ${product.gender === 'male' ? "men's" : "women's"
-                } fragrance that embodies sophistication and elegance. This exquisite scent is perfect for those who appreciate fine fragrances and want to make a lasting impression.`}
-            </p>
+          <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h4 className="text-sm sm:text-base font-bold text-gray-900">
+                  Product Description
+                </h4>
+                {/* <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+                  Read the story of this perfume
+                </p> */}
+              </div>
+
+              <Badge variant="secondary" className="text-[11px] px-2 py-0.5">
+                Premium
+              </Badge>
+            </div>
+
+            {/* accent bar */}
+            <div className="mt-3 sm:mt-4 flex gap-3">
+              <div className="w-1.5 rounded-full bg-gradient-to-b from-blue-600 via-purple-600 to-pink-600" />
+
+              <div className="min-w-0">
+                <p
+                  className={cn(
+                    "text-[15px] sm:text-base leading-7 text-gray-800",
+                    "font-medium tracking-[0.01em]"
+                  )}
+                  style={{ textWrap: "pretty" as any }}
+                >
+                  {product.description ||
+                    `Experience the luxury of ${product.name}, a premium ${product.gender === "male" ? "men's" : "women's"
+                    } fragrance that embodies sophistication and elegance. This exquisite scent is perfect for those who appreciate fine fragrances and want to make a lasting impression.`}
+                </p>
+
+                {/* subtle callout line */}
+                <p className="mt-3 text-xs sm:text-sm text-gray-600">
+                  {/* ✨ Tip: Apply on pulse points for best performance. */}
+                  <p>Note: Each bottle is beautifully captured, though shades may vary slightly under different lighting.</p>
+                </p>
+              </div>
+            </div>
+
+            {/* optional quick highlights (auto, no extra fields needed) */}
+            <div className="mt-4 flex flex-wrap gap-2">
+              {(product.longevity || "6-8 hours") && (
+                <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs sm:text-sm text-gray-700">
+                  <span className="font-semibold mr-1">Longevity:</span> {product.longevity?.replace(/[_-]+/g, " ") || "6-8 hours"}
+                </span>
+              )}
+              {(product.projection || "Moderate to Strong") && (
+                <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs sm:text-sm text-gray-700">
+                  <span className="font-semibold mr-1">Projection:</span> {product.projection?.replace(/[_-]+/g, " ") || "Moderate to Strong"}
+                </span>
+              )}
+              {(product.sillage || "Good") && (
+                <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs sm:text-sm text-gray-700">
+                  <span className="font-semibold mr-1">Sillage:</span> {product.sillage?.replace(/[_-]+/g, " ") || "Good"}
+                </span>
+              )}
+              {(product.bestFor || "Good") && (
+                <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs sm:text-sm text-gray-700">
+                  <span className="font-semibold mr-1">Best For:</span> {product.bestFor?.join(", ") || "Day, Office, Evening"}
+                </span>
+              )}
+            </div>
           </div>
 
           {product.perfumeNotes && typeof product.perfumeNotes === "object" && (
             <div>
               <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-purple-600" />
-                Fragrance Notes
+                Perfume Notes
               </h4>
-              <div className="bg-white rounded-xl p-4 border border-purple-100">
+              <div className="bg-gradient-to-br from-white to-purple-50 rounded-xl p-4 border border-purple-100">
                 <div className="space-y-1">
-                  {Object.entries(product.perfumeNotes).map(([title, note]) => (
-                    <p key={title} className="text-gray-700">
-                      <span className="font-semibold">{title}:</span> {Array.isArray(note) ? note.join(", ") : note}
-                    </p>
-                  ))}
+                  {Object.entries(product.perfumeNotes).map(([title, note]) => {
+                    const formattedTitle =
+                      title.charAt(0).toUpperCase() + title.slice(1);
+
+                    return (
+                      <p key={title} className="text-gray-800 text-[15px] sm:text-base leading-7">
+                        <span className="font-bold text-gray-900">{formattedTitle}:</span>{" "}
+                        <span className="text-gray-700">{Array.isArray(note) ? note.join(", ") : note}</span>
+                      </p>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -225,78 +329,104 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
               <h4 className="font-semibold text-gray-900 mb-3">Fragrance Family</h4>
               <div className="flex flex-wrap gap-2">
                 {product.accords.map((scent, index) => (
-                  <Badge key={index} variant="outline" className="border-purple-200 text-purple-700">
+                  <Badge key={index} variant="outline" className="border-purple-200 text-purple-700 text-md sm:text-base">
                     {scent}
                   </Badge>
                 ))}
               </div>
             </div>
           )}
-        </div>
-      </AccordionItem>
 
-      {/* Product Details */}
-      <AccordionItem
-        title="Product Details"
-        icon={Package}
-        isOpen={openSection === "details"}
-        onToggle={() => toggleSection("details")}
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <h4 className="font-semibold text-gray-900">Specifications</h4>
-            <div className="space-y-3">
-              {product.brand && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Brand</span>
-                  <span className="font-medium text-gray-900">{product.brand}</span>
-                </div>
-              )}
-              {product.origin && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Origin</span>
-                  <span className="font-medium text-gray-900">{product.origin}</span>
-                </div>
-              )}
-              {product.gender && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Gender</span>
-                  <span className="font-medium text-gray-900 capitalize">
-                    {product.gender === 'male' ? 'Men' : 'Women'}
-                  </span>
-                </div>
-              )}
-              {(product.variants || []).length > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Available Sizes</span>
-                  <span className="font-medium text-gray-900">
-                    {product.variants!.map((v) => `${v.size}${v.unit}`).join(", ")}
-                  </span>
-                </div>
-              )}
+          {/* Specs + Performance (moved here) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            {/* Specifications */}
+            <div className="rounded-xl border border-gray-200 bg-white p-4">
+              <h4 className="font-semibold text-gray-900 mb-3">Specifications</h4>
+
+              <div className="space-y-2 text-sm">
+                {product.brand && (
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-gray-600">Brand</span>
+                    <span className="font-medium text-gray-900 text-right break-words">
+                      {/* {product.brand} */}
+                      KhushbuWaala
+                    </span>
+                  </div>
+                )}
+
+                {product.origin && (
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-gray-600">Origin</span>
+                    <span className="font-medium text-gray-900 text-right break-words">
+                      {product.origin}
+                    </span>
+                  </div>
+                )}
+
+                {product.gender && (
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-gray-600">Gender</span>
+                    <span className="font-medium text-gray-900 text-right capitalize">
+                      {product.gender === "male" ? "Men" : "Women"}
+                    </span>
+                  </div>
+                )}
+
+                {(product.variants || []).length > 0 && (
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="text-gray-600">Available Sizes</span>
+
+                    <div className="text-right space-y-1">
+                      {/* sizes */}
+                      <span className="font-medium text-gray-900 break-words block">
+                        {product.variants!.map((v) => `${v.size} ${v.unit?.toLowerCase()}`).join(", ")}
+                      </span>
+
+                      {/* wholesale note */}
+                      <span className="text-[11px] sm:text-xs text-emerald-600 font-medium">
+                        Wholesale from 100ML+
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-4">
-            <h4 className="font-semibold text-gray-900">Performance</h4>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Longevity</span>
-                <span className="font-medium text-gray-900">{product.longevity || "6-8 hours"}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Projection</span>
-                <span className="font-medium text-gray-900">{product.projection || "Moderate to Strong"}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Sillage</span>
-                <span className="font-medium text-gray-900">{product.sillage || "Good"}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Best For</span>
-                <span className="font-medium text-gray-900">
-                  {product.bestFor?.join(", ") || (product.gender === 'male' ? 'Office, Evening' : 'Daily, Special Occasions')}
-                </span>
+            {/* Performance */}
+            <div className="rounded-xl border border-gray-200 bg-white p-4">
+              <h4 className="font-semibold text-gray-900 mb-3">Performance</h4>
+
+              <div className="space-y-2 text-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-gray-600">Longevity</span>
+                  <span className="font-medium text-gray-900 text-right break-words">
+                    {product.longevity?.replace(/[_-]+/g, " ") || "6-8 hours"}
+                  </span>
+                </div>
+
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-gray-600">Projection</span>
+                  <span className="font-medium text-gray-900 text-right break-words">
+                    {product.projection?.replace(/[_-]+/g, " ") || "Moderate to Strong"}
+                  </span>
+                </div>
+
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-gray-600">Sillage</span>
+                  <span className="font-medium text-gray-900 text-right break-words">
+                    {product.sillage?.replace(/[_-]+/g, " ") || "Good"}
+                  </span>
+                </div>
+
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-gray-600">Best For</span>
+                  <span className="font-medium text-gray-900 text-right break-words">
+                    {product.bestFor?.join(", ") ||
+                      (product.gender === "male"
+                        ? "Office, Evening"
+                        : "Daily, Special Occasions")}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -313,40 +443,52 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
       >
         <div className="space-y-6">
           {/* Rating Summary */}
-          <div className="bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-50 rounded-2xl p-8 border border-yellow-200 shadow-sm">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full mb-4 shadow-lg">
-                  <span className="text-3xl font-bold text-white">{avgRating.toFixed(1)}</span>
+          <div className="bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-50 rounded-2xl p-4 sm:p-6 border border-yellow-200 shadow-sm">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-md">
+                  <span className="text-2xl sm:text-3xl font-bold text-white">
+                    {avgRating.toFixed(1)}
+                  </span>
                 </div>
-                <div className="flex justify-center mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-6 h-6 ${i < Math.floor(avgRating) ? 'text-yellow-500 fill-current' : 'text-gray-300'}`}
-                    />
-                  ))}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={cn(
+                          "w-5 h-5",
+                          i < Math.floor(avgRating) ? "text-yellow-500 fill-current" : "text-gray-300"
+                        )}
+                      />
+                    ))}
+                  </div>
+                  <div className="text-sm text-gray-700 font-medium mt-1">
+                    {reviews.length} reviews
+                  </div>
+                  <div className="text-[12px] text-gray-600">
+                    Verified customer ratings
+                  </div>
                 </div>
-                <div className="text-gray-700 font-medium">Based on {reviews.length} verified reviews</div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {[5, 4, 3, 2, 1].map((rating) => {
                   const count = reviews.filter((r) => r.rating === rating).length;
                   const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
                   return (
-                    <div key={rating} className="flex items-center gap-4">
-                      <div className="flex items-center gap-1 w-14">
-                        <span className="text-sm font-medium">{rating}</span>
+                    <div key={rating} className="flex items-center gap-3">
+                      <div className="flex items-center gap-1 w-12">
+                        <span className="text-xs font-medium">{rating}</span>
                         <Star className="w-3 h-3 text-yellow-500 fill-current" />
                       </div>
-                      <div className="flex-1 bg-yellow-200 rounded-full h-3 overflow-hidden">
+                      <div className="flex-1 bg-yellow-200 rounded-full h-2 overflow-hidden">
                         <div
-                          className="bg-gradient-to-r from-yellow-400 to-orange-500 h-3 rounded-full transition-all duration-700 ease-out"
+                          className="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full transition-all duration-500"
                           style={{ width: `${percentage}%` }}
                         />
                       </div>
-                      <span className="text-sm text-gray-600 w-8 text-right font-medium">{count}</span>
+                      <span className="text-xs text-gray-600 w-6 text-right font-medium">{count}</span>
                     </div>
                   );
                 })}
@@ -355,7 +497,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
           </div>
 
           {/* Review Submission Form */}
-          <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-200 shadow-sm">
             <h4 className="font-semibold text-gray-900 mb-4">Write a Review</h4>
             <form onSubmit={handleSubmitReview} className="space-y-4">
               <div>
@@ -364,7 +506,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-6 h-6 cursor-pointer ${i < newReview.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'
+                      className={`w-6 h-6 sm:w-7 sm:h-7 cursor-pointer ${i < newReview.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'
                         }`}
                       onClick={() => handleRatingSelect(i + 1)}
                     />
@@ -408,11 +550,11 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
               {reviews.map((review) => (
                 <div
                   key={review.id}
-                  className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300"
+                  className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
                         {review.user.name.charAt(0)}
                       </div>
                       <div className="flex-1">
@@ -460,7 +602,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
         isOpen={openSection === "shipping"}
         onToggle={() => toggleSection("shipping")}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8">
           <div>
             <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Truck className="w-5 h-5 text-blue-600" />
@@ -472,8 +614,8 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
                   <CheckCircle className="w-4 h-4 text-green-600" />
                 </div>
                 <div>
-                  <h5 className="font-medium text-gray-900">Inside Dhaka</h5>
-                  <p className="text-sm text-gray-600">Free delivery within 2-3 business days</p>
+                  <h5 className="font-medium text-gray-900 break-words text-right sm:text-left">Inside Dhaka</h5>
+                  <p className="text-sm text-gray-600">৳50 delivery charge, 1-2 business days</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -481,8 +623,8 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
                   <Globe className="w-4 h-4 text-blue-600" />
                 </div>
                 <div>
-                  <h5 className="font-medium text-gray-900">Outside Dhaka</h5>
-                  <p className="text-sm text-gray-600">৳60 delivery charge, 3-5 business days</p>
+                  <h5 className="font-medium text-gray-900 break-words text-right sm:text-left">Outside Dhaka</h5>
+                  <p className="text-sm text-gray-600">৳120 delivery charge, 3-5 business days</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -490,7 +632,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
                   <Clock className="w-4 h-4 text-purple-600" />
                 </div>
                 <div>
-                  <h5 className="font-medium text-gray-900">Processing Time</h5>
+                  <h5 className="font-medium text-gray-900 break-words text-right sm:text-left">Processing Time</h5>
                   <p className="text-sm text-gray-600">Orders processed within 24 hours</p>
                 </div>
               </div>
@@ -503,7 +645,7 @@ export default function ProductAccordion({ product }: ProductAccordionProps) {
               Return Policy
             </h4>
             <div className="space-y-4">
-              <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+              <div className="bg-green-50 rounded-xl p-3.5 sm:p-4 border border-green-200">
                 <h5 className="font-medium text-green-900 mb-2">7-Day Return Policy</h5>
                 <p className="text-sm text-green-700">
                   Return unused products within 7 days of delivery for a full refund

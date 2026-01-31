@@ -1,13 +1,14 @@
 "use client";
 
 import { useCart } from "@/context/CartContext";
-import { Badge, Heart, MessageSquare, ShoppingCart, Tag, Zap } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Badge, Heart, Loader2, MessageSquare, ShoppingCart, Tag, Zap } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
 import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
 // import { toggleWishlist, selectIsInWishlist } from "@/redux/store/features/wishlist/wishlistSlice";
 import { IDiscount, IProduct, IProductVariant } from "@/types/product.types";
 import { useRouter } from "next/navigation";
+import flyToCart from "./FlyToCart";
 
 export default function ProductPageBottomBar({ product }: { product: IProduct }) {
     const cart = useCart()
@@ -25,6 +26,12 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
     const [fallbackSelectedSize, setFallbackSelectedSize] = useState<string>(sizeKeys[0] || "3 ml");
     const [fallbackQuantity, setFallbackQuantity] = useState<number>(1);
     const dispatch = useAppDispatch();
+
+    const [isAdding, setIsAdding] = useState(false);
+    const [isBuying, setIsBuying] = useState(false);
+    const [isPending, startTransition] = useTransition();
+
+    const busy = isAdding || isBuying || isPending;
 
     // const selectedSize = selection?.selectedSize ?? fallbackSelectedSize;
     // const setSelectedSize = selection?.setSelectedSize ?? setFallbackSelectedSize;
@@ -54,6 +61,28 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
 
     // Available sizes based on product data
     const availableSizes = sizeKeys;
+
+    useEffect(() => {
+        const el = document.getElementById("sticky-cart");
+        if (!el) return;
+
+        const applyPadding = () => {
+            const h = el.getBoundingClientRect().height;
+            document.documentElement.style.setProperty("--kw-bottom-bar-h", `${h}px`);
+        };
+
+        applyPadding();
+
+        const ro = new ResizeObserver(applyPadding);
+        ro.observe(el);
+
+        window.addEventListener("resize", applyPadding);
+        return () => {
+            ro.disconnect();
+            window.removeEventListener("resize", applyPadding);
+            document.documentElement.style.removeProperty("--kw-bottom-bar-h");
+        };
+    }, []);
 
     // Get current price
     const getCurrentVariant = () => {
@@ -129,176 +158,255 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
     // const isOutOfStock = (product.totalStock ?? 0) <= 0 || (totalVariantStock ?? 0) <= 0;
     const isOutOfStock = (product.totalStock ?? 0) <= 0;
 
-    const handleAddToCart = async () => {
-        if (isOutOfStock) return;
-        cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
-    };
+    // const handleAddToCart = async () => {
+    //     if (isOutOfStock) return;
+    //     cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
+    // };
+
+    const handleAddToCart = useCallback(
+        async (e: React.MouseEvent<HTMLButtonElement>) => {
+            if (isOutOfStock || busy) return;
+
+            setIsAdding(true);
+            try {
+                // ✅ fly animation first (from button → cart icon)
+                flyToCart(e.currentTarget, (product as any)?.primaryImage);
+
+                cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
+
+                if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("kw:cart-added"));
+                }
+
+                await new Promise((r) => setTimeout(r, 1000));
+            } finally {
+                setIsAdding(false);
+            }
+        }, [cart, product, quantity, selectedSize, selectedPrice, isOutOfStock, busy]);
+
+    const handleBuyNow = useCallback(async () => {
+        if (isOutOfStock || busy) return;
+
+        setIsBuying(true);
+        try {
+            cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
+            await new Promise((r) => setTimeout(r, 1000));
+
+            startTransition(() => {
+                router.push("/checkout");
+            });
+        } finally {
+            setIsBuying(false);
+        }
+    }, [cart, product, quantity, selectedSize, selectedPrice, router, isOutOfStock, busy, startTransition]);
 
     return (
         <>
-            {/* Universal Sticky CTA */}
+            {/* Sticky Bottom Bar */}
             <div
                 id="sticky-cart"
-                className="fixed bottom-0 left-0 right-0 z-50 transform transition-transform duration-300 ease-in-out">
-                {/* Gradient Background */}
-                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/95 to-transparent backdrop-blur-xl"></div>
+                className="fixed inset-x-0 bottom-0 z-50">
+                {/* Backdrop / Blur */}
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-xl border-t border-gray-200/70" />
 
-                {/* Shadow */}
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+                {/* Content */}
+                <div className="relative mx-auto max-w-7xl px-3 sm:px-4 pb-[calc(env(safe-area-inset-bottom)+10px)] pt-3">
+                    {/* =========================
+            DESKTOP / TABLET (md+)
+        ========================== */}
+                    <div className="hidden md:flex items-center justify-between gap-6">
+                        {/* Left: product */}
+                        <div className="flex items-center gap-4 min-w-0">
+                            <div className="w-14 h-14 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shrink-0">
+                                <img
+                                    src={product.primaryImage}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
 
-                <div className="relative px-4 py-2 safe-area-bottom">
-                    {/* Desktop/Tablet Layout */}
-                    <div className="hidden md:block">
-                        <div className="max-w-7xl mx-auto flex items-center justify-between">
-                            <div className="flex items-center gap-6">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden border-2 border-gray-200">
-                                        <img
-                                            src={product.primaryImage}
-                                            alt={product.name}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-gray-900 text-lg">{product.name}</h3>
-                                        <div className="text-2xl font-bold text-gray-900">
-                                            ৳{discountedPrice.toLocaleString()}
-                                            {(product.discount && discountedPrice !== currentPrice) && (
-                                                <span className="text-lg text-gray-500 line-through ml-2">
-                                                    ৳{currentPrice.toLocaleString()}
-                                                </span>
-                                            )}
-                                            {(totalDiscounted !== totalCurrent) && (
-                                                <span className="text-sm text-gray-500 line-through ml-2">
-                                                    ৳{totalCurrent.toLocaleString()}
-                                                </span>
-                                            )}
-                                            {/* {activeDiscount ? (
-                                                <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 animate-pulse shadow-lg">
-                                                    <Tag className="w-3 h-3 mr-2" />
-                                                    {activeDiscount.type === "percentage"
-                                                        ? `${activeDiscount.value}% OFF`
-                                                        : `৳${activeDiscount.value} OFF`}
-                                                </Badge>
-                                            ) : null} */}
-                                        </div>
-                                    </div>
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-2">
+                                    <h3 className="font-bold text-gray-900 truncate">{product.name}</h3>
+                                    {discountValue > 0 && (
+                                        <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-100">
+                                            {discountValue}% OFF
+                                        </span>
+                                    )}
                                 </div>
-                            </div>
 
-                            <div className="flex items-center gap-4">
-                                {/* <button
-                                    onClick={onToggleWishlist}
-                                    className="flex items-center gap-2 bg-white border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-2xl font-semibold hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-all duration-300">
-                                    <Heart className={`w-5 h-5 mr-2 ${isWishlisted ? "fill-current" : ""}`} />
-                                    {isWishlisted ? "Saved" : "Wishlist"}
-                                </button> */}
+                                <div className="flex items-center gap-3 text-sm text-gray-600 mt-1">
+                                    <span className="px-2 py-1 rounded-lg bg-gray-50 border border-gray-200">
+                                        Size: <span className="font-semibold text-gray-900">{selectedSize}</span>
+                                    </span>
+                                    <span className="px-2 py-1 rounded-lg bg-gray-50 border border-gray-200">
+                                        Qty: <span className="font-semibold text-gray-900">{quantity}</span>
+                                    </span>
 
-                                {/* <a
-                                    href="https://wa.me/8801566395807"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-2 bg-white border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-2xl font-semibold hover:border-green-300 hover:bg-green-50 hover:text-green-600 transition-all duration-300"
-                                >
-                                    <MessageSquare className="w-5 h-5" />
-                                    Ask Expert
-                                </a> */}
-
-                                <button
-                                    disabled={isOutOfStock}
-                                    className="flex items-center gap-3 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white py-4 px-8 rounded-2xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]"
-                                    onClick={() => {
-                                        if (!isOutOfStock) {
-                                            cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice)
-                                        }
-                                    }}
-                                >
-                                    <ShoppingCart className="w-6 h-6 mr-2" />
-                                    {isOutOfStock ? "Out of Stock" : "Add to Cart"}
-                                </button>
-
-                                <button
-                                    disabled={isOutOfStock}
-                                    onClick={() => {
-                                        if (!isOutOfStock) {
-                                            // cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize, selectedPrice)
-                                            cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
-                                            router.push('/checkout')
-                                        }
-                                    }}
-                                    className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white py-4 px-8 rounded-2xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-                                >
-                                    <Zap className="w-5 h-5" />
-                                    Buy Now
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Mobile Layout */}
-                    <div className="md:hidden">
-                        <div className="flex items-center gap-3 mb-4">
-                            <button
-                                disabled={isOutOfStock}
-                                onClick={handleAddToCart}
-                                className="flex-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white py-4 px-4 rounded-2xl font-bold text-center shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation active:scale-95 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-                            >
-                                <ShoppingCart className="w-5 h-5" />
-                                {isOutOfStock ? "Out of Stock" : "Add to Cart"}
-                            </button>
-
-                            {/* <button
-                                onClick={onToggleWishlist}
-                                className="w-14 h-14 bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-200 text-red-600 rounded-2xl flex items-center justify-center hover:bg-red-100 transition-all duration-300 touch-manipulation active:scale-95 shadow-lg"
-                            >
-                                <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
-                            </button> */}
-
-                            {/* <a
-                                href="https://wa.me/8801566395807"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-14 h-14 bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 text-green-600 rounded-2xl flex items-center justify-center hover:bg-green-100 transition-all duration-300 touch-manipulation active:scale-95 shadow-lg"
-                            >
-                                <MessageSquare className="w-5 h-5" />
-                            </a> */}
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                                <div className="text-xs text-gray-500 font-medium">Total Price</div>
-                                <div className="text-xl font-bold text-gray-900">
-                                    ৳{totalDiscounted.toLocaleString()}
-                                    {/* {(product.discount && totalDiscounted !== totalCurrent) && ( */}
-                                    {(totalDiscounted !== totalCurrent) && (
-                                        <span className="text-sm text-gray-500 line-through ml-2">
-                                            ৳{totalCurrent.toLocaleString()}
+                                    {totalDiscounted !== totalCurrent && (
+                                        <span className="px-2 py-1 rounded-lg bg-green-50 border border-green-100 text-green-700 font-semibold">
+                                            Save ৳{(totalCurrent - totalDiscounted).toLocaleString()}
                                         </span>
                                     )}
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Right: price + actions grouped (professional) */}
+                        <div className="flex items-center gap-4">
+                            {/* Price stacked near CTA */}
+                            <div className="text-right mr-2">
+                                <div className="text-xs text-gray-500 font-medium">Total</div>
+                                <div className="text-2xl font-extrabold text-gray-900 leading-tight">
+                                    ৳{totalDiscounted.toLocaleString()}
+                                </div>
+                                {totalDiscounted !== totalCurrent && (
+                                    <div className="text-sm text-gray-500 line-through font-semibold">
+                                        ৳{totalCurrent.toLocaleString()}
+                                    </div>
+                                )}
+                            </div>
 
                             <button
-                                disabled={isOutOfStock}
-                                onClick={() => {
-                                    if (!isOutOfStock) {
-                                        // cart?.setCheckoutOnlyItem?.(product as any, quantity, selectedSize, selectedPrice)
-                                        cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
-                                        router.push('/checkout')
-                                    }
-                                }}
-                                className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white py-3 px-8 rounded-2xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation active:scale-95 flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                                disabled={isOutOfStock || busy}
+                                aria-busy={busy}
+                                onClick={handleAddToCart}
+                                className="h-12 px-6 rounded-2xl font-bold shadow-lg transition-all duration-200
+                 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white
+                 hover:shadow-xl hover:scale-[1.02]
+                 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
                             >
-                                <Zap className="w-5 h-5" />
-                                Buy Now
+                                <span className="flex items-center gap-2">
+                                    {isAdding ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShoppingCart className="w-5 h-5" />}
+                                    {isOutOfStock ? "Out of Stock" : isAdding ? "Adding..." : "Add to Cart"}
+                                </span>
                             </button>
+
+                            <button
+                                disabled={isOutOfStock || busy}
+                                aria-busy={busy}
+                                onClick={handleBuyNow}
+                                className="h-12 px-7 rounded-2xl font-extrabold shadow-lg transition-all duration-200
+                 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white
+                 hover:shadow-xl hover:scale-[1.02]
+                 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+                            >
+                                <span className="flex items-center gap-2">
+                                    {isBuying || isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
+                                    {isOutOfStock ? "Out of Stock" : isBuying || isPending ? "Processing..." : "Buy Now"}
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* =========================
+            MOBILE (below md)
+        ========================== */}
+                    <div className="md:hidden space-y-3">
+                        {/* Row 1: product + price + quick meta */}
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shrink-0">
+                                <img
+                                    src={product.primaryImage}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center justify-between gap-2">
+                                    <h4 className="font-extrabold text-gray-900 truncate">{product.name}</h4>
+                                    <div className="text-right shrink-0">
+                                        <div className="text-[10px] text-gray-500 font-semibold">Total</div>
+                                        <div className="text-lg font-extrabold text-gray-900 leading-none">
+                                            ৳{totalDiscounted.toLocaleString()}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-[11px] px-2 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-700">
+                                        {selectedSize}
+                                    </span>
+                                    <span className="text-[11px] px-2 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-700">
+                                        Qty {quantity}
+                                    </span>
+                                    {totalDiscounted !== totalCurrent && (
+                                        <span className="text-[11px] px-2 py-1 rounded-lg bg-green-50 border border-green-100 text-green-700 font-semibold">
+                                            Save ৳{(totalCurrent - totalDiscounted).toLocaleString()}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Row 2: main CTAs (big + thumb friendly) */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                disabled={isOutOfStock || busy}
+                                aria-busy={busy}
+                                onClick={handleAddToCart}
+                                className="h-12 rounded-2xl font-extrabold shadow-lg transition-all duration-200
+                         bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white
+                         active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                            >
+                                <span className="flex items-center justify-center gap-2">
+                                    {isAdding ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShoppingCart className="w-5 h-5" />}
+                                    {isOutOfStock ? "Out" : isAdding ? "Adding..." : "Cart"}
+                                </span>
+                            </button>
+
+                            <button
+                                disabled={isOutOfStock || busy}
+                                aria-busy={busy}
+                                onClick={handleBuyNow}
+                                className="h-12 rounded-2xl font-extrabold shadow-lg transition-all duration-200
+                         bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white
+                         active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                            >
+                                <span className="flex items-center justify-center gap-2">
+                                    {isBuying || isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
+                                    {isOutOfStock ? "Out" : isBuying || isPending ? "..." : "Buy Now"}
+                                </span>
+                            </button>
+                        </div>
+
+                        {/* Row 3: micro trust + quick qty controls */}
+                        <div className="flex items-center justify-between gap-3">
+                            {/* Trust chips */}
+                            <div className="flex items-center gap-2">
+                                <span className="text-[11px] px-2 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 font-semibold">
+                                    Cash on Delivery
+                                </span>
+                                <span className="text-[11px] px-2 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 font-semibold">
+                                    Fast Delivery
+                                </span>
+                            </div>
+
+                            {/* Qty quick actions (optional but very conversion-friendly) */}
+                            <div className="flex items-center rounded-2xl border border-gray-200 bg-white overflow-hidden">
+                                <button
+                                    onClick={() => handleQuantityChange("decrement")}
+                                    disabled={busy || quantity <= 1}
+                                    className="h-9 w-10 grid place-items-center text-gray-700 disabled:opacity-50"
+                                >
+                                    −
+                                </button>
+                                <div className="h-9 px-3 grid place-items-center text-sm font-bold text-gray-900 border-x border-gray-200">
+                                    {quantity}
+                                </div>
+                                <button
+                                    onClick={() => handleQuantityChange("increment")}
+                                    disabled={busy || quantity >= 10}
+                                    className="h-9 w-10 grid place-items-center text-gray-700 disabled:opacity-50"
+                                >
+                                    +
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            {/* Spacer for sticky CTA */}
-            < div className="h-24 md:h-28" ></div >
         </>
     )
 }

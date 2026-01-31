@@ -40,20 +40,9 @@ export default function ThankYouLoading() {
                   ))}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[1, 2].map((i) => (
-                    <div key={i} className="border rounded-lg p-4 bg-gray-50 space-y-2">
-                      <Skeleton className="h-4 w-40" />
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
-                      <Skeleton className="h-4 w-1/3" />
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex gap-3">
-                  <Skeleton className="h-10 w-32" />
-                  <Skeleton className="h-10 w-40" />
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Skeleton className="h-10 w-full sm:w-32" />
+                  <Skeleton className="h-10 w-full sm:w-40" />
                 </div>
               </CardContent>
             </Card>

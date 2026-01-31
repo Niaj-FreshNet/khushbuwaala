@@ -27,17 +27,31 @@ function RadioGroupItem({
     <RadioGroupPrimitive.Item
       data-slot="radio-group-item"
       className={cn(
-        "border-input text-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 aspect-square size-4 shrink-0 rounded-full border shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
+        // ✅ Tap target + visual size
+        "relative flex items-center justify-center",
+        "h-6 w-6 sm:h-5 sm:w-5", // mobile bigger
+        "shrink-0 rounded-full border bg-background",
+        "border-input text-primary shadow-xs",
+        "transition-colors transition-shadow outline-none",
+        // ✅ States
+        "hover:border-primary/60",
+        "focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        "aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20",
         className
       )}
       {...props}
     >
       <RadioGroupPrimitive.Indicator
         data-slot="radio-group-indicator"
-        className="relative flex items-center justify-center"
+        className="flex items-center justify-center"
       >
-        <CircleIcon className="fill-primary absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2" />
+        {/* ✅ cleaner dot */}
+        <span className="block h-3 w-3 rounded-full bg-primary" />
       </RadioGroupPrimitive.Indicator>
+
+      {/* ✅ invisible larger tap target (44px) */}
+      <span className="absolute -inset-3 rounded-full" aria-hidden="true" />
     </RadioGroupPrimitive.Item>
   )
 }

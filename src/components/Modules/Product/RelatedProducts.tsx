@@ -80,15 +80,15 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
   return (
     <section
       aria-label="Related products"
-      className="mt-12 max-w-screen-xl mx-auto px-4 lg:px-8"
+      className="mt-4 max-w-screen-xl mx-auto px-4 lg:px-8"
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100 text-gray-800 text-xs font-semibold">
+          {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-100 text-gray-800 text-xs font-semibold">
             <Sparkles className="w-4 h-4" />
             Handpicked for you
-          </div>
+          </div> */}
 
           <h3 className="mt-3 text-xl md:text-2xl font-bold text-gray-900">
             You may also like
@@ -154,7 +154,7 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
                 )}
 
                 {/* Stock pill */}
-                <div className="absolute top-3 right-3">
+                {/* <div className="absolute top-3 right-3">
                   {p.inStock ? (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/90 text-green-700 border border-white shadow-sm">
                       <CheckCircle2 className="w-3.5 h-3.5" />
@@ -166,7 +166,7 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
                       Out
                     </span>
                   )}
-                </div>
+                </div> */}
 
                 {/* Quick hint (shows on hover) */}
                 <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition">
@@ -185,10 +185,15 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
                 {/* Meta line */}
                 <div className="mt-1 flex items-center justify-between gap-3">
                   <span className="text-xs text-gray-500 line-clamp-1">
-                    {p.brand ? p.brand : "KhushbuWaala"}
+                    KhushbuWaala
                   </span>
-                  <span className="text-[11px] font-semibold text-gray-600">
+                  {/* <span className="text-[11px] font-semibold text-gray-600">
                     {unit ? `${sizeCount}+ sizes • ${unit}` : "Standard size"}
+                  </span> */}
+
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-gray-900">
+                    View
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                   </span>
                 </div>
 
@@ -211,16 +216,13 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
                 </div>
 
                 {/* Divider + CTA */}
-                <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-xs font-medium text-gray-500">
-                    {p.gender ?? "UNISEX"}
-                  </span>
+                {/* <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-center">
 
                   <span className="inline-flex items-center gap-1 text-xs font-bold text-gray-900">
                     View
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                   </span>
-                </div>
+                </div> */}
               </div>
             </Link>
           );

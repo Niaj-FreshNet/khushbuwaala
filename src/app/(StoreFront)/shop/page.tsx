@@ -104,33 +104,6 @@ export default async function ShopPage({
         | "popularity"
         | undefined;
 
-    // Prefetch products
-    // const { data } = await store.dispatch(
-    //     productApi.endpoints.getAllProducts.initiate({
-    //         page,
-    //         limit: 20,
-    //         category,
-    //         specification,
-    //         section,
-    //         priceMin,
-    //         priceMax,
-    //         smells,
-    //         sortBy,
-    //     })
-    // );
-    // console.log('data', data)
-
-    // const products: IProductResponse[] = data?.data || [];
-    // const totalPages = data?.meta.totalPage || 1;
-
-    const notices = [
-        "🚚 Free Nationwide Shipping on Orders Over ৳1000",
-        "🔥 Up to 50% Off on Selected Premium Items",
-        "✨ Authentic Quality Guaranteed - 100% Original Products",
-        "🏪 Visit Our Banasree Outlet for In-Person Experience",
-        "💝 Special Gift Wrapping Available for All Orders",
-    ];
-
     // =================== STRUCTURED DATA ===================
     // Before returning JSX in ShopPage
     const shopStructuredData = {

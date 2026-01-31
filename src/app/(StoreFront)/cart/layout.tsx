@@ -1,8 +1,9 @@
-import type { Metadata } from "next"
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Shopping Cart | Khushbuwaala - Premium Perfume Oils",
-  description: "Review your selected premium perfume oils and proceed to secure checkout. Free shipping available on orders over ৳1000. Fast delivery across Bangladesh.",
+  description:
+    "Review your selected premium perfume oils and proceed to secure checkout. Free shipping available on orders over ৳1000. Fast delivery across Bangladesh.",
   keywords: [
     "shopping cart",
     "perfume oil cart",
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
     "attar shopping",
     "fragrance cart",
     "perfume checkout",
-    "online perfume store Bangladesh"
+    "online perfume store Bangladesh",
   ],
   openGraph: {
     title: "Shopping Cart | Khushbuwaala",
@@ -27,38 +28,34 @@ export const metadata: Metadata = {
     description: "Review your premium perfume oil selection and complete your purchase securely.",
   },
   robots: {
-    index: false, // Cart pages shouldn't be indexed
+    index: false,
     follow: true,
   },
   alternates: {
     canonical: "/cart",
   },
-}
+};
 
-export default function CartLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function CartLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       {children}
-      {/* JSON-LD structured data for cart page */}
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "ShoppingCart",
-            "mainEntity": {
+            mainEntity: {
               "@type": "Organization",
-              "name": "Khushbuwaala",
-              "url": "https://khushbuwaala.com",
-              "description": "Premium perfume oils and attar collection in Bangladesh"
-            }
+              name: "Khushbuwaala",
+              url: "https://khushbuwaala.com",
+              description: "Premium perfume oils and attar collection in Bangladesh",
+            },
           }),
         }}
       />
     </>
-  )
+  );
 }

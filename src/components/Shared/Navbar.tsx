@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import { NavbarClientWrapper } from "./NavbarClientWrapper"
+import { cn } from "@/lib/utils"
 
 // SEO: Structured Data for Navigation
 const navigationStructuredData = {
@@ -94,7 +95,7 @@ export function Navbar() {
       />
 
       <NavbarClientWrapper>
-        {({ handlers, counts, drawerOpen }) => (
+        {({ handlers, counts, drawerOpen, cartBump }) => (
           <header
             className="sticky top-0 z-50 border-b border-red-100/50 bg-white/95 shadow-md backdrop-blur-xl transition-all duration-300"
             role="banner"
@@ -138,9 +139,8 @@ export function Navbar() {
                     )}
                     <div className="absolute inset-0 bg-red-50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300 z-0" />
                     <Menu
-                      className={`relative z-10 h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300 ${
-                        drawerOpen ? "rotate-90 scale-110" : "group-hover:scale-110"
-                      }`}
+                      className={`relative z-10 h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300 ${drawerOpen ? "rotate-90 scale-110" : "group-hover:scale-110"
+                        }`}
                     />
                   </Button>
                 </div>
@@ -180,10 +180,14 @@ export function Navbar() {
                   </Button>
 
                   <Button
+                    id="kw-cart-icon-mobile"
                     variant="ghost"
                     size="icon"
                     onClick={handlers.openCart}
-                    className="relative h-10 w-10 sm:h-11 sm:w-11 rounded-xl group hover:bg-green-50 hover:text-green-600 transition-all duration-300"
+                    className={cn(
+                      "relative h-10 w-10 sm:h-11 sm:w-11 rounded-xl group hover:bg-green-50 hover:text-green-600 transition-all duration-300",
+                      cartBump && "animate-bounce ring-4 ring-emerald-200 bg-green-50 text-green-600"
+                    )}
                     aria-label={`Shopping cart (${counts.cart} items)`}
                     title="Cart"
                   >
@@ -192,6 +196,12 @@ export function Navbar() {
                       {counts.cart > 99 ? "99+" : counts.cart}
                     </Badge>
                     <div className="absolute inset-0 bg-green-50/50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300" />
+                    {cartBump && (
+                      <div className="absolute -bottom-10 right-0 z-50 rounded-xl bg-gray-900 text-white text-xs px-3 py-1 shadow-xl animate-in fade-in zoom-in">
+                        Added to cart ✅
+                      </div>
+                    )}
+
                   </Button>
                 </div>
               </div>
@@ -379,10 +389,14 @@ export function Navbar() {
                   </Link>
 
                   <Button
+                    id="kw-cart-icon-desktop"
                     variant="ghost"
                     size="icon"
                     onClick={handlers.openCart}
-                    className="relative overflow-visible h-11 w-11 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-600 transition-all duration-300 rounded-xl group"
+                    className={cn(
+                      "relative overflow-visible h-11 w-11 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-600 transition-all duration-300 rounded-xl group",
+                      cartBump && "animate-bounce ring-4 ring-emerald-200 bg-green-50 text-green-600"
+                    )}
                     aria-label={`Shopping cart (${counts.cart} items)`}
                     title="View your shopping cart"
                   >
@@ -394,6 +408,11 @@ export function Navbar() {
                     <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-green-200/30 to-transparent animate-shimmer" />
                     </div>
+                    {cartBump && (
+                      <div className="absolute -bottom-10 right-0 z-50 rounded-xl bg-gray-900 text-white text-xs px-3 py-1 shadow-xl animate-in fade-in zoom-in">
+                        Added to cart ✅
+                      </div>
+                    )}
                   </Button>
 
                   <Link href="/track-order">

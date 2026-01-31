@@ -21,7 +21,6 @@ import { VariantsSection } from '../_component/VariantsSection';
 import AddVariantButton from '../_component/AddVariantButton';
 import { PublishedSwitch } from '../_component/PublishedSwitch';
 import { VariantForForm } from '@/types/product.types';
-import { useFormContext } from 'react-hook-form';
 
 interface FormValues {
   name: string;
@@ -57,7 +56,7 @@ const EditProductPage = () => {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [updateProduct] = useUpdateProductMutation();
 
-  const { data: productResponse, isLoading } = useGetProductBySlugQuery(slug);
+  const { data: productResponse, isLoading, refetch } = useGetProductBySlugQuery(slug);
   const product = productResponse?.data;
 
   const { data: categoriesData } = useGetAllCategoriesAdminQuery();
@@ -71,9 +70,16 @@ const EditProductPage = () => {
   // Convert API product to form default values
   const [defaultValues, setDefaultValues] = useState<FormValues | null>(null);
 
+  const [imagesToKeep, setImagesToKeep] = useState<string[]>([]);
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+
+
   useEffect(() => {
     if (product) {
-      setImagePreviews([product.primaryImage, ...(product.otherImages || [])]);
+      const current = [product.primaryImage, ...(product.otherImages || [])].filter(Boolean);
+      setImagePreviews(current);
+      setImagesToKeep(current);
+      setNewImageFiles([]);
 
       setDefaultValues({
         name: product.name || '',
@@ -98,8 +104,6 @@ const EditProductPage = () => {
             price: v.price,
             unit: v.unit,
           })) || [{ size: '', price: 0, stock: 0, sku: '', unit: 'ML' }],
-        primaryImage: [product.primaryImage],
-        otherImages: product.otherImages || [],
         origin: product.origin || '',
         performance: product.performance || 'GOOD',
         longevity: product.longevity || 'MODERATE',
@@ -109,6 +113,8 @@ const EditProductPage = () => {
         videoUrl: product.videoUrl || '',
         stock: product.totalStock || 0,
         supplier: product.supplier || '',
+        primaryImage: [product.primaryImage],
+        otherImages: product.otherImages || [],
       });
     }
   }, [product]);
@@ -116,47 +122,58 @@ const EditProductPage = () => {
   // console.log(product?.materialIds)
   const handleSubmit = async (values: FormValues) => {
     try {
-      const payload = {
-        name: values.name,
-        description: values.description,
-        brand: values.brand,
-        gender: values.gender,
-        origin: values.origin || '',
-        primaryImage: imagePreviews[0] || '',
-        otherImages: imagePreviews.slice(1),
-        videoUrl: values.videoUrl || '',
-        tags: values.tags.split(',').map(t => t.trim()).filter(Boolean),
-        perfumeNotes: {
-          top: values.perfumeNotes.top.split(',').map(n => n.trim()).filter(Boolean),
-          middle: values.perfumeNotes.middle.split(',').map(n => n.trim()).filter(Boolean),
-          base: values.perfumeNotes.base.split(',').map(n => n.trim()).filter(Boolean),
-        },
-        accords: values.accords.split(',').map(a => a.trim()).filter(Boolean),
-        bestFor: values.bestFor?.split(',').map(b => b.trim()).filter(Boolean),
-        categoryId: values.categoryId,
-        materialIds: values.materialIds,
-        fragranceIds: values.fragranceIds,
-        published: values.published,
-        performance: values.performance || '',
-        longevity: values.longevity || '',
-        projection: values.projection || '',
-        sillage: values.sillage || '',
-        stock: values.stock,
-        supplier: values.supplier,
-        variants: values.variants.map(v => ({
-          sku: v.sku,
-          size: Number(v.size),
-          unit: v.unit.toUpperCase(),
-          price: Number(v.price),
-        })),
-      };
+      const fd = new FormData();
 
-      await updateProduct({ id: product?.id, formData: payload }).unwrap();
-      toast.success('Product updated successfully!');
-      // router.push('/dashboard/products');
+      // ----- normal fields -----
+      fd.append("name", values.name);
+      fd.append("description", values.description);
+      fd.append("brand", values.brand);
+      fd.append("gender", values.gender);
+      fd.append("origin", values.origin || "");
+      fd.append("videoUrl", values.videoUrl || "");
+      fd.append("categoryId", values.categoryId);
+      fd.append("supplier", values.supplier || "");
+      fd.append("stock", String(values.stock));
+      fd.append("published", String(values.published));
+
+      // ----- json fields (because parseJsonFields expects JSON) -----
+      fd.append("tags", JSON.stringify(values.tags.split(",").map(t => t.trim()).filter(Boolean)));
+      fd.append("accords", JSON.stringify(values.accords.split(",").map(a => a.trim()).filter(Boolean)));
+      fd.append("bestFor", JSON.stringify(values.bestFor?.split(",").map(b => b.trim()).filter(Boolean) || []));
+
+      fd.append("perfumeNotes", JSON.stringify({
+        top: values.perfumeNotes.top.split(",").map(n => n.trim()).filter(Boolean),
+        middle: values.perfumeNotes.middle.split(",").map(n => n.trim()).filter(Boolean),
+        base: values.perfumeNotes.base.split(",").map(n => n.trim()).filter(Boolean),
+      }));
+
+      // fd.append("materialIds", JSON.stringify(values.materialIds || []));
+      fd.append("materialIds", JSON.stringify(values.materialIds || []));
+      // fd.append("fragranceIds", JSON.stringify(values.fragranceIds || []));
+      fd.append("fragranceIds", JSON.stringify(values.fragranceIds || []));
+
+      fd.append("variants", JSON.stringify(values.variants.map(v => ({
+        sku: v.sku,
+        size: Number(v.size),
+        unit: v.unit.toUpperCase(),
+        price: Number(v.price),
+      }))));
+
+      // ----- image logic (this is the key) -----
+      // fd.append("imagesToKeep", JSON.stringify(imagesToKeep.filter((u) => u.startsWith("http"))));
+      fd.append("imagesToKeep", JSON.stringify(imagesToKeep));
+
+      // newImageFiles.forEach((file) => {
+      //   fd.append("images", file); // ✅ must be 'images' (backend expects)
+      // });
+      newImageFiles.forEach((f) => fd.append("images", f)); // multer expects 'images'
+
+      await updateProduct({ id: product?.id as string, formData: fd }).unwrap();
+      toast.success("Product updated successfully!");
+      await refetch();
     } catch (error) {
       console.error(error);
-      toast.error('Failed to update product.');
+      toast.error("Failed to update product.");
     }
   };
 
@@ -303,11 +320,25 @@ const EditProductPage = () => {
                     type="file"
                     inputClassName="border-[#FB923C]"
                     onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const previewUrl = URL.createObjectURL(file);
-                        setImagePreviews((prev) => [previewUrl, ...prev.slice(1)]);
-                      }
+                      const file = (e.target as HTMLInputElement).files?.[0];
+                      if (!file) return;
+
+                      const previewUrl = URL.createObjectURL(file);
+
+                      // UI preview
+                      setImagePreviews((prev) => [previewUrl, ...prev.slice(1)]);
+
+                      // backend logic:
+                      // remove existing primary from keep-list (if it was an URL)
+                      setImagesToKeep((prevKeep) => {
+                        const currentPrimary = prevKeep[0];
+                        const rest = prevKeep.slice(1);
+                        // only remove if it looks like a real URL, not blob
+                        return currentPrimary?.startsWith("http") ? rest : prevKeep;
+                      });
+
+                      // add new file to upload list
+                      setNewImageFiles((prev) => [file, ...prev]);
                     }}
                   />
                   {imagePreviews[0] && (
@@ -330,9 +361,13 @@ const EditProductPage = () => {
                     inputClassName="border-[#FB923C]"
                     multiple
                     onChange={(e) => {
-                      const files = Array.from(e.target.files || []);
-                      const previews = files.map((file) => URL.createObjectURL(file));
-                      setImagePreviews((prev) => [prev[0], ...previews]); // keep primary first
+                      const files = Array.from((e.target as HTMLInputElement).files || []);
+                      if (!files.length) return;
+
+                      const previews = files.map((f) => URL.createObjectURL(f));
+
+                      setImagePreviews((prev) => [prev[0], ...prev.slice(1), ...previews]);
+                      setNewImageFiles((prev) => [...prev, ...files]);
                     }}
                   />
 
@@ -349,18 +384,24 @@ const EditProductPage = () => {
                             className="w-full h-full object-cover"
                           />
                           <Button
+                            type="button"
                             variant="outline"
                             size="icon"
                             className="absolute top-2 right-4 -translate-y-1/2 translate-x-1/2"
                             onClick={() => {
-                              const form = useFormContext<FormValues>();
-                              const otherImages = form.getValues("otherImages");
-                              // adjust the array removing that image
-                              otherImages.splice(index + 1, 1);
-                              form.setValue("otherImages", otherImages);
-                              setImagePreviews((prev) =>
-                                prev.filter((_, i) => i !== index + 1)
-                              );
+                              const img = imagePreviews[index + 1]; // because slice(1)
+
+                              // remove from UI preview
+                              setImagePreviews((prev) => prev.filter((_, i) => i !== index + 1));
+
+                              // if it’s an old server URL -> remove from keep list
+                              if (img?.startsWith("http")) {
+                                setImagesToKeep((prev) => prev.filter((u) => u !== img));
+                              }
+
+                              // if it’s a blob preview -> also remove its file from newImageFiles
+                              // easiest safe approach: rebuild newImageFiles by filtering out matching "last selected"
+                              // (optional improvement: map blob->File in state)
                             }}
                           >
                             x

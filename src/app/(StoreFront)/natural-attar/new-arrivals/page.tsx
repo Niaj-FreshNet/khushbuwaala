@@ -7,6 +7,7 @@ import { initializeStore } from "@/redux/store/ssrStore";
 import { productApi } from "@/redux/store/api/product/productApi";
 import { IProductResponse } from "@/types/product.types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ShopShell } from "@/components/Modules/Shop/ShopShell";
 
 // ✅ SEO Metadata
 export const metadata: Metadata = {
@@ -93,93 +94,73 @@ const newArrivalStructuredData = {
 };
 
 // ✅ Page Component
-export default async function NewArrivalsPage() {
-  const store = initializeStore();
+export default async function NewArrivalsPage({
+  searchParams: rawSearchParams
+}: {
+  searchParams: Record<string, string | undefined>
+}) {
+  const searchParams = await Promise.resolve(rawSearchParams); // ✅ async-safe
 
-  // Fetch only new arrival products from API
-  const { data } = await store.dispatch(productApi.endpoints.getNewArrivals.initiate(undefined));
-
-  const products: IProductResponse[] = data || [];
-
-  // Static notices reused from Shop page
-  const notices = [
-    "🚚 Free Nationwide Shipping on Orders Over ৳1000",
-    "🔥 Up to 50% Off on Selected Premium Items",
-    "✨ Authentic Quality Guaranteed - 100% Original Products",
-    "🏪 Visit Our Banasree Outlet for In-Person Experience",
-    "💝 Special Gift Wrapping Available for All Orders",
-  ];
+  const page = Number(searchParams.page) || 1;
+  const categoryName = searchParams.category;
+  const specification = searchParams.specification;
+  const section = searchParams.section;
+  const minPrice = searchParams.minPrice ? Number(searchParams.minPrice) : undefined;
+  const maxPrice = searchParams.maxPrice ? Number(searchParams.maxPrice) : undefined;
+  const accords = searchParams.accords;
+  const perfumeNotes = searchParams.perfumeNotes;
+  const performance = searchParams.performance;
+  // const sortBy = searchParams.sortBy as
+  //   | "name"
+  //   | "price_asc"
+  //   | "price_desc"
+  //   | "newest"
+  //   | "oldest"
+  //   | "popularity"
+  //   | undefined;
+  const sortBy = "newest" as string | undefined;
 
   return (
     <>
+      {/* Hidden crawlable pagination links */}
+      {page > 1 && (
+        <link
+          rel="prev"
+          href={`/new-arrivals?page=${page - 1}`}
+        />
+      )}
+      {page < 100 && (
+        <link
+          rel="next"
+          href={`/new-arrivals?page=${page + 1}`}
+        />
+      )}
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(newArrivalStructuredData),
         }}
       />
-      <div className="w-full mx-auto">
-        {/* ✅ Banner */}
-        <ShopBanner
-          heading="Get The Latest Perfume Oil Editions"
-          text="Choose Your Desired Perfume Oil from Our New Arrivals"
-          buttonText="Shop Now"
-          link="/shop"
-          images={{
-            desktop: "/images/n111.png",
-            mobile: "/images/n1.webp",
-          }}
-          altText="Banner displaying the newest perfume oil arrivals"
-          variant="premium"
-        />
 
-        {/* ✅ Notice Bar */}
-        <div className="py-8 bg-gradient-to-r from-gray-50 via-white to-gray-50">
-          <NoticeBar
-            heading="New Arrival Perfume Oils"
-            notices={notices}
-            interval={4500}
-          />
-        </div>
-
-        {/* ✅ Product Section */}
-        <div id="products" className="bg-white pt-0 pb-8">
-          <Suspense fallback={<ShopProductsSkeleton />}>
-            <ShopProducts
-              initialProducts={products}
-              section="newArrival"
-              totalPages={1}
-              initialPage={1}
-            />
-          </Suspense>
-        </div>
-      </div>
+      <ShopShell
+        bannerHeading="Get The Latest Perfume Oil Editions"
+        bannerText="Choose Your Desired Perfume Oil from Our New Arrivals"
+        bannerImages={{ desktop: "/images/n111.png", mobile: "/images/n1.webp" }}
+        bannerAlt="Banner displaying the newest perfume oil arrivals"
+        noticesHeading="New Arrival Perfume Oils"
+        initialPage={page}
+        categoryName={categoryName}
+        specification={specification}
+        section={section}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        accords={accords}
+        perfumeNotes={perfumeNotes}
+        performance={performance}
+        sortBy={sortBy}
+        lockCategory={false}
+      />
     </>
-  );
-}
-
-// ✅ Skeleton Loader
-function ShopProductsSkeleton() {
-  return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="border border-gray-100 rounded-xl shadow-sm overflow-hidden"
-          >
-            <Skeleton className="w-full h-64 rounded-t-xl" />
-            <div className="p-4 space-y-3">
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-              <div className="flex gap-2 pt-2">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <Skeleton className="h-10 flex-1 rounded-lg" />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }

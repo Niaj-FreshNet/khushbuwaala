@@ -49,6 +49,18 @@ export default function BottomBar() {
     }
   }, [lastScrollY])
 
+  const [cartBump, setCartBump] = useState(false);
+
+  useEffect(() => {
+    const onCartAdded = () => {
+      setCartBump(true);
+      setTimeout(() => setCartBump(false), 5000);
+    };
+
+    window.addEventListener("kw:cart-added", onCartAdded);
+    return () => window.removeEventListener("kw:cart-added", onCartAdded);
+  }, []);
+
   const handlers = {
     openSearch: () => setSearchVisible(true),
     closeSearch: () => setSearchVisible(false),
@@ -160,6 +172,7 @@ export default function BottomBar() {
           <div className="relative flex justify-around items-center h-16 px-2">
             {navItems.map((item, index) => {
               const isActive = item.path ? isActiveRoute(item.path) : false
+              const isCart = item.label === "Cart";
 
               return (
                 <div key={item.label} className="relative flex-1 flex justify-center">
@@ -167,12 +180,13 @@ export default function BottomBar() {
                     <Button
                       variant="ghost"
                       className={cn(
-                        "relative flex flex-col items-center justify-center h-14 w-14 rounded-2xl transition-all duration-300 group",
+                        "relative flex flex-col items-center justify-center h-14 w-14 rounded-lg transition-all duration-300 group",
                         "hover:bg-red-50/80 active:scale-95",
                         isActive
-                          ? "bg-red-50/80 text-red-600 shadow-lg shadow-red-500/20"
+                          ? "bg-red-50/80 text-red-600 shadow-lg shadow-red-500/10"
                           : "text-gray-600 hover:text-red-600",
-                        item.isSpecial && "bg-blue-50/80 hover:bg-blue-100/80"
+                        item.isSpecial && "bg-blue-50/80 hover:bg-blue-100/80",
+                        isCart && cartBump && "animate-bounce ring-4 ring-emerald-200"
                       )}
                       asChild
                       aria-label={item.ariaLabel}
@@ -209,9 +223,10 @@ export default function BottomBar() {
                           {item.label}
                         </span>
 
-                        {/* Active indicator */}
-                        {/* {isActive && (
-                          <div className="absolute -bottom-1 w-1 h-1 bg-red-500 rounded-full animate-pulse" />
+                        {/* {isCart && cartBump && (
+                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 rounded-xl bg-gray-900 text-white text-[11px] px-3 py-1 shadow-xl">
+                            Added ✅
+                          </div>
                         )} */}
                       </Link>
                     </Button>
@@ -219,7 +234,7 @@ export default function BottomBar() {
                     <Button
                       variant="ghost"
                       className={cn(
-                        "relative flex flex-col items-center justify-center h-14 w-14 rounded-2xl transition-all duration-300 group",
+                        "relative flex flex-col items-center justify-center h-14 w-14 rounded-lg transition-all duration-300 group",
                         "hover:bg-red-50/80 active:scale-95",
                         "text-gray-600 hover:text-red-600",
                         item.isSpecial && "bg-blue-50/80 hover:bg-blue-100/80"

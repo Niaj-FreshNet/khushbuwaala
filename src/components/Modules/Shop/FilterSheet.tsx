@@ -52,9 +52,11 @@ export function FilterSheet({
   // your normal categories should match DB categoryName exactly
   const CATEGORY_OPTIONS = [
     { value: "INSPIRED PERFUME OIL", label: "Inspired Perfume Oil" },
-    { value: "ORIENTAL", label: "Oriental & Arabian Attar" },
+    { value: "ORIENTAL ATTAR", label: "Oriental & Arabian Attar" },
     { value: "ARTIFICIAL OUD", label: "Artificial Oud" },
-    { value: "NATURAL", label: "Natural Collections" },
+    { value: "GIFTS AND PACKAGES", label: "Gifts & Packages" },
+    { value: "NATURAL ATTAR", label: "Natural Attar" },
+    { value: "ORGANIC ATTAR", label: "Organic Attar" },
     { value: "BRAND", label: "Brand" },
   ];
 
