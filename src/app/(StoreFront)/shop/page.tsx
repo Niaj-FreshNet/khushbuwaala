@@ -95,14 +95,15 @@ export default async function ShopPage({
     const accords = searchParams.accords;
     const perfumeNotes = searchParams.perfumeNotes;
     const performance = searchParams.performance;
-    const sortBy = searchParams.sortBy as
-        | "name"
-        | "price_asc"
-        | "price_desc"
-        | "newest"
-        | "oldest"
-        | "popularity"
-        | undefined;
+    // const sortBy = searchParams.sortBy as
+    //     | "name"
+    //     | "price_asc"
+    //     | "price_desc"
+    //     | "newest"
+    //     | "oldest"
+    //     | "popularity"
+    //     | undefined;
+    const sortBy = "a-z" as string| undefined;
 
     // =================== STRUCTURED DATA ===================
     // Before returning JSX in ShopPage
