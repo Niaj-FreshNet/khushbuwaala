@@ -7,6 +7,7 @@ import { IDiscount, IProduct, IProductVariant } from "@/types/product.types";
 import { useRouter } from "next/navigation";
 import ProductDetailsUI from "./ProductDetailsUI.server";
 import flyToCart from "./FlyToCart";
+import { kwPushAddToCart, kwPushBeginCheckout } from "@/lib/Analytics/kwEcom";
 
 export default function ProductDetailsClient({
   product,
@@ -122,6 +123,23 @@ export default function ProductDetailsClient({
         // If addToCart is sync, this still gives user feedback for a moment
         cart?.addToCart?.(product as any, quantity, selectedSizeLabel, currentPrice);
 
+        // ✅ TRACK: add_to_cart (GA4 + Meta via GTM)
+        kwPushAddToCart({
+          currency: "BDT",
+          value: currentPrice * quantity,
+          items: [
+            {
+              item_id: String((product as any).id || (product as any).slug),
+              item_name: String((product as any).name || ""),
+              item_brand: String((product as any).brand || "KhushbuWaala"),
+              item_category: String((product as any).categoryId || ""),
+              item_variant: selectedSizeLabel, // ✅ variant
+              price: currentPrice,
+              quantity,
+            },
+          ],
+        });
+
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("kw:cart-added"));
         }
@@ -140,8 +158,24 @@ export default function ProductDetailsClient({
     try {
       cart?.addToCart?.(product as any, quantity, selectedSizeLabel, currentPrice);
 
-      await new Promise((r) => setTimeout(r, 1000));
+      // ✅ TRACK begin_checkout from Buy Now (single-item checkout intent)
+      kwPushBeginCheckout({
+        currency: "BDT",
+        value: currentPrice * quantity,
+        items: [
+          {
+            item_id: String((product as any).id || (product as any).slug),
+            item_name: String((product as any).name || ""),
+            item_brand: String((product as any).brand || "KhushbuWaala"),
+            item_category: String((product as any).categoryId || ""),
+            item_variant: selectedSizeLabel,
+            price: currentPrice,
+            quantity,
+          },
+        ],
+      });
 
+      await new Promise((r) => setTimeout(r, 500));
       startTransition(() => router.push("/checkout"));
     } finally {
       setIsBuyingNow(false);

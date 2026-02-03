@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import Image from "next/image"
 import { useCart } from "@/redux/store/hooks/useCart"
 import { useEffect, useRef, useState } from "react"
+import { kwPushBeginCheckout } from "@/lib/Analytics/kwEcom"
 
 
 // Use real cart from store
@@ -263,6 +264,23 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
   }
 
   const handleCheckout = () => {
+    // build items from drawer cartItems
+    const items = (cartItems || []).map((item: any) => ({
+      item_id: String(item?.product?.id || item?.product?.slug || ""),
+      item_name: String(item?.product?.name || ""),
+      item_brand: String(item?.product?.brand || "KhushbuWaala"),
+      item_category: String(item?.product?.categoryId || ""),
+      item_variant: String(item?.selectedSize || ""),
+      price: Number(item?.selectedPrice || 0),
+      quantity: Number(item?.quantity || 1),
+    })).filter((i: any) => i.item_id)
+
+    kwPushBeginCheckout({
+      currency: "BDT",
+      value: Number(calculateSubtotal() || 0),
+      items,
+    })
+
     router.push("/checkout")
     onClose()
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -35,11 +35,16 @@ import StoreContainer from "@/components/Layout/StoreContainer";
 import { useCreateBkashPaymentMutation } from "@/redux/store/api/payment/paymentApi";
 import { cn } from "@/lib/utils";
 import { useApplyDiscountMutation } from "@/redux/store/api/discount/discountApi";
+import { kwPushAddPaymentInfo, kwPushAddShippingInfo } from "@/lib/Analytics/kwEcom";
 
 // --- Types ---
 type ShippingMethod = "insideDhaka" | "outsideDhaka";
 type PaymentMethod = "bkash" | "cashOnDelivery";
 type BillingType = "sameAsShipping" | "differentBillingAddress";
+type DiscountLabel =
+  | { type: "percentage"; value: number }
+  | { type: "fixed"; value: number }
+  | null;
 
 // --- Districts ---
 const districts = [
@@ -64,6 +69,9 @@ export default function CheckoutPage() {
     calculateSubtotal,
     proceedToCartCheckout,
     clearCart,
+    appliedCouponCode,
+    setAppliedCouponCode,
+    clearAppliedCouponCode
   } = useCart();
 
   const { handleCreateOrder, loading: isPlacingOrder } = useOrder();
@@ -101,7 +109,17 @@ export default function CheckoutPage() {
   const [billingThana, setBillingThana] = useState("");
   const [billingContactNumber, setBillingContactNumber] = useState("");
 
+  const [discountInfo, setDiscountInfo] = useState<DiscountLabel>(null);
+
   const [applyDiscount, { isLoading: isApplyingDiscount }] = useApplyDiscountMutation();
+
+  const [districtSearch, setDistrictSearch] = useState("");
+
+  const filteredDistricts = useMemo(() => {
+    const q = districtSearch.trim().toLowerCase();
+    if (!q) return districts;
+    return districts.filter((d) => d.toLowerCase().includes(q));
+  }, [districtSearch]);
 
   useEffect(() => {
     if (typeof window !== "undefined") window.scrollTo(0, 0);
@@ -155,9 +173,135 @@ export default function CheckoutPage() {
     return calculateSubtotal();
   }, [checkoutMode, checkoutItem, calculateSubtotal]);
 
+
   const estimatedTaxes = 0;
   const discountedSubtotal = Math.max(0, subtotal - discount);
   const total = discountedSubtotal + estimatedTaxes + shippingCost;
+
+  // ----------------------------
+  // Analytics: map cart -> GA4 items
+  // ----------------------------
+  const userData = useMemo(() => {
+    // only include what is available
+    return {
+      em: email || undefined,
+      ph: contactNumber || undefined,
+      fn: name || undefined,
+      ct: selectedDistrict || undefined,
+      country: "bd",
+    }
+  }, [email, contactNumber, name, selectedDistrict])
+
+  const analyticsItems = useMemo(() => {
+    return itemsToDisplay
+      .map((product: any) => {
+        const p = product?.product || product
+
+        const productId =
+          product?.product?.id ||
+          product?.product?._id ||
+          product?.productId ||
+          product?.product?.productId
+
+        const productName = p?.name || product?.name || "Product"
+
+        const brand = p?.brand || "KhushbuWaala"
+        const category = p?.category?.name || p?.categoryName || p?.category || undefined
+
+        // Your variant is basically selectedSize (e.g. "6 ml")
+        const variant = product?.selectedSize ? String(product.selectedSize).trim().toUpperCase() : undefined
+
+        // Price
+        const [sizeValue, sizeUnit] = String(product?.selectedSize || "").split(" ")
+        const matchedVariant = product?.product?.variants?.find(
+          (v: any) =>
+            Number(v.size) === Number(sizeValue) &&
+            String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
+        )
+        const price = Number(product?.selectedPrice ?? matchedVariant?.price ?? product?.price ?? 0)
+
+        // Quantity
+        const quantity = Math.max(1, Number(product?.quantity || 1))
+
+        if (!productId) return null
+
+        return {
+          item_id: String(productId),
+          item_name: String(productName),
+          item_brand: String(brand),
+          item_category: category ? String(category) : undefined,
+          item_variant: variant ? String(variant) : undefined,
+          price,
+          quantity,
+        }
+      })
+      .filter(Boolean) as any[]
+  }, [itemsToDisplay])
+
+  const shippingDedupeRef = useRef<string>("")
+  const paymentDedupeRef = useRef<string>("")
+
+  useEffect(() => {
+    // We only track once shipping can be validly determined
+    if (!selectedDistrict) return
+    if (!analyticsItems.length) return
+
+    // ✅ guard: avoid firing if any item has invalid/zero price
+    if (analyticsItems.some(i => !i.price || i.price <= 0)) return
+
+    const shippingTier =
+      shippingMethod === "insideDhaka" ? "Inside Dhaka" : "Outside Dhaka"
+
+    // fingerprint prevents duplicate firing on rerenders
+    const fp = [
+      "ship",
+      selectedDistrict,
+      shippingMethod,
+      String(Math.round(total)),
+      analyticsItems.map(i => `${i.item_id}:${i.item_variant || ""}:${i.price}:${i.quantity}`).sort().join("|"),
+    ].join("~")
+
+    if (shippingDedupeRef.current === fp) return
+    shippingDedupeRef.current = fp
+
+    kwPushAddShippingInfo({
+      currency: "BDT",
+      value: total,
+      items: analyticsItems,
+      shipping_tier: shippingTier,
+      coupon: appliedPromoCode ?? undefined,
+      user_data: userData,
+    })
+  }, [selectedDistrict, shippingMethod, total, analyticsItems])
+
+  useEffect(() => {
+    if (!analyticsItems.length) return
+
+    // ✅ guard: avoid firing if any item has invalid/zero price
+    if (analyticsItems.some(i => !i.price || i.price <= 0)) return
+
+    const paymentType = paymentMethod === "bkash" ? "bkash" : "cod"
+
+    const fp = [
+      "pay",
+      paymentType,
+      String(Math.round(total)),
+      analyticsItems.map(i => `${i.item_id}:${i.item_variant || ""}:${i.price}:${i.quantity}`).sort().join("|"),
+    ].join("~")
+
+    if (paymentDedupeRef.current === fp) return
+    paymentDedupeRef.current = fp
+
+    kwPushAddPaymentInfo({
+      currency: "BDT",
+      value: total,
+      items: analyticsItems,
+      payment_type: paymentType,
+      coupon: appliedPromoCode ?? undefined,
+      user_data: userData,
+    })
+  }, [paymentMethod, total, analyticsItems])
+
 
   const formatBDT = (amount: number) =>
     new Intl.NumberFormat("en-BD", {
@@ -195,6 +339,11 @@ export default function CheckoutPage() {
       const price = Number(product?.selectedPrice ?? matchedVariant?.price ?? 0);
       const qty = Number(product?.quantity || 1);
 
+      const productId =
+        product?.product?.id ||
+        product?.product?._id ||
+        product?.productId;
+
       // Try multiple fallbacks for variantId depending on your cart structure
       const variantId =
         product?.variantId ||
@@ -202,12 +351,40 @@ export default function CheckoutPage() {
         matchedVariant?.id ||
         matchedVariant?._id;
 
+      console.log(product, productId, variantId, price, qty)
+
       return {
+        productId,
         variantId,
         price,
         qty,
       };
     });
+  };
+
+  const pickDiscountAmount = (res: any) =>
+    Number(res?.data?.discountAmount ?? res?.discountAmount ?? 0);
+
+  const pickDiscountInfo = (res: any): DiscountLabel => {
+    const items = res?.data?.items ?? res?.items ?? [];
+
+    // Prefer PROMO discount if present on any item
+    for (const it of items) {
+      const promo = (it?.appliedDiscounts ?? []).find((d: any) => d?.code);
+      if (promo?.type && typeof promo?.value === "number") {
+        return { type: promo.type, value: Number(promo.value) } as DiscountLabel;
+      }
+    }
+
+    // Else fall back to any AUTO discount
+    for (const it of items) {
+      const auto = (it?.appliedDiscounts ?? []).find((d: any) => !d?.code);
+      if (auto?.type && typeof auto?.value === "number") {
+        return { type: auto.type, value: Number(auto.value) } as DiscountLabel;
+      }
+    }
+
+    return null;
   };
 
   // --- Promo code ---
@@ -216,7 +393,9 @@ export default function CheckoutPage() {
     if (appliedPromoCode) {
       setAppliedPromoCode(null);
       setDiscount(0);
+      setDiscountInfo(null);
       setPromoCode("");
+      clearAppliedCouponCode()
       toast.success("Promo removed");
       return;
     }
@@ -226,6 +405,7 @@ export default function CheckoutPage() {
 
     try {
       const items = buildDiscountItems();
+      console.log("items", items)
 
       // Optional guard (helps avoid weird payloads)
       if (!items.length) return toast.error("Your cart is empty.");
@@ -235,8 +415,8 @@ export default function CheckoutPage() {
 
       const res = await applyDiscount({ code, items }).unwrap();
 
-      // expected: { discount: IDiscount; discountAmount: number }
-      const discountAmount = Number(res?.discountAmount ?? 0);
+      const discountAmount = pickDiscountAmount(res);
+      const info = pickDiscountInfo(res);
 
       if (discountAmount <= 0) {
         toast.error("This coupon doesn't apply to your cart.");
@@ -244,7 +424,9 @@ export default function CheckoutPage() {
       }
 
       setAppliedPromoCode(code);
+      setAppliedCouponCode(code)
       setDiscount(discountAmount);
+      setDiscountInfo(info);
       toast.success(`Promo applied: -${formatBDT(discountAmount)}`);
     } catch (e: any) {
       const msg =
@@ -256,24 +438,40 @@ export default function CheckoutPage() {
   };
 
   useEffect(() => {
+    if (!appliedCouponCode) return
+    if (appliedPromoCode) return
+
+    // set it in UI
+    setPromoCode(appliedCouponCode)
+    setAppliedPromoCode(appliedCouponCode)
+  }, [appliedCouponCode, appliedPromoCode])
+
+  useEffect(() => {
     const revalidate = async () => {
       if (!appliedPromoCode) return;
 
       try {
         const items = buildDiscountItems();
         const res = await applyDiscount({ code: appliedPromoCode, items }).unwrap();
-        const discountAmount = Number(res?.discountAmount ?? 0);
-        setDiscount(discountAmount);
+        setDiscount(pickDiscountAmount(res));
+        setDiscountInfo(pickDiscountInfo(res));
       } catch {
         // If coupon becomes invalid due to cart changes, remove it cleanly
         setAppliedPromoCode(null);
         setDiscount(0);
+        setDiscountInfo(null);
       }
     };
 
     revalidate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemsToDisplay, appliedPromoCode]);
+
+  const discountLabel = useMemo(() => {
+    if (!discountInfo) return null;
+    if (discountInfo.type === "percentage") return `${Math.round(discountInfo.value)}%`;
+    return formatBDT(discountInfo.value); // shows ৳100 etc.
+  }, [discountInfo]);
 
   // --- Submit order ---
   const handleSubmit = async () => {
@@ -301,6 +499,10 @@ export default function CheckoutPage() {
       saleType: "SINGLE",
       shippingCost: Number(shippingCost),
       additionalNotes,
+
+      coupon: appliedPromoCode ?? null,     // ✅ add
+      discountAmount: Number(discount || 0),// ✅ add
+
       customerInfo: {
         name,
         phone: contactNumber,
@@ -498,10 +700,18 @@ export default function CheckoutPage() {
                     {discount > 0 && (
                       <div className="flex justify-between text-sm text-green-700">
                         <span className="flex items-center gap-1">
-                          <Percent className="h-3 w-3" />
+                          {/* <Percent className="h-3 w-3" /> */}
+                          {discountLabel ? ` ${discountLabel} ` : ""}
                           Discount{appliedPromoCode ? ` (${appliedPromoCode})` : ""}
                         </span>
                         <span>-{formatBDT(discount)}</span>
+                      </div>
+                    )}
+
+                    {discount > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span>Subtotal after discount</span>
+                        <span>{formatBDT(discountedSubtotal)}</span>
                       </div>
                     )}
 
@@ -521,7 +731,8 @@ export default function CheckoutPage() {
                       <span>{formatBDT(total)}</span>
                     </div>
 
-                    <div className="pt-2">
+                    <div className="pt-0">
+                      <label className="text-xs font-medium text-gray-600">Have a coupon code?</label>
                       <div className="flex gap-2">
                         <Input
                           placeholder="Gift card or discount code"
@@ -590,18 +801,45 @@ export default function CheckoutPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-gray-700">District</label>
-                      <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
-                        <SelectTrigger className="w-full">
+
+                      <Select
+                        value={selectedDistrict}
+                        onValueChange={(v) => {
+                          setSelectedDistrict(v);
+                          setDistrictSearch(""); // reset after picking
+                        }}
+                      >
+                        <SelectTrigger className={cn("w-full", errors.district && "border-red-500 focus-visible:ring-red-500")}>
                           <SelectValue placeholder="Select your district" />
                         </SelectTrigger>
-                        <SelectContent>
-                          {districts.map((d) => (
-                            <SelectItem key={d} value={d}>
-                              {d}
-                            </SelectItem>
-                          ))}
+
+                        <SelectContent className="p-0">
+                          {/* Search box */}
+                          <div className="p-2 border-b bg-white sticky top-0 z-10">
+                            <Input
+                              value={districtSearch}
+                              onChange={(e) => setDistrictSearch(e.target.value)}
+                              placeholder="Search district..."
+                              className="h-9"
+                              autoFocus
+                            />
+                          </div>
+
+                          {/* List */}
+                          <div className="max-h-64 overflow-auto p-1">
+                            {filteredDistricts.length ? (
+                              filteredDistricts.map((d) => (
+                                <SelectItem key={d} value={d}>
+                                  {d}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <div className="px-3 py-2 text-sm text-gray-500">No district found.</div>
+                            )}
+                          </div>
                         </SelectContent>
                       </Select>
+
                       {errors.district && <p className="text-xs text-red-600 mt-1">{errors.district}</p>}
                     </div>
 
@@ -836,10 +1074,18 @@ export default function CheckoutPage() {
                     {discount > 0 && (
                       <div className="flex justify-between text-sm text-green-700">
                         <span className="flex items-center gap-1">
-                          <Percent className="h-3 w-3" />
+                          {/* <Percent className="h-3 w-3" /> */}
+                          {discountLabel ? ` ${discountLabel} ` : ""}
                           Discount{appliedPromoCode ? ` (${appliedPromoCode})` : ""}
                         </span>
                         <span>-{formatBDT(discount)}</span>
+                      </div>
+                    )}
+
+                    {discount > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span>Subtotal after discount</span>
+                        <span>{formatBDT(discountedSubtotal)}</span>
                       </div>
                     )}
 
@@ -860,7 +1106,7 @@ export default function CheckoutPage() {
                     </div>
 
                     <div className="pt-2">
-                      <label className="text-xs font-medium text-gray-600">Have a code?</label>
+                      <label className="text-xs font-medium text-gray-600">Have a coupon code?</label>
                       <div className="mt-1 flex gap-2">
                         <Input
                           placeholder="Gift card or discount code"
@@ -871,9 +1117,6 @@ export default function CheckoutPage() {
                           {isApplyingDiscount ? "Applying..." : appliedPromoCode ? "Remove" : "Apply"}
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Try WELCOME10 (10% up to ৳300) or SAVE100
-                      </p>
                     </div>
                   </CardContent>
                 </Card>

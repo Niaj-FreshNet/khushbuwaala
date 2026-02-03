@@ -667,7 +667,7 @@ export function ShopProducts(props: ShopProductProps) {
 
   return (
     <section
-      className="container mx-auto py-6 sm:py-8 px-3 sm:px-4 relative"
+      className="container mx-auto py-6 sm:py-8 px-3 sm:px-4 relative overflow-x-hidden"
       aria-labelledby="shop-products-heading"
     >
       {/* Hidden crawlable pagination links for SEO */}
@@ -859,41 +859,93 @@ export function ShopProducts(props: ShopProductProps) {
       )} */}
 
       {/* Pagination */}
-      <div className="flex justify-center items-center gap-2 mt-10">
-
-        <Button
-          variant="outline"
-          disabled={page <= 1}
-          onClick={() => setPage(page - 1)}
-          className="px-4 py-2 rounded-lg cursor-pointer"
-        >
-          Previous
-        </Button>
-
-        {[...Array(totalPages)].map((_, i) => {
-          const pageNum = i + 1;
-          return (
+      <div className="mt-10">
+        <div className="mx-auto w-full max-w-full overflow-x-hidden">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {/* Previous */}
             <Button
-              key={pageNum}
-              onClick={() => setPage(pageNum)}
-              className={`px-4 py-2 rounded-lg ${page === pageNum
-                ? "bg-red-600 text-white hover:bg-red-700"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer"
-                }`}
+              variant="outline"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="h-9 px-3 rounded-lg"
             >
-              {pageNum}
+              Previous
             </Button>
-          );
-        })}
 
-        <Button
-          variant="outline"
-          disabled={page >= totalPages}
-          onClick={() => setPage(page + 1)}
-          className="px-4 py-2 rounded-lg cursor-pointer"
-        >
-          Next
-        </Button>
+            {/* Page numbers (responsive, capped, no overflow) */}
+            {(() => {
+              const total = totalPages;
+              const current = page;
+
+              // how many pages to show around current
+              const delta = 1; // current +/- 1 (mobile friendly)
+              const range: number[] = [];
+              const rangeWithDots: (number | "...")[] = [];
+
+              const left = Math.max(2, current - delta);
+              const right = Math.min(total - 1, current + delta);
+
+              range.push(1);
+              for (let i = left; i <= right; i++) range.push(i);
+              if (total > 1) range.push(total);
+
+              // remove duplicates + sort
+              const uniq = Array.from(new Set(range)).sort((a, b) => a - b);
+
+              // build with dots
+              for (let i = 0; i < uniq.length; i++) {
+                const n = uniq[i];
+                const prev = uniq[i - 1];
+
+                if (i > 0 && prev !== undefined && n - prev > 1) {
+                  rangeWithDots.push("...");
+                }
+                rangeWithDots.push(n);
+              }
+
+              return rangeWithDots.map((item, idx) => {
+                if (item === "...") {
+                  return (
+                    <span
+                      key={`dots-${idx}`}
+                      className="px-2 text-sm text-gray-500 select-none"
+                    >
+                      …
+                    </span>
+                  );
+                }
+
+                const pageNum = item as number;
+
+                return (
+                  <Button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={[
+                      "h-9 min-w-9 px-3 rounded-lg",
+                      "text-sm",
+                      page === pageNum
+                        ? "bg-red-600 text-white hover:bg-red-700"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                    ].join(" ")}
+                  >
+                    {pageNum}
+                  </Button>
+                );
+              });
+            })()}
+
+            {/* Next */}
+            <Button
+              variant="outline"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className="h-9 px-3 rounded-lg"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Filter and Sort Sheets */}

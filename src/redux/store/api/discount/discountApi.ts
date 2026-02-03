@@ -39,7 +39,7 @@ export const discountApi = baseApi.injectEndpoints({
     // ── Public (apply discount) ────────────────────────
     applyDiscount: builder.mutation<
       { discount: IDiscount; discountAmount: number },
-      { code: string; items: { variantId?: string; price: number; qty: number }[] }
+      { code: string; items: { productId: string, variantId?: string; price: number; qty: number }[] }
     >({
       query: (payload) => ({
         url: "/discount/apply",

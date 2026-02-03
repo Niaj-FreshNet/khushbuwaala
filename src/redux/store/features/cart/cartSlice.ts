@@ -8,6 +8,7 @@ export interface CartState {
   checkoutMode: boolean
   isLoading: boolean
   error: string | null
+  appliedCouponCode: string | null
 }
 
 const initialState: CartState = {
@@ -16,34 +17,77 @@ const initialState: CartState = {
   checkoutMode: false,
   isLoading: false,
   error: null,
+  appliedCouponCode: null,
 }
 
 // Helper function to load cart from localStorage
-const loadCartFromStorage = (): CartItem[] => {
-  if (typeof window === 'undefined') return []
+// const loadCartFromStorage = (): CartItem[] => {
+//   if (typeof window === 'undefined') return []
+//   try {
+//     const savedCart = localStorage.getItem('cartItems')
+//     return savedCart ? JSON.parse(savedCart) : []
+//   } catch {
+//     return []
+//   }
+// }
+
+type CartStorageShape =
+  | CartItem[] // old format (backward compatible)
+  | { items: CartItem[]; appliedCouponCode?: string | null } // new format
+
+const loadCartFromStorage = (): { items: CartItem[]; appliedCouponCode: string | null } => {
+  if (typeof window === "undefined") return { items: [], appliedCouponCode: null }
+
   try {
-    const savedCart = localStorage.getItem('cartItems')
-    return savedCart ? JSON.parse(savedCart) : []
+    const raw = localStorage.getItem("cartItems")
+    if (!raw) return { items: [], appliedCouponCode: null }
+
+    const parsed: CartStorageShape = JSON.parse(raw)
+
+    // ✅ backward compatibility: old saved value was array
+    if (Array.isArray(parsed)) {
+      return { items: parsed, appliedCouponCode: null }
+    }
+
+    return {
+      items: Array.isArray(parsed.items) ? parsed.items : [],
+      appliedCouponCode: parsed.appliedCouponCode ? String(parsed.appliedCouponCode) : null,
+    }
   } catch {
-    return []
+    return { items: [], appliedCouponCode: null }
+  }
+}
+
+const saveCartToStorage = (items: CartItem[], appliedCouponCode: string | null) => {
+  if (typeof window === "undefined") return
+  try {
+    localStorage.setItem(
+      "cartItems",
+      JSON.stringify({ items, appliedCouponCode })
+    )
+  } catch (error) {
+    console.error("Failed to save cart to localStorage:", error)
   }
 }
 
 // Helper function to save cart to localStorage
-const saveCartToStorage = (items: CartItem[]) => {
-  if (typeof window === 'undefined') return
-  try {
-    localStorage.setItem('cartItems', JSON.stringify(items))
-  } catch (error) {
-    console.error('Failed to save cart to localStorage:', error)
-  }
-}
+// const saveCartToStorage = (items: CartItem[]) => {
+//   if (typeof window === 'undefined') return
+//   try {
+//     localStorage.setItem('cartItems', JSON.stringify(items))
+//   } catch (error) {
+//     console.error('Failed to save cart to localStorage:', error)
+//   }
+// }
+
+const hydrated = loadCartFromStorage()
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState: {
     ...initialState,
-    items: loadCartFromStorage(),
+    items: hydrated.items,
+    appliedCouponCode: hydrated.appliedCouponCode,
   },
   reducers: {
     // Add item to cart
@@ -74,7 +118,7 @@ const cartSlice = createSlice({
         })
       }
       // console.log(state.items, 'cartItem')
-      saveCartToStorage(state.items)
+      saveCartToStorage(state.items, state.appliedCouponCode)
     },
 
     // Update item quantity
@@ -96,7 +140,7 @@ const cartSlice = createSlice({
       if (itemIndex !== -1) {
         state.items[itemIndex].quantity = Math.max(quantity, 1)
         state.items[itemIndex].cartItemId = cartItemId
-        saveCartToStorage(state.items)
+        saveCartToStorage(state.items, state.appliedCouponCode)
       }
 
       // ✅ If backend cart item ID is provided, store it locally
@@ -114,13 +158,14 @@ const cartSlice = createSlice({
       state.items = state.items.filter(
         (item) => item.product.id !== productId || item.selectedSize !== size
       )
-      saveCartToStorage(state.items)
+      saveCartToStorage(state.items, state.appliedCouponCode)
     },
 
     // Clear entire cart
     clearCart: (state) => {
       state.items = []
-      saveCartToStorage(state.items)
+      state.appliedCouponCode = null
+      saveCartToStorage(state.items, state.appliedCouponCode)
     },
 
     // Set checkout only item (for buy now functionality)
@@ -161,8 +206,21 @@ const cartSlice = createSlice({
 
     // Initialize cart from localStorage (for hydration)
     initializeCart: (state) => {
-      state.items = loadCartFromStorage()
+      const hydrated = loadCartFromStorage()
+      state.items = hydrated.items
+      state.appliedCouponCode = hydrated.appliedCouponCode
     },
+
+    setAppliedCouponCode: (state, action: PayloadAction<string | null>) => {
+      state.appliedCouponCode = action.payload ? String(action.payload).trim().toUpperCase() : null
+      saveCartToStorage(state.items, state.appliedCouponCode)
+    },
+
+    clearAppliedCouponCode: (state) => {
+      state.appliedCouponCode = null
+      saveCartToStorage(state.items, state.appliedCouponCode)
+    },
+
   },
 })
 
@@ -176,6 +234,8 @@ export const {
   setLoading,
   setError,
   initializeCart,
+  setAppliedCouponCode,
+  clearAppliedCouponCode,
 } = cartSlice.actions
 
 export default cartSlice.reducer
@@ -200,6 +260,9 @@ export const selectCartTotal = (state: { cart: CartState }) => {
   const taxes = subtotal * 0.0 // No taxes for now
   return subtotal + taxes
 }
+
+export const selectAppliedCouponCode = (state: { cart: CartState }) =>
+  state.cart.appliedCouponCode
 
 export const selectCheckoutItem = (state: { cart: CartState }) => state.cart.checkoutItem
 export const selectCheckoutMode = (state: { cart: CartState }) => state.cart.checkoutMode

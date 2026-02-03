@@ -31,6 +31,7 @@ import {
 
 import { useCart } from "@/context/CartContext"
 import { useWishlist } from "@/context/WishlistContext"
+import { kwPushAddToCart, kwPushBeginCheckout } from "@/lib/Analytics/kwEcom"
 
 interface ProductQuickViewProps {
   product: IProductResponse
@@ -208,6 +209,22 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
         selectedPrice // ✅ discounted final price
       )
 
+      kwPushAddToCart({
+        currency: "BDT",
+        value: selectedPrice * 1,
+        items: [
+          {
+            item_id: String((product as any).id || (product as any).slug || product.name),
+            item_name: product.name,
+            item_brand: (product as any).brand || "KhushbuWaala",
+            item_category: (product as any).categoryId || (product as any).category?.categoryName || "product",
+            item_variant: defaultSize || undefined,
+            price: selectedPrice,
+            quantity: 1,
+          },
+        ],
+      });
+
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("kw:cart-added"))
       }
@@ -223,12 +240,24 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
     try {
       await new Promise((r) => setTimeout(r, 450))
 
-      cart?.addToCart?.(
-        product,
-        quantity,
-        selectedSize || "3 ml",
-        selectedPrice // ✅ discounted final price
-      )
+      cart?.addToCart?.(product, quantity, selectedSize || "3 ml", selectedPrice)
+
+      // ✅ TRACK begin_checkout
+      kwPushBeginCheckout({
+        currency: "BDT",
+        value: selectedPrice * quantity,
+        items: [
+          {
+            item_id: String((product as any).id || (product as any).slug || product.name),
+            item_name: product.name,
+            item_brand: (product as any).brand || "KhushbuWaala",
+            item_category: (product as any).categoryId || (product as any).category?.categoryName || "product",
+            item_variant: selectedSize || "3 ml",
+            price: selectedPrice,
+            quantity,
+          },
+        ],
+      })
 
       router.push("/checkout")
       onOpenChange?.(false)

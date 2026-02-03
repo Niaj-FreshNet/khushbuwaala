@@ -12,6 +12,9 @@ import {
   selectCheckoutMode,
   selectCartLoading,
   selectCartError,
+  selectAppliedCouponCode,
+  setAppliedCouponCode as setAppliedCouponCodeAction,
+  clearAppliedCouponCode as clearAppliedCouponCodeAction,
 } from '../features/cart/cartSlice'
 import type { IProductResponse } from '@/types/product.types'
 import { useAddToCartMutation, useUpdateCartItemMutation, useRemoveCartItemMutation } from '@/redux/store/api/cart/cartApi'
@@ -25,6 +28,7 @@ export const useCart = () => {
   const checkoutMode = useAppSelector(selectCheckoutMode)
   const isLoading = useAppSelector(selectCartLoading)
   const error = useAppSelector(selectCartError)
+  const appliedCouponCode = useAppSelector(selectAppliedCouponCode)
 
   // RTK Query mutations (silent background API)
   const [addToCartApi] = useAddToCartMutation()
@@ -135,6 +139,17 @@ export const useCart = () => {
     // toast.info('Cart cleared!')
   }, [dispatch])
 
+  const setAppliedCouponCode = useCallback(
+    (code: string | null) => {
+      dispatch(setAppliedCouponCodeAction(code))
+    },
+    [dispatch]
+  )
+
+  const clearAppliedCouponCode = useCallback(() => {
+    dispatch(clearAppliedCouponCodeAction())
+  }, [dispatch])
+
   return {
     cartItems,
     checkoutItem,
@@ -149,5 +164,8 @@ export const useCart = () => {
     setCheckoutOnlyItem,
     proceedToCartCheckout,
     clearCart,
+    appliedCouponCode,
+    setAppliedCouponCode,
+    clearAppliedCouponCode,
   }
 }

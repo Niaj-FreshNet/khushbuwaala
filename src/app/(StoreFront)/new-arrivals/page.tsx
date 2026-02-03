@@ -110,15 +110,15 @@ export default async function NewArrivalsPage({
   const accords = searchParams.accords;
   const perfumeNotes = searchParams.perfumeNotes;
   const performance = searchParams.performance;
-  // const sortBy = searchParams.sortBy as
-  //   | "name"
-  //   | "price_asc"
-  //   | "price_desc"
-  //   | "newest"
-  //   | "oldest"
-  //   | "popularity"
-  //   | undefined;
-  const sortBy = "newest" as string | undefined;
+  const sortBy = searchParams.sortBy as
+    | "name"
+    | "price_asc"
+    | "price_desc"
+    | "newest"
+    | "oldest"
+    | "popularity"
+    | undefined;
+  // const sortBy = "newest" as string | undefined;
 
   return (
     <>

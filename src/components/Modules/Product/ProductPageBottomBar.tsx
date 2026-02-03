@@ -9,6 +9,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/store/hooks";
 import { IDiscount, IProduct, IProductVariant } from "@/types/product.types";
 import { useRouter } from "next/navigation";
 import flyToCart from "./FlyToCart";
+import { kwPushAddToCart } from "@/lib/Analytics/kwEcom";
 
 export default function ProductPageBottomBar({ product }: { product: IProduct }) {
     const cart = useCart()
@@ -173,6 +174,22 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                 flyToCart(e.currentTarget, (product as any)?.primaryImage);
 
                 cart?.addToCart?.(product as any, quantity, selectedSize, selectedPrice);
+
+                kwPushAddToCart({
+                    currency: "BDT",
+                    value: selectedPrice * 1,
+                    items: [
+                        {
+                            item_id: String((product as any).id || (product as any).slug || product.name),
+                            item_name: product.name,
+                            item_brand: (product as any).brand || "KhushbuWaala",
+                            item_category: (product as any).categoryId || (product as any).category?.categoryName || "product",
+                            item_variant: defaultSize || undefined,
+                            price: selectedPrice,
+                            quantity: 1,
+                        },
+                    ],
+                });
 
                 if (typeof window !== "undefined") {
                     window.dispatchEvent(new CustomEvent("kw:cart-added"));
@@ -371,9 +388,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                             </button>
                         </div>
 
-                        {/* Row 3: micro trust + quick qty controls */}
-                        <div className="flex items-center justify-between gap-3">
-                            {/* Trust chips */}
+                        {/* <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2">
                                 <span className="text-[11px] px-2 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 font-semibold">
                                     Cash on Delivery
@@ -383,7 +398,6 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                 </span>
                             </div>
 
-                            {/* Qty quick actions (optional but very conversion-friendly) */}
                             <div className="flex items-center rounded-2xl border border-gray-200 bg-white overflow-hidden">
                                 <button
                                     onClick={() => handleQuantityChange("decrement")}
@@ -403,7 +417,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                     +
                                 </button>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </div>

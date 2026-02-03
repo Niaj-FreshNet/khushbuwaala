@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ShoppingBag, ArrowLeft, Package2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,14 @@ import { useCart } from "@/redux/store/hooks/useCart";
 import { CartItem } from "@/types/cart.types";
 import { CartItemCard } from "@/components/Modules/Cart/CartItemCard";
 import { DesktopCartTable } from "@/components/Modules/Cart/DesktopCartTable";
+import { kwPushBeginCheckout } from "@/lib/Analytics/kwEcom";
+import { useApplyDiscountMutation } from "@/redux/store/api/discount/discountApi";
+import { toast } from "sonner";
+
+type DiscountLabel =
+  | { type: "percentage"; value: number }
+  | { type: "fixed"; value: number }
+  | null;
 
 // ✅ Empty cart illustration component
 const EmptyCartIllustration = () => (
@@ -55,12 +63,26 @@ const EmptyCartIllustration = () => (
 
 export default function CartPage() {
   const router = useRouter();
-  const { cartItems } = useCart();
+  const { cartItems, appliedCouponCode, setAppliedCouponCode, clearAppliedCouponCode } = useCart()
 
   const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [isRouting, startTransition] = useTransition();
   const [checkoutClicked, setCheckoutClicked] = useState(false);
+
+  const [discount, setDiscount] = useState(0);
+  const [discountInfo, setDiscountInfo] = useState<DiscountLabel>(null);
+
+  const [applyDiscount, { isLoading: isApplyingDiscount }] = useApplyDiscountMutation();
+
+  const formatBDT = (amount: number) =>
+    new Intl.NumberFormat("en-BD", {
+      style: "currency",
+      currency: "BDT",
+      maximumFractionDigits: 0,
+    })
+      .format(Math.max(0, Math.round(amount)))
+      .replace("BDT", "৳")
+      .trim();
 
   // ✅ Subtotal: safe + consistent (works even if selectedPrice exists or not)
   const subtotal = useMemo(() => {
@@ -88,8 +110,145 @@ export default function CartPage() {
     }, 0);
   }, [cartItems]);
 
-  const discount = appliedCoupon ? subtotal * 0.1 : 0; // demo 10%
-  const total = subtotal - discount;
+  const buildDiscountItems = () => {
+    return (cartItems || []).map((item: any) => {
+      const [sizeValue, sizeUnit] = String(item?.selectedSize || "").split(" ");
+
+      const matchedVariant = item?.product?.variants?.find(
+        (v: any) =>
+          Number(v?.size) === Number(sizeValue) &&
+          String(v?.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
+      );
+
+      const price = Number(item?.selectedPrice ?? matchedVariant?.price ?? 0);
+      const qty = Number(item?.quantity || 1);
+
+      const productId =
+        item?.product?.id ||
+        item?.product?._id ||
+        item?.productId;
+
+      const variantId =
+        item?.variantId ||
+        item?.selectedVariantId ||
+        matchedVariant?.id ||
+        matchedVariant?._id;
+
+      return { productId, variantId, price, qty };
+    });
+  };
+
+
+  const pickDiscountAmount = (res: any) =>
+    Number(res?.data?.discountAmount ?? res?.discountAmount ?? 0);
+
+  const pickDiscountInfo = (res: any): DiscountLabel => {
+    const items = res?.data?.items ?? res?.items ?? [];
+
+    // Prefer promo discount
+    for (const it of items) {
+      const promo = (it?.appliedDiscounts ?? []).find((d: any) => d?.code);
+      if (promo?.type && typeof promo?.value === "number") {
+        return { type: promo.type, value: Number(promo.value) };
+      }
+    }
+
+    // fallback auto discount
+    for (const it of items) {
+      const auto = (it?.appliedDiscounts ?? []).find((d: any) => !d?.code);
+      if (auto?.type && typeof auto?.value === "number") {
+        return { type: auto.type, value: Number(auto.value) };
+      }
+    }
+
+    return null;
+  };
+
+  const discountLabel = useMemo(() => {
+    if (!discountInfo) return null;
+    if (discountInfo.type === "percentage") return `${Math.round(discountInfo.value)}%`;
+    return formatBDT(discountInfo.value);
+  }, [discountInfo]);
+
+
+  const discountedSubtotal = Math.max(0, subtotal - discount);
+  const total = discountedSubtotal; // shipping calculated at checkout
+
+  const applyCoupon = async () => {
+    // remove flow
+    if (appliedCouponCode) {
+      clearAppliedCouponCode();
+      setDiscount(0);
+      setDiscountInfo(null);
+      toast.success("Coupon removed");
+      return;
+    }
+
+    const code = couponCode.trim().toUpperCase();
+    if (!code) return toast.error("Enter a coupon code");
+
+    try {
+      const items = buildDiscountItems();
+
+      if (!items.length) return toast.error("Your cart is empty.");
+      if (items.some((it) => !it.price || it.price <= 0)) {
+        return toast.error("Some items have invalid price.");
+      }
+
+      const res = await applyDiscount({ code, items }).unwrap();
+
+      const discountAmount = pickDiscountAmount(res);
+      const info = pickDiscountInfo(res);
+
+      if (discountAmount <= 0) {
+        toast.error("This coupon doesn't apply to your cart.");
+        return;
+      }
+
+      setAppliedCouponCode(code);
+      setDiscount(discountAmount);
+      setDiscountInfo(info);
+      setCouponCode("");
+      toast.success(`Coupon applied: -${formatBDT(discountAmount)}`);
+    } catch (e: any) {
+      const msg = e?.data?.message || e?.error || "Failed to apply coupon.";
+      toast.error(msg);
+    }
+  };
+
+  const removeCoupon = () => {
+    clearAppliedCouponCode();
+    setDiscount(0);
+    setDiscountInfo(null);
+    setCouponCode("");
+    toast.success("Coupon removed");
+  };
+
+  useEffect(() => {
+    const revalidate = async () => {
+      if (!appliedCouponCode) return
+      if (!cartItems?.length) {
+        clearAppliedCouponCode()
+        setDiscount(0)
+        setDiscountInfo(null)
+        return
+      }
+
+      try {
+        const items = buildDiscountItems()
+        const res = await applyDiscount({ code: appliedCouponCode, items }).unwrap()
+        setDiscount(pickDiscountAmount(res))
+        setDiscountInfo(pickDiscountInfo(res))
+      } catch {
+        clearAppliedCouponCode()
+        setDiscount(0)
+        setDiscountInfo(null)
+      }
+    }
+
+    revalidate()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartItems, appliedCouponCode])
 
   const totalItems = useMemo(() => {
     if (!Array.isArray(cartItems)) return 0;
@@ -97,26 +256,31 @@ export default function CartPage() {
   }, [cartItems]);
 
   const handleCheckout = () => {
-    if (checkoutClicked) return; // prevent double click
-    setCheckoutClicked(true);
+    if (checkoutClicked) return
+    setCheckoutClicked(true)
+
+    const items = (cartItems || []).map((item: any) => ({
+      item_id: String(item?.product?.id || item?.product?.slug || ""),
+      item_name: String(item?.product?.name || ""),
+      item_brand: String(item?.product?.brand || "KhushbuWaala"),
+      item_category: String(item?.product?.categoryId || ""),
+      item_variant: String(item?.selectedSize || ""),
+      price: Number(item?.selectedPrice || 0),
+      quantity: Number(item?.quantity || 1),
+    })).filter((i: any) => i.item_id)
+
+    kwPushBeginCheckout({
+      currency: "BDT",
+      value: Number(total || 0), // you already compute total
+      items,
+    })
 
     startTransition(() => {
-      router.push("/checkout");
-    });
+      router.push("/checkout")
+    })
 
-    // Optional: safety fallback (if route fails or very slow)
-    window.setTimeout(() => setCheckoutClicked(false), 8000);
-  };
-
-  const applyCoupon = () => {
-    if (!couponCode.trim()) return;
-    setAppliedCoupon(couponCode.trim());
-    setCouponCode("");
-  };
-
-  const removeCoupon = () => {
-    setAppliedCoupon(null);
-  };
+    window.setTimeout(() => setCheckoutClicked(false), 5000)
+  }
 
   return (
     <StoreContainer>
@@ -193,7 +357,33 @@ export default function CartPage() {
                     <CardTitle className="text-lg">Discount Code</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {!appliedCoupon ? (
+                    {appliedCouponCode ? (
+                      // ✅ COUPON APPLIED VIEW
+                      <div className="flex items-center justify-between gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-2 h-2 bg-green-500 rounded-full shrink-0" />
+                          <span className="text-green-700 font-medium truncate">
+                            {appliedCouponCode}
+                          </span>
+
+                          {discountLabel && (
+                            <span className="text-green-700 text-xs font-semibold whitespace-nowrap">
+                              ({discountLabel})
+                            </span>
+                          )}
+                        </div>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={removeCoupon}
+                          className="text-green-700 hover:text-green-800 shrink-0"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ) : (
+                      // ✅ INPUT VIEW
                       <div className="flex flex-col sm:flex-row gap-2">
                         <Input
                           placeholder="Enter coupon code"
@@ -203,28 +393,11 @@ export default function CartPage() {
                         />
                         <Button
                           onClick={applyCoupon}
-                          disabled={!couponCode.trim()}
+                          disabled={!couponCode.trim() || isApplyingDiscount}
                           variant="outline"
                           className="sm:w-auto w-full"
                         >
-                          Apply
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-2 h-2 bg-green-500 rounded-full shrink-0" />
-                          <span className="text-green-700 font-medium truncate">
-                            {appliedCoupon}
-                          </span>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={removeCoupon}
-                          className="text-green-700 hover:text-green-800 shrink-0"
-                        >
-                          Remove
+                          {isApplyingDiscount ? "Applying..." : "Apply"}
                         </Button>
                       </div>
                     )}
@@ -245,8 +418,19 @@ export default function CartPage() {
 
                       {discount > 0 && (
                         <div className="flex justify-between text-green-600">
-                          <span>Discount</span>
-                          <span>-৳{discount.toFixed(2)}</span>
+                          <span className="flex items-center gap-2">
+                            {/* <Percent className="h-4 w-4" /> */}
+                            {discountLabel ? `${discountLabel} ` : ""}
+                            Discount{appliedCouponCode ? ` (${appliedCouponCode})` : ""}
+                          </span>
+                          <span>-{formatBDT(discount)}</span>
+                        </div>
+                      )}
+
+                      {discount > 0 && (
+                        <div className="flex justify-between text-sm text-gray-700">
+                          <span>Subtotal after discount</span>
+                          <span>{formatBDT(discountedSubtotal)}</span>
                         </div>
                       )}
 
@@ -259,7 +443,7 @@ export default function CartPage() {
 
                       <div className="flex justify-between text-lg font-semibold">
                         <span>Total</span>
-                        <span>৳{total.toFixed(2)}</span>
+                        <span>{formatBDT(total)}</span>
                       </div>
                     </div>
 

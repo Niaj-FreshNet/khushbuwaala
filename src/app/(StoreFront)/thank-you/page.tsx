@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -14,6 +14,7 @@ import OrderInvoiceModal from "@/components/Modules/Orders/OrderInvoiceModal"
 import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import StoreContainer from "@/components/Layout/StoreContainer"
+import { kwPushPurchase } from "@/lib/Analytics/kwEcom"
 // import OrderInvoice from "@/components/Modules/Orders/OrderInvoice"
 
 export default function ThankYouPage() {
@@ -29,6 +30,16 @@ export default function ThankYouPage() {
   const [isReceiptOpen, setIsReceiptOpen] = useState(false)
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
 
+  const formatBDT = (amount: number) =>
+    new Intl.NumberFormat("en-BD", {
+      style: "currency",
+      currency: "BDT",
+      maximumFractionDigits: 0,
+    })
+      .format(Math.max(0, Math.round(Number(amount || 0))))
+      .replace("BDT", "৳")
+      .trim();
+
   // Scroll to top on mount
   useEffect(() => {
     if (typeof window !== "undefined") window.scrollTo(0, 0)
@@ -37,24 +48,141 @@ export default function ThankYouPage() {
   // Map API orderItems to cart-like structure for display
   const cartItems = useMemo(() => {
     if (!order?.orderItems) return []
-    return order.orderItems.map((item) => ({
+    return order.orderItems.map((item: any) => ({
       id: item.id,
       name: item.product?.name || "Product",
       primaryImage: item.product?.primaryImage || "/placeholder.png",
-      size: item.variant?.size || "Default",
-      quantity: item.quantity,
-      price: item.variant?.price || 0,
+
+      // ✅ show "3 ML"
+      size:
+        item.size && item.unit
+          ? `${item.size} ${String(item.unit).toUpperCase()}`
+          : item.variant?.size
+            ? String(item.variant.size)
+            : "Default",
+
+      quantity: Number(item.quantity || 1),
+
+      // ✅ IMPORTANT: price from order item (authoritative)
+      price: Number(item.price ?? item.variant?.price ?? 0),
     }))
   }, [order])
 
   const totals = useMemo(() => {
-    if (!cartItems) return { subtotal: 0, shippingCost: 0, estimatedTaxes: 0, total: 0 }
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    const shippingCost = order?.shippingCost || 0
-    const estimatedTaxes = order?.estimatedTaxes || 0
-    const total = subtotal + shippingCost + estimatedTaxes
-    return { subtotal, shippingCost, estimatedTaxes, total }
+
+    const discountAmount = Math.max(0, Number(order?.discountAmount ?? 0))
+    const coupon = order?.coupon ? String(order.coupon) : null
+
+    const discountedSubtotal = Math.max(0, subtotal - discountAmount)
+
+    const shippingCost = Number(order?.shippingCost ?? 0)
+    const estimatedTaxes = Number(order?.estimatedTaxes ?? 0)
+
+    // ✅ server truth (final total)
+    const total = Number(order?.amount ?? discountedSubtotal + shippingCost + estimatedTaxes)
+
+    return {
+      subtotal,
+      discountAmount,
+      coupon,
+      discountedSubtotal,
+      shippingCost,
+      estimatedTaxes,
+      total,
+    }
   }, [cartItems, order])
+
+  const purchaseSentRef = useRef<string>("")
+
+  const purchaseUserData = useMemo(() => {
+    if (!order) return undefined
+    const name = order.shipping?.name || order.customer?.name
+    const phone = order.shipping?.phone
+    const email = order.shipping?.email
+
+    return {
+      em: email || undefined,
+      ph: phone || undefined,
+      fn: name || undefined,
+      external_id: order.customerId || order.customer?.id || undefined,
+      ct: order.shipping?.district || undefined,
+      country: "bd",
+    }
+  }, [order])
+
+  const purchaseItems = useMemo(() => {
+    if (!order?.orderItems?.length) return []
+
+    return order.orderItems
+      .map((it: any) => {
+        const productId = it?.productId || it?.product?.id
+        if (!productId) return null
+
+        const unit = it?.unit || it?.variant?.unit
+        const size = it?.size ?? it?.variant?.size
+
+        const variantLabel =
+          size && unit ? `${size} ${String(unit).toUpperCase()}` : undefined
+
+        return {
+          item_id: String(productId),
+          item_name: String(it?.product?.name || "Product"),
+          item_brand: "KhushbuWaala",
+          // If you later include category in order payload, map it here
+          item_variant: variantLabel,
+          price: Number(it?.price ?? 0),        // ✅ authoritative
+          quantity: Math.max(1, Number(it?.quantity || 1)),
+        }
+      })
+      .filter(Boolean) as any[]
+  }, [order])
+
+  useEffect(() => {
+    if (!order) return
+    if (!purchaseItems.length) return
+
+    // ✅ PRO SAFETY: never track purchase for cancelled/failed/refunded orders
+    const badStatuses = new Set(["CANCELLED", "FAILED", "REFUNDED"])
+    if (order.status && badStatuses.has(String(order.status).toUpperCase())) {
+      return
+    }
+
+    // ✅ Gate for online payments: only fire if actually paid
+    if (String(order.method).toLowerCase() === "bkash" && !order.isPaid) {
+      return
+    }
+
+    const transactionId = String(order.id || "")
+    if (!transactionId) return
+
+    // prevent duplicate fires
+    if (purchaseSentRef.current === transactionId) return
+    purchaseSentRef.current = transactionId
+
+    const eventId = `kw_${transactionId}` // or uuid
+
+    kwPushPurchase({
+      event_id: eventId,
+      transaction_id: transactionId,
+      currency: "BDT",
+      value: Number(order.amount ?? 0),
+      shipping: Number(order.shippingCost ?? 0),
+      tax: 0,
+      coupon: order.coupon ?? undefined,
+
+      user_data: purchaseUserData,
+
+      shipping_data: {
+        email: order.shipping?.email,
+        phone: order.shipping?.phone,
+        name: order.shipping?.name,
+        district: order.shipping?.district,
+      },
+
+      items: purchaseItems,
+    })
+  }, [order, purchaseItems])
 
   if (!order) {
     return (
@@ -179,6 +307,23 @@ export default function ThankYouPage() {
                       <span>Subtotal</span>
                       <span>৳{totals.subtotal.toFixed(2)} BDT</span>
                     </div>
+
+                    {totals.discountAmount > 0 && (
+                      <div className="flex justify-between text-sm text-green-700">
+                        <span>
+                          Discount{totals.coupon ? ` (${totals.coupon})` : ""}
+                        </span>
+                        <span>-{formatBDT(totals.discountAmount)}</span>
+                      </div>
+                    )}
+
+                    {totals.discountAmount > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span>Subtotal after discount</span>
+                        <span>{formatBDT(totals.discountedSubtotal)}</span>
+                      </div>
+                    )}
+
                     <div className="flex justify-between text-sm">
                       <span>Shipping</span>
                       <span>৳{totals.shippingCost.toFixed(2)} BDT</span>
@@ -210,7 +355,7 @@ export default function ThankYouPage() {
                   <p> You can track your order status anytime using the order ID.</p>
                   <p>
                     Payment Method: <span className="font-semibold">
-                      {order.isPaid ? 'Online Payment' : 'Cash on Delivery'}
+                      {String(order.method).toLowerCase() === "bkash" ? "bKash (Online Payment)" : "Cash on Delivery"}
                     </span>
                   </p>
                   <p>Order Status: <span className="font-semibold">{order.status}</span></p>
@@ -293,6 +438,23 @@ export default function ThankYouPage() {
                       <span>Subtotal</span>
                       <span>৳{totals.subtotal.toFixed(2)} BDT</span>
                     </div>
+
+                    {totals.discountAmount > 0 && (
+                      <div className="flex justify-between text-sm text-green-700">
+                        <span>
+                          Discount{totals.coupon ? ` (${totals.coupon})` : ""}
+                        </span>
+                        <span>-{formatBDT(totals.discountAmount)}</span>
+                      </div>
+                    )}
+
+                    {totals.discountAmount > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span>Subtotal after discount</span>
+                        <span>{formatBDT(totals.discountedSubtotal)}</span>
+                      </div>
+                    )}
+
                     <div className="flex justify-between text-sm">
                       <span>Shipping</span>
                       <span>৳{totals.shippingCost.toFixed(2)} BDT</span>
