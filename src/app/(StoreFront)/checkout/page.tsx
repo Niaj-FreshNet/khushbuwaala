@@ -206,7 +206,8 @@ export default function CheckoutPage() {
         const productName = p?.name || product?.name || "Product"
 
         const brand = p?.brand || "KhushbuWaala"
-        const category = p?.category?.name || p?.categoryName || p?.category || undefined
+        // const category = p?.category?.name || p?.categoryName || p?.category || undefined
+        const category = p?.categoryId || undefined
 
         // Your variant is basically selectedSize (e.g. "6 ml")
         const variant = product?.selectedSize ? String(product.selectedSize).trim().toUpperCase() : undefined

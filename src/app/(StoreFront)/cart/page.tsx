@@ -12,7 +12,7 @@ import Link from "next/link";
 import StoreContainer from "@/components/Layout/StoreContainer";
 import { useCart } from "@/redux/store/hooks/useCart";
 import { CartItem } from "@/types/cart.types";
-import { CartItemCard } from "@/components/Modules/Cart/CartItemCard";
+import { CartItemCard } from "@/components/Modules/Home/CartItemCard";
 import { DesktopCartTable } from "@/components/Modules/Cart/DesktopCartTable";
 import { kwPushBeginCheckout } from "@/lib/Analytics/kwEcom";
 import { useApplyDiscountMutation } from "@/redux/store/api/discount/discountApi";

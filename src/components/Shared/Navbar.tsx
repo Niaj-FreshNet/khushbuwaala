@@ -331,7 +331,7 @@ export function Navbar() {
                         role="menuitem"
                         title="Perfect gift sets and packages"
                       >
-                        <span className="relative z-10">GIFTS</span>
+                        <span className="relative z-10">PACKAGES</span>
                         <div className="absolute inset-0 bg-red-50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300" />
                       </Link>
                     </li>

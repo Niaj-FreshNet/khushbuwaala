@@ -19,10 +19,8 @@ function formatVariantLabel(v: any) {
 
 export default function TrackVariantChange({
   product,
-  categoryName,
 }: {
   product: IProduct;
-  categoryName?: string;
 }) {
   const { selectedVariant } = useProductSelection();
   const prevVariantIdRef = useRef<string | null>(null);
@@ -47,6 +45,8 @@ export default function TrackVariantChange({
     const itemId = String(product.id || product.slug);
     const variantId = String(selectedVariant.id);
 
+    const category = product.categoryId || undefined;
+
     window.dataLayer = window.dataLayer || [];
 
     // ----- GA4 (your existing push) -----
@@ -63,7 +63,7 @@ export default function TrackVariantChange({
             item_id: itemId,
             item_name: product.name,
             item_brand: product.brand || "KhushbuWaala",
-            item_category: categoryName || product.categoryId,
+            item_category: category || "Shop",
             item_variant: itemVariant,
             price,
             quantity: 1,
@@ -97,7 +97,7 @@ export default function TrackVariantChange({
       variant_id: variantId,
       item_variant: itemVariant,
       sku: selectedVariant.sku,
-      category: categoryName || product.categoryId,
+      category: category,
     });
   }, [
     selectedVariant?.id,
@@ -111,7 +111,6 @@ export default function TrackVariantChange({
     product?.brand,
     product?.categoryId,
     product?.minPrice,
-    categoryName,
   ]);
 
   return null;

@@ -22,6 +22,7 @@ export default function DiscountList() {
   const [deleteDiscount] = useDeleteDiscountMutation();
 
   const discounts = useMemo(() => Array.isArray(data) ? data : (data?.data || []), [data]);
+  console.log("discounts: ", discounts);
 
   const filtered = useMemo(() => {
     return discounts.filter((d: any) => {

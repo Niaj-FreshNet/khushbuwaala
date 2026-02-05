@@ -15,12 +15,20 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 
-const home1 = "/hero1.png"
-const home2 = "/hero2.png"
-const home3 = "/hero3.png"
+// const home1 = "/hero1.png"
+// const home1 = "/hero4.png"
+const home1 = "/hero2.1.png"
+// const home1 = "/hero4.2.png"
+// const home1 = "/hero4.3.png"
+// const home2 = "/hero2.png"
+const home2 = "/hero5.png"
+const home3 = "/hero5.3.png"
+const homeMobile3 = "/mobile5.3.png"
+const homeMobile1 = "/hero1.png"
 
 type Slide = {
-  src: string
+  src: string              // desktop
+  mobileSrc?: string       // mobile
   alt: string
   primaryText: string
   primaryLink: string
@@ -38,6 +46,7 @@ export function CarouselSlider() {
   const slides: Slide[] = [
     {
       src: home1,
+      mobileSrc: homeMobile1,
       alt: "KhushbuWaala Premium Perfumes",
       primaryText: "Shop Now",
       primaryLink: "/shop",
@@ -46,6 +55,7 @@ export function CarouselSlider() {
     },
     {
       src: home2,
+      mobileSrc: homeMobile1,
       alt: "KhushbuWaala Attars & Oud",
       primaryText: "Explore Collections",
       primaryLink: "/shop",
@@ -54,6 +64,7 @@ export function CarouselSlider() {
     },
     {
       src: home3,
+      mobileSrc: homeMobile3,
       alt: "KhushbuWaala Attars & Oud",
       primaryText: "Explore Collections",
       primaryLink: "/shop",
@@ -98,21 +109,31 @@ export function CarouselSlider() {
     }
 
   return (
-    <section className="w-full overflow-hidden relative mb-6" aria-label="Hero Carousel">
+    <section className="w-full overflow-hidden relative mb-6 mt-6" aria-label="Hero Carousel">
       <Carousel setApi={setApi} plugins={[plugin.current]} className="w-full">
         <CarouselContent>
           {slides.map((slide, index) => (
             <CarouselItem key={index}>
-              <div className="relative w-full h-[420px] md:h-[660px]">
+              <div className="relative w-full h-[420px] md:h-[600px]">
+                {/* Mobile image */}
+                <Image
+                  src={slide.mobileSrc || slide.src}
+                  alt={slide.alt}
+                  fill
+                  sizes="100vw"
+                  className="object-cover md:hidden"
+                  priority={index === 0}
+                />
+
+                {/* Desktop image */}
                 <Image
                   src={slide.src}
                   alt={slide.alt}
                   fill
                   sizes="100vw"
-                  className="object-cover"
+                  className="object-cover hidden md:block"
                   priority={index === 0}
                 />
-
                 {/* Minimal vignette ONLY for CTA readability (doesn't fight your image text) */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-transparent" />
 

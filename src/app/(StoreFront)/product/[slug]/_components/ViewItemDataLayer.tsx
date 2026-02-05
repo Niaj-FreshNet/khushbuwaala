@@ -25,10 +25,8 @@ function formatVariantLabel(v: any) {
 
 export default function ViewItemDataLayer({
     product,
-    categoryName,
 }: {
     product: IProduct;
-    categoryName?: string;
 }) {
     const { selectedVariant } = useProductSelection();
 
@@ -42,6 +40,8 @@ export default function ViewItemDataLayer({
         const price = selectedVariant?.price ?? product.minPrice ?? undefined;
         const currency = "BDT"; // set your store currency here
         const itemVariant = formatVariantLabel(selectedVariant);
+
+        const category = product.categoryId || undefined;
 
         // Dedupe key: same product page view
         // If you want to re-fire when variant changes, include variant.id in key.
@@ -74,7 +74,7 @@ export default function ViewItemDataLayer({
                         item_id: String(product.id || product.slug),
                         item_name: product.name,
                         item_brand: product.brand || "KhushbuWaala",
-                        item_category: categoryName || product.categoryId,
+                        item_category: category || "Shop",
                         item_variant: itemVariant,
                         price,
                         quantity: 1,

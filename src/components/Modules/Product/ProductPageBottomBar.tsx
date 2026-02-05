@@ -149,8 +149,6 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
         setQuantity(next);
     };
 
-
-
     // const totalVariantStock = product.variants?.reduce(
     //   (sum, v) => sum + (v.stock ?? 0),
     //   0
@@ -184,7 +182,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                             item_name: product.name,
                             item_brand: (product as any).brand || "KhushbuWaala",
                             item_category: (product as any).categoryId || (product as any).category?.categoryName || "product",
-                            item_variant: defaultSize || undefined,
+                            item_variant: selectedSize || undefined,
                             price: selectedPrice,
                             quantity: 1,
                         },

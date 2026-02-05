@@ -73,7 +73,7 @@ function RelatedProductsLoading() {
 export default function ProductDetailPage({ product }: IProductResponseProps) {
     const mappedProduct = mapProductResponseToProduct(product);
     const breadcrumbItems = generateBreadcrumbs(mappedProduct);
-    const categoryInfo = getCategoryInfo(mappedProduct.categoryId);
+    // const categoryInfo = getCategoryInfo(mappedProduct.categoryId);
 
     return (
         <>
@@ -88,8 +88,8 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
 
             <main className="bg-white pb-[var(--kw-bottom-bar-h,0px)]">
                 <ProductSelectionProvider product={mappedProduct}>
-                    <ViewItemDataLayer product={mappedProduct} categoryName={categoryInfo.name} />
-                    <TrackVariantChange product={mappedProduct} categoryName={categoryInfo.name} />
+                    <ViewItemDataLayer product={mappedProduct} />
+                    <TrackVariantChange product={mappedProduct} />
 
                     {/* Hero Section */}
                     <section className="relative overflow-hidden">
