@@ -71,47 +71,48 @@ const priceFormatter = new Intl.NumberFormat("en-BD", {
 });
 const formatPriceBDT = (price: number) => priceFormatter.format(price).replace("BDT", "৳");
 
-// Helper: find active discount (variant-first)
+// Helper: find active AUTO discount only (variant-first)
+// ❌ promo-code discounts must NOT be visible on card
 function getActiveDiscount(product: any, variant?: any) {
   const now = new Date();
-  const discounts = variant?.discounts?.length ? variant.discounts : product?.discounts;
-  if (!discounts || discounts.length === 0) return null;
-  return discounts.find((d: any) => {
-    try {
-      const start = d.startDate ?? d.start ?? d.from;
-      const end = d.endDate ?? d.end ?? d.to;
-      if (!start && !end) return true;
-      const s = start ? new Date(start) : new Date(0);
-      const e = end ? new Date(end) : new Date(8640000000000000);
-      return now >= s && now <= e;
-    } catch {
-      return false;
-    }
-  }) || null;
+
+  const isActiveAuto = (d: any) => {
+    if (!d) return false;
+
+    // ✅ hide promo-code discounts
+    if (d.code && String(d.code).trim() !== "") return false;
+
+    const start = d.startDate ?? d.start ?? d.from;
+    const end = d.endDate ?? d.end ?? d.to;
+
+    const startOk = !start || new Date(start) <= now;
+    const endOk = !end || new Date(end) >= now;
+
+    return startOk && endOk;
+  };
+
+  const variantAuto = (variant?.discounts ?? []).find(isActiveAuto) || null;
+  const productAuto = (product?.discounts ?? []).find(isActiveAuto) || null;
+
+  // ✅ variant first
+  return variantAuto || productAuto || null;
 }
 
-// Helper: compute discounted price given discount object
 function computeDiscountedPrice(basePrice: number, discount: any) {
   if (!discount) return basePrice;
-  if (typeof discount.price === "number") return discount.price;
-  // percent-style: supports discount.percent or discount.value or discount.amount
-  const percent =
-    typeof discount.percent === "number"
-      ? discount.percent
-      : typeof discount.value === "number"
-        ? discount.value
-        : typeof discount.amount === "number"
-          ? discount.amount
-          : null;
-  if (percent !== null) {
-    const pct = percent <= 1 ? percent * 100 : percent;
-    return Math.max(0, Math.round(basePrice * (1 - pct / 100)));
+
+  // ✅ prefer your schema: { type: "percentage" | "fixed", value: number }
+  if (discount.type === "percentage" && typeof discount.value === "number") {
+    return Math.max(0, Math.round(basePrice * (1 - discount.value / 100)));
   }
-  // fixed amount style
-  const amount = discount.amount ?? discount.value;
-  if (typeof amount === "number") {
-    return Math.max(0, Math.round(basePrice - amount));
+
+  if (discount.type === "fixed" && typeof discount.value === "number") {
+    return Math.max(0, Math.round(basePrice - discount.value));
   }
+
+  // fallback support (old shapes)
+  if (typeof discount.price === "number") return Math.round(discount.price);
+
   return basePrice;
 }
 
@@ -159,18 +160,18 @@ export function ProductCard({
   // discount percent label
   const discountPercentLabel = useMemo(() => {
     if (!activeDiscount) return null;
-    // look for explicit percent-like fields
-    const pct = activeDiscount.percent ?? activeDiscount.value ?? activeDiscount.amount;
-    if (typeof pct === "number" && pct > 0) {
-      const val = pct <= 1 ? Math.round(pct * 100) : Math.round(pct);
-      return `-${val}%`;
+
+    // ✅ only show badge if it's percentage discount
+    if (activeDiscount.type === "percentage" && typeof activeDiscount.value === "number") {
+      return `-${Math.round(activeDiscount.value)}%`;
     }
-    // else derive from prices
-    if (basePrice > 0 && discountedPrice < basePrice) {
-      return `-${Math.round(((basePrice - discountedPrice) / basePrice) * 100)}%`;
+
+    if (activeDiscount.type === "fixed" && typeof activeDiscount.value === "number") {
+      return `৳${Math.round(activeDiscount.value)}`;
     }
-    return null;
-  }, [activeDiscount, basePrice, discountedPrice]);
+
+    return null; // fixed discount -> no percent badge
+  }, [activeDiscount]);
 
   // default size heuristics
   const defaultSize = useMemo(() => {

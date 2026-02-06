@@ -2,115 +2,171 @@
 
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import { useRouter, useParams } from 'next/navigation';
 import {
   useCreateDiscountMutation,
   useUpdateDiscountMutation,
+  useGetDiscountByIdQuery,
 } from '@/redux/store/api/discount/discountApi';
 import { Skeleton } from '@/components/ui/skeleton';
 import FormInput from '@/components/ReusableUI/FormInput';
 import { FormProvider, useForm, useFormContext, SubmitHandler } from 'react-hook-form';
-import { useGetAllProductsAdminQuery, useGetProductVariantsQuery } from '@/redux/store/api/product/productApi';
+import {
+  useGetAllProductsAdminQuery,
+  useGetProductVariantsQuery,
+} from '@/redux/store/api/product/productApi';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const schema = z.object({
-  productId: z.string().min(1, 'Product is required'),
-  variantId: z.string().default(''),
-  code: z.string().default(''),
-  type: z.enum(['percentage', 'fixed']),
-  value: z.coerce.number().positive('Enter a positive number'),
-  maxUsage: z.union([
-    z.string().transform(val => val === '' ? undefined : parseInt(val)),
-    z.number(),
-    z.undefined()
-  ]).optional(),
-  startDate: z.string().default(''),
-  endDate: z.string().default(''),
-});
+const schema = z
+  .object({
+    scope: z.enum(['ORDER', 'PRODUCT', 'VARIANT']).default('PRODUCT'),
+    productId: z.string().optional(),
+    variantId: z.string().optional(),
+    code: z.string().optional(),
+    type: z.enum(['percentage', 'fixed']),
+    value: z.coerce.number().positive('Enter a positive number'),
+    maxUsage: z
+      .union([
+        z.string().transform((val) => (val === '' ? undefined : parseInt(val))),
+        z.number(),
+        z.undefined(),
+      ])
+      .optional(),
+    startDate: z.string().default(''),
+    endDate: z.string().default(''),
+  })
+  .superRefine((data, ctx) => {
+    if (data.scope === 'ORDER') {
+      if (!data.code?.trim()) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['code'],
+          message: 'Coupon code is required for order discount',
+        });
+      }
+    }
+
+    if (data.scope === 'PRODUCT') {
+      if (!data.productId?.trim()) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['productId'],
+          message: 'Product is required',
+        });
+      }
+    }
+
+    if (data.scope === 'VARIANT') {
+      if (!data.productId?.trim()) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['productId'],
+          message: 'Product is required',
+        });
+      }
+      if (!data.variantId?.trim()) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['variantId'],
+          message: 'Variant is required',
+        });
+      }
+    }
+  });
 
 type FormData = z.infer<typeof schema>;
 
-const DiscountFormLogic = () => {
-  const { watch, setValue } = useFormContext<FormData>();
-  const productId = watch('productId');
-  const variantId = watch('variantId');
-  const discountType = watch('type');
-  const discountValue = watch('value');
-  
-  const prevProductIdRef = useRef<string>('');
+// ISO -> datetime-local (YYYY-MM-DDTHH:mm)
+const toLocalInput = (iso?: string | null) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}`;
+};
 
-  console.log('🔍 DiscountFormLogic - productId:', productId);
-  console.log('🔍 DiscountFormLogic - variantId:', variantId);
+function computeDiscountPreview(opts: {
+  originalPrice: number;
+  type: 'percentage' | 'fixed';
+  value: number;
+}) {
+  const { originalPrice, type, value } = opts;
 
-  // Only fetch when productId exists and is not empty
-  const shouldFetch = Boolean(productId && productId.trim() !== '');
-  
-  console.log('🔍 shouldFetch:', shouldFetch);
-  
-  const { data: variantsData, isLoading: isVariantsLoading, error } =
-    useGetProductVariantsQuery(productId, {
-      skip: !shouldFetch,
-    });
-
-  console.log('🔍 variantsData:', variantsData);
-  console.log('🔍 isVariantsLoading:', isVariantsLoading);
-  console.log('🔍 error:', error);
-
-  // Reset variantId when product changes
-  useEffect(() => {
-    if (productId && productId !== prevProductIdRef.current && prevProductIdRef.current !== '') {
-      setValue('variantId', '', { shouldValidate: false });
-    }
-    if (productId) {
-      prevProductIdRef.current = productId;
-    }
-  }, [productId, setValue]);
-
-  const selectedVariant = variantsData?.data?.find(
-    (v: any) => v.id === variantId
-  );
-  const originalPrice = selectedVariant?.price ?? 0;
-
-  // Parse discount value safely - it comes as a string from the input
-  const parsedValue = typeof discountValue === 'string' 
-    ? parseFloat(discountValue) || 0 
-    : discountValue || 0;
+  const parsedValue = Number(value || 0);
+  if (!parsedValue || parsedValue <= 0 || originalPrice <= 0) {
+    return {
+      originalPrice: Math.round(originalPrice),
+      discountAmount: 0,
+      discountPercent: 0,
+      finalPrice: Math.round(originalPrice),
+    };
+  }
 
   let discountAmount = 0;
-  let discountedPrice = originalPrice;
+  let finalPrice = originalPrice;
   let discountPercent = 0;
 
-  if (parsedValue > 0) {
-    if (discountType === 'percentage') {
-      discountAmount = (originalPrice * parsedValue) / 100;
-      discountedPrice = originalPrice - discountAmount;
-      discountPercent = parsedValue;
-    } else if (discountType === 'fixed') {
-      discountAmount = parsedValue;
-      discountedPrice = Math.max(originalPrice - discountAmount, 0);
-      discountPercent = originalPrice
-        ? (discountAmount / originalPrice) * 100
-        : 0;
+  if (type === 'percentage') {
+    discountAmount = (originalPrice * parsedValue) / 100;
+    finalPrice = originalPrice - discountAmount;
+    discountPercent = parsedValue;
+  } else {
+    discountAmount = parsedValue;
+    finalPrice = originalPrice - discountAmount;
+    discountPercent = originalPrice ? (discountAmount / originalPrice) * 100 : 0;
+  }
+
+  // no decimals for price; percent max 1 decimal
+  discountAmount = Math.round(discountAmount);
+  finalPrice = Math.max(0, Math.round(finalPrice));
+  discountPercent = Math.round(discountPercent * 10) / 10;
+
+  return {
+    originalPrice: Math.round(originalPrice),
+    discountAmount,
+    discountPercent,
+    finalPrice,
+  };
+}
+
+const VariantPickerAndPreview = () => {
+  const { watch, setValue } = useFormContext<FormData>();
+
+  const scope = watch('scope');
+  const productId = watch('productId');
+  const variantId = watch('variantId');
+  const type = watch('type');
+  const value = watch('value');
+
+  const prevProductIdRef = useRef<string>('');
+
+  const shouldFetchVariants = Boolean(scope !== 'ORDER' && productId?.trim());
+
+  const { data: variantsData, isLoading, error } = useGetProductVariantsQuery(
+    productId as string,
+    { skip: !shouldFetchVariants }
+  );
+
+  // Reset variantId when product changes (but not on initial load)
+  useEffect(() => {
+    if (!productId) return;
+    if (prevProductIdRef.current && productId !== prevProductIdRef.current) {
+      setValue('variantId', '', { shouldValidate: false });
     }
-  }
+    prevProductIdRef.current = productId;
+  }, [productId, setValue]);
 
-  // Don't render anything if no product selected
-  if (!shouldFetch) {
-    return null;
-  }
+  if (scope === 'ORDER') return null;
+  if (!shouldFetchVariants) return null;
+  if (isLoading) return <Skeleton className="h-12 w-full mb-4" />;
 
-  // Show loading state
-  if (isVariantsLoading) {
-    return <Skeleton className="h-12 w-full mb-4" />;
-  }
-
-  // Show error if any
   if (error) {
-    console.error('Error fetching variants:', error);
     return (
       <div className="p-4 bg-red-50 border border-red-200 rounded mb-4 text-red-800">
         Failed to load variants. Please try again.
@@ -118,10 +174,8 @@ const DiscountFormLogic = () => {
     );
   }
 
-  // Check if variants exist
-  const hasVariants = variantsData?.data && Array.isArray(variantsData.data) && variantsData.data.length > 0;
-
-  if (!hasVariants) {
+  const variants = Array.isArray((variantsData as any)?.data) ? (variantsData as any).data : [];
+  if (!variants.length) {
     return (
       <div className="p-4 bg-gray-50 border border-gray-200 rounded mb-4 text-gray-600">
         No variants available for this product.
@@ -129,30 +183,47 @@ const DiscountFormLogic = () => {
     );
   }
 
+  const selectedVariant = variants.find((v: any) => v.id === variantId);
+  const minPrice = Math.min(...variants.map((v: any) => Number(v.price || 0)));
+
+  const previewBasePrice =
+    scope === 'PRODUCT' ? minPrice : Number(selectedVariant?.price ?? 0);
+
+  const preview = computeDiscountPreview({
+    originalPrice: previewBasePrice,
+    type,
+    value: Number(value || 0),
+  });
+
   return (
     <>
-      <FormInput
-        name="variantId"
-        label="Select Variant (optional)"
-        type="select"
-        options={variantsData.data.map((v: any) => ({
-          value: v.id,
-          label: `${v.sku} (${v.size}${v.unit}) - $${v.price}`,
-        }))}
-        placeholder="Select variant (optional)"
-      />
+      {scope === 'VARIANT' && (
+        <FormInput
+          name="variantId"
+          label="Select Variant"
+          type="select"
+          options={variants.map((v: any) => ({
+            value: v.id,
+            label: `${v.sku} - (${v.size}${v.unit}) - ${Math.round(v.price)} BDT`,
+          }))}
+          placeholder="Select variant"
+          required
+        />
+      )}
 
-      {selectedVariant && parsedValue > 0 && (
+      {Number(value || 0) > 0 && previewBasePrice > 0 && (
         <div className="p-4 bg-orange-50 border border-orange-200 rounded mt-4 text-gray-800">
           <p>
-            <strong>Original Price:</strong> ${originalPrice.toFixed(2)}
+            <strong>Preview Base Price:</strong> {preview.originalPrice} BDT{' '}
+            {scope === 'PRODUCT' ? (
+              <span className="text-xs text-gray-600">(minimum variant price)</span>
+            ) : null}
           </p>
           <p>
-            <strong>Discount:</strong> ${discountAmount.toFixed(2)} (
-            {discountPercent.toFixed(1)}%)
+            <strong>Discount:</strong> {preview.discountAmount} BDT ({preview.discountPercent.toFixed(1)}%)
           </p>
           <p>
-            <strong>Final Price:</strong> ${discountedPrice.toFixed(2)}
+            <strong>Final Price:</strong> {preview.finalPrice} BDT
           </p>
         </div>
       )}
@@ -169,11 +240,22 @@ export default function DiscountFormPage() {
   const [updateDiscount, { isLoading: isUpdating }] = useUpdateDiscountMutation();
 
   const { data: productData, isLoading: isProductsLoading } =
-    useGetAllProductsAdminQuery({ page: 1, limit: 100 });
+    useGetAllProductsAdminQuery({ page: 1, limit: 200 });
+
+  // ✅ IMPORTANT: your API likely returns { success, data: discount }
+  const {
+    data: discountRes,
+    isLoading: isDiscountLoading,
+    isFetching: isDiscountFetching,
+    error: discountError,
+  } = useGetDiscountByIdQuery(id as string, { skip: !id });
+
+  const discount = (discountRes as any)?.data ?? discountRes;
 
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
+      scope: 'PRODUCT',
       productId: '',
       variantId: '',
       code: '',
@@ -186,21 +268,59 @@ export default function DiscountFormPage() {
     mode: 'onChange',
   });
 
+  const isHydratedRef = useRef(false);
+
+  // ✅ populate form with previous values
+  useEffect(() => {
+    if (!id) return;
+    if (!discount) return;
+
+    methods.reset(
+      {
+        scope: discount.scope || 'PRODUCT',
+        productId: discount.productId || '',
+        variantId: discount.variantId || '',
+        code: discount.code || '',
+        type: discount.type || 'percentage',
+        value: Number(discount.value ?? 0),
+        maxUsage: discount.maxUsage ?? undefined,
+        startDate: toLocalInput(discount.startDate),
+        endDate: toLocalInput(discount.endDate),
+      },
+      { keepDefaultValues: false }
+    );
+
+    isHydratedRef.current = true;
+  }, [id, discount, methods]);
+
+  const scope = methods.watch('scope');
+  const productId = methods.watch('productId');
+  const code = methods.watch('code');
+
+  // when scope changes => clear irrelevant fields (AFTER initial hydration)
+  useEffect(() => {
+    if (!isHydratedRef.current && id) return;
+
+    if (scope === 'ORDER') {
+      methods.setValue('productId', '', { shouldValidate: false });
+      methods.setValue('variantId', '', { shouldValidate: false });
+    }
+    if (scope === 'PRODUCT') {
+      methods.setValue('variantId', '', { shouldValidate: false });
+    }
+  }, [scope, methods, id]);
+
   const handleSubmit: SubmitHandler<FormData> = async (data) => {
-    console.log('🚀 Form submitted with data:', data);
-    
     try {
-      // Clean up data before submitting
       const submitData = {
         ...data,
-        variantId: data.variantId || undefined,
-        code: data.code || undefined,
+        code: data.code?.trim() ? data.code.trim().toUpperCase() : undefined,
+        productId: data.scope === 'ORDER' ? undefined : data.productId,
+        variantId: data.scope === 'VARIANT' ? data.variantId : undefined,
         maxUsage: data.maxUsage || undefined,
         startDate: data.startDate || undefined,
         endDate: data.endDate || undefined,
       };
-
-      console.log('📤 Submitting cleaned data:', submitData);
 
       if (id) {
         await updateDiscount({ id, data: submitData }).unwrap();
@@ -209,16 +329,31 @@ export default function DiscountFormPage() {
         await createDiscount(submitData).unwrap();
         toast.success('Discount created successfully');
       }
+
       router.push('/dashboard/discounts');
     } catch (error: any) {
-      console.error('❌ Submit error:', error);
       toast.error(error?.data?.message || 'Failed to save discount');
     }
   };
 
   const isSubmitting = isCreating || isUpdating;
-  const watchedProductId = methods.watch('productId');
-  console.log('🔍 Main component - watchedProductId:', watchedProductId);
+  const isEditLoading = !!id && (isDiscountLoading || isDiscountFetching);
+
+  const badge = useMemo(() => {
+    if (scope === 'ORDER') return { text: 'Order Coupon', cls: 'bg-purple-600' };
+    if (code?.trim()) return { text: 'Promo Code Discount', cls: 'bg-blue-500' };
+    return { text: 'Auto Discount', cls: 'bg-green-500' };
+  }, [scope, code]);
+
+  if (id && discountError) {
+    return (
+      <div className="p-6 max-w-2xl mx-auto bg-white shadow-md rounded-xl">
+        <div className="p-4 bg-red-50 border border-red-200 rounded text-red-800">
+          Failed to load discount for editing.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-2xl mx-auto bg-white shadow-md rounded-xl">
@@ -226,116 +361,154 @@ export default function DiscountFormPage() {
         {id ? 'Edit Discount' : 'Create New Discount'}
       </h1>
 
-      <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(handleSubmit)} className="space-y-6">
-          {/* Product Select */}
-          {isProductsLoading ? (
-            <Skeleton className="h-12 w-full mb-4" />
-          ) : (
+      {isEditLoading ? (
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+        </div>
+      ) : (
+        <FormProvider {...methods}>
+          <form onSubmit={methods.handleSubmit(handleSubmit)} className="space-y-6">
             <FormInput
-              name="productId"
-              label="Select Product"
+              name="scope"
+              label="Discount Apply On"
               type="select"
-              options={
-                productData?.data?.map((p: any) => ({
-                  value: p.id,
-                  label: p.name,
-                })) || []
-              }
-              placeholder="Choose a product"
+              options={[
+                { value: 'ORDER', label: 'Total Order (Cart Total)' },
+                { value: 'PRODUCT', label: 'Specific Product' },
+                { value: 'VARIANT', label: 'Specific Variant' },
+              ]}
               required
             />
-          )}
 
-          {/* Code */}
-          <FormInput
-            name="code"
-            label="Discount Code (optional)"
-            placeholder="SAVE10"
-          />
+            {scope !== 'ORDER' && (
+              <>
+                {isProductsLoading ? (
+                  <Skeleton className="h-12 w-full mb-4" />
+                ) : (
+                  <FormInput
+                    name="productId"
+                    label="Select Product"
+                    type="select"
+                    options={
+                      (productData as any)?.data?.map((p: any) => ({
+                        value: p.id,
+                        label: p.name,
+                      })) || []
+                    }
+                    placeholder="Choose a product"
+                    required
+                  />
+                )}
 
-          {methods.watch('code') && methods.watch('code').trim() !== '' ? (
-            <div className="mb-4">
-              <span className="inline-block px-3 py-1 text-sm font-semibold text-white bg-blue-500 rounded-full">
-                Promo Code Discount
+                {productId && <VariantPickerAndPreview key={productId} />}
+              </>
+            )}
+
+            <FormInput
+              name="code"
+              label={
+                scope === 'ORDER' ? 'Coupon Code (required)' : 'Discount Code (optional)'
+              }
+              placeholder="SAVE10"
+              required={scope === 'ORDER'}
+            />
+
+            <div className="mb-2">
+              <span
+                className={cn(
+                  'inline-block px-3 py-1 text-sm font-semibold text-white rounded-full',
+                  badge.cls
+                )}
+              >
+                {badge.text}
               </span>
             </div>
-          ) : (
-            <div className="mb-4">
-              <span className="inline-block px-3 py-1 text-sm font-semibold text-white bg-green-500 rounded-full">
-                Auto Discount
-              </span>
+
+            <FormInput
+              name="type"
+              label="Discount Type"
+              type="select"
+              options={[
+                { value: 'percentage', label: 'Percentage (%)' },
+                { value: 'fixed', label: 'Fixed Amount (BDT)' },
+              ]}
+              required
+            />
+
+            <FormInput
+              name="value"
+              label="Discount Value"
+              type="number"
+              placeholder="e.g. 10"
+              required
+            />
+
+            <FormInput
+              name="maxUsage"
+              label="Maximum Usage (optional)"
+              type="number"
+              placeholder="e.g. 100"
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormInput name="startDate" label="Start Date" type="datetime-local" />
+              <FormInput name="endDate" label="End Date" type="datetime-local" />
             </div>
-          )}
 
-          {/* Type & Value */}
-          <FormInput
-            name="type"
-            label="Discount Type"
-            type="select"
-            options={[
-              { value: 'percentage', label: 'Percentage' },
-              { value: 'fixed', label: 'Fixed Amount' },
-            ]}
-            required
-          />
-          <FormInput
-            name="value"
-            label="Discount Value"
-            type="number"
-            placeholder="e.g. 10"
-            required
-          />
+            <div className="flex justify-end gap-4 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  // Reset to loaded values on edit, otherwise defaults
+                  if (id && discount) {
+                    methods.reset({
+                      scope: discount.scope || 'PRODUCT',
+                      productId: discount.productId || '',
+                      variantId: discount.variantId || '',
+                      code: discount.code || '',
+                      type: discount.type || 'percentage',
+                      value: Number(discount.value ?? 0),
+                      maxUsage: discount.maxUsage ?? undefined,
+                      startDate: toLocalInput(discount.startDate),
+                      endDate: toLocalInput(discount.endDate),
+                    });
+                  } else {
+                    methods.reset();
+                  }
+                }}
+                disabled={isSubmitting}
+                className="border-orange-400 text-orange-500 hover:bg-orange-50"
+              >
+                Reset
+              </Button>
 
-          {/* Variant + Preview */}
-          {watchedProductId && <DiscountFormLogic key={watchedProductId} />}
-
-          {/* Max Usage */}
-          <FormInput
-            name="maxUsage"
-            label="Maximum Usage (optional)"
-            type="number"
-            placeholder="e.g. 100"
-          />
-
-          {/* Dates */}
-          <div className="grid grid-cols-2 gap-4">
-            <FormInput name="startDate" label="Start Date" type="datetime-local" />
-            <FormInput name="endDate" label="End Date" type="datetime-local" />
-          </div>
-
-          {/* Submit Button */}
-          <div className="flex justify-end gap-4 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => methods.reset()}
-              disabled={isSubmitting}
-              className="border-orange-400 text-orange-500 hover:bg-orange-50"
-            >
-              Reset
-            </Button>
-
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className={cn(
-                'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg hover:from-orange-600 hover:to-red-600',
-                isSubmitting && 'opacity-70 cursor-not-allowed'
-              )}
-            >
-              {isSubmitting ? (
-                <span className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  {id ? 'Updating...' : 'Creating...'}
-                </span>
-              ) : (
-                id ? 'Update Discount' : 'Create Discount'
-              )}
-            </Button>
-          </div>
-        </form>
-      </FormProvider>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className={cn(
+                  'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg hover:from-orange-600 hover:to-red-600',
+                  isSubmitting && 'opacity-70 cursor-not-allowed'
+                )}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {id ? 'Updating...' : 'Creating...'}
+                  </span>
+                ) : id ? (
+                  'Update Discount'
+                ) : (
+                  'Create Discount'
+                )}
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
+      )}
     </div>
   );
 }

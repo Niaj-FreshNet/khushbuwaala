@@ -25,6 +25,7 @@ type Props = {
   isOutOfStock: boolean;
   selectedSizeLabel: string;
   availableVariants: IProductVariant[];
+  getVariantDiscount: (variant?: IProductVariant) => IDiscount | null;
 
   // handlers (from client)
   onReadMore?: () => void;
@@ -48,6 +49,7 @@ export default function ProductDetailsUI({
   isOutOfStock,
   selectedSizeLabel,
   availableVariants,
+  getVariantDiscount,
   onReadMore,
   onSelectVariant,
   onQtyDec,
@@ -124,30 +126,57 @@ export default function ProductDetailsUI({
 
       {/* Description */}
       <div className="p-3.5 sm:p-6 bg-white rounded-2xl border border-gray-200">
-        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Description</h3>
-        <p className="text-gray-700 leading-relaxed">
-          {(() => {
-            const description =
-              product.description || "Experience luxury with this premium fragrance.";
-            const words = description.split(" ");
-            const truncated = words.slice(0, 25).join(" ");
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900">Description</h3>
 
-            if (words.length > 25) {
-              return (
-                <>
-                  {truncated}...
-                  <button
-                    onClick={onReadMore}
-                    className="ml-2 inline-flex items-center rounded-md px-2 py-1 text-blue-700 hover:text-blue-900 font-semibold hover:underline active:scale-[0.98]"
-                  >
-                    Read more
-                  </button>
-                </>
-              );
-            }
-            return description;
-          })()}
-        </p>
+          {/* optional: show "Read more" button in header when long */}
+          {/* (keeps UI clean) */}
+        </div>
+
+        {(() => {
+          const description =
+            product.description?.toString() ||
+            "Experience luxury with this premium fragrance.";
+
+          const normalized = description.replace(/\r\n/g, "\n").trim();
+
+          // ✅ Compact preview rules
+          const PREVIEW_CHARS = 220;  // change 180/220/260 based on your UI
+          const PREVIEW_LINES = 3;    // show max 3 lines (new-line based)
+
+          const lines = normalized.split("\n");
+
+          // make a text that is max PREVIEW_LINES (keeps formatting)
+          const lineLimited = lines.slice(0, PREVIEW_LINES).join("\n");
+
+          // now enforce max chars too (keeps card short always)
+          const preview =
+            lineLimited.length > PREVIEW_CHARS
+              ? lineLimited.slice(0, PREVIEW_CHARS).trimEnd() + "..."
+              : lineLimited;
+
+          const isLong =
+            normalized.length > preview.replace(/\.\.\.$/, "").length ||
+            lines.length > PREVIEW_LINES;
+
+          return (
+            <div className="space-y-3">
+              <div className="text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+                {preview}
+              </div>
+
+              {isLong && (
+                <button
+                  onClick={onReadMore}
+                  type="button"
+                  className="inline-flex items-center rounded-md px-2.5 py-1.5 text-blue-700 hover:text-blue-900 font-semibold hover:underline active:scale-[0.98]"
+                >
+                  Read more
+                </button>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Fragrance Notes */}
@@ -184,6 +213,9 @@ export default function ProductDetailsUI({
             const label = `${variant.size} ${variant.unit.toLowerCase()}`;
             const isSelected = selectedSizeLabel === label;
 
+            const vDiscount = getVariantDiscount(variant); // ✅
+            const hasDiscount = !!vDiscount;
+
             return (
               <button
                 key={variant.id}
@@ -195,6 +227,15 @@ export default function ProductDetailsUI({
                     : "border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50"
                 )}
               >
+                {/* ✅ per-variant discount badge */}
+                {hasDiscount && (
+                  <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow">
+                    {vDiscount!.type === "percentage"
+                      ? `-${Math.round(vDiscount!.value)}%`
+                      : `-৳${Math.round(vDiscount!.value)}`}
+                  </div>
+                )}
+
                 {isSelected && (
                   <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                     <CheckCircle className="w-4 h-4 text-white" />

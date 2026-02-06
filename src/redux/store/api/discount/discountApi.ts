@@ -10,6 +10,11 @@ export const discountApi = baseApi.injectEndpoints({
       providesTags: ["Discount"],
     }),
 
+    getDiscountById: builder.query<IDiscount, string>({
+  query: (id) => `/discount/${id}`,
+  providesTags: (_res, _err, id) => [{ type: "Discount", id }],
+}),
+
     createDiscount: builder.mutation<IDiscount, Partial<IDiscount>>({
       query: (payload) => ({
         url: "/discount/create",
@@ -52,6 +57,7 @@ export const discountApi = baseApi.injectEndpoints({
 
 export const {
   useGetAllDiscountsAdminQuery,
+  useGetDiscountByIdQuery,
   useCreateDiscountMutation,
   useUpdateDiscountMutation,
   useDeleteDiscountMutation,

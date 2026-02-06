@@ -121,29 +121,38 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
   }, [currentVariant?.price, product.minPrice])
 
   // ✅ Pricing logic aligned with Product Details page (variant discounts first + product discounts)
+  // ✅ Pricing logic: ONLY auto discounts (code must be empty)
   const { discount, discountedPrice } = React.useMemo(() => {
-    const now = new Date()
+    const now = new Date();
 
     const allDiscounts: IDiscount[] = [
       ...(currentVariant?.discounts ?? []),
       ...(product.discounts ?? []),
-    ]
+    ];
 
     const active =
       allDiscounts.find((d) => {
-        const startOk = !d.startDate || new Date(d.startDate) <= now
-        const endOk = !d.endDate || new Date(d.endDate) >= now
-        return startOk && endOk
-      }) || null
+        // ❌ hide promo-code discounts
+        if (d.code && String(d.code).trim() !== "") return false;
 
-    let final = originalPrice
+        const startOk = !d.startDate || new Date(d.startDate) <= now;
+        const endOk = !d.endDate || new Date(d.endDate) >= now;
+        return startOk && endOk;
+      }) || null;
+
+    let final = originalPrice;
+
     if (active) {
-      if (active.type === "percentage") final = originalPrice - (originalPrice * active.value) / 100
-      if (active.type === "fixed") final = Math.max(0, originalPrice - active.value)
+      if (active.type === "percentage") {
+        final = originalPrice - (originalPrice * active.value) / 100;
+      } else if (active.type === "fixed") {
+        final = originalPrice - active.value;
+      }
     }
 
-    return { discount: (active as IDiscount | null), discountedPrice: Number(final) }
-  }, [product.discounts, currentVariant, originalPrice])
+    final = Math.max(0, Math.round(final)); // ✅ no decimals + no negative
+    return { discount: (active as IDiscount | null), discountedPrice: Number(final) };
+  }, [product.discounts, currentVariant, originalPrice]);
 
   const currentPrice = discountedPrice // ✅ final price for UI + cart
   const savings = Math.max(0, originalPrice - discountedPrice)
@@ -164,7 +173,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
     router.push(`/product/${product.slug}`)
     toast.info("Navigating to Product Details", {
       description: "Opening full product page...",
-      duration: 1800,
+      duration: 1200,
     })
     onOpenChange?.(false)
   }
@@ -172,28 +181,30 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
   const nextImage = () => setCurrentImageIndex((prev) => (prev + 1) % images.length)
   const prevImage = () => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
 
-  // ✅ Discount badge helper (badge only, NOT price)
+  // ✅ Discount badge helper (badge only) - ONLY auto discounts (no code)
   const getActiveDiscountForVariant = React.useCallback(
     (variant?: IProductVariant): IDiscount | null => {
-      const now = new Date()
+      const now = new Date();
 
       const allDiscounts: IDiscount[] = [
         ...(variant?.discounts ?? []),
         ...(product.discounts ?? []),
-      ]
-      if (!allDiscounts.length) return null
+      ];
 
       const active =
         allDiscounts.find((d) => {
-          const startOk = !d.startDate || new Date(d.startDate) <= now
-          const endOk = !d.endDate || new Date(d.endDate) >= now
-          return startOk && endOk
-        }) || null
+          // ❌ hide promo-code discounts from badge too
+          if (d.code && String(d.code).trim() !== "") return false;
 
-      return active as IDiscount | null
+          const startOk = !d.startDate || new Date(d.startDate) <= now;
+          const endOk = !d.endDate || new Date(d.endDate) >= now;
+          return startOk && endOk;
+        }) || null;
+
+      return active as IDiscount | null;
     },
     [product.discounts]
-  )
+  );
 
   const handleAddToCart = async () => {
     if (isOutOfStock || isAddingToCart || isBuyingNow) return
@@ -206,20 +217,20 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
         product,
         quantity,
         selectedSize || "3 ml",
-        selectedPrice // ✅ discounted final price
+        discountedPrice // ✅ discounted final price
       )
 
       kwPushAddToCart({
         currency: "BDT",
-        value: selectedPrice * 1,
+        value: discountedPrice * 1,
         items: [
           {
             item_id: String((product as any).id || (product as any).slug || product.name),
             item_name: product.name,
             item_brand: (product as any).brand || "KhushbuWaala",
             item_category: (product as any).categoryId || (product as any).category?.categoryName || "product",
-            item_variant: defaultSize || undefined,
-            price: selectedPrice,
+            item_variant: selectedSize || "3 ml",
+            price: discountedPrice,
             quantity: 1,
           },
         ],
@@ -240,12 +251,12 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
     try {
       await new Promise((r) => setTimeout(r, 450))
 
-      cart?.addToCart?.(product, quantity, selectedSize || "3 ml", selectedPrice)
+      cart?.addToCart?.(product, quantity, selectedSize || "3 ml", discountedPrice)
 
       // ✅ TRACK begin_checkout
       kwPushBeginCheckout({
         currency: "BDT",
-        value: selectedPrice * quantity,
+        value: discountedPrice * quantity,
         items: [
           {
             item_id: String((product as any).id || (product as any).slug || product.name),
@@ -253,7 +264,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
             item_brand: (product as any).brand || "KhushbuWaala",
             item_category: (product as any).categoryId || (product as any).category?.categoryName || "product",
             item_variant: selectedSize || "3 ml",
-            price: selectedPrice,
+            price: discountedPrice,
             quantity,
           },
         ],
@@ -549,9 +560,46 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                           <Eye className="h-4 w-4 text-blue-500 shrink-0" />
                           Description
                         </h3>
-                        <p className="text-gray-700 leading-relaxed text-xs sm:text-sm line-clamp-3">
-                          {product.description}
-                        </p>
+
+                        {(() => {
+                          const normalized = String(product.description)
+                            .replace(/\r\n/g, "\n")
+                            .trim();
+
+                          const PREVIEW_LINES = 3;
+                          const PREVIEW_CHARS = 200; // ✅ keep compact in modal
+
+                          const lines = normalized.split("\n");
+                          const lineLimited = lines.slice(0, PREVIEW_LINES).join("\n");
+
+                          const preview =
+                            lineLimited.length > PREVIEW_CHARS
+                              ? lineLimited.slice(0, PREVIEW_CHARS).trimEnd() + "..."
+                              : lineLimited;
+
+                          const isLong = normalized.length > preview.replace(/\.\.\.$/, "").length || lines.length > PREVIEW_LINES;
+
+                          return (
+                            <div className="space-y-2">
+                              <div className="text-gray-700 leading-relaxed text-xs sm:text-sm whitespace-pre-wrap break-words">
+                                {preview}
+                              </div>
+
+                              {isLong && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    router.push(`/product/${product.slug}`);
+                                    onOpenChange?.(false);
+                                  }}
+                                  className="inline-flex items-center rounded-md px-2 py-1 text-blue-700 hover:text-blue-900 font-semibold hover:underline active:scale-[0.98]"
+                                >
+                                  Read more
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
 

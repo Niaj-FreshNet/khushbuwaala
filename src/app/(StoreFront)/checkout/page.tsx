@@ -161,10 +161,6 @@ export default function CheckoutPage() {
     }
   }, [selectedDistrict, shippingMethod]);
 
-  const shippingCost = useMemo(
-    () => (shippingMethod === "outsideDhaka" ? 110 : 50),
-    [shippingMethod]
-  );
 
   const subtotal = useMemo(() => {
     if (checkoutMode && checkoutItem) {
@@ -173,9 +169,25 @@ export default function CheckoutPage() {
     return calculateSubtotal();
   }, [checkoutMode, checkoutItem, calculateSubtotal]);
 
-
   const estimatedTaxes = 0;
   const discountedSubtotal = Math.max(0, subtotal - discount);
+
+  const FREE_SHIPPING_MIN = 1000;
+
+  // ✅ qualify based on discounted subtotal (recommended)
+  const isFreeShipping = useMemo(() => discountedSubtotal >= FREE_SHIPPING_MIN, [discountedSubtotal]);
+
+  const baseShippingCost = useMemo(
+    () => (shippingMethod === "outsideDhaka" ? 110 : 50),
+    [shippingMethod]
+  );
+
+  // ✅ final shipping cost
+  const shippingCost = useMemo(
+    () => (isFreeShipping ? 0 : baseShippingCost),
+    [isFreeShipping, baseShippingCost]
+  );
+
   const total = discountedSubtotal + estimatedTaxes + shippingCost;
 
   // ----------------------------
@@ -251,7 +263,11 @@ export default function CheckoutPage() {
     if (analyticsItems.some(i => !i.price || i.price <= 0)) return
 
     const shippingTier =
-      shippingMethod === "insideDhaka" ? "Inside Dhaka" : "Outside Dhaka"
+      isFreeShipping
+        ? "Free Shipping"
+        : shippingMethod === "insideDhaka"
+          ? "Inside Dhaka"
+          : "Outside Dhaka";
 
     // fingerprint prevents duplicate firing on rerenders
     const fp = [
@@ -363,25 +379,43 @@ export default function CheckoutPage() {
     });
   };
 
-  const pickDiscountAmount = (res: any) =>
-    Number(res?.data?.discountAmount ?? res?.discountAmount ?? 0);
+  const pickDiscountAmount = (res: any) => {
+    const root = res?.data ?? res;
+
+    const total = Number(root?.discountAmount ?? 0);
+    const orderPart = Number(root?.orderDiscountAmount ?? 0);
+
+    // If backend already returns total, use it.
+    // Otherwise, add order part to item part.
+    if (total > 0 && orderPart > 0) return total; // assumes total already includes it
+    if (total > 0) return total;
+    return orderPart;
+  };
 
   const pickDiscountInfo = (res: any): DiscountLabel => {
-    const items = res?.data?.items ?? res?.items ?? [];
+    const root = res?.data ?? res;
 
-    // Prefer PROMO discount if present on any item
+    // ✅ Prefer ORDER coupon info if present
+    const od = root?.orderDiscount;
+    if (od?.type && typeof od?.value === "number") {
+      return { type: od.type, value: Number(od.value) };
+    }
+
+    const items = root?.items ?? [];
+
+    // Prefer PROMO item discount
     for (const it of items) {
       const promo = (it?.appliedDiscounts ?? []).find((d: any) => d?.code);
       if (promo?.type && typeof promo?.value === "number") {
-        return { type: promo.type, value: Number(promo.value) } as DiscountLabel;
+        return { type: promo.type, value: Number(promo.value) };
       }
     }
 
-    // Else fall back to any AUTO discount
+    // Else AUTO item discount
     for (const it of items) {
       const auto = (it?.appliedDiscounts ?? []).find((d: any) => !d?.code);
       if (auto?.type && typeof auto?.value === "number") {
-        return { type: auto.type, value: Number(auto.value) } as DiscountLabel;
+        return { type: auto.type, value: Number(auto.value) };
       }
     }
 
@@ -437,16 +471,7 @@ export default function CheckoutPage() {
       toast.error(msg);
     }
   };
-
-  useEffect(() => {
-    if (!appliedCouponCode) return
-    if (appliedPromoCode) return
-
-    // set it in UI
-    setPromoCode(appliedCouponCode)
-    setAppliedPromoCode(appliedCouponCode)
-  }, [appliedCouponCode, appliedPromoCode])
-
+  
   useEffect(() => {
     const revalidate = async () => {
       if (!appliedPromoCode) return;
@@ -717,8 +742,25 @@ export default function CheckoutPage() {
                     )}
 
                     <div className="flex justify-between text-sm">
-                      <span>Shipping</span>
-                      <span>{formatBDT(shippingCost)}</span>
+                      <span className="flex items-center gap-2">
+                        Shipping
+                        {isFreeShipping && (
+                          <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                            Free over ৳{FREE_SHIPPING_MIN}
+                          </span>
+                        )}
+                      </span>
+
+                      <span>
+                        {isFreeShipping ? (
+                          <>
+                            <span className="line-through text-gray-400 mr-2">{formatBDT(baseShippingCost)}</span>
+                            <span className="text-green-700 font-semibold">{formatBDT(0)}</span>
+                          </>
+                        ) : (
+                          formatBDT(shippingCost)
+                        )}
+                      </span>
                     </div>
 
                     <div className="flex justify-between text-sm">
@@ -1091,8 +1133,25 @@ export default function CheckoutPage() {
                     )}
 
                     <div className="flex justify-between text-sm">
-                      <span>Shipping</span>
-                      <span>{formatBDT(shippingCost)}</span>
+                      <span className="flex items-center gap-2">
+                        Shipping
+                        {isFreeShipping && (
+                          <span className="text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                            Free over ৳{FREE_SHIPPING_MIN}
+                          </span>
+                        )}
+                      </span>
+
+                      <span>
+                        {isFreeShipping ? (
+                          <>
+                            <span className="line-through text-gray-400 mr-2">{formatBDT(baseShippingCost)}</span>
+                            <span className="text-green-700 font-semibold">{formatBDT(0)}</span>
+                          </>
+                        ) : (
+                          formatBDT(shippingCost)
+                        )}
+                      </span>
                     </div>
 
                     <div className="flex justify-between text-sm">

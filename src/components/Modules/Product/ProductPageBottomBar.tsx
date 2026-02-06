@@ -92,8 +92,12 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
         );
     };
 
+    // Get current price
     const currentVariant = getCurrentVariant();
-    const currentPrice = currentVariant?.price ?? product.minPrice ?? 0;
+    const currentPriceRaw = currentVariant?.price ?? product.minPrice ?? 0;
+
+    // always keep base price integer
+    const currentPrice = Math.round(Number(currentPriceRaw) || 0);
 
     // Get active discount (checks dates, variant first)
     const getActiveDiscount = (
@@ -120,27 +124,30 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
 
     if (discount) {
         if (discount.type === "percentage") {
-            discountedPrice = currentPrice - (currentPrice * discount.value) / 100;
+            discountedPrice = currentPrice - (currentPrice * Number(discount.value || 0)) / 100;
         } else if (discount.type === "fixed") {
-            discountedPrice = currentPrice - discount.value;
+            discountedPrice = currentPrice - Number(discount.value || 0);
         }
     }
 
-    // Final totals
-    const totalCurrent = currentPrice * quantity;
-    const totalDiscounted = discountedPrice * quantity;
+    // ✅ round final unit price + prevent negative
+    discountedPrice = Math.max(0, Math.round(discountedPrice));
+
+    // Final totals (integers)
+    const totalCurrent = Math.round(currentPrice * quantity);
+    const totalDiscounted = Math.round(discountedPrice * quantity);
+
+    // ✅ Determine selected variant price (before discount)
+    const price = Math.round(Number(selection?.selectedVariant?.price ?? product.minPrice ?? 0));
+
+    // ✅ Get final selected price (unit) for cart/analytics (integer)
+    const selectedPrice = discount ? discountedPrice : price;
 
     const activeDiscount = getActiveDiscount(product, currentVariant);
 
     const discountValue = activeDiscount?.type === "percentage"
         ? activeDiscount.value
         : 0;
-
-    // ✅ Determine selected variant price (before discount)
-    const price = selection?.selectedVariant?.price ?? product.minPrice ?? 0;
-
-    // ✅ Get final price after checking discount
-    const selectedPrice = discount ? discountedPrice : price;
 
     const handleQuantityChange = (type: "increment" | "decrement") => {
         const next = type === "increment"
@@ -175,7 +182,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
 
                 kwPushAddToCart({
                     currency: "BDT",
-                    value: selectedPrice * 1,
+                    value: Math.round(selectedPrice),
                     items: [
                         {
                             item_id: String((product as any).id || (product as any).slug || product.name),
@@ -183,7 +190,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                             item_brand: (product as any).brand || "KhushbuWaala",
                             item_category: (product as any).categoryId || (product as any).category?.categoryName || "product",
                             item_variant: selectedSize || undefined,
-                            price: selectedPrice,
+                            price: Math.round(selectedPrice),
                             quantity: 1,
                         },
                     ],

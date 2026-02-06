@@ -266,7 +266,17 @@ const AddProductPage = () => {
               <FormInput name="tags" label="Tags" placeholder="e.g. floral, luxury, unisex" inputClassName="border-[#FB923C]" />
             </div>
 
-            <FormInput name="description" label="Description" type="textarea" placeholder="Product Description" inputClassName="border-[#FB923C]" />
+            <FormInput
+              name="description"
+              label="Description"
+              type="textarea"
+              rows={10}
+              maxLength={2000}
+              showCount
+              helperText="Supports line breaks, bullets and detailed formatting."
+              placeholder={`Write a rich description...\n\n• Long lasting\n• Strong projection\n• Best for: Office, Evening`}
+              inputClassName="border-[#FB923C]"
+            />
 
             {/* Perfume Notes */}
             <Card className="border-[#FB923C]">

@@ -242,7 +242,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
         drawCheckoutGuide();
       }, 120);
 
-      window.setTimeout(() => setCheckoutNudge(false), 1800);
+      window.setTimeout(() => setCheckoutNudge(false), 1200);
     };
 
     // ✅ run when opened by navbar click OR add-to-cart auto open

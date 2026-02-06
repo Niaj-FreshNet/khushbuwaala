@@ -31,7 +31,7 @@ const StockManagementPage = () => {
   const meta = data?.meta;
 
   const handleViewLogs = (productId: string) => {
-    router.push(`/dashboard/stock/${productId}`);
+    router.push(`/dashboard/stock/logs/${productId}`);
   };
 
   const handleAddStock = (productId: string) => {

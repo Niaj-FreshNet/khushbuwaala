@@ -51,27 +51,43 @@ export default function ProductDetailsClient({
   const { discount, discountedPrice } = useMemo(() => {
     const now = new Date();
 
-    const allDiscounts = [
-      ...(selectedVariant?.discounts ?? []),
-      ...(product.discounts ?? []),
-    ];
+    // ✅ tolerate different shapes/keys
+    const productDiscounts: IDiscount[] =
+      ((product as any)?.discounts as IDiscount[]) ??
+      ((product as any)?.Discounts as IDiscount[]) ??
+      ((product as any)?.productDiscounts as IDiscount[]) ??
+      [];
 
-    const active =
-      allDiscounts.find((d) => {
-        const startOk = !d.startDate || new Date(d.startDate) <= now;
-        const endOk = !d.endDate || new Date(d.endDate) >= now;
-        return startOk && endOk;
-      }) || null;
+    const variantDiscounts: IDiscount[] =
+      ((selectedVariant as any)?.discounts as IDiscount[]) ??
+      ((selectedVariant as any)?.Discounts as IDiscount[]) ??
+      [];
+
+    const isActiveAuto = (d: any) => {
+      if (!d) return false;
+
+      // ❌ hide promo-code discounts
+      if (d.code && String(d.code).trim() !== "") return false;
+
+      const startOk = !d.startDate || new Date(d.startDate) <= now;
+      const endOk = !d.endDate || new Date(d.endDate) >= now;
+      return startOk && endOk;
+    };
+
+    // ✅ VARIANT auto > PRODUCT auto
+    const active = variantDiscounts.find(isActiveAuto) || productDiscounts.find(isActiveAuto) || null;
 
     let final = currentPrice;
 
     if (active) {
-      if (active.type === "percentage") final = currentPrice - (currentPrice * active.value) / 100;
-      if (active.type === "fixed") final = currentPrice - active.value;
+      if (active.type === "percentage") final = currentPrice * (1 - active.value / 100);
+      else if (active.type === "fixed") final = currentPrice - active.value;
     }
 
+    final = Math.max(0, Math.round(final));
+
     return { discount: active as IDiscount | null, discountedPrice: final };
-  }, [product.discounts, selectedVariant, currentPrice]);
+  }, [product, selectedVariant, currentPrice]);
 
   const isOutOfStock = (product.totalStock ?? 0) <= 0;
 
@@ -121,12 +137,12 @@ export default function ProductDetailsClient({
         flyToCart(e.currentTarget, (product as any)?.primaryImage);
 
         // If addToCart is sync, this still gives user feedback for a moment
-        cart?.addToCart?.(product as any, quantity, selectedSizeLabel, currentPrice);
+        cart?.addToCart?.(product as any, quantity, selectedSizeLabel, discountedPrice);
 
         // ✅ TRACK: add_to_cart (GA4 + Meta via GTM)
         kwPushAddToCart({
           currency: "BDT",
-          value: currentPrice * quantity,
+          value: discountedPrice * quantity,
           items: [
             {
               item_id: String((product as any).id || (product as any).slug),
@@ -134,7 +150,7 @@ export default function ProductDetailsClient({
               item_brand: String((product as any).brand || "KhushbuWaala"),
               item_category: String((product as any).categoryId || ""),
               item_variant: selectedSizeLabel, // ✅ variant
-              price: currentPrice,
+              price: discountedPrice,
               quantity,
             },
           ],
@@ -156,12 +172,12 @@ export default function ProductDetailsClient({
 
     setIsBuyingNow(true);
     try {
-      cart?.addToCart?.(product as any, quantity, selectedSizeLabel, currentPrice);
+      cart?.addToCart?.(product as any, quantity, selectedSizeLabel, discountedPrice);
 
       // ✅ TRACK begin_checkout from Buy Now (single-item checkout intent)
       kwPushBeginCheckout({
         currency: "BDT",
-        value: currentPrice * quantity,
+        value: discountedPrice * quantity,
         items: [
           {
             item_id: String((product as any).id || (product as any).slug),
@@ -169,7 +185,7 @@ export default function ProductDetailsClient({
             item_brand: String((product as any).brand || "KhushbuWaala"),
             item_category: String((product as any).categoryId || ""),
             item_variant: selectedSizeLabel,
-            price: currentPrice,
+            price: discountedPrice,
             quantity,
           },
         ],
@@ -182,6 +198,38 @@ export default function ProductDetailsClient({
     }
   }, [cart, product, quantity, selectedSizeLabel, currentPrice, router, startTransition, isOutOfStock, isBuyingNow, isAddingToCart]);
 
+  const getActiveAutoDiscountForVariant = useCallback(
+    (variant?: IProductVariant): IDiscount | null => {
+      const now = new Date();
+
+      const productDiscounts: IDiscount[] =
+        ((product as any)?.discounts as IDiscount[]) ??
+        ((product as any)?.Discounts as IDiscount[]) ??
+        ((product as any)?.productDiscounts as IDiscount[]) ??
+        [];
+
+      const variantDiscounts: IDiscount[] =
+        ((variant as any)?.discounts as IDiscount[]) ??
+        ((variant as any)?.Discounts as IDiscount[]) ??
+        [];
+
+      const isActiveAuto = (d: any) => {
+        if (!d) return false;
+
+        // ❌ promo-code discounts are hidden (coupon only)
+        if (d.code && String(d.code).trim() !== "") return false;
+
+        const startOk = !d.startDate || new Date(d.startDate) <= now;
+        const endOk = !d.endDate || new Date(d.endDate) >= now;
+        return startOk && endOk;
+      };
+
+      // ✅ variant auto > product auto
+      return (variantDiscounts.find(isActiveAuto) || productDiscounts.find(isActiveAuto) || null) as IDiscount | null;
+    },
+    [product]
+  );
+
   return (
     <ProductDetailsUI
       product={product}
@@ -192,6 +240,7 @@ export default function ProductDetailsClient({
       isOutOfStock={isOutOfStock}
       selectedSizeLabel={selectedSizeLabel}
       availableVariants={availableVariants}
+      getVariantDiscount={getActiveAutoDiscountForVariant}
       onReadMore={onReadMore}
       onSelectVariant={onSelectVariant}
       onQtyDec={onQtyDec}

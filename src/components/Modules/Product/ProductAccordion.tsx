@@ -255,22 +255,25 @@ export default function ProductAccordion({ product, initialOpenSection }: Produc
               <div className="w-1.5 rounded-full bg-gradient-to-b from-blue-600 via-purple-600 to-pink-600" />
 
               <div className="min-w-0">
-                <p
+                <div
                   className={cn(
                     "text-[15px] sm:text-base leading-7 text-gray-800",
-                    "font-medium tracking-[0.01em]"
+                    "font-medium tracking-[0.01em]",
+                    "whitespace-pre-wrap break-words"
                   )}
                   style={{ textWrap: "pretty" as any }}
                 >
-                  {product.description ||
+                  {(product.description?.toString()?.replace(/\r\n/g, "\n")) ||
                     `Experience the luxury of ${product.name}, a premium ${product.gender === "male" ? "men's" : "women's"
                     } fragrance that embodies sophistication and elegance. This exquisite scent is perfect for those who appreciate fine fragrances and want to make a lasting impression.`}
-                </p>
+                </div>
 
                 {/* subtle callout line */}
                 <p className="mt-3 text-xs sm:text-sm text-gray-600">
                   {/* ✨ Tip: Apply on pulse points for best performance. */}
-                  <p>Note: Each bottle is beautifully captured, though shades may vary slightly under different lighting.</p>
+                  <p className="mt-3 text-xs sm:text-sm text-gray-600">
+                    Note: Each bottle is beautifully captured, though shades may vary slightly under different lighting.
+                  </p>
                 </p>
               </div>
             </div>
