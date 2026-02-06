@@ -21,10 +21,11 @@ const home1 = "/hero2.1.png"
 // const home1 = "/hero4.2.png"
 // const home1 = "/hero4.3.png"
 // const home2 = "/hero2.png"
-const home2 = "/hero5.png"
+// const home2 = "/hero5.png"
 const home3 = "/hero5.3.png"
 const homeMobile3 = "/mobile5.3.png"
 const homeMobile1 = "/hero1.png"
+const home2 = "/desktop1.png"
 
 type Slide = {
   src: string              // desktop

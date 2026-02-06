@@ -330,6 +330,44 @@ export default function CheckoutPage() {
       .replace("BDT", "৳")
       .trim();
 
+  const normalizeLines = (p: any) => {
+    const productDoc = p?.product || p;
+
+    const [sizeValue, sizeUnit] = String(p?.selectedSize || "").split(" ");
+
+    const matchedVariant = productDoc?.variants?.find(
+      (v: any) =>
+        Number(v.size) === Number(sizeValue) &&
+        String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
+    );
+
+    const originalUnit = Number(matchedVariant?.price ?? p?.price ?? 0);
+
+    // selectedPrice should already be the final payable price (after auto discount, etc.)
+    const finalUnit = Number(p?.selectedPrice ?? originalUnit);
+
+    const qty = Math.max(1, Number(p?.quantity || 1));
+
+    const lineOriginal = Math.max(0, Math.round(originalUnit * qty));
+    const lineFinal = Math.max(0, Math.round(finalUnit * qty));
+
+    const save = Math.max(0, lineOriginal - lineFinal);
+
+    const hasDiscount = originalUnit > 0 && finalUnit > 0 && finalUnit < originalUnit;
+
+    return {
+      productDoc,
+      matchedVariant,
+      originalUnit,
+      finalUnit,
+      qty,
+      lineOriginal,
+      lineFinal,
+      save,
+      hasDiscount,
+    };
+  };
+
   // --- Validation ---
   const validateForm = () => {
     const nextErrors: Record<string, string> = {};
@@ -368,7 +406,7 @@ export default function CheckoutPage() {
         matchedVariant?.id ||
         matchedVariant?._id;
 
-      console.log(product, productId, variantId, price, qty)
+      // console.log(product, productId, variantId, price, qty)
 
       return {
         productId,
@@ -471,7 +509,7 @@ export default function CheckoutPage() {
       toast.error(msg);
     }
   };
-  
+
   useEffect(() => {
     const revalidate = async () => {
       if (!appliedPromoCode) return;
@@ -685,34 +723,67 @@ export default function CheckoutPage() {
                 <Card>
                   <CardContent className="p-4 space-y-3">
                     {itemsToDisplay.map((product: any, idx: number) => {
-                      // ✅ correct line price on mobile
-                      const [sizeValue, sizeUnit] = String(product?.selectedSize || "").split(" ");
-                      const matchedVariant = product?.product?.variants?.find(
-                        (v: any) =>
-                          Number(v.size) === Number(sizeValue) &&
-                          String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
-                      );
-                      const selectedPrice = Number(product?.selectedPrice ?? matchedVariant?.price ?? 0);
-                      const line = selectedPrice * Number(product?.quantity || 1);
+                      const {
+                        productDoc,
+                        qty,
+                        originalUnit,
+                        finalUnit,
+                        lineOriginal,
+                        lineFinal,
+                        save,
+                        hasDiscount,
+                      } = normalizeLines(product);
 
                       return (
-                        <div key={`${product.product?.id}-${product.selectedSize}-${idx}`} className="flex items-start gap-3">
+                        <div key={`${productDoc?.id}-${product.selectedSize}-${idx}`} className="flex items-start gap-3">
                           <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100 shrink-0">
                             <Image
-                              src={product.product?.primaryImage}
-                              alt={product.product?.name}
+                              src={productDoc?.primaryImage}
+                              alt={productDoc?.name}
                               fill
                               className="object-cover"
                             />
                             <div className="absolute -top-2 -right-2 text-xs bg-gray-200 text-black rounded-full px-2 py-0.5">
-                              {product.quantity}
+                              {qty}
                             </div>
                           </div>
+
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{product.product?.name}</p>
+                            <p className="text-sm font-medium truncate">{productDoc?.name}</p>
                             <p className="text-xs text-gray-500">Size: {product.selectedSize}</p>
+
+                            {/* ✅ Unit price row */}
+                            <div className="mt-1 flex items-center gap-2">
+                              <span className="text-sm font-semibold text-gray-900">
+                                {formatBDT(finalUnit)}{" "}
+                                <span className="text-xs font-medium text-gray-500">× {qty}</span>
+                              </span>
+
+                              {/* {hasDiscount && (
+                                <>
+                                  <span className="text-xs text-gray-500 line-through">
+                                    {formatBDT(originalUnit)}
+                                  </span>
+                                  <span className="text-[11px] font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                                    Save {formatBDT(originalUnit - finalUnit)}
+                                  </span>
+                                </>
+                              )} */}
+                            </div>
                           </div>
-                          <div className="text-sm font-medium">{formatBDT(line)}</div>
+
+                          {/* ✅ Line total (final) + original beside it */}
+                          <div className="text-right">
+                            <div className="text-sm font-semibold text-gray-900">{formatBDT(lineFinal)}</div>
+                            {hasDiscount && (
+                              <>
+                                <div className="text-xs text-gray-500 line-through">{formatBDT(lineOriginal)}</div>
+                                <span className="text-[11px] font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                                  Save {formatBDT(save)}
+                                </span>
+                              </>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
@@ -1080,29 +1151,67 @@ export default function CheckoutPage() {
                   <CardContent className="space-y-4">
                     <div className="space-y-3">
                       {itemsToDisplay.map((product: any, idx: number) => {
-                        const [sizeValue, sizeUnit] = String(product?.selectedSize || "").split(" ");
-                        const matchedVariant = product?.product?.variants?.find(
-                          (v: any) =>
-                            Number(v.size) === Number(sizeValue) &&
-                            String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
-                        );
-
-                        const selectedPrice = Number(product?.selectedPrice ?? matchedVariant?.price ?? 0);
-                        const line = selectedPrice * Number(product?.quantity || 1);
+                        const {
+                          productDoc,
+                          qty,
+                          originalUnit,
+                          finalUnit,
+                          lineOriginal,
+                          lineFinal,
+                          save,
+                          hasDiscount,
+                        } = normalizeLines(product);
 
                         return (
-                          <div key={`${product.product?.id}-${product.selectedSize}-${idx}`} className="flex items-start gap-3">
+                          <div key={`${productDoc?.id}-${product.selectedSize}-${idx}`} className="flex items-start gap-3">
                             <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100 shrink-0">
-                              <Image src={product.product?.primaryImage} alt={product.product?.name} fill className="object-cover" />
+                              <Image
+                                src={productDoc?.primaryImage}
+                                alt={productDoc?.name}
+                                fill
+                                className="object-cover"
+                              />
                               <div className="absolute -top-2 -right-2 text-xs bg-gray-200 text-black rounded-full px-2 py-0.5">
-                                {product.quantity}
+                                {qty}
                               </div>
                             </div>
+
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">{product.product?.name}</p>
+                              <p className="text-sm font-medium truncate">{productDoc?.name}</p>
                               <p className="text-xs text-gray-500">Size: {product.selectedSize}</p>
+
+                              {/* ✅ Unit price row */}
+                              <div className="mt-1 flex items-center gap-2">
+                                <span className="text-sm font-semibold text-gray-900">
+                                  {formatBDT(finalUnit)}{" "}
+                                  <span className="text-xs font-medium text-gray-500">× {qty}</span>
+                                </span>
+
+                                {/* {hasDiscount && (
+                                  <>
+                                    <span className="text-xs text-gray-500 line-through">
+                                      {formatBDT(originalUnit)}
+                                    </span>
+                                    <span className="text-[11px] font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                                      Save {formatBDT(originalUnit - finalUnit)}
+                                    </span>
+                                  </>
+                                )} */}
+                              </div>
                             </div>
-                            <div className="text-sm font-medium">{formatBDT(line)}</div>
+
+                            {/* ✅ Final line total + original line total */}
+                            <div className="text-right">
+                              <div className="text-sm font-semibold text-gray-900">{formatBDT(lineFinal)}</div>
+                              {hasDiscount && (
+                                <>
+                                  <div className="text-xs text-gray-500 line-through">{formatBDT(lineOriginal)}</div>
+                                  <span className="text-[11px] font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                                    Save {formatBDT(save)}
+                                  </span>
+                                </>
+                              )}
+                            </div>
                           </div>
                         );
                       })}
