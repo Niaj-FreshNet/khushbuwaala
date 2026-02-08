@@ -34,6 +34,7 @@ interface BannerProps {
     value: string
     label: string
   }>
+  priority?: boolean;
 }
 
 export function BannerSection({
@@ -47,6 +48,7 @@ export function BannerSection({
   showVideoButton = false,
   videoUrl,
   stats,
+  priority = false
 }: BannerProps) {
   const sectionRef = useRef<HTMLElement | null>(null)
 
@@ -161,7 +163,7 @@ export function BannerSection({
       onMouseMove={enableMouse ? handleMouseMove : undefined}
       className={cn(
         "relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden mt-12 mb-4 group",
-        hasLoaded ? "opacity-100" : "opacity-0"
+        // hasLoaded ? "opacity-100" : "opacity-0"
       )}
       aria-labelledby="banner-heading"
       initial="hidden"
@@ -181,9 +183,9 @@ export function BannerSection({
             src={images.mobile || "/placeholder.svg"}
             alt={heading}
             fill
-            sizes="100vw"
+            sizes="(max-width: 768px) 100vw, 1200px"
             className="object-cover"
-            priority
+            priority={priority}
             quality={85}
             onLoadingComplete={() => setHasLoaded(true)}
           />
@@ -194,9 +196,9 @@ export function BannerSection({
             src={images.tablet || images.desktop}
             alt={heading}
             fill
-            sizes="100vw"
+            sizes="(max-width: 768px) 100vw, 1200px"
             className="object-cover"
-            priority
+            priority={priority}
             quality={90}
             onLoadingComplete={() => setHasLoaded(true)}
           />
@@ -207,9 +209,9 @@ export function BannerSection({
             src={images.desktop}
             alt={heading}
             fill
-            sizes="100vw"
+            sizes="(max-width: 768px) 100vw, 1200px"
             className="object-cover"
-            priority
+            priority={priority}
             quality={95}
             onLoadingComplete={() => setHasLoaded(true)}
           />

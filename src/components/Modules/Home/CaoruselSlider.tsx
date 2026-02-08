@@ -116,9 +116,10 @@ export function CarouselSlider() {
                   src={slide.mobileSrc || slide.src}
                   alt={slide.alt}
                   fill
-                  sizes="100vw"
+                  sizes="(max-width: 768px) 100vw, 1200px"
                   className="object-cover md:hidden"
                   priority={index === 0}
+                  loading={index === 0 ? "eager" : "lazy"}
                 />
 
                 {/* Desktop image */}
@@ -126,9 +127,10 @@ export function CarouselSlider() {
                   src={slide.src}
                   alt={slide.alt}
                   fill
-                  sizes="100vw"
+                  sizes="(max-width: 768px) 100vw, 1200px"
                   className="object-cover hidden md:block"
                   priority={index === 0}
+                  loading={index === 0 ? "eager" : "lazy"}
                 />
                 {/* Minimal vignette ONLY for CTA readability (doesn't fight your image text) */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-transparent" />
@@ -224,35 +226,35 @@ hover:bg-white/10
         {/* Dots (mobile-optimized + still tap-friendly) */}
         <div className="absolute -bottom-1 md:bottom-6 left-0 right-0 z-10 flex items-center justify-center">
           {/* <div className="pointer-events-auto flex items-center gap-1.5 md:gap-2 rounded-full bg-black/20 backdrop-blur-md border border-white/10 px-2.5 py-1.5 md:px-3 md:py-2"> */}
-            {Array.from({ length: snapCount }).map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                aria-label={`Go to slide ${i + 1}`}
-                onClick={() => goTo(i)}
-                className={[
-                  // ✅ tap target (mobile needs ~40px). We use padding wrapper via min size.
-                  "grid place-items-center rounded-full",
-                  "h-7 w-7 md:h-8 md:w-8",
+          {Array.from({ length: snapCount }).map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              aria-label={`Go to slide ${i + 1}`}
+              onClick={() => goTo(i)}
+              className={[
+                // ✅ tap target (mobile needs ~40px). We use padding wrapper via min size.
+                "grid place-items-center rounded-full",
+                "h-7 w-7 md:h-8 md:w-8",
 
-                  // inner dot
-                  "relative",
-                  "transition-transform duration-200",
-                  "active:scale-95",
-                  i === active ? "scale-100" : "scale-95",
+                // inner dot
+                "relative",
+                "transition-transform duration-200",
+                "active:scale-95",
+                i === active ? "scale-100" : "scale-95",
+              ].join(" ")}
+            >
+              <span
+                className={[
+                  "block rounded-full transition-all duration-300",
+                  // ✅ actual visible dot sizes
+                  i === active
+                    ? "w-4 h-1.5 md:w-8 md:h-2 bg-white"
+                    : "w-1.5 h-1.5 md:w-2.5 md:h-2.5 bg-white/45 hover:bg-white/70",
                 ].join(" ")}
-              >
-                <span
-                  className={[
-                    "block rounded-full transition-all duration-300",
-                    // ✅ actual visible dot sizes
-                    i === active
-                      ? "w-4 h-1.5 md:w-8 md:h-2 bg-white"
-                      : "w-1.5 h-1.5 md:w-2.5 md:h-2.5 bg-white/45 hover:bg-white/70",
-                  ].join(" ")}
-                />
-              </button>
-            ))}
+              />
+            </button>
+          ))}
           {/* </div> */}
         </div>
 

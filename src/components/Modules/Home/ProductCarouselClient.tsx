@@ -6,8 +6,15 @@ import type React from "react"
 import { SectionTitle } from "./SectionTitle"
 import { ProductCard } from "@/components/ReusableUI/ProductCard"
 import { IProductResponse } from "@/types/product.types"
-import { ProductQuickView } from "@/components/ReusableUI/ProductQuickView"
 import { motion, useInView, Variants, useReducedMotion } from "framer-motion"
+
+import dynamic from "next/dynamic";
+// REMOVE: import { ProductQuickView } from "@/components/ReusableUI/ProductQuickView"
+
+const ProductQuickView = dynamic(
+  () => import("@/components/ReusableUI/ProductQuickView").then(m => m.ProductQuickView),
+  { ssr: false }
+);
 
 export function ProductCarouselClient({
   products,
@@ -87,11 +94,11 @@ export function ProductCarouselClient({
         underlineVariant={titleUnderlineVariant}
       />
 
-      <div className="relative overflow-hidden">
+      <div className="relative">
         <Carousel opts={{ align: "center" }} className="w-full">
           <motion.div variants={listVariants} initial="hidden" animate={isInView ? "show" : "hidden"}>
             {/* ✅ GAP REDUCED HERE (product cards) */}
-            <CarouselContent className="w-full mx-auto gap-0">
+            <CarouselContent className="w-full mx-auto gap-0 md:gap-1 lg:gap-2">
               {products.map((product) => (
                 <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
                   <motion.div
@@ -100,7 +107,7 @@ export function ProductCarouselClient({
                     transition={reduce ? undefined : { type: "spring", stiffness: 260, damping: 22 }}
                     className="h-full"
                   >
-                    <ProductCard className="h-full" product={product} onQuickView={() => handleQuickView(product)} />
+                    <ProductCard className="h-auto" product={product} onQuickView={() => handleQuickView(product)} />
                   </motion.div>
                 </CarouselItem>
               ))}
