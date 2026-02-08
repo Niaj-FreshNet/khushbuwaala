@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 
 import { useGetOrderByIdQuery } from '@/redux/store/api/order/ordersApi';
 import OrderInvoice from './OrderInvoice';
+import { LargeNumberLike } from 'crypto';
 
 interface OrderDetailsModalProps {
   orderId: string;
@@ -29,6 +30,8 @@ type OrderApi = {
   amount: number;
   shippingCost?: number;
   additionalNotes?: string;
+  discountAmount?: number;
+  coupon?: string;
 
   isPaid: boolean;
   method: string;
@@ -157,6 +160,9 @@ const OrderDetailsModal = ({ orderId, visible, onClose }: OrderDetailsModalProps
   const shipping = order?.shipping || null;
   const billing = order?.billing || null;
 
+  const discountAmount = order?.discountAmount ?? 0;
+  const coupon = order?.coupon ?? null;
+
   return (
     <>
       <Dialog open={visible} onOpenChange={onClose}>
@@ -247,13 +253,18 @@ const OrderDetailsModal = ({ orderId, visible, onClose }: OrderDetailsModalProps
                     </div>
 
                     <div>
+                      <p className="text-sm font-medium text-gray-700">Discount</p>
+                      <p className="font-semibold">{discountAmount} BDT ({coupon})</p>
+                    </div>
+
+                    <div>
                       <p className="text-sm font-medium text-gray-700">Shipping Cost</p>
                       <p className="font-semibold">{shippingCost} BDT</p>
                     </div>
 
-                    <div className="md:col-span-2">
-                      <p className="text-sm font-medium text-gray-700">Total Amount</p>
-                      <p className="font-semibold">{total} BDT</p>
+                    <div className="">
+                      <p className="text-sm font-medium text-gray-700 underline">Total Amount</p>
+                      <p className="font-bold">{total} BDT</p>
                     </div>
                   </div>
                 </CardContent>

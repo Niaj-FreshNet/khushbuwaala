@@ -18,64 +18,56 @@ interface FormValues {
 
 export default function CategorySizesUpdater({ categories, setSelectedSizes }: Props) {
   const form = useFormContext<FormValues>();
-  // console.log(setSelectedSizes)
 
-  // Watch categoryId in form
   const selectedCategoryId = useWatch({
     control: form.control,
     name: 'categoryId',
   });
 
-  // Keep previous sizes to prevent unnecessary state updates
-  const prevSizesRef = useRef<string[]>([]);
+  const prevKeyRef = useRef<string>(''); // sizes+unit snapshot key
 
   useEffect(() => {
     if (!selectedCategoryId) {
-      if (prevSizesRef.current.length > 0) {
-        prevSizesRef.current = [];
+      if (prevKeyRef.current) {
+        prevKeyRef.current = '';
         setSelectedSizes([]);
+        form.setValue('variants', [], { shouldDirty: true });
       }
       return;
     }
 
-    const category = categories.find(cat => cat.id === selectedCategoryId);
-    const sizes = category?.sizes || [];
+    const category = categories.find((c) => c.id === selectedCategoryId);
 
-    const sizesChanged =
-      prevSizesRef.current.length !== sizes.length ||
-      !sizes.every(size => prevSizesRef.current.includes(size));
+    const sizes = (category?.sizes || []).map((s: any) => String(s).trim());
+    const unit = category?.unit ? String(category.unit).trim() : ''; // ✅ dynamic unit
 
-    if (!sizesChanged) return;
+    // create a key so we don't rerun unnecessarily
+    const key = `${sizes.join('|')}__${unit}`;
+    if (prevKeyRef.current === key) return;
+    prevKeyRef.current = key;
 
-    prevSizesRef.current = sizes;
     setSelectedSizes(sizes);
 
-    const variants = form.getValues('variants') || [];
+    const existingVariants = form.getValues('variants') || [];
 
-    const updatedVariantses = sizes.map(size => {
-      return (
-        variants.find(v => v.size === size) || {
-          id: uuidv4(),
-          size: size,
-          price: undefined,
-          stock: undefined,
-          sku: undefined,
-          unit: undefined,
-        }
-      );
+    // ✅ Build variants strictly from category sizes, preserve existing price/sku etc
+    const nextVariants: VariantForForm[] = sizes.map((size) => {
+      const found = existingVariants.find((v) => String(v.size) === size);
+      return {
+        id: found?.id || uuidv4(),
+        sku: found?.sku || '',
+        price: found?.price ?? 0,
+        stock: found?.stock ?? 0,
+        size,
+        unit: unit || found?.unit || '', // ✅ category unit wins
+      };
     });
 
-    const variantsChanged =
-      variants.length !== updatedVariantses.length ||
-      variants.some((v, i) => v?.size !== updatedVariantses[i]?.size);
-
-    if (variantsChanged) {
-      // 🧩 Delay state update until after render to prevent React warning
-      queueMicrotask(() => {
-        form.setValue('variants', updatedVariantses, { shouldDirty: true });
-      });
-    }
-  }, [selectedCategoryId, categories, setSelectedSizes]); // 🚫 removed `form`
+    // also remove variants that are not in the selected category sizes
+    queueMicrotask(() => {
+      form.setValue('variants', nextVariants, { shouldDirty: true });
+    });
+  }, [selectedCategoryId, categories, setSelectedSizes, form]);
 
   return null;
 }

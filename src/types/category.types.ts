@@ -4,6 +4,7 @@ export interface Category {
   categoryName: string;
   imageUrl?: string;
   sizes: string[];
+  unit: string;
   specification: 'male' | 'female' | 'unisex';
   published: boolean;
 }
@@ -11,6 +12,7 @@ export interface Category {
 export interface CategoryFormValues {
   categoryName: string;
   sizes: string[];
+  unit: string;
   specification: 'male' | 'female' | 'unisex';
   published: boolean;
   imageUrl?: string;

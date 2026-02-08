@@ -15,17 +15,12 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 
-// const home1 = "/hero1.png"
-// const home1 = "/hero4.png"
-const home1 = "/hero2.1.png"
-// const home1 = "/hero4.2.png"
-// const home1 = "/hero4.3.png"
-// const home2 = "/hero2.png"
-// const home2 = "/hero5.png"
-const home3 = "/hero5.3.png"
-const homeMobile3 = "/mobile5.3.png"
-const homeMobile1 = "/hero1.png"
-const home2 = "/desktop1.png"
+const home1 = "/hero1desktop.png"
+const home2 = "/hero2desktop.png"
+const home3 = "/hero3desktop.png"
+const homeMobile1 = "/hero1mobile.png"
+const homeMobile2 = "/hero2mobile.png"
+const homeMobile3 = "/hero3mobile.png"
 
 type Slide = {
   src: string              // desktop
@@ -56,12 +51,12 @@ export function CarouselSlider() {
     },
     {
       src: home2,
-      mobileSrc: homeMobile1,
+      mobileSrc: homeMobile2,
       alt: "KhushbuWaala Attars & Oud",
       primaryText: "Explore Collections",
       primaryLink: "/shop",
       secondaryText: "Best Sellers",
-      secondaryLink: "/shop?section=bestSeller",
+      secondaryLink: "/shop",
     },
     {
       src: home3,
@@ -70,7 +65,7 @@ export function CarouselSlider() {
       primaryText: "Explore Collections",
       primaryLink: "/shop",
       secondaryText: "Best Sellers",
-      secondaryLink: "/shop?section=bestSeller",
+      secondaryLink: "/shop",
     },
   ]
 
@@ -140,7 +135,7 @@ export function CarouselSlider() {
 
                 {/* CTA Dock: bottom-left on desktop, centered on mobile */}
                 <div className="absolute inset-0 flex items-end">
-                  <div className="container mx-auto px-4 pb-14 sm:pb-12 md:pb-10">
+                  <div className="container mx-auto sm:px-4 md:px-8 pb-8 sm:pb-10 md:pb-24">
                     <div className="flex justify-center md:justify-start">
                       <AnimatePresence mode="wait">
                         {active === index && (
@@ -159,7 +154,7 @@ export function CarouselSlider() {
                               "flex items-center gap-2 md:gap-3",
 
                               // padding (smaller on mobile, bigger on desktop)
-                              "px-3 py-2 md:px-5 md:py-4",
+                              "px-6 py-4 md:px-10 md:py-8",
 
                               // look
                               "rounded-xl md:rounded-2xl",
@@ -174,9 +169,9 @@ export function CarouselSlider() {
                             <Button
                               asChild
                               className="
-h-10 md:h-12
-px-5 md:px-7
-text-sm md:text-base
+h-12 md:h-14
+px-8 md:px-16
+text-sm md:text-xl
 rounded-full
 bg-gradient-to-r from-rose-600 to-pink-600
 text-white font-semibold
@@ -187,7 +182,7 @@ transition-transform
                             >
                               <Link href={slide.primaryLink} aria-label={slide.primaryText}>
                                 {slide.primaryText}
-                                <ArrowRight className="ml-2 h-4 w-4" />
+                                <ArrowRight className="ml-2 h-5 w-8" />
                               </Link>
                             </Button>
 
@@ -197,9 +192,9 @@ transition-transform
                                 asChild
                                 variant="ghost"
                                 className="
-h-10 md:h-12
-px-4 md:px-6
-text-sm md:text-base
+h-12 md:h-14
+px-6 md:px-12
+text-sm md:text-xl
 rounded-full
 text-white
 border border-white/20
@@ -227,8 +222,8 @@ hover:bg-white/10
         <CarouselNext className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-10 hidden md:flex bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/15 backdrop-blur-md transition-all" />
 
         {/* Dots (mobile-optimized + still tap-friendly) */}
-        <div className="absolute bottom-2 md:bottom-6 left-0 right-0 z-10 flex items-center justify-center">
-          <div className="pointer-events-auto flex items-center gap-1.5 md:gap-2 rounded-full bg-black/20 backdrop-blur-md border border-white/10 px-2.5 py-1.5 md:px-3 md:py-2">
+        <div className="absolute -bottom-1 md:bottom-6 left-0 right-0 z-10 flex items-center justify-center">
+          {/* <div className="pointer-events-auto flex items-center gap-1.5 md:gap-2 rounded-full bg-black/20 backdrop-blur-md border border-white/10 px-2.5 py-1.5 md:px-3 md:py-2"> */}
             {Array.from({ length: snapCount }).map((_, i) => (
               <button
                 key={i}
@@ -258,7 +253,7 @@ hover:bg-white/10
                 />
               </button>
             ))}
-          </div>
+          {/* </div> */}
         </div>
 
       </Carousel>

@@ -21,7 +21,6 @@ import {
   ShieldCheck,
   Truck,
   CreditCard,
-  Percent,
   Info,
   Phone,
   Loader2,
@@ -59,6 +58,43 @@ const districts = [
   "Sylhet", "Tangail", "Thakurgaon",
 ];
 
+// ✅ hoisted (prevents "Cannot access before initialization")
+function normalizeLines(p: any) {
+  const productDoc = p?.product || p;
+
+  const [sizeValue, sizeUnit] = String(p?.selectedSize || "").split(" ");
+
+  const matchedVariant = productDoc?.variants?.find(
+    (v: any) =>
+      Number(v.size) === Number(sizeValue) &&
+      String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
+  );
+
+  const originalUnit = Number(matchedVariant?.price ?? p?.price ?? 0);
+  // selectedPrice is your FINAL payable unit price (already includes AUTO discount)
+  const finalUnit = Number(p?.selectedPrice ?? originalUnit);
+
+  const qty = Math.max(1, Number(p?.quantity || 1));
+
+  const lineOriginal = Math.max(0, Math.round(originalUnit * qty));
+  const lineFinal = Math.max(0, Math.round(finalUnit * qty));
+
+  const save = Math.max(0, lineOriginal - lineFinal);
+  const hasDiscount = originalUnit > 0 && finalUnit > 0 && finalUnit < originalUnit;
+
+  return {
+    productDoc,
+    matchedVariant,
+    originalUnit,
+    finalUnit,
+    qty,
+    lineOriginal,
+    lineFinal,
+    save,
+    hasDiscount,
+  };
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
 
@@ -71,7 +107,7 @@ export default function CheckoutPage() {
     clearCart,
     appliedCouponCode,
     setAppliedCouponCode,
-    clearAppliedCouponCode
+    clearAppliedCouponCode,
   } = useCart();
 
   const { handleCreateOrder, loading: isPlacingOrder } = useOrder();
@@ -81,10 +117,15 @@ export default function CheckoutPage() {
 
   // --- UI state ---
   const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false);
-  const [shippingMethod, setShippingMethod] = useState<ShippingMethod>("insideDhaka");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cashOnDelivery");
-  const [billingType, setBillingType] = useState<BillingType>("sameAsShipping");
-  const [selectedDistrict, setSelectedDistrict] = useState<string | undefined>(undefined);
+  const [shippingMethod, setShippingMethod] =
+    useState<ShippingMethod>("insideDhaka");
+  const [paymentMethod, setPaymentMethod] =
+    useState<PaymentMethod>("cashOnDelivery");
+  const [billingType, setBillingType] =
+    useState<BillingType>("sameAsShipping");
+  const [selectedDistrict, setSelectedDistrict] = useState<string | undefined>(
+    undefined
+  );
   const [customThana, setCustomThana] = useState("");
 
   // --- Form state ---
@@ -99,8 +140,15 @@ export default function CheckoutPage() {
 
   // --- Promotions ---
   const [promoCode, setPromoCode] = useState("");
-  const [appliedPromoCode, setAppliedPromoCode] = useState<string | null>(null);
-  const [discount, setDiscount] = useState(0);
+  const [appliedPromoCode, setAppliedPromoCode] = useState<string | null>(
+    appliedCouponCode ?? null
+  );
+  // ✅ couponDiscount only (NOT auto)
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [discountInfo, setDiscountInfo] = useState<DiscountLabel>(null);
+
+  const [applyDiscount, { isLoading: isApplyingDiscount }] =
+    useApplyDiscountMutation();
 
   // --- Billing details ---
   const [billingName, setBillingName] = useState("");
@@ -108,10 +156,6 @@ export default function CheckoutPage() {
   const [billingDistrict, setBillingDistrict] = useState("");
   const [billingThana, setBillingThana] = useState("");
   const [billingContactNumber, setBillingContactNumber] = useState("");
-
-  const [discountInfo, setDiscountInfo] = useState<DiscountLabel>(null);
-
-  const [applyDiscount, { isLoading: isApplyingDiscount }] = useApplyDiscountMutation();
 
   const [districtSearch, setDistrictSearch] = useState("");
 
@@ -131,13 +175,10 @@ export default function CheckoutPage() {
       return [
         {
           ...checkoutItem,
-          // ✅ ensure cartItemId exists for order payload
           cartItemId: checkoutItem.cartItemId ?? checkoutItem.id,
         },
       ];
     }
-
-    // ✅ ensure cartItemId exists
     return (Array.isArray(cartItems) ? cartItems : []).map((it: any) => ({
       ...it,
       cartItemId: it.cartItemId ?? it.id,
@@ -161,7 +202,17 @@ export default function CheckoutPage() {
     }
   }, [selectedDistrict, shippingMethod]);
 
+  const formatBDT = (amount: number) =>
+    new Intl.NumberFormat("en-BD", {
+      style: "currency",
+      currency: "BDT",
+      maximumFractionDigits: 0,
+    })
+      .format(Math.max(0, Math.round(Number(amount || 0))))
+      .replace("BDT", "৳")
+      .trim();
 
+  // ✅ subtotal (already includes AUTO discount if you use selectedPrice)
   const subtotal = useMemo(() => {
     if (checkoutMode && checkoutItem) {
       return Number(checkoutItem.selectedPrice || 0) * Number(checkoutItem.quantity || 1);
@@ -169,12 +220,24 @@ export default function CheckoutPage() {
     return calculateSubtotal();
   }, [checkoutMode, checkoutItem, calculateSubtotal]);
 
+  // ✅ calculate AUTO discount amount only for DISPLAY + payload (not for totals subtraction)
+  const autoDiscount = useMemo(() => {
+    return itemsToDisplay.reduce((sum, p) => sum + (normalizeLines(p).save || 0), 0);
+  }, [itemsToDisplay]);
+
+  // ✅ couponDiscount affects totals
+  const safeCouponDiscount = Math.max(0, Math.round(Number(couponDiscount || 0)));
+
+  // ✅ total discount shown & saved in order
+  const displayedDiscount = Math.max(0, Math.round(autoDiscount + safeCouponDiscount));
+
   const estimatedTaxes = 0;
-  const discountedSubtotal = Math.max(0, subtotal - discount);
+
+  // ✅ IMPORTANT:
+  // subtotal already includes auto discount, so subtract ONLY coupon here
+  const discountedSubtotal = Math.max(0, Math.round(subtotal - safeCouponDiscount));
 
   const FREE_SHIPPING_MIN = 1000;
-
-  // ✅ qualify based on discounted subtotal (recommended)
   const isFreeShipping = useMemo(() => discountedSubtotal >= FREE_SHIPPING_MIN, [discountedSubtotal]);
 
   const baseShippingCost = useMemo(
@@ -182,61 +245,56 @@ export default function CheckoutPage() {
     [shippingMethod]
   );
 
-  // ✅ final shipping cost
   const shippingCost = useMemo(
     () => (isFreeShipping ? 0 : baseShippingCost),
     [isFreeShipping, baseShippingCost]
   );
 
-  const total = discountedSubtotal + estimatedTaxes + shippingCost;
+  const total = Math.max(0, Math.round(discountedSubtotal + estimatedTaxes + shippingCost));
 
   // ----------------------------
-  // Analytics: map cart -> GA4 items
+  // Analytics
   // ----------------------------
   const userData = useMemo(() => {
-    // only include what is available
     return {
       em: email || undefined,
       ph: contactNumber || undefined,
       fn: name || undefined,
       ct: selectedDistrict || undefined,
       country: "bd",
-    }
-  }, [email, contactNumber, name, selectedDistrict])
+    };
+  }, [email, contactNumber, name, selectedDistrict]);
 
   const analyticsItems = useMemo(() => {
     return itemsToDisplay
       .map((product: any) => {
-        const p = product?.product || product
+        const p = product?.product || product;
 
         const productId =
           product?.product?.id ||
           product?.product?._id ||
           product?.productId ||
-          product?.product?.productId
+          product?.product?.productId;
 
-        const productName = p?.name || product?.name || "Product"
+        const productName = p?.name || product?.name || "Product";
+        const brand = p?.brand || "KhushbuWaala";
+        const category = p?.categoryId || undefined;
 
-        const brand = p?.brand || "KhushbuWaala"
-        // const category = p?.category?.name || p?.categoryName || p?.category || undefined
-        const category = p?.categoryId || undefined
+        const variant = product?.selectedSize
+          ? String(product.selectedSize).trim().toUpperCase()
+          : undefined;
 
-        // Your variant is basically selectedSize (e.g. "6 ml")
-        const variant = product?.selectedSize ? String(product.selectedSize).trim().toUpperCase() : undefined
-
-        // Price
-        const [sizeValue, sizeUnit] = String(product?.selectedSize || "").split(" ")
+        const [sizeValue, sizeUnit] = String(product?.selectedSize || "").split(" ");
         const matchedVariant = product?.product?.variants?.find(
           (v: any) =>
             Number(v.size) === Number(sizeValue) &&
             String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
-        )
-        const price = Number(product?.selectedPrice ?? matchedVariant?.price ?? product?.price ?? 0)
+        );
 
-        // Quantity
-        const quantity = Math.max(1, Number(product?.quantity || 1))
+        const price = Number(product?.selectedPrice ?? matchedVariant?.price ?? product?.price ?? 0);
+        const quantity = Math.max(1, Number(product?.quantity || 1));
 
-        if (!productId) return null
+        if (!productId) return null;
 
         return {
           item_id: String(productId),
@@ -246,21 +304,18 @@ export default function CheckoutPage() {
           item_variant: variant ? String(variant) : undefined,
           price,
           quantity,
-        }
+        };
       })
-      .filter(Boolean) as any[]
-  }, [itemsToDisplay])
+      .filter(Boolean) as any[];
+  }, [itemsToDisplay]);
 
-  const shippingDedupeRef = useRef<string>("")
-  const paymentDedupeRef = useRef<string>("")
+  const shippingDedupeRef = useRef<string>("");
+  const paymentDedupeRef = useRef<string>("");
 
   useEffect(() => {
-    // We only track once shipping can be validly determined
-    if (!selectedDistrict) return
-    if (!analyticsItems.length) return
-
-    // ✅ guard: avoid firing if any item has invalid/zero price
-    if (analyticsItems.some(i => !i.price || i.price <= 0)) return
+    if (!selectedDistrict) return;
+    if (!analyticsItems.length) return;
+    if (analyticsItems.some((i) => !i.price || i.price <= 0)) return;
 
     const shippingTier =
       isFreeShipping
@@ -269,17 +324,19 @@ export default function CheckoutPage() {
           ? "Inside Dhaka"
           : "Outside Dhaka";
 
-    // fingerprint prevents duplicate firing on rerenders
     const fp = [
       "ship",
       selectedDistrict,
       shippingMethod,
       String(Math.round(total)),
-      analyticsItems.map(i => `${i.item_id}:${i.item_variant || ""}:${i.price}:${i.quantity}`).sort().join("|"),
-    ].join("~")
+      analyticsItems
+        .map((i) => `${i.item_id}:${i.item_variant || ""}:${i.price}:${i.quantity}`)
+        .sort()
+        .join("|"),
+    ].join("~");
 
-    if (shippingDedupeRef.current === fp) return
-    shippingDedupeRef.current = fp
+    if (shippingDedupeRef.current === fp) return;
+    shippingDedupeRef.current = fp;
 
     kwPushAddShippingInfo({
       currency: "BDT",
@@ -288,26 +345,27 @@ export default function CheckoutPage() {
       shipping_tier: shippingTier,
       coupon: appliedPromoCode ?? undefined,
       user_data: userData,
-    })
-  }, [selectedDistrict, shippingMethod, total, analyticsItems])
+    });
+  }, [selectedDistrict, shippingMethod, total, analyticsItems, isFreeShipping, appliedPromoCode, userData]);
 
   useEffect(() => {
-    if (!analyticsItems.length) return
+    if (!analyticsItems.length) return;
+    if (analyticsItems.some((i) => !i.price || i.price <= 0)) return;
 
-    // ✅ guard: avoid firing if any item has invalid/zero price
-    if (analyticsItems.some(i => !i.price || i.price <= 0)) return
-
-    const paymentType = paymentMethod === "bkash" ? "bkash" : "cod"
+    const paymentType = paymentMethod === "bkash" ? "bkash" : "cod";
 
     const fp = [
       "pay",
       paymentType,
       String(Math.round(total)),
-      analyticsItems.map(i => `${i.item_id}:${i.item_variant || ""}:${i.price}:${i.quantity}`).sort().join("|"),
-    ].join("~")
+      analyticsItems
+        .map((i) => `${i.item_id}:${i.item_variant || ""}:${i.price}:${i.quantity}`)
+        .sort()
+        .join("|"),
+    ].join("~");
 
-    if (paymentDedupeRef.current === fp) return
-    paymentDedupeRef.current = fp
+    if (paymentDedupeRef.current === fp) return;
+    paymentDedupeRef.current = fp;
 
     kwPushAddPaymentInfo({
       currency: "BDT",
@@ -316,57 +374,8 @@ export default function CheckoutPage() {
       payment_type: paymentType,
       coupon: appliedPromoCode ?? undefined,
       user_data: userData,
-    })
-  }, [paymentMethod, total, analyticsItems])
-
-
-  const formatBDT = (amount: number) =>
-    new Intl.NumberFormat("en-BD", {
-      style: "currency",
-      currency: "BDT",
-      maximumFractionDigits: 0,
-    })
-      .format(Math.max(0, Math.round(amount)))
-      .replace("BDT", "৳")
-      .trim();
-
-  const normalizeLines = (p: any) => {
-    const productDoc = p?.product || p;
-
-    const [sizeValue, sizeUnit] = String(p?.selectedSize || "").split(" ");
-
-    const matchedVariant = productDoc?.variants?.find(
-      (v: any) =>
-        Number(v.size) === Number(sizeValue) &&
-        String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
-    );
-
-    const originalUnit = Number(matchedVariant?.price ?? p?.price ?? 0);
-
-    // selectedPrice should already be the final payable price (after auto discount, etc.)
-    const finalUnit = Number(p?.selectedPrice ?? originalUnit);
-
-    const qty = Math.max(1, Number(p?.quantity || 1));
-
-    const lineOriginal = Math.max(0, Math.round(originalUnit * qty));
-    const lineFinal = Math.max(0, Math.round(finalUnit * qty));
-
-    const save = Math.max(0, lineOriginal - lineFinal);
-
-    const hasDiscount = originalUnit > 0 && finalUnit > 0 && finalUnit < originalUnit;
-
-    return {
-      productDoc,
-      matchedVariant,
-      originalUnit,
-      finalUnit,
-      qty,
-      lineOriginal,
-      lineFinal,
-      save,
-      hasDiscount,
-    };
-  };
+    });
+  }, [paymentMethod, total, analyticsItems, appliedPromoCode, userData]);
 
   // --- Validation ---
   const validateForm = () => {
@@ -382,7 +391,6 @@ export default function CheckoutPage() {
 
   const buildDiscountItems = () => {
     return itemsToDisplay.map((product: any) => {
-      // Try to determine selected variant from selectedSize like you already do
       const [sizeValue, sizeUnit] = String(product?.selectedSize || "").split(" ");
 
       const matchedVariant = product?.product?.variants?.find(
@@ -399,33 +407,21 @@ export default function CheckoutPage() {
         product?.product?._id ||
         product?.productId;
 
-      // Try multiple fallbacks for variantId depending on your cart structure
       const variantId =
         product?.variantId ||
         product?.selectedVariantId ||
         matchedVariant?.id ||
         matchedVariant?._id;
 
-      // console.log(product, productId, variantId, price, qty)
-
-      return {
-        productId,
-        variantId,
-        price,
-        qty,
-      };
+      return { productId, variantId, price, qty };
     });
   };
 
   const pickDiscountAmount = (res: any) => {
     const root = res?.data ?? res;
-
     const total = Number(root?.discountAmount ?? 0);
     const orderPart = Number(root?.orderDiscountAmount ?? 0);
-
-    // If backend already returns total, use it.
-    // Otherwise, add order part to item part.
-    if (total > 0 && orderPart > 0) return total; // assumes total already includes it
+    if (total > 0 && orderPart > 0) return total;
     if (total > 0) return total;
     return orderPart;
   };
@@ -433,7 +429,6 @@ export default function CheckoutPage() {
   const pickDiscountInfo = (res: any): DiscountLabel => {
     const root = res?.data ?? res;
 
-    // ✅ Prefer ORDER coupon info if present
     const od = root?.orderDiscount;
     if (od?.type && typeof od?.value === "number") {
       return { type: od.type, value: Number(od.value) };
@@ -441,7 +436,6 @@ export default function CheckoutPage() {
 
     const items = root?.items ?? [];
 
-    // Prefer PROMO item discount
     for (const it of items) {
       const promo = (it?.appliedDiscounts ?? []).find((d: any) => d?.code);
       if (promo?.type && typeof promo?.value === "number") {
@@ -449,7 +443,6 @@ export default function CheckoutPage() {
       }
     }
 
-    // Else AUTO item discount
     for (const it of items) {
       const auto = (it?.appliedDiscounts ?? []).find((d: any) => !d?.code);
       if (auto?.type && typeof auto?.value === "number") {
@@ -460,15 +453,21 @@ export default function CheckoutPage() {
     return null;
   };
 
-  // --- Promo code ---
+  const discountLabel = useMemo(() => {
+    if (!discountInfo) return null;
+    if (discountInfo.type === "percentage") return `${Math.round(discountInfo.value)}%`;
+    return formatBDT(discountInfo.value);
+  }, [discountInfo]);
+
+  // ✅ Promo apply/remove
   const applyPromo = async () => {
-    // Remove flow
     if (appliedPromoCode) {
       setAppliedPromoCode(null);
-      setDiscount(0);
+      setAppliedCouponCode?.(""); // safe
+      clearAppliedCouponCode?.();
+      setCouponDiscount(0);
       setDiscountInfo(null);
       setPromoCode("");
-      clearAppliedCouponCode()
       toast.success("Promo removed");
       return;
     }
@@ -478,16 +477,12 @@ export default function CheckoutPage() {
 
     try {
       const items = buildDiscountItems();
-      console.log("items", items)
-
-      // Optional guard (helps avoid weird payloads)
       if (!items.length) return toast.error("Your cart is empty.");
       if (items.some((it) => !it.price || it.price <= 0)) {
         return toast.error("Some items have invalid price.");
       }
 
       const res = await applyDiscount({ code, items }).unwrap();
-
       const discountAmount = pickDiscountAmount(res);
       const info = pickDiscountInfo(res);
 
@@ -497,45 +492,34 @@ export default function CheckoutPage() {
       }
 
       setAppliedPromoCode(code);
-      setAppliedCouponCode(code)
-      setDiscount(discountAmount);
+      setAppliedCouponCode?.(code);
+      setCouponDiscount(discountAmount);
       setDiscountInfo(info);
       toast.success(`Promo applied: -${formatBDT(discountAmount)}`);
     } catch (e: any) {
-      const msg =
-        e?.data?.message ||
-        e?.error ||
-        "Failed to apply coupon. Please try again.";
+      const msg = e?.data?.message || e?.error || "Failed to apply coupon. Please try again.";
       toast.error(msg);
     }
   };
 
+  // ✅ revalidate coupon when cart changes
   useEffect(() => {
     const revalidate = async () => {
       if (!appliedPromoCode) return;
-
       try {
         const items = buildDiscountItems();
         const res = await applyDiscount({ code: appliedPromoCode, items }).unwrap();
-        setDiscount(pickDiscountAmount(res));
+        setCouponDiscount(pickDiscountAmount(res));
         setDiscountInfo(pickDiscountInfo(res));
       } catch {
-        // If coupon becomes invalid due to cart changes, remove it cleanly
         setAppliedPromoCode(null);
-        setDiscount(0);
+        setCouponDiscount(0);
         setDiscountInfo(null);
       }
     };
-
     revalidate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemsToDisplay, appliedPromoCode]);
-
-  const discountLabel = useMemo(() => {
-    if (!discountInfo) return null;
-    if (discountInfo.type === "percentage") return `${Math.round(discountInfo.value)}%`;
-    return formatBDT(discountInfo.value); // shows ৳100 etc.
-  }, [discountInfo]);
 
   // --- Submit order ---
   const handleSubmit = async () => {
@@ -564,8 +548,9 @@ export default function CheckoutPage() {
       shippingCost: Number(shippingCost),
       additionalNotes,
 
-      coupon: appliedPromoCode ?? null,     // ✅ add
-      discountAmount: Number(discount || 0),// ✅ add
+      // ✅ what you want saved to order:
+      coupon: appliedPromoCode ?? null,
+      discountAmount: Number(displayedDiscount || 0), // auto + coupon
 
       customerInfo: {
         name,
@@ -604,8 +589,6 @@ export default function CheckoutPage() {
 
     try {
       const res: any = await handleCreateOrder(payload);
-
-      // ✅ Clear local checkout state after order created
       proceedToCartCheckout();
 
       const orderId = res?.data?.id || res?.id;
@@ -616,14 +599,12 @@ export default function CheckoutPage() {
         return;
       }
 
-      // ✅ COD flow
       if (paymentMethod === "cashOnDelivery") {
         clearCart();
         router.push(`/thank-you?order=${encodeURIComponent(orderId)}`);
         return;
       }
 
-      // ✅ bKash flow
       if (paymentMethod === "bkash") {
         if (!payToken) {
           toast.error("Order created but payToken missing.");
@@ -658,7 +639,6 @@ export default function CheckoutPage() {
 
   return (
     <StoreContainer>
-      {/* ✅ Keep shell consistent with loading.tsx */}
       <div className="min-h-screen bg-gray-50 pt-2 sm:pt-6 pb-6">
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           {/* Header */}
@@ -694,85 +674,44 @@ export default function CheckoutPage() {
               aria-controls="mobile-order-summary"
             >
               <div className="flex items-center gap-2 min-w-0">
-                <span className="text-sm font-medium text-gray-700">
-                  Order summary
-                </span>
-
-                {/* tiny helper badge text */}
-                <span className="text-xs text-gray-500">
-                  {isMobileSummaryOpen ? "Tap to hide" : "Tap to view"}
-                </span>
+                <span className="text-sm font-medium text-gray-700">Order summary</span>
+                <span className="text-xs text-gray-500">{isMobileSummaryOpen ? "Tap to hide" : "Tap to view"}</span>
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-base font-semibold text-gray-900">
-                  {formatBDT(total)}
-                </span>
-
-                {/* toggle indicator */}
-                <ChevronDown
-                  className={`h-4 w-4 text-gray-600 transition-transform duration-200 ${isMobileSummaryOpen ? "rotate-180" : ""
-                    }`}
-                />
+                <span className="text-base font-semibold text-gray-900">{formatBDT(total)}</span>
+                <ChevronDown className={`h-4 w-4 text-gray-600 transition-transform duration-200 ${isMobileSummaryOpen ? "rotate-180" : ""}`} />
               </div>
             </Button>
 
             {isMobileSummaryOpen && (
               <div id="mobile-order-summary" className="mt-4 space-y-4">
-                {/* your Card stays same */}
                 <Card>
                   <CardContent className="p-4 space-y-3">
                     {itemsToDisplay.map((product: any, idx: number) => {
-                      const {
-                        productDoc,
-                        qty,
-                        originalUnit,
-                        finalUnit,
-                        lineOriginal,
-                        lineFinal,
-                        save,
-                        hasDiscount,
-                      } = normalizeLines(product);
+                      const { productDoc, qty, finalUnit, lineOriginal, lineFinal, save, hasDiscount } =
+                        normalizeLines(product);
 
                       return (
                         <div key={`${productDoc?.id}-${product.selectedSize}-${idx}`} className="flex items-start gap-3">
-                          <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100 shrink-0">
-                            <Image
-                              src={productDoc?.primaryImage}
-                              alt={productDoc?.name}
-                              fill
-                              className="object-cover"
-                            />
-                            <div className="absolute -top-2 -right-2 text-xs bg-gray-200 text-black rounded-full px-2 py-0.5">
-                              {qty}
-                            </div>
+                          <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100">
+                            <Image src={productDoc?.primaryImage} alt={productDoc?.name} fill className="object-cover" />
+                            {/* <div className="absolute top-1 right-1 text-xs bg-black text-white rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                              {product.quantity}
+                            </div> */}
                           </div>
 
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{productDoc?.name}</p>
                             <p className="text-xs text-gray-500">Size: {product.selectedSize}</p>
 
-                            {/* ✅ Unit price row */}
                             <div className="mt-1 flex items-center gap-2">
                               <span className="text-sm font-semibold text-gray-900">
-                                {formatBDT(finalUnit)}{" "}
-                                <span className="text-xs font-medium text-gray-500">× {qty}</span>
+                                {formatBDT(finalUnit)} <span className="text-xs font-medium text-gray-500">× {qty}</span>
                               </span>
-
-                              {/* {hasDiscount && (
-                                <>
-                                  <span className="text-xs text-gray-500 line-through">
-                                    {formatBDT(originalUnit)}
-                                  </span>
-                                  <span className="text-[11px] font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-                                    Save {formatBDT(originalUnit - finalUnit)}
-                                  </span>
-                                </>
-                              )} */}
                             </div>
                           </div>
 
-                          {/* ✅ Line total (final) + original beside it */}
                           <div className="text-right">
                             <div className="text-sm font-semibold text-gray-900">{formatBDT(lineFinal)}</div>
                             {hasDiscount && (
@@ -794,20 +733,24 @@ export default function CheckoutPage() {
                       <span>{formatBDT(subtotal)}</span>
                     </div>
 
-                    {discount > 0 && (
+                    {/* ✅ show auto + coupon cleanly */}
+                    {autoDiscount > 0 && (
                       <div className="flex justify-between text-sm text-green-700">
-                        <span className="flex items-center gap-1">
-                          {/* <Percent className="h-3 w-3" /> */}
-                          {discountLabel ? ` ${discountLabel} ` : ""}
-                          Discount{appliedPromoCode ? ` (${appliedPromoCode})` : ""}
-                        </span>
-                        <span>-{formatBDT(discount)}</span>
+                        <span>Auto discount</span>
+                        <span>-{formatBDT(autoDiscount)}</span>
                       </div>
                     )}
 
-                    {discount > 0 && (
+                    {safeCouponDiscount > 0 && (
+                      <div className="flex justify-between text-sm text-green-700">
+                        <span>Coupon discount{appliedPromoCode ? ` (${appliedPromoCode})` : ""}</span>
+                        <span>-{formatBDT(safeCouponDiscount)}</span>
+                      </div>
+                    )}
+
+                    {safeCouponDiscount > 0 && (
                       <div className="flex justify-between text-sm">
-                        <span>Subtotal after discount</span>
+                        <span>Subtotal after coupon</span>
                         <span>{formatBDT(discountedSubtotal)}</span>
                       </div>
                     )}
@@ -821,7 +764,6 @@ export default function CheckoutPage() {
                           </span>
                         )}
                       </span>
-
                       <span>
                         {isFreeShipping ? (
                           <>
@@ -845,6 +787,7 @@ export default function CheckoutPage() {
                       <span>{formatBDT(total)}</span>
                     </div>
 
+                    {/* Coupon input */}
                     <div className="pt-0">
                       <label className="text-xs font-medium text-gray-600">Have a coupon code?</label>
                       <div className="flex gap-2">
@@ -857,7 +800,9 @@ export default function CheckoutPage() {
                           {isApplyingDiscount ? "Applying..." : appliedPromoCode ? "Remove" : "Apply"}
                         </Button>
                       </div>
-                      {/* <p className="text-xs text-gray-500 mt-1">Use WELCOME10 or SAVE100</p> */}
+                      {discountLabel && appliedPromoCode && (
+                        <p className="text-xs text-gray-500 mt-1">Applied: {discountLabel}</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -865,9 +810,8 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          {/* ✅ MAIN LAYOUT: lg grid 3 columns like Cart */}
+          {/* MAIN LAYOUT */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-            {/* Left: Form (span 2) */}
             <div className="space-y-4 lg:col-span-2">
               {/* Delivery Address */}
               <Card className="shadow-sm">
@@ -920,7 +864,7 @@ export default function CheckoutPage() {
                         value={selectedDistrict}
                         onValueChange={(v) => {
                           setSelectedDistrict(v);
-                          setDistrictSearch(""); // reset after picking
+                          setDistrictSearch("");
                         }}
                       >
                         <SelectTrigger className={cn("w-full", errors.district && "border-red-500 focus-visible:ring-red-500")}>
@@ -928,7 +872,6 @@ export default function CheckoutPage() {
                         </SelectTrigger>
 
                         <SelectContent className="p-0">
-                          {/* Search box */}
                           <div className="p-2 border-b bg-white sticky top-0 z-10">
                             <Input
                               value={districtSearch}
@@ -939,7 +882,6 @@ export default function CheckoutPage() {
                             />
                           </div>
 
-                          {/* List */}
                           <div className="max-h-64 overflow-auto p-1">
                             {filteredDistricts.length ? (
                               filteredDistricts.map((d) => (
@@ -1151,56 +1093,29 @@ export default function CheckoutPage() {
                   <CardContent className="space-y-4">
                     <div className="space-y-3">
                       {itemsToDisplay.map((product: any, idx: number) => {
-                        const {
-                          productDoc,
-                          qty,
-                          originalUnit,
-                          finalUnit,
-                          lineOriginal,
-                          lineFinal,
-                          save,
-                          hasDiscount,
-                        } = normalizeLines(product);
+                        const { productDoc, qty, finalUnit, lineOriginal, lineFinal, save, hasDiscount } =
+                          normalizeLines(product);
 
                         return (
                           <div key={`${productDoc?.id}-${product.selectedSize}-${idx}`} className="flex items-start gap-3">
-                            <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100 shrink-0">
-                              <Image
-                                src={productDoc?.primaryImage}
-                                alt={productDoc?.name}
-                                fill
-                                className="object-cover"
-                              />
-                              <div className="absolute -top-2 -right-2 text-xs bg-gray-200 text-black rounded-full px-2 py-0.5">
-                                {qty}
-                              </div>
+                            <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100">
+                              <Image src={productDoc?.primaryImage} alt={productDoc?.name} fill className="object-cover" />
+                              {/* <div className="absolute top-1 right-1 text-xs bg-black text-white rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                                {product.quantity}
+                              </div> */}
                             </div>
 
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium truncate">{productDoc?.name}</p>
                               <p className="text-xs text-gray-500">Size: {product.selectedSize}</p>
 
-                              {/* ✅ Unit price row */}
                               <div className="mt-1 flex items-center gap-2">
                                 <span className="text-sm font-semibold text-gray-900">
-                                  {formatBDT(finalUnit)}{" "}
-                                  <span className="text-xs font-medium text-gray-500">× {qty}</span>
+                                  {formatBDT(finalUnit)} <span className="text-xs font-medium text-gray-500">× {qty}</span>
                                 </span>
-
-                                {/* {hasDiscount && (
-                                  <>
-                                    <span className="text-xs text-gray-500 line-through">
-                                      {formatBDT(originalUnit)}
-                                    </span>
-                                    <span className="text-[11px] font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-                                      Save {formatBDT(originalUnit - finalUnit)}
-                                    </span>
-                                  </>
-                                )} */}
                               </div>
                             </div>
 
-                            {/* ✅ Final line total + original line total */}
                             <div className="text-right">
                               <div className="text-sm font-semibold text-gray-900">{formatBDT(lineFinal)}</div>
                               {hasDiscount && (
@@ -1223,20 +1138,23 @@ export default function CheckoutPage() {
                       <span>{formatBDT(subtotal)}</span>
                     </div>
 
-                    {discount > 0 && (
+                    {autoDiscount > 0 && (
                       <div className="flex justify-between text-sm text-green-700">
-                        <span className="flex items-center gap-1">
-                          {/* <Percent className="h-3 w-3" /> */}
-                          {discountLabel ? ` ${discountLabel} ` : ""}
-                          Discount{appliedPromoCode ? ` (${appliedPromoCode})` : ""}
-                        </span>
-                        <span>-{formatBDT(discount)}</span>
+                        <span>Discount</span>
+                        <span>-{formatBDT(autoDiscount)}</span>
                       </div>
                     )}
 
-                    {discount > 0 && (
+                    {safeCouponDiscount > 0 && (
+                      <div className="flex justify-between text-sm text-green-700">
+                        <span>Coupon discount{appliedPromoCode ? ` (${appliedPromoCode})` : ""}</span>
+                        <span>-{formatBDT(safeCouponDiscount)}</span>
+                      </div>
+                    )}
+
+                    {safeCouponDiscount > 0 && (
                       <div className="flex justify-between text-sm">
-                        <span>Subtotal after discount</span>
+                        <span>Subtotal after coupon</span>
                         <span>{formatBDT(discountedSubtotal)}</span>
                       </div>
                     )}
@@ -1250,7 +1168,6 @@ export default function CheckoutPage() {
                           </span>
                         )}
                       </span>
-
                       <span>
                         {isFreeShipping ? (
                           <>
@@ -1286,11 +1203,21 @@ export default function CheckoutPage() {
                           {isApplyingDiscount ? "Applying..." : appliedPromoCode ? "Remove" : "Apply"}
                         </Button>
                       </div>
+                      {discountLabel && appliedPromoCode && (
+                        <p className="text-xs text-gray-500 mt-1">Applied: {discountLabel}</p>
+                      )}
+                      {/* Optional: show total discount */}
+                      {displayedDiscount > 0 && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Total discount saved in order: {formatBDT(displayedDiscount)}
+                        </p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               </div>
             </div>
+
           </div>
         </div>
       </div>

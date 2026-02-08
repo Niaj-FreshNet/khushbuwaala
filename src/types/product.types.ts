@@ -11,6 +11,8 @@ export interface IDiscount {
   startDate?: string;
   endDate?: string;
   variantId?: string; // null means product-level discount
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface StockLog {
@@ -72,6 +74,17 @@ export interface IProduct {
 
   categoryId: string;
   published: boolean;
+
+  materialIds: string[];
+  fragranceIds: string[];
+  materials?: {
+    id: string;
+    name: string;
+  }[];
+  fragrances?: {
+    id: string;
+    name: string;
+  }[];
   
   reviews: IReview[];
   averageRating: number;
@@ -201,6 +214,14 @@ export interface IProductResponse {
 
   materialIds: string[];
   fragranceIds: string[];
+  materials?: {
+    id: string;
+    name: string;
+  }[];
+  fragrances?: {
+    id: string;
+    name: string;
+  }[];
 
   reviews: IReview[];
   averageRating: number;
@@ -229,6 +250,7 @@ export interface IProductVariantResponse {
   size: number;
   price: number;
   stock?: number;
+  discounts?: IDiscount[];
   productId?: string;
   createdAt: Date;
   updatedAt: Date;

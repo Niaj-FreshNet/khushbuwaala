@@ -215,7 +215,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
 
         {/* Premium Badge */}
         <div className="absolute uppercase -bottom-5 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-500 text-gray-900 px-6 py-2 rounded-full text-sm font-bold shadow-xl flex items-center gap-2 border-2 border-white">
-          Order Now
+          Authentic
         </div>
       </div>
 

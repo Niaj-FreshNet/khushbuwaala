@@ -76,7 +76,7 @@ const AddProductPage = () => {
     materialIds: [],
     fragranceIds: [],
     published: true,
-    variants: [{ size: '', price: 0, stock: 0, sku: '', unit: 'ML' }],
+    variants: [{ size: '', price: 0, stock: 0, sku: '', unit: '' }],
     primaryImage: [],
     otherImages: [],
     origin: '',

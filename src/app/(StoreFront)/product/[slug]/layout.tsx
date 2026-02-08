@@ -13,7 +13,7 @@ export default function ProductLayout({
   children: ReactNode;
 }) {
   return (
-    <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+    <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 lg:pt-12">
       {children}
     </section>
   );

@@ -19,6 +19,8 @@ export default function mapProductResponseToProduct(
     tags: product.tags || [],
     
     origin: product.origin,
+    fragrances: product.fragrances?.map((f: any) => f?.name).filter(Boolean) || [],
+    materials: product.materials?.map((f: any) => f?.name).filter(Boolean) || [],
     brand: product.brand,
     gender: product.gender,
     perfumeNotes: product.perfumeNotes,

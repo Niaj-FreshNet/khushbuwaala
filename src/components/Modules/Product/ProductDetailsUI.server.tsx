@@ -60,6 +60,7 @@ export default function ProductDetailsUI({
   isBuyingNow,
   isPending,
 }: Props) {
+  const fragrances = product.fragrances ?? [];
   return (
     <div className="space-y-3 sm:space-y-4 lg:space-y-5">
       {/* Header Section */}
@@ -85,7 +86,7 @@ export default function ProductDetailsUI({
         </div>
 
         {/* Price Section */}
-        <div className="relative p-3.5 sm:p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl border border-blue-100 overflow-hidden">
+        <div className="relative p-2.5 sm:p-4 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl border border-blue-100 overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-200/20 to-transparent rounded-full blur-2xl"></div>
 
           <div className="relative space-y-2 sm:space-y-3">
@@ -125,9 +126,9 @@ export default function ProductDetailsUI({
       </div>
 
       {/* Description */}
-      <div className="p-3.5 sm:p-6 bg-white rounded-2xl border border-gray-200">
+      <div className="p-2.5 sm:p-4 bg-white rounded-2xl border border-gray-200">
         <div className="flex items-center justify-between gap-3 mb-2">
-          <h3 className="text-base sm:text-lg font-bold text-gray-900">Description</h3>
+          <h3 className="text-sm sm:text-base font-bold text-gray-900">Description</h3>
 
           {/* optional: show "Read more" button in header when long */}
           {/* (keeps UI clean) */}
@@ -141,7 +142,7 @@ export default function ProductDetailsUI({
           const normalized = description.replace(/\r\n/g, "\n").trim();
 
           // ✅ Compact preview rules
-          const PREVIEW_CHARS = 220;  // change 180/220/260 based on your UI
+          const PREVIEW_CHARS = 120;  // change 180/220/260 based on your UI
           const PREVIEW_LINES = 3;    // show max 3 lines (new-line based)
 
           const lines = normalized.split("\n");
@@ -161,7 +162,7 @@ export default function ProductDetailsUI({
 
           return (
             <div className="space-y-3">
-              <div className="text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+              <div className="text-gray-700 leading-relaxed whitespace-pre-wrap break-words text-sm sm:text-md">
                 {preview}
               </div>
 
@@ -169,7 +170,7 @@ export default function ProductDetailsUI({
                 <button
                   onClick={onReadMore}
                   type="button"
-                  className="inline-flex items-center rounded-md px-2.5 py-1.5 text-blue-700 hover:text-blue-900 font-semibold hover:underline active:scale-[0.98]"
+                  className="inline-flex items-center rounded-md px-0 py-1.5 text-sm sm:text-base text-blue-700 hover:text-blue-900 font-semibold hover:underline active:scale-[0.98]"
                 >
                   Read more
                 </button>
@@ -180,21 +181,27 @@ export default function ProductDetailsUI({
       </div>
 
       {/* Fragrance Notes */}
-      {product.accords && product.accords.length > 0 && (
-        <div className="p-3.5 sm:p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100">
-          <h3 className="font-semibold text-purple-800 mb-2 sm:mb-4 flex items-center justify-between gap-2 text-base sm:text-lg">
-            {/* <Sparkles className="w-5 h-5" /> */}
-            <span>Fragrance Accords</span>
+      {fragrances.length > 0 && (
+        <div className="p-2.5 sm:p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100">
+          <h3 className="font-semibold text-purple-800 mb-2 sm:mb-4 flex items-center justify-between gap-2 text-sm sm:text-base">
+            <span>Fragrance Family</span>
           </h3>
+
           <div className="flex flex-wrap gap-2 sm:gap-3">
-            {product.accords.map((note, index) => (
+            {fragrances.slice(0, 4).map((f, idx) => (
               <span
-                key={index}
+                key={(f as any).id ?? `${(f as any).name ?? "fr"}-${idx}`}
                 className="px-3 py-1.5 bg-white/70 text-purple-700 rounded-full text-xs sm:text-sm font-medium border border-purple-200"
               >
-                {note}
+                {(f as any).name ?? String(f)}
               </span>
             ))}
+
+            {fragrances.length > 4 && (
+              <span className="px-3 py-1.5 bg-white/70 text-purple-700 rounded-full text-xs sm:text-sm font-medium border border-purple-200">
+                +{fragrances.length - 4} more
+              </span>
+            )}
           </div>
         </div>
       )}
@@ -205,7 +212,7 @@ export default function ProductDetailsUI({
           <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
             <Gift className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
           </div>
-          <h3 className="text-base sm:text-lg font-bold text-gray-900">Choose Size</h3>
+          <h3 className="text-sm sm:text-base font-bold text-gray-900">Choose Size</h3>
         </div>
 
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-4">
@@ -237,14 +244,14 @@ export default function ProductDetailsUI({
                 )}
 
                 {isSelected && (
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                  <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                     <CheckCircle className="w-4 h-4 text-white" />
                   </div>
                 )}
 
                 <div className="text-center">
                   <div className="font-bold text-sm sm:text-base">{label}</div>
-                  <div className="text-xs sm:text-sm text-gray-500">৳{variant.price.toLocaleString()}</div>
+                  {/* <div className="text-xs sm:text-sm text-gray-500">৳{variant.price.toLocaleString()}</div> */}
                 </div>
               </button>
             );
@@ -260,7 +267,7 @@ export default function ProductDetailsUI({
               <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 leading-none">Quantity</h3>
+              <h3 className="text-sm sm:text-base font-bold text-gray-900 leading-none">Quantity</h3>
               <p className="text-[11px] sm:text-xs text-gray-500 mt-1">Max 100 per order</p>
             </div>
           </div>
@@ -278,21 +285,21 @@ export default function ProductDetailsUI({
             <button
               onClick={onQtyDec}
               disabled={quantity <= 1}
-              className="w-14 h-12 sm:w-16 sm:h-14 flex items-center justify-center text-gray-700 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+              className="w-12 h-10 sm:w-14 sm:h-12 flex items-center justify-center text-gray-700 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
               type="button"
               aria-label="Decrease quantity"
             >
               <Minus className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
 
-            <div className="flex-1 sm:flex-none min-w-[80px] sm:min-w-[110px] h-12 sm:h-14 bg-white border-x border-gray-200 flex items-center justify-center">
-              <span className="font-bold text-gray-900 text-xl sm:text-2xl">{quantity}</span>
+            <div className="flex-1 sm:flex-none min-w-[80px] sm:min-w-[110px] w-12 h-10 sm:w-14 sm:h-12 bg-white border-x border-gray-200 flex items-center justify-center">
+              <span className="font-bold text-gray-900 text-lg sm:text-xl">{quantity}</span>
             </div>
 
             <button
               onClick={onQtyInc}
               disabled={quantity >= 100}
-              className="w-14 h-12 sm:w-16 sm:h-14 flex items-center justify-center text-gray-700 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+              className="w-12 h-10 sm:w-14 sm:h-12 flex items-center justify-center text-gray-700 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
               type="button"
               aria-label="Increase quantity"
             >

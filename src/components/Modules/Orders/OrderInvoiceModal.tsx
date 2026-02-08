@@ -1,29 +1,24 @@
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { OrderInvoice } from "./OrderInvoice";
-import { Order } from "./OrderReceipt";
 
 interface OrderInvoiceModalProps {
-    order: Order;
-    isInvoiceOpen?: boolean | null;
-    setIsInvoiceOpen?: boolean | null;
+  order: any;
+  isInvoiceOpen?: boolean | null;
+  setIsInvoiceOpen?: any;
+  discountBreakdown?: any;
 }
 
-export default function OrderInvoiceModal({ order, isInvoiceOpen, setIsInvoiceOpen }: OrderInvoiceModalProps) {
-    return (
-        <Dialog open={isInvoiceOpen} onOpenChange={setIsInvoiceOpen}>
-            <DialogContent className="max-w-[90vh] max-h-[90vh] overflow-y-auto">
-                {/* <DialogHeader>
-                    <DialogTitle className="text-center text-xl font-semibold">
-                        Order Invoice
-                    </DialogTitle>
-                </DialogHeader> */}
-                <OrderInvoice order={order} />
-            </DialogContent>
-        </Dialog>
-    );
+export default function OrderInvoiceModal({
+  order,
+  isInvoiceOpen,
+  setIsInvoiceOpen,
+  discountBreakdown,
+}: OrderInvoiceModalProps) {
+  return (
+    <Dialog open={!!isInvoiceOpen} onOpenChange={setIsInvoiceOpen}>
+      <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+        <OrderInvoice order={order} discountBreakdown={discountBreakdown} />
+      </DialogContent>
+    </Dialog>
+  );
 }

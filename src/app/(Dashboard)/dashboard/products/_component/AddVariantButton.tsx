@@ -8,21 +8,21 @@ interface Props {
 }
 
 interface FormValues {
-    name: string;
-    description: string;
-    brand: string;
-    gender: string;
-    perfumeNotes: { top: string; middle: string; base: string };
-    accords: string;
-    tags: string;
-    categoryId: string;
-    materialId: string;
-    published: boolean;
-    variants: VariantForForm[];
-    images: File[];
+  name: string;
+  description: string;
+  brand: string;
+  gender: string;
+  perfumeNotes: { top: string; middle: string; base: string };
+  accords: string;
+  tags: string;
+  categoryId: string;
+  materialId: string;
+  published: boolean;
+  variants: VariantForForm[];
+  images: File[];
 }
 
-export default function AddVariantButton({selectedSizes}: Props) {
+export default function AddVariantButton({ selectedSizes }: Props) {
   const form = useFormContext<FormValues>(); // ✅ inside provider
   return (
     <Button
@@ -30,9 +30,12 @@ export default function AddVariantButton({selectedSizes}: Props) {
       variant="outline"
       className="w-full border-[#FB923C] text-[#FB923C] hover:bg-[#FFF7ED]"
       onClick={() => {
+        const variants = form.getValues('variants') || [];
+        const unitFromCategory = variants[0]?.unit || ''; // ✅ already synced by CategorySizesUpdater
+
         form.setValue('variants', [
-          ...form.getValues('variants'),
-          { id: crypto.randomUUID(), size: '', price: 0, stock: 0, sku: '', unit: 'ML' },
+          ...variants,
+          { id: crypto.randomUUID(), size: '', price: 0, stock: 0, sku: '', unit: unitFromCategory },
         ]);
       }}
     >

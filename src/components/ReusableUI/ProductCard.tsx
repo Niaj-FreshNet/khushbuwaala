@@ -64,6 +64,32 @@ import { kwPushAddToCart } from "@/lib/Analytics/kwEcom";
  * - useWishlist() -> addToWishlist(product), removeFromWishlist(productId), isInWishlist(productId)
  */
 
+function pickLowestPriceVariant(product: any) {
+  const variants = Array.isArray(product?.variants) ? product.variants : [];
+  if (!variants.length) return null;
+
+  // keep only valid priced variants
+  const priced = variants
+    .map((v: any) => ({ v, price: Number(v?.price ?? 0) }))
+    .filter((x: any) => x.price > 0);
+
+  if (!priced.length) return variants[0];
+
+  priced.sort((a: any, b: any) => a.price - b.price);
+  return priced[0].v;
+}
+
+function toUnitKey(unit: any) {
+  return String(unit || "").trim().toLowerCase().replace(/\./g, "");
+}
+
+function variantLabel(v: any) {
+  const size = Number(v?.size);
+  const unit = toUnitKey(v?.unit);
+  if (!size || !unit) return null;
+  return `${size} ${unit}`;
+}
+
 const priceFormatter = new Intl.NumberFormat("en-BD", {
   style: "currency",
   currency: "BDT",
@@ -144,12 +170,10 @@ export function ProductCard({
   const categoryLabel =
     (product as any).category?.categoryName ?? (product as any).category ?? (product as any).categoryName ?? "product";
 
-  // default variant fallback
+  // ✅ default variant = lowest price
   const defaultVariant = useMemo(() => {
-    if ((product as any).variants && (product as any).variants.length > 0) return (product as any).variants[0];
-    return null;
+    return pickLowestPriceVariant(product as any);
   }, [product]);
-
   // discount (variant-first)
   const activeDiscount = useMemo(() => getActiveDiscount(product as any, defaultVariant), [product, defaultVariant]);
 
@@ -173,17 +197,18 @@ export function ProductCard({
     return null; // fixed discount -> no percent badge
   }, [activeDiscount]);
 
-  // default size heuristics
+  // ✅ default size derived from chosen variant
   const defaultSize = useMemo(() => {
-    if (defaultVariant) {
-      if (defaultVariant.size && defaultVariant.unit.toLowerCase()) return `${defaultVariant.size} ${defaultVariant.unit.toLowerCase()}`;
-      if (defaultVariant.size) return `${defaultVariant.size}ml`;
-    }
+    const label = defaultVariant ? variantLabel(defaultVariant) : null;
+    if (label) return label;
+
+    // fallback: variantPrices object keys (if no variants)
     const vp = (product as any).variantPrices;
     if (vp && typeof vp === "object") {
       const keys = Object.keys(vp);
       if (keys.length) return keys[0];
     }
+
     return null;
   }, [defaultVariant, product]);
 
@@ -200,6 +225,14 @@ export function ProductCard({
     // from variantPrices object
     if ((product as any).variantPrices && typeof (product as any).variantPrices === "object") {
       return Object.keys((product as any).variantPrices);
+    }
+    return [];
+  }, [product]);
+
+  const fragranceFamilies = useMemo(() => {
+    const arr = (product as any)?.fragrances;
+    if (Array.isArray(arr) && arr.length) {
+      return arr.map((f: any) => f?.name).filter(Boolean);
     }
     return [];
   }, [product]);
@@ -236,7 +269,7 @@ export function ProductCard({
       const selectedPrice = discountedPrice ?? basePrice;
 
       // add to cart first (keeps behavior same)
-      cart?.addToCart?.((product as any) as any, 1, defaultSize, selectedPrice);
+      cart?.addToCart?.((product as any) as any, 1, (defaultSize as any), selectedPrice);
 
       kwPushAddToCart({
         currency: "BDT",
@@ -510,19 +543,20 @@ export function ProductCard({
               </div>
 
               {/* Enhanced Smell Tags */}
-              {product.accords && product.accords.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {product.accords.map((note, index) => (
+              {fragranceFamilies.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
+                  {fragranceFamilies.slice(0, 3).map((family: string, index: number) => (
                     <span
-                      key={index}
-                      className="px-3 py-1.5 bg-gradient-to-r from-red-50 to-pink-50 text-red-700 text-xs rounded-full border border-red-100 hover:shadow-md transition-shadow duration-200 cursor-default"
+                      key={`${family}-${index}`}
+                      className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-gradient-to-r from-red-50 to-pink-50 text-red-700 text-[10px] sm:text-xs rounded-full border border-red-100 hover:shadow-md transition-shadow duration-200 cursor-default"
                     >
-                      {note}
+                      {family}
                     </span>
                   ))}
-                  {product.accords.length > 6 && (
-                    <span className="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs rounded-full hover:bg-gray-200 transition-colors cursor-default">
-                      +{product.accords.length - 6} more
+
+                  {fragranceFamilies.length > 3 && (
+                    <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-gray-100 text-gray-600 text-[10px] sm:text-xs rounded-full hover:bg-gray-200 transition-colors cursor-default">
+                      +{fragranceFamilies.length - 3}
                     </span>
                   )}
                 </div>
@@ -734,19 +768,20 @@ export function ProductCard({
           </div>
 
           {/* Enhanced Smell Tags for Grid */}
-          {product.accords && product.accords.length > 0 && (
+          {fragranceFamilies.length > 0 && (
             <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
-              {product.accords.slice(0, 3).map((note, index) => (
+              {fragranceFamilies.slice(0, 3).map((family: string, index: number) => (
                 <span
-                  key={index}
+                  key={`${family}-${index}`}
                   className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-gradient-to-r from-red-50 to-pink-50 text-red-700 text-[10px] sm:text-xs rounded-full border border-red-100 hover:shadow-md transition-shadow duration-200 cursor-default"
                 >
-                  {note}
+                  {family}
                 </span>
               ))}
-              {product.accords.length > 3 && (
+
+              {fragranceFamilies.length > 3 && (
                 <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-gray-100 text-gray-600 text-[10px] sm:text-xs rounded-full hover:bg-gray-200 transition-colors cursor-default">
-                  +{product.accords.length - 3}
+                  +{fragranceFamilies.length - 3}
                 </span>
               )}
             </div>
