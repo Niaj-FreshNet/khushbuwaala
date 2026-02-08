@@ -163,7 +163,7 @@ export function BannerSection({
       onMouseMove={enableMouse ? handleMouseMove : undefined}
       className={cn(
         "relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden mt-12 mb-4 group",
-        // hasLoaded ? "opacity-100" : "opacity-0"
+        hasLoaded ? "opacity-100" : "opacity-0"
       )}
       aria-labelledby="banner-heading"
       initial="hidden"

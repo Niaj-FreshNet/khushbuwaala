@@ -5,6 +5,7 @@ import React, {
   useContext,
   useMemo,
   useState,
+  useEffect,
   type ReactNode,
 } from "react";
 import { IProduct, IProductVariant } from "@/types/product.types";
@@ -25,10 +26,17 @@ const ProductSelectionContext = createContext<ProductSelectionContextValue | und
 );
 
 function getDefaultVariant(product: IProduct): IProductVariant | null {
-  if (product.variants && product.variants.length > 0) {
-    return product.variants[0];
-  }
-  return null;
+  const variants = Array.isArray(product?.variants) ? product.variants : [];
+  if (!variants.length) return null;
+
+  const priced = variants
+    .map((v) => ({ v, price: Number((v as any)?.price ?? 0) }))
+    .filter((x) => Number.isFinite(x.price) && x.price > 0);
+
+  if (!priced.length) return variants[0] ?? null;
+
+  priced.sort((a, b) => a.price - b.price);
+  return priced[0]?.v ?? null;
 }
 
 export function ProductSelectionProvider({
@@ -39,6 +47,10 @@ export function ProductSelectionProvider({
   children: ReactNode;
 }) {
   const defaultVariant = useMemo(() => getDefaultVariant(product), [product]);
+
+  useEffect(() => {
+  setSelectedVariant(defaultVariant);
+}, [defaultVariant]);
 
   const [selectedVariant, setSelectedVariant] = useState<IProductVariant | null>(
     defaultVariant

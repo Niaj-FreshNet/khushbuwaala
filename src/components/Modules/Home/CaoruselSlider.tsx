@@ -15,12 +15,12 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 
-const home1 = "/hero1desktop.png"
-const home2 = "/hero2desktop.png"
-const home3 = "/hero3desktop.png"
-const homeMobile1 = "/hero1mobile.png"
-const homeMobile2 = "/hero2mobile.png"
-const homeMobile3 = "/hero3mobile.png"
+const home1 = "/hero1desktop.webp"
+const home2 = "/hero2desktop.webp"
+const home3 = "/hero3desktop.webp"
+const homeMobile1 = "/hero1mobile.webp"
+const homeMobile2 = "/hero2mobile.webp"
+const homeMobile3 = "/hero3mobile.webp"
 
 type Slide = {
   src: string              // desktop

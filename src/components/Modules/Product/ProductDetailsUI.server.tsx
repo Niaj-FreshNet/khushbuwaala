@@ -60,6 +60,7 @@ export default function ProductDetailsUI({
   isBuyingNow,
   isPending,
 }: Props) {
+  console.log('currentPrice', currentPrice);
   const fragrances = product.fragrances ?? [];
   return (
     <div className="space-y-3 sm:space-y-4 lg:space-y-5">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useTransition, useCallback } from "react";
+import React, { useMemo, useState, useTransition, useCallback, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
 import { IDiscount, IProduct, IProductVariant } from "@/types/product.types";
@@ -23,6 +23,7 @@ export default function ProductDetailsClient({
 
   // keep your selection context support
   const selection = useProductSelectionOptional();
+  console.log('selection', selection);
 
   const sortedVariants = useMemo(() => {
     return [...(product.variants ?? [])].sort((a, b) => a.size - b.size);
@@ -30,28 +31,61 @@ export default function ProductDetailsClient({
 
   const availableVariants = useMemo(() => sortedVariants.slice(0, 4), [sortedVariants]);
 
-  const [fallbackSelected, setFallbackSelected] = useState<IProductVariant | null>(
-    sortedVariants[0] ?? null
-  );
+  function pickLowestPriceVariant(product: any) {
+    const variants = Array.isArray(product?.variants) ? product.variants : [];
+    if (!variants.length) return null;
+
+    const priced = variants
+      .map((v: any) => ({ v, price: Number(v?.price ?? 0) }))
+      .filter((x: any) => Number.isFinite(x.price) && x.price > 0);
+
+    if (!priced.length) return variants[0] ?? null;
+
+    priced.sort((a: any, b: any) => a.price - b.price);
+    return priced[0].v ?? null;
+  }
+
+  function safeUnit(unit: any) {
+    return String(unit || "").trim().toLowerCase();
+  }
+
+  const lowestPriceVariant = useMemo(() => {
+    return pickLowestPriceVariant(product as any) as IProductVariant | null;
+  }, [product]);
+
+  const [fallbackSelected, setFallbackSelected] = useState<IProductVariant | null>(null);
+
+  useEffect(() => {
+    if (!selection?.selectedVariant) {
+      setFallbackSelected(lowestPriceVariant);
+    }
+  }, [lowestPriceVariant, selection?.selectedVariant]);
+
   const [fallbackQuantity, setFallbackQuantity] = useState(1);
 
-  const quantity = selection?.quantity ?? fallbackQuantity;
+  const quantity =
+    typeof selection?.quantity === "number" && selection.quantity > 0
+      ? selection.quantity
+      : fallbackQuantity;
+
   const setQuantity = selection?.setQuantity ?? setFallbackQuantity;
 
-  const selectedVariant = selection?.selectedVariant ?? fallbackSelected;
+  const selectedVariant = selection?.selectedVariant ?? null;
+  const effectiveVariant = selectedVariant ?? fallbackSelected ?? lowestPriceVariant;
 
-  const selectedSizeLabel = selectedVariant
-    ? `${selectedVariant.size} ${selectedVariant.unit.toLowerCase()}`
+  console.log('effectiveVariant', effectiveVariant);
+
+  const selectedSizeLabel = effectiveVariant
+    ? `${effectiveVariant.size} ${safeUnit(effectiveVariant.unit)}`
     : product.variants?.[0]
-      ? `${product.variants[0].size} ${product.variants[0].unit.toLowerCase()}`
+      ? `${product.variants[0].size} ${safeUnit(product.variants[0].unit)}`
       : "3 ml";
 
-  const currentPrice = selectedVariant?.price ?? product.minPrice ?? 0;
+  const currentPrice = effectiveVariant?.price ?? product.minPrice ?? 0;
 
   const { discount, discountedPrice } = useMemo(() => {
     const now = new Date();
 
-    // ✅ tolerate different shapes/keys
     const productDiscounts: IDiscount[] =
       ((product as any)?.discounts as IDiscount[]) ??
       ((product as any)?.Discounts as IDiscount[]) ??
@@ -59,22 +93,18 @@ export default function ProductDetailsClient({
       [];
 
     const variantDiscounts: IDiscount[] =
-      ((selectedVariant as any)?.discounts as IDiscount[]) ??
-      ((selectedVariant as any)?.Discounts as IDiscount[]) ??
+      ((effectiveVariant as any)?.discounts as IDiscount[]) ??
+      ((effectiveVariant as any)?.Discounts as IDiscount[]) ??
       [];
 
     const isActiveAuto = (d: any) => {
       if (!d) return false;
-
-      // ❌ hide promo-code discounts
-      if (d.code && String(d.code).trim() !== "") return false;
-
+      if (d.code && String(d.code).trim() !== "") return false; // hide coupon discounts
       const startOk = !d.startDate || new Date(d.startDate) <= now;
       const endOk = !d.endDate || new Date(d.endDate) >= now;
       return startOk && endOk;
     };
 
-    // ✅ VARIANT auto > PRODUCT auto
     const active = variantDiscounts.find(isActiveAuto) || productDiscounts.find(isActiveAuto) || null;
 
     let final = currentPrice;
@@ -85,9 +115,8 @@ export default function ProductDetailsClient({
     }
 
     final = Math.max(0, Math.round(final));
-
     return { discount: active as IDiscount | null, discountedPrice: final };
-  }, [product, selectedVariant, currentPrice]);
+  }, [product, effectiveVariant, currentPrice]);
 
   const isOutOfStock = (product.totalStock ?? 0) <= 0;
 
