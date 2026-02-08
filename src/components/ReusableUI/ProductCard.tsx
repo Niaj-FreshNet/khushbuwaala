@@ -803,8 +803,8 @@ export function ProductCard({
           </div> */}
         </div>
 
-        <CardContent className="p-2 sm:p-3 md:p-4 pb-1 sm:pb-1 md:pb-1 space-y-1.5 sm:space-y-2">
-          <CardTitle className="text-[13px] sm:text-sm md:text-base font-semibold line-clamp-2 text-center leading-snug">
+        <CardContent className="p-0 pb-1 space-y-1 sm:space-y-2">
+          <CardTitle className="text-md sm:text-lg md:text-xl font-semibold line-clamp-2 text-center leading-snug">
             <span className="block">{product.name}</span>
           </CardTitle>
 
@@ -841,7 +841,7 @@ export function ProductCard({
           )}
         </CardContent>
 
-        <CardFooter className="px-2 sm:px-3 md:px-4 pb-2 pt-0">
+        <CardFooter className="px-2 sm:px-3 md:px-4 pb-4">
           <Button
             type="button"
             className={cn(

@@ -30,7 +30,7 @@ export function CategoryBanner() {
   ]
 
   return (
-    <section className="py-10 sm:py-12" aria-labelledby="categories-heading">
+    <section className="py-1 sm:py-2" aria-labelledby="categories-heading">
       <div className="px-4">
         <SectionTitle
           title="Shop by Categories"
@@ -41,7 +41,7 @@ export function CategoryBanner() {
         />
       </div>
 
-      <div className="max-w-screen-xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* ✅ Client component handles motion + rendering */}
         <CategoryGridClient categories={categories} />
       </div>

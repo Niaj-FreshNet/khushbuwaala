@@ -235,6 +235,8 @@ export default function ThankYouPage() {
     const shippingCost = Number(order?.shippingCost ?? 0);
     const estimatedTaxes = 0;
 
+  const discountedSubtotal = Math.max(0, Math.round(subtotalOriginal - discountAmount));
+
     const total = Number(order?.amount ?? (subtotalDiscounted + shippingCost + estimatedTaxes));
 
     return {
@@ -244,6 +246,7 @@ export default function ThankYouPage() {
       coupon,
       shippingCost,
       estimatedTaxes,
+      discountedSubtotal,
       total,
     };
   }, [cartItems, order]);

@@ -5,9 +5,6 @@ import Image from "next/image";
 import {
   Tag,
   ArrowRight,
-  Sparkles,
-  CheckCircle2,
-  XCircle,
 } from "lucide-react";
 import { IProduct } from "@/types/product.types";
 import { useGetRelatedProductsQuery } from "@/redux/store/api/product/productApi";
@@ -145,10 +142,10 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
 
                 {/* Discount badge */}
                 {activeDiscount && (
-                  <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold text-white bg-red-500 shadow-lg">
+                  <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold text-white bg-red-500 shadow-lg">
                     <Tag className="w-3.5 h-3.5" />
                     {activeDiscount.type === "percentage"
-                      ? `${activeDiscount.value}% OFF`
+                      ? `${activeDiscount.value}%`
                       : `- ${activeDiscount.value}৳`}
                   </div>
                 )}

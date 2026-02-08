@@ -152,7 +152,7 @@ export default function ProductDetailsClient({
     requestAnimationFrame(() => {
       setTimeout(() => {
         window.dispatchEvent(new Event("kw:open-description"));
-      }, 250);
+      }, 500);
     });
   }, []);
 

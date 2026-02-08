@@ -45,7 +45,6 @@ export default function HomePage() {
       <CarouselSlider />
 
       {/* Best Sellers Section with premium variant */}
-      <div className="pt-4 pb-8">
         <ProductCarouselSection
           title="Best Sellers"
           section="bestSeller"
@@ -55,7 +54,6 @@ export default function HomePage() {
           titleIcon={<Crown className="h-6 w-6" />}
           titleUnderlineVariant="full"
         />
-      </div>
 
       <Deferred delay={800}>
 
@@ -79,7 +77,6 @@ export default function HomePage() {
         </MountOnView>
 
         {/* Inspired Perfume Products Section with gradient variant */}
-        <div className="pt-4 pb-8">
           <MountOnView>
             <ProductCarouselSection
               title="Inspired Perfume Oils"
@@ -89,7 +86,6 @@ export default function HomePage() {
               titleIcon={<Sparkles className="h-6 w-6" />}
             />
           </MountOnView>
-        </div>
 
         {/* Enhanced Oriental Fragrances Banner */}
         <MountOnView>
@@ -107,7 +103,6 @@ export default function HomePage() {
         </MountOnView>
 
         {/* Oriental Products Section with elegant variant */}
-        <div className="pt-4 pb-8">
           <MountOnView>
             <ProductCarouselSection
               title="Arabian Attar"
@@ -118,7 +113,6 @@ export default function HomePage() {
               titleIcon={<Star className="h-6 w-6" />}
             />
           </MountOnView>
-        </div>
 
         {/* Enhanced Artificial Oud Banner */}
         <MountOnView>
@@ -136,7 +130,6 @@ export default function HomePage() {
         </MountOnView>
 
         {/* Artificial Oud Products Section with modern variant */}
-        <div className="pt-4 pb-8">
           <MountOnView>
             <ProductCarouselSection
               title="Artificial Oud"
@@ -147,7 +140,6 @@ export default function HomePage() {
               titleIcon={<Gem className="h-6 w-6" />}
             />
           </MountOnView>
-        </div>
 
         {/* Services Section */}
         <ServicesSection />

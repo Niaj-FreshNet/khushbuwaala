@@ -9,13 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   ShieldCheck,
@@ -25,6 +18,8 @@ import {
   Phone,
   Loader2,
   ChevronDown,
+  ChevronsUpDown,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,6 +30,8 @@ import { useCreateBkashPaymentMutation } from "@/redux/store/api/payment/payment
 import { cn } from "@/lib/utils";
 import { useApplyDiscountMutation } from "@/redux/store/api/discount/discountApi";
 import { kwPushAddPaymentInfo, kwPushAddShippingInfo } from "@/lib/Analytics/kwEcom";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 
 // --- Types ---
 type ShippingMethod = "insideDhaka" | "outsideDhaka";
@@ -158,6 +155,29 @@ export default function CheckoutPage() {
   const [billingContactNumber, setBillingContactNumber] = useState("");
 
   const [districtSearch, setDistrictSearch] = useState("");
+  const [districtQuery, setDistrictQuery] = useState("");
+
+  type SubmitStep =
+    | "idle"
+    | "validating"
+    | "creating_order"
+    | "redirecting"
+    | "done"
+    | "error";
+
+  const [submitStep, setSubmitStep] = useState<SubmitStep>("idle");
+  const isSubmittingRef = useRef(false);
+
+  const stepText: Record<SubmitStep, string> = {
+    idle: "",
+    validating: "Validating your information…",
+    creating_order: "Placing your order…",
+    redirecting: paymentMethod === "bkash" ? "Redirecting to bKash…" : "Finishing…",
+    done: "Completed!",
+    error: "Something went wrong. Please try again.",
+  };
+
+  const isBlockingUI = submitStep !== "idle" && submitStep !== "error";
 
   const filteredDistricts = useMemo(() => {
     const q = districtSearch.trim().toLowerCase();
@@ -192,12 +212,12 @@ export default function CheckoutPage() {
     if (selectedDistrict === "Dhaka") {
       if (shippingMethod !== "insideDhaka") {
         setShippingMethod("insideDhaka");
-        toast.info("Dhaka is inside Dhaka — shipping set automatically to Inside Dhaka.");
+        // toast.info("Dhaka is inside Dhaka — shipping set automatically to Inside Dhaka.");
       }
     } else {
       if (shippingMethod !== "outsideDhaka") {
         setShippingMethod("outsideDhaka");
-        toast.info(`${selectedDistrict} is outside Dhaka — shipping set automatically to Outside Dhaka.`);
+        // toast.info(`${selectedDistrict} is outside Dhaka — shipping set automatically to Outside Dhaka.`);
       }
     }
   }, [selectedDistrict, shippingMethod]);
@@ -309,6 +329,9 @@ export default function CheckoutPage() {
       .filter(Boolean) as any[];
   }, [itemsToDisplay]);
 
+  const nameRef = useRef<HTMLInputElement | null>(null);
+  const addressRef = useRef<HTMLInputElement | null>(null);
+  const phoneRef = useRef<HTMLInputElement | null>(null);
   const shippingDedupeRef = useRef<string>("");
   const paymentDedupeRef = useRef<string>("");
 
@@ -382,10 +405,19 @@ export default function CheckoutPage() {
     const nextErrors: Record<string, string> = {};
     if (!name.trim()) nextErrors.name = "Please enter your full name.";
     if (!address.trim()) nextErrors.address = "Please enter your full address.";
-    if (!selectedDistrict) nextErrors.district = "Please select your district.";
     if (contactNumber.replace(/\D/g, "").length < 10)
       nextErrors.contactNumber = "Please enter a valid phone number.";
+    // if (!selectedDistrict) nextErrors.district = "Please select your district.";
     setErrors(nextErrors);
+
+    // ✅ scroll to first invalid field
+    const order: Array<keyof typeof nextErrors> = ["name", "address", "contactNumber"];
+    const firstKey = order.find((k) => nextErrors[k]);
+
+    if (firstKey === "name") scrollToField(nameRef.current);
+    if (firstKey === "address") scrollToField(addressRef.current);
+    if (firstKey === "contactNumber") scrollToField(phoneRef.current);
+
     return Object.keys(nextErrors).length === 0;
   };
 
@@ -523,71 +555,51 @@ export default function CheckoutPage() {
 
   // --- Submit order ---
   const handleSubmit = async () => {
+    // HARD block: prevents double click even if state is late
+    if (isSubmittingRef.current) return;
     if (isPlacingOrder || isBkashRedirecting) return;
 
-    if (!validateForm()) {
-      toast.error("Please fix the highlighted fields");
-      return;
-    }
-    if (!agreeToTerms) {
-      toast.error("Please agree to the terms to continue");
-      return;
-    }
-
-    const cartItemIds = itemsToDisplay
-      .map((item: any) => item.cartItemId)
-      .filter(Boolean) as string[];
-
-    const payload: any = {
-      cartItemIds,
-      amount: total,
-      isPaid: false,
-      method: paymentMethod,
-      orderSource: "WEBSITE",
-      saleType: "SINGLE",
-      shippingCost: Number(shippingCost),
-      additionalNotes,
-
-      // ✅ what you want saved to order:
-      coupon: appliedPromoCode ?? null,
-      discountAmount: Number(displayedDiscount || 0), // auto + coupon
-
-      customerInfo: {
-        name,
-        phone: contactNumber,
-        email,
-        address,
-        district: selectedDistrict,
-        thana: customThana,
-      },
-      shippingAddress: {
-        name,
-        phone: contactNumber,
-        email,
-        address,
-        district: selectedDistrict,
-        thana: customThana,
-      },
-      billingAddress:
-        billingType === "sameAsShipping"
-          ? {
-            name,
-            phone: contactNumber,
-            email,
-            address,
-            district: selectedDistrict,
-            thana: customThana,
-          }
-          : {
-            name: billingName,
-            phone: billingContactNumber,
-            address: billingAddress,
-            district: billingDistrict,
-            thana: billingThana,
-          },
-    };
+    isSubmittingRef.current = true;
+    setSubmitStep("validating");
 
     try {
+      if (!validateForm()) {
+        setSubmitStep("idle");
+        toast.error("Please fix the highlighted fields");
+        return;
+      }
+      if (!agreeToTerms) {
+        setSubmitStep("idle");
+        toast.error("Please agree to the terms to continue");
+        return;
+      }
+
+      setSubmitStep("creating_order");
+
+      const cartItemIds = itemsToDisplay
+        .map((item: any) => item.cartItemId)
+        .filter(Boolean) as string[];
+
+      const payload: any = {
+        cartItemIds,
+        amount: total,
+        isPaid: false,
+        method: paymentMethod,
+        orderSource: "WEBSITE",
+        saleType: "SINGLE",
+        shippingCost: Number(shippingCost),
+        additionalNotes,
+        coupon: appliedPromoCode ?? null,
+        discountAmount: Number(displayedDiscount || 0),
+
+        customerInfo: { name, phone: contactNumber, email, address, district: selectedDistrict, thana: customThana },
+        shippingAddress: { name, phone: contactNumber, email, address, district: selectedDistrict, thana: customThana },
+        billingAddress:
+          billingType === "sameAsShipping"
+            ? { name, phone: contactNumber, email, address, district: selectedDistrict, thana: customThana }
+            : { name: billingName, phone: billingContactNumber, address: billingAddress, district: billingDistrict, thana: billingThana },
+      };
+
       const res: any = await handleCreateOrder(payload);
       proceedToCartCheckout();
 
@@ -595,50 +607,115 @@ export default function CheckoutPage() {
       const payToken = res?.data?.payToken || res?.payToken;
 
       if (!orderId) {
+        setSubmitStep("error");
         toast.error("Order created but orderId missing.");
         return;
       }
 
+      setSubmitStep("redirecting");
+
       if (paymentMethod === "cashOnDelivery") {
         clearCart();
+        setSubmitStep("done");
         router.push(`/thank-you?order=${encodeURIComponent(orderId)}`);
         return;
       }
 
-      if (paymentMethod === "bkash") {
-        if (!payToken) {
-          toast.error("Order created but payToken missing.");
-          router.push(`/thank-you?order=${encodeURIComponent(orderId)}`);
-          return;
-        }
-
-        try {
-          const bkashRes = await createBkashPayment({ orderId, payToken }).unwrap();
-
-          if (typeof window !== "undefined") {
-            localStorage.setItem("lastBkashOrderId", orderId);
-            localStorage.setItem("lastBkashPaymentID", bkashRes.paymentID);
-          }
-
-          clearCart();
-          window.location.href = bkashRes.bkashURL;
-          return;
-        } catch (e: any) {
-          toast.error(e?.data?.message || "Failed to start bKash payment.");
-          router.push(`/thank-you?order=${encodeURIComponent(orderId)}`);
-          return;
-        }
+      // bKash
+      if (!payToken) {
+        clearCart();
+        setSubmitStep("done");
+        toast.error("Order created but payToken missing.");
+        router.push(`/thank-you?order=${encodeURIComponent(orderId)}`);
+        return;
       }
-    } catch (err) {
+
+      const bkashRes = await createBkashPayment({ orderId, payToken }).unwrap();
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("lastBkashOrderId", orderId);
+        localStorage.setItem("lastBkashPaymentID", bkashRes.paymentID);
+      }
+
+      clearCart();
+      setSubmitStep("done");
+      window.location.href = bkashRes.bkashURL;
+    } catch (err: any) {
       console.error(err);
-      toast.error("Failed to place order. Please try again.");
+      setSubmitStep("error");
+      toast.error(err?.data?.message || "Failed to place order. Please try again.");
+    } finally {
+      // if redirect happens, page unloads; otherwise reset safely
+      setTimeout(() => {
+        isSubmittingRef.current = false;
+        if (submitStep !== "redirecting" && submitStep !== "done") {
+          setSubmitStep("idle");
+        }
+      }, 150);
     }
   };
 
-  const isProcessing = isPlacingOrder || isBkashRedirecting;
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (!isBlockingUI) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isBlockingUI]);
+
+  function scrollToField(el: HTMLElement | null) {
+    if (!el) return;
+    // smooth scroll to element
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    // focus after a tick (important for mobile + smooth scroll)
+    setTimeout(() => {
+      // focus if it is input/textarea/select button etc
+      (el as any)?.focus?.();
+    }, 800);
+  }
 
   return (
     <StoreContainer>
+      {isBlockingUI && (
+        <div className="fixed inset-0 z-[9999] bg-black/40 backdrop-blur-sm flex items-center justify-center px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl p-5">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                <Loader2 className="h-5 w-5 animate-spin" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-gray-900">Processing</p>
+                <p className="text-xs text-gray-600">{stepText[submitStep]}</p>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-2 text-xs text-gray-600">
+              <div className={cn("flex items-center gap-2", submitStep === "validating" && "font-semibold text-gray-900")}>
+                <span className="h-2 w-2 rounded-full bg-gray-300" /> Validating details
+              </div>
+              <div className={cn("flex items-center gap-2", submitStep === "creating_order" && "font-semibold text-gray-900")}>
+                <span className="h-2 w-2 rounded-full bg-gray-300" /> Creating order
+              </div>
+              <div className={cn("flex items-center gap-2", submitStep === "redirecting" && "font-semibold text-gray-900")}>
+                <span className="h-2 w-2 rounded-full bg-gray-300" /> Redirecting
+              </div>
+            </div>
+
+            <div className="mt-5 flex gap-2">
+              <Button className="w-full" disabled>
+                Please wait…
+              </Button>
+            </div>
+
+            <p className="mt-3 text-[11px] text-gray-500">
+              Don’t close the tab while we place your order.
+            </p>
+          </div>
+        </div>
+      )}
       <div className="min-h-screen bg-gray-50 pt-2 sm:pt-6 pb-6">
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           {/* Header */}
@@ -736,7 +813,7 @@ export default function CheckoutPage() {
                     {/* ✅ show auto + coupon cleanly */}
                     {autoDiscount > 0 && (
                       <div className="flex justify-between text-sm text-green-700">
-                        <span>Auto discount</span>
+                        <span>Discount</span>
                         <span>-{formatBDT(autoDiscount)}</span>
                       </div>
                     )}
@@ -822,6 +899,7 @@ export default function CheckoutPage() {
                   <div>
                     <label className="text-sm font-medium text-gray-700">Full Name</label>
                     <Input
+                      ref={nameRef}
                       placeholder="e.g. Rahim Uddin"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -833,6 +911,7 @@ export default function CheckoutPage() {
                   <div>
                     <label className="text-sm font-medium text-gray-700">Full Address</label>
                     <Input
+                      ref={addressRef}
                       placeholder="House, Road, Area"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
@@ -845,6 +924,7 @@ export default function CheckoutPage() {
                   <div>
                     <label className="text-sm font-medium text-gray-700">Contact Number</label>
                     <Input
+                      ref={phoneRef}
                       placeholder="01XXXXXXXXX"
                       inputMode="numeric"
                       value={contactNumber}
@@ -859,44 +939,73 @@ export default function CheckoutPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-gray-700">District</label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button type="button" variant="outline" className="w-full justify-between">
+                            <span className={cn(!selectedDistrict && "text-gray-500")}>
+                              {selectedDistrict ?? "Select your district"}
+                            </span>
+                            <ChevronsUpDown className="h-4 w-4 opacity-60" />
+                          </Button>
+                        </PopoverTrigger>
 
-                      <Select
-                        value={selectedDistrict}
-                        onValueChange={(v) => {
-                          setSelectedDistrict(v);
-                          setDistrictSearch("");
-                        }}
-                      >
-                        <SelectTrigger className={cn("w-full", errors.district && "border-red-500 focus-visible:ring-red-500")}>
-                          <SelectValue placeholder="Select your district" />
-                        </SelectTrigger>
-
-                        <SelectContent className="p-0">
-                          <div className="p-2 border-b bg-white sticky top-0 z-10">
-                            <Input
-                              value={districtSearch}
-                              onChange={(e) => setDistrictSearch(e.target.value)}
+                        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                          <Command shouldFilter>
+                            <CommandInput
                               placeholder="Search district..."
-                              className="h-9"
-                              autoFocus
+                              value={districtQuery}
+                              onValueChange={(val) => {
+                                setDistrictQuery(val);
+
+                                // ✅ auto-select if exact match
+                                const match = districts.find(
+                                  (d) => d.toLowerCase() === val.trim().toLowerCase()
+                                );
+
+                                if (match) setSelectedDistrict(match);
+                              }}
                             />
-                          </div>
 
-                          <div className="max-h-64 overflow-auto p-1">
-                            {filteredDistricts.length ? (
-                              filteredDistricts.map((d) => (
-                                <SelectItem key={d} value={d}>
-                                  {d}
-                                </SelectItem>
-                              ))
-                            ) : (
-                              <div className="px-3 py-2 text-sm text-gray-500">No district found.</div>
-                            )}
-                          </div>
-                        </SelectContent>
-                      </Select>
+                            <CommandList>
+                              <CommandEmpty>No district found.</CommandEmpty>
 
-                      {errors.district && <p className="text-xs text-red-600 mt-1">{errors.district}</p>}
+                              <CommandGroup>
+                                <CommandItem
+                                  onSelect={() => {
+                                    setSelectedDistrict(undefined);
+                                    setDistrictQuery("");
+                                  }}
+                                >
+                                  <span className="text-sm text-gray-600">Clear</span>
+                                </CommandItem>
+
+                                {districts.map((d) => (
+                                  <CommandItem
+                                    key={d}
+                                    value={d}
+                                    onSelect={() => {
+                                      setSelectedDistrict(d);
+                                      setDistrictQuery(d); // ✅ show selected in search box too
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        selectedDistrict?.toLowerCase() === d.toLowerCase()
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                    {d}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+
+                      {/* {errors.district && <p className="text-xs text-red-600 mt-1">{errors.district}</p>} */}
                     </div>
 
                     <div>
@@ -909,12 +1018,12 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-2">
+                  {/* <div className="flex items-center gap-2 pt-2">
                     <Checkbox id="newsletter" />
                     <label htmlFor="newsletter" className="text-sm text-gray-600">
                       Save this information for next time
                     </label>
-                  </div>
+                  </div> */}
                 </CardContent>
               </Card>
 
@@ -932,11 +1041,11 @@ export default function CheckoutPage() {
                         return;
                       }
                       if (selectedDistrict === "Dhaka" && v === "outsideDhaka") {
-                        toast.error("Dhaka is inside Dhaka. You cannot choose Outside Dhaka shipping.");
+                        toast.error("Shipping cost is only 50 TK inside Dhaka");
                         return;
                       }
                       if (selectedDistrict !== "Dhaka" && v === "insideDhaka") {
-                        toast.error(`${selectedDistrict} is outside Dhaka. You cannot choose Inside Dhaka shipping.`);
+                        toast.error(` Shipping cost is only 110 TK for ${selectedDistrict}.`);
                         return;
                       }
                       setShippingMethod(v as ShippingMethod);
@@ -1024,6 +1133,7 @@ export default function CheckoutPage() {
                   <p className="text-xs text-gray-500">All transactions are secure and encrypted.</p>
 
                   <RadioGroup
+                    disabled
                     value={paymentMethod}
                     onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}
                     className="gap-3"
@@ -1063,12 +1173,12 @@ export default function CheckoutPage() {
                 <Button
                   className="w-full h-14 text-lg font-bold"
                   onClick={handleSubmit}
-                  disabled={isProcessing}
+                  disabled={submitStep !== "idle" && submitStep !== "error"}
                 >
-                  {isProcessing ? (
+                  {submitStep !== "idle" && submitStep !== "error" ? (
                     <span className="flex items-center justify-center gap-2">
                       <Loader2 className="h-5 w-5 animate-spin" />
-                      Processing...
+                      {stepText[submitStep] || "Processing..."}
                     </span>
                   ) : (
                     "Complete Order"

@@ -6,15 +6,14 @@ import type React from "react"
 import { SectionTitle } from "./SectionTitle"
 import { ProductCard } from "@/components/ReusableUI/ProductCard"
 import { IProductResponse } from "@/types/product.types"
-import { motion, useInView, Variants, useReducedMotion } from "framer-motion"
 
-import dynamic from "next/dynamic";
-// REMOVE: import { ProductQuickView } from "@/components/ReusableUI/ProductQuickView"
+import dynamic from "next/dynamic"
+// REMOVE: import { motion, useInView, Variants, useReducedMotion } from "framer-motion"
 
 const ProductQuickView = dynamic(
-  () => import("@/components/ReusableUI/ProductQuickView").then(m => m.ProductQuickView),
+  () => import("@/components/ReusableUI/ProductQuickView").then((m) => m.ProductQuickView),
   { ssr: false }
-);
+)
 
 export function ProductCarouselClient({
   products,
@@ -45,44 +44,11 @@ export function ProductCarouselClient({
     setIsQuickViewOpen(true)
   }
 
+  // kept (even if unused) in case you need it later
   const wrapRef = useRef<HTMLDivElement | null>(null)
-  const isInView = useInView(wrapRef, { amount: 0.25, once: true })
-  const reduce = useReducedMotion()
-
-  const sectionVariants: Variants = reduce
-    ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
-    : {
-      hidden: { opacity: 0, y: 14 },
-      show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
-    }
-
-  const listVariants: Variants = reduce
-    ? { hidden: {}, show: {} }
-    : { hidden: {}, show: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } } }
-
-  const itemVariants: Variants = reduce
-    ? {
-      hidden: { opacity: 1, y: 0, filter: "blur(0px)" },
-      show: { opacity: 1, y: 0, filter: "blur(0px)" },
-    }
-    : {
-      hidden: { opacity: 0, y: 12, filter: "blur(6px)" },
-      show: {
-        opacity: 1,
-        y: 0,
-        filter: "blur(0px)",
-        transition: { duration: 0.45, ease: "easeOut" },
-      },
-    }
 
   return (
-    <motion.section
-      ref={wrapRef}
-      initial="hidden"
-      animate={isInView ? "show" : "hidden"}
-      variants={sectionVariants}
-      className="mx-auto w-full max-w-7xl px-3 sm:px-4 lg:px-6 py-2"
-    >
+    <section ref={wrapRef} className="mx-auto w-full max-w-7xl px-3 sm:px-4 lg:px-6 py-2">
       <SectionTitle
         title={title}
         subtitle={titleSubtitle}
@@ -96,32 +62,29 @@ export function ProductCarouselClient({
 
       <div className="relative">
         <Carousel opts={{ align: "center" }} className="w-full">
-          <motion.div variants={listVariants} initial="hidden" animate={isInView ? "show" : "hidden"}>
-            {/* ✅ GAP REDUCED HERE (product cards) */}
-            <CarouselContent className="w-full mx-auto gap-0 md:gap-1 lg:gap-2">
-              {products.map((product) => (
-                <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
-                  <motion.div
-                    variants={itemVariants}
-                    whileHover={reduce ? undefined : { y: -4 }}
-                    transition={reduce ? undefined : { type: "spring", stiffness: 260, damping: 22 }}
-                    className="h-full"
-                  >
-                    <ProductCard className="h-auto" product={product} onQuickView={() => handleQuickView(product)} />
-                  </motion.div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </motion.div>
+          {/* ✅ GAP REDUCED HERE (product cards) */}
+          <CarouselContent className="w-full mx-auto gap-0 md:gap-1 lg:gap-2">
+            {products.map((product) => (
+              <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
+                <div className="h-full">
+                  <ProductCard className="h-auto" product={product} onQuickView={() => handleQuickView(product)} />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
 
-          <CarouselPrevious className="flex" />
-          <CarouselNext className="flex" />
+          <CarouselPrevious className="hidden md:flex" />
+          <CarouselNext className="hidden md:flex" />
         </Carousel>
       </div>
 
       {quickViewProduct && (
-        <ProductQuickView product={quickViewProduct} open={isQuickViewOpen} onOpenChange={setIsQuickViewOpen} />
+        <ProductQuickView
+          product={quickViewProduct}
+          open={isQuickViewOpen}
+          onOpenChange={setIsQuickViewOpen}
+        />
       )}
-    </motion.section>
+    </section>
   )
 }
