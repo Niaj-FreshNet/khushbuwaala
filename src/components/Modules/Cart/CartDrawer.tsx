@@ -11,6 +11,7 @@ import Image from "next/image"
 import { useCart } from "@/redux/store/hooks/useCart"
 import { useEffect, useRef, useState } from "react"
 import { kwPushBeginCheckout } from "@/lib/Analytics/kwEcom"
+import Link from "next/link"
 
 
 // Use real cart from store
@@ -408,12 +409,14 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
                 <p className="text-sm text-gray-500 mb-6 max-w-sm">
                   Discover our amazing collection of premium perfumes and add some to your cart.
                 </p>
-                <Button
-                  onClick={onClose}
-                  className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white px-8 py-2 rounded-full transition-all duration-300 transform hover:scale-105"
-                >
-                  Start Shopping
-                </Button>
+                <Link href='/shop'>
+                  <Button
+                    onClick={onClose}
+                    className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white px-8 py-2 rounded-full transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                  >
+                    Start Shopping
+                  </Button>
+                </Link>
               </div>
             )}
           </ScrollArea>

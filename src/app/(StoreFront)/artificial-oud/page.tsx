@@ -58,6 +58,8 @@ export default async function ArtificialOudPage({
   const categoryName = "ARTIFICIAL-OUD";
   const categoryId = "6904ab807a035c41185d2729";
 
+  const sortBy = "a-z" as string | undefined;
+
   return (
     <>
       {/* Hidden crawlable pagination links */}
@@ -88,6 +90,7 @@ export default async function ArtificialOudPage({
         initialPage={page}
         categoryId={categoryId}
         categoryName={categoryName}
+        sortBy={sortBy}
         lockCategory={true} // ✅ category locked
       />
     </>

@@ -74,7 +74,7 @@ export function ProductCarouselClient({
       initial="hidden"
       animate={isInView ? "show" : "hidden"}
       variants={sectionVariants}
-      className="mx-auto w-full max-w-7xl px-3 sm:px-4 lg:px-6 py-2 overflow-x-hidden"
+      className="mx-auto w-full max-w-7xl px-3 sm:px-4 lg:px-6 py-2"
     >
       <SectionTitle
         title={title}
@@ -88,10 +88,10 @@ export function ProductCarouselClient({
       />
 
       <div className="relative overflow-hidden">
-        <Carousel opts={{ align: "start" }} className="w-full">
+        <Carousel opts={{ align: "center" }} className="w-full">
           <motion.div variants={listVariants} initial="hidden" animate={isInView ? "show" : "hidden"}>
             {/* ✅ GAP REDUCED HERE (product cards) */}
-            <CarouselContent className="ml-0 gap-1 sm:gap-2 md:gap-3">
+            <CarouselContent className="w-full mx-auto gap-0">
               {products.map((product) => (
                 <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
                   <motion.div
@@ -107,8 +107,8 @@ export function ProductCarouselClient({
             </CarouselContent>
           </motion.div>
 
-          <CarouselPrevious className="hidden md:flex" />
-          <CarouselNext className="hidden md:flex" />
+          <CarouselPrevious className="flex" />
+          <CarouselNext className="flex" />
         </Carousel>
       </div>
 

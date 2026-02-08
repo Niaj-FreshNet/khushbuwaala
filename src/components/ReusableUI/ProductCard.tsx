@@ -473,7 +473,7 @@ export function ProductCard({
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               {/* Quick view button */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+              {/* <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
                 <Button
                   size="sm"
                   className="bg-white/90 text-gray-800 hover:bg-white backdrop-blur-sm shadow-lg border border-white/20"
@@ -486,7 +486,33 @@ export function ProductCard({
                   <Eye className="h-4 w-4 mr-2" />
                   Quick View
                 </Button>
-              </div>
+              </div>*/}
+              {/* ✅ Quick View Icon */}
+              {onQuickView && (
+                <div className="absolute top-4 left-4 z-20">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={cn(
+                      "h-10 w-10 rounded-full backdrop-blur-md border shadow-lg",
+                      "bg-white/85 hover:bg-white",
+                      "text-gray-800 hover:text-gray-900",
+                      "transition-all duration-200 active:scale-95",
+                      "opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                    )}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      onQuickView()
+                    }}
+                    aria-label={`Quick view ${product.name}`}
+                    title="Quick view"
+                  >
+                    <Eye className="h-5 w-5" />
+                  </Button>
+                </div>
+              )}
             </Link>
 
             {/* Enhanced Wishlist Button */}
@@ -688,7 +714,7 @@ export function ProductCard({
           )} */}
 
             {/* Quick view overlay */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+            {/* <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
               <Button
                 size="sm"
                 className="bg-white/90 text-gray-800 hover:bg-white backdrop-blur-sm shadow-lg border border-white/20 transform scale-75 group-hover:scale-100 transition-transform duration-300"
@@ -701,7 +727,34 @@ export function ProductCard({
                 <Eye className="h-4 w-4 mr-2" />
                 Quick View
               </Button>
-            </div>
+            </div> */}
+            {/* ✅ Quick View Icon (pro + mobile friendly) */}
+            {onQuickView && (
+              <div className="absolute top-14 md:top-12 right-3 z-10 opacity-0 group-hover:opacity-100 ">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className={cn(
+                    "h-8 w-8 rounded-full backdrop-blur-md border shadow-lg",
+                    "bg-white/85 hover:bg-white",
+                    "text-gray-800 hover:text-gray-900",
+                    "transition-all duration-200 active:scale-95",
+                    // Desktop: subtle hide until hover. Mobile: always visible.
+                    "opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                  )}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    onQuickView()
+                  }}
+                  aria-label={`Quick view ${product.name}`}
+                  title="Quick view"
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* discount badge */}
@@ -788,30 +841,11 @@ export function ProductCard({
           )}
         </CardContent>
 
-        <CardFooter className="px-2 sm:px-3 md:px-4 pb-2 sm:pb-3 md:pb-4 pt-0">
+        <CardFooter className="px-2 sm:px-3 md:px-4 pb-2 pt-0">
           <Button
             type="button"
-            //   className="w-full hover:bg-gray-700"
-            //   onClick={(e) => {
-            //     e.preventDefault();
-            //     e.stopPropagation();
-            //     handleAddToCart();
-            //   }}
-            //   disabled={isAddingToCart}
-            // >
-            //   {isAddingToCart ? (
-            //     <>
-            //       <span className="inline-block w-4 h-4 border-b-2 border-white animate-spin rounded-full mr-2" />
-            //       Adding...
-            //     </>
-            //   ) : (
-            //     <>
-            //       <ShoppingCart className="h-4 w-4 mr-2" /> Add to Cart
-            //     </>
-            //   )}
-
             className={cn(
-              "w-full h-9 sm:h-10 rounded-lg sm:rounded-xl font-semibold text-[12px] sm:text-sm shadow-md transition-all duration-300 active:scale-[0.98]",
+              "w-full h-12 sm:h-14 rounded-lg sm:rounded-xl font-semibold text-[12px] sm:text-sm shadow-md transition-all duration-300 active:scale-[0.98]",
               isAddingToCart
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-gradient-to-r from-red-600 via-red-600 to-pink-600 hover:from-red-700 hover:via-red-700 hover:to-pink-700 text-white hover:shadow-lg hover:shadow-red-500/20"

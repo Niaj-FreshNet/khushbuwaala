@@ -171,7 +171,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
           </div>
 
           {/* Navigation Arrows */}
-          {images.length > 1 && (
+          {/* {images.length > 1 && (
             <>
               <button
                 className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/90 text-gray-700 rounded-full hover:bg-gray-900 hover:text-white transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100 shadow-lg border border-gray-200"
@@ -196,7 +196,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
                 <ChevronRight size={24} />
               </button>
             </>
-          )}
+          )} */}
 
           {/* Decorative */}
           <div className="absolute top-1/4 right-1/5 w-2 h-2 bg-blue-400 rounded-full animate-ping opacity-60"></div>
