@@ -183,7 +183,7 @@ export function BannerSection({
             src={images.mobile || "/placeholder.svg"}
             alt={heading}
             fill
-            sizes="(max-width: 768px) 100vw, 1200px"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 1200px"
             className="object-cover"
             priority={priority}
             quality={85}
@@ -196,7 +196,7 @@ export function BannerSection({
             src={images.tablet || images.desktop}
             alt={heading}
             fill
-            sizes="(max-width: 768px) 100vw, 1200px"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 1200px"
             className="object-cover"
             priority={priority}
             quality={90}
@@ -209,7 +209,7 @@ export function BannerSection({
             src={images.desktop}
             alt={heading}
             fill
-            sizes="(max-width: 768px) 100vw, 1200px"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 1200px"
             className="object-cover"
             priority={priority}
             quality={95}
