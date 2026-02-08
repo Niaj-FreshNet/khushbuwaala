@@ -58,7 +58,6 @@ export function FilterSheet({
     { value: "GIFTS AND PACKAGES", label: "Gifts & Packages" },
     { value: "NATURAL ATTAR", label: "Natural Attar" },
     { value: "ORGANIC ATTAR", label: "Organic Attar" },
-    { value: "BRAND", label: "Brand" },
   ];
 
   // If locked, show only locked option
@@ -247,41 +246,41 @@ export function FilterSheet({
                       </h5>
                       <div className="h-1 w-64 lg:w-72 mb-4 rounded-full bg-gradient-to-r from-pink-500 via-pink-600 to-purple-600" />
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-  {smells.map((smell) => {
-    const id = `${groupName}-${smell}`
-    const checked = selected.includes(smell)
+                      <div className="grid grid-cols-2 sm:grid-cols-2 gap-2">
+                        {smells.map((smell) => {
+                          const id = `${groupName}-${smell}`
+                          const checked = selected.includes(smell)
 
-    return (
-      <Label
-        key={smell}
-        htmlFor={id}
-        className={cn(
-          // whole row becomes clickable
-          "flex items-center gap-3 cursor-pointer select-none",
-          "rounded-xl border px-3 py-3 bg-white",
-          "transition-all duration-150",
-          "hover:border-primary/50 hover:bg-primary/5 active:scale-[0.99]",
-          checked && "border-primary bg-primary/10"
-        )}
-      >
-        <Checkbox
-          id={id}
-          checked={checked}
-          onCheckedChange={(isChecked) => {
-            setSelected((prev) =>
-              isChecked ? [...prev, smell] : prev.filter((s) => s !== smell)
-            )
-          }}
-        />
+                          return (
+                            <Label
+                              key={smell}
+                              htmlFor={id}
+                              className={cn(
+                                // whole row becomes clickable
+                                "flex items-center gap-3 cursor-pointer select-none",
+                                "rounded-xl border px-3 py-3 bg-white",
+                                "transition-all duration-150",
+                                "hover:border-primary/50 hover:bg-primary/5 active:scale-[0.99]",
+                                checked && "border-primary bg-primary/10"
+                              )}
+                            >
+                              <Checkbox
+                                id={id}
+                                checked={checked}
+                                onCheckedChange={(isChecked) => {
+                                  setSelected((prev) =>
+                                    isChecked ? [...prev, smell] : prev.filter((s) => s !== smell)
+                                  )
+                                }}
+                              />
 
-        <span className="text-sm font-medium text-gray-700 flex-1">
-          {smell}
-        </span>
-      </Label>
-    )
-  })}
-</div>
+                              <span className="text-sm font-medium text-gray-700 flex-1">
+                                {smell}
+                              </span>
+                            </Label>
+                          )
+                        })}
+                      </div>
                     </div>
                   );
                 })}

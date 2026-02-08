@@ -112,6 +112,13 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
     setSearchPerformed(true);
   };
 
+  const productsCountLabel =
+  debouncedSearch === ""
+    ? "100+ Products"
+    : isFetching
+      ? "Searching..."
+      : `${products.length} Products`;
+
   return (
     <Sheet open={visible} onOpenChange={onClose}>
       <SheetContent
@@ -167,10 +174,12 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="inspiredPerfumeOil">Inspired Perfume Oil</SelectItem>
-                <SelectItem value="oriental">Oriental & Arabian</SelectItem>
-                <SelectItem value="artificialOud">Artificial Oud</SelectItem>
-                <SelectItem value="natural">Natural Collections</SelectItem>
+                <SelectItem value="INSPIRED PERFUME OIL">Inspired Perfume Oil</SelectItem>
+                <SelectItem value="ORIENTAL ATTAR">Oriental & Arabian Attar</SelectItem>
+                <SelectItem value="ARTIFCIAL OUD">Artificial Oud</SelectItem>
+                <SelectItem value="GIFTS AND PACKAGES">Gifts & Combo Pakcages</SelectItem>
+                <SelectItem value="NATURAL ATTAR">Natural Attar</SelectItem>
+                <SelectItem value="ORGANIC ATTAR">Organic Attar</SelectItem>
               </SelectContent>
             </Select>
 
@@ -272,7 +281,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                   <div className="w-20 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mt-1"></div>
                 </div>
                 <Badge variant="outline" className="bg-white">
-                  {products.length} Products
+                  {productsCountLabel}
                 </Badge>
               </div>
             </div>

@@ -730,7 +730,7 @@ export function ProductCard({
             </div> */}
             {/* ✅ Quick View Icon (pro + mobile friendly) */}
             {onQuickView && (
-              <div className="absolute top-14 md:top-12 right-3 z-10 opacity-0 group-hover:opacity-100 ">
+              <div className="absolute top-14 md:top-12 right-3 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
                 <Button
                   type="button"
                   variant="outline"
