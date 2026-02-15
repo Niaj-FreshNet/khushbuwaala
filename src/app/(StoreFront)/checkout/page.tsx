@@ -31,7 +31,15 @@ import { cn } from "@/lib/utils";
 import { useApplyDiscountMutation } from "@/redux/store/api/discount/discountApi";
 import { kwPushAddPaymentInfo, kwPushAddShippingInfo } from "@/lib/Analytics/kwEcom";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { districtAliases, districts } from "./_components/districts";
 
 // --- Types ---
 type ShippingMethod = "insideDhaka" | "outsideDhaka";
@@ -42,18 +50,7 @@ type DiscountLabel =
   | { type: "fixed"; value: number }
   | null;
 
-// --- Districts ---
-const districts = [
-  "Bagerhat", "Bandarban", "Barguna", "Barishal", "Bhola", "Bogura", "Brahmanbaria", "Chandpur",
-  "Chattogram", "Chuadanga", "Cox's Bazar", "Cumilla", "Dhaka", "Dinajpur", "Faridpur", "Feni",
-  "Gaibandha", "Gazipur", "Gopalganj", "Habiganj", "Jamalpur", "Jashore", "Jhalokati", "Jhenaidah",
-  "Joypurhat", "Khagrachari", "Khulna", "Kishoreganj", "Kurigram", "Kushtia", "Lakshmipur",
-  "Lalmonirhat", "Madaripur", "Magura", "Manikganj", "Meherpur", "Moulvibazar", "Munshiganj",
-  "Mymensingh", "Naogaon", "Narail", "Narayanganj", "Narsingdi", "Natore", "Netrokona",
-  "Nilphamari", "Noakhali", "Pabna", "Panchagarh", "Patuakhali", "Pirojpur", "Rajbari", "Rajshahi",
-  "Rangamati", "Rangpur", "Satkhira", "Shariatpur", "Sherpur", "Sirajganj", "Sunamganj",
-  "Sylhet", "Tangail", "Thakurgaon",
-];
+type DistrictSource = "auto" | "manual" | null;
 
 // ✅ hoisted (prevents "Cannot access before initialization")
 function normalizeLines(p: any) {
@@ -92,6 +89,62 @@ function normalizeLines(p: any) {
   };
 }
 
+// --- helpers (strong + safe) ---
+const norm = (s: string) =>
+  (s || "")
+    .toLowerCase()
+    .normalize("NFKC")
+    .replace(/[—–-]/g, " ")
+    .replace(/['’]/g, "")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+function detectDistrictEnFromText(text: string) {
+  const t = norm(text);
+  if (!t) return undefined;
+
+  // 1) alias scan
+  for (const d of districts) {
+    const aliases = districtAliases[d.en] ?? [d.en, d.bn];
+
+    for (const a of aliases) {
+      const aa = norm(a);
+      if (!aa) continue;
+
+      // english -> word boundary
+      const isEnglish = /^[a-z0-9\s]+$/.test(aa);
+      if (isEnglish) {
+        const re = new RegExp(`\\b${aa.replace(/\s+/g, "\\s+")}\\b`, "i");
+        if (re.test(t)) return d.en;
+      } else {
+        // bangla -> includes (handles suffix-ish forms often still containing root)
+        if (t.includes(aa)) return d.en;
+      }
+    }
+  }
+
+  // 2) fallback: match district list itself
+  for (const d of districts) {
+    const en = norm(d.en);
+    const bn = norm(d.bn);
+
+    if (en) {
+      const re = new RegExp(`\\b${en.replace(/\s+/g, "\\s+")}\\b`, "i");
+      if (re.test(t)) return d.en;
+    }
+    if (bn && t.includes(bn)) return d.en;
+  }
+
+  return undefined;
+}
+
+function getDistrictLabel(en?: string) {
+  if (!en) return undefined;
+  const d = districts.find((x) => x.en === en);
+  return d ? `${d.en} — ${d.bn}` : en;
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
 
@@ -114,16 +167,19 @@ export default function CheckoutPage() {
 
   // --- UI state ---
   const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false);
-  const [shippingMethod, setShippingMethod] =
-    useState<ShippingMethod>("insideDhaka");
+
+  // ✅ default inside Dhaka
+  const [shippingMethod, setShippingMethod] = useState<ShippingMethod>("insideDhaka");
+
   const [paymentMethod, setPaymentMethod] =
     useState<PaymentMethod>("cashOnDelivery");
+
   const [billingType, setBillingType] =
     useState<BillingType>("sameAsShipping");
-  const [selectedDistrict, setSelectedDistrict] = useState<string | undefined>(
-    undefined
-  );
-  const [customThana, setCustomThana] = useState("");
+
+  // ✅ store district EN only (optional)
+  const [selectedDistrictEn, setSelectedDistrictEn] = useState<string | undefined>(undefined);
+  const [districtSource, setDistrictSource] = useState<DistrictSource>(null);
 
   // --- Form state ---
   const [name, setName] = useState("");
@@ -147,14 +203,13 @@ export default function CheckoutPage() {
   const [applyDiscount, { isLoading: isApplyingDiscount }] =
     useApplyDiscountMutation();
 
-  // --- Billing details ---
+  // --- Billing details (simple) ---
   const [billingName, setBillingName] = useState("");
   const [billingAddress, setBillingAddress] = useState("");
-  const [billingDistrict, setBillingDistrict] = useState("");
-  const [billingThana, setBillingThana] = useState("");
+  const [billingDistrictEn, setBillingDistrictEn] = useState<string | undefined>(undefined);
+  const [billingDistrictQuery, setBillingDistrictQuery] = useState("");
   const [billingContactNumber, setBillingContactNumber] = useState("");
 
-  const [districtSearch, setDistrictSearch] = useState("");
   const [districtQuery, setDistrictQuery] = useState("");
 
   type SubmitStep =
@@ -166,6 +221,11 @@ export default function CheckoutPage() {
     | "error";
 
   const [submitStep, setSubmitStep] = useState<SubmitStep>("idle");
+  const submitStepRef = useRef<SubmitStep>("idle");
+  useEffect(() => {
+    submitStepRef.current = submitStep;
+  }, [submitStep]);
+
   const isSubmittingRef = useRef(false);
 
   const stepText: Record<SubmitStep, string> = {
@@ -179,11 +239,16 @@ export default function CheckoutPage() {
 
   const isBlockingUI = submitStep !== "idle" && submitStep !== "error";
 
-  const filteredDistricts = useMemo(() => {
-    const q = districtSearch.trim().toLowerCase();
-    if (!q) return districts;
-    return districts.filter((d) => d.toLowerCase().includes(q));
-  }, [districtSearch]);
+  // --- Display district EN-BN label ---
+  const selectedDistrictLabel = useMemo(
+    () => getDistrictLabel(selectedDistrictEn),
+    [selectedDistrictEn]
+  );
+
+  const billingDistrictLabel = useMemo(
+    () => getDistrictLabel(billingDistrictEn) || "",
+    [billingDistrictEn]
+  );
 
   useEffect(() => {
     if (typeof window !== "undefined") window.scrollTo(0, 0);
@@ -205,22 +270,39 @@ export default function CheckoutPage() {
     }));
   }, [checkoutMode, checkoutItem, cartItems]);
 
-  // 🧩 Shipping logic
+  // ✅ Auto-pick district from address keywords:
+  // - updates while source is "auto" or null
+  // - never overrides manual selection
   useEffect(() => {
-    if (!selectedDistrict) return;
+    if (districtSource === "manual") return;
 
-    if (selectedDistrict === "Dhaka") {
-      if (shippingMethod !== "insideDhaka") {
-        setShippingMethod("insideDhaka");
-        // toast.info("Dhaka is inside Dhaka — shipping set automatically to Inside Dhaka.");
-      }
-    } else {
-      if (shippingMethod !== "outsideDhaka") {
-        setShippingMethod("outsideDhaka");
-        // toast.info(`${selectedDistrict} is outside Dhaka — shipping set automatically to Outside Dhaka.`);
-      }
+    const guess = detectDistrictEnFromText(address);
+
+    if (guess && guess !== selectedDistrictEn) {
+      setSelectedDistrictEn(guess);
+      setDistrictSource("auto");
+      setDistrictQuery(getDistrictLabel(guess) ?? "");
+      return;
     }
-  }, [selectedDistrict, shippingMethod]);
+
+    // if address changed and we no longer detect anything, clear ONLY if it was auto
+    if (!guess && districtSource === "auto") {
+      setSelectedDistrictEn(undefined);
+      setDistrictSource(null);
+      setDistrictQuery("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address]);
+
+  // ✅ Shipping logic:
+  // - If district selected => auto set shipping (Dhaka => inside, else outside)
+  // - If no district selected => user can manually choose, no restriction
+  useEffect(() => {
+    if (!selectedDistrictEn) return;
+
+    const next: ShippingMethod = selectedDistrictEn === "Dhaka" ? "insideDhaka" : "outsideDhaka";
+    if (shippingMethod !== next) setShippingMethod(next);
+  }, [selectedDistrictEn, shippingMethod]);
 
   const formatBDT = (amount: number) =>
     new Intl.NumberFormat("en-BD", {
@@ -258,7 +340,10 @@ export default function CheckoutPage() {
   const discountedSubtotal = Math.max(0, Math.round(subtotal - safeCouponDiscount));
 
   const FREE_SHIPPING_MIN = 1000;
-  const isFreeShipping = useMemo(() => discountedSubtotal >= FREE_SHIPPING_MIN, [discountedSubtotal]);
+  const isFreeShipping = useMemo(
+    () => discountedSubtotal >= FREE_SHIPPING_MIN,
+    [discountedSubtotal]
+  );
 
   const baseShippingCost = useMemo(
     () => (shippingMethod === "outsideDhaka" ? 110 : 50),
@@ -280,10 +365,10 @@ export default function CheckoutPage() {
       em: email || undefined,
       ph: contactNumber || undefined,
       fn: name || undefined,
-      ct: selectedDistrict || undefined,
+      ct: selectedDistrictEn || undefined, // ✅ EN only
       country: "bd",
     };
-  }, [email, contactNumber, name, selectedDistrict]);
+  }, [email, contactNumber, name, selectedDistrictEn]);
 
   const analyticsItems = useMemo(() => {
     return itemsToDisplay
@@ -330,13 +415,13 @@ export default function CheckoutPage() {
   }, [itemsToDisplay]);
 
   const nameRef = useRef<HTMLInputElement | null>(null);
-  const addressRef = useRef<HTMLInputElement | null>(null);
   const phoneRef = useRef<HTMLInputElement | null>(null);
+  const addressRef = useRef<HTMLTextAreaElement | null>(null);
+
   const shippingDedupeRef = useRef<string>("");
   const paymentDedupeRef = useRef<string>("");
 
   useEffect(() => {
-    if (!selectedDistrict) return;
     if (!analyticsItems.length) return;
     if (analyticsItems.some((i) => !i.price || i.price <= 0)) return;
 
@@ -349,7 +434,7 @@ export default function CheckoutPage() {
 
     const fp = [
       "ship",
-      selectedDistrict,
+      selectedDistrictEn || "unknown",
       shippingMethod,
       String(Math.round(total)),
       analyticsItems
@@ -369,7 +454,7 @@ export default function CheckoutPage() {
       coupon: appliedPromoCode ?? undefined,
       user_data: userData,
     });
-  }, [selectedDistrict, shippingMethod, total, analyticsItems, isFreeShipping, appliedPromoCode, userData]);
+  }, [selectedDistrictEn, shippingMethod, total, analyticsItems, isFreeShipping, appliedPromoCode, userData]);
 
   useEffect(() => {
     if (!analyticsItems.length) return;
@@ -404,19 +489,17 @@ export default function CheckoutPage() {
   const validateForm = () => {
     const nextErrors: Record<string, string> = {};
     if (!name.trim()) nextErrors.name = "Please enter your full name.";
-    if (!address.trim()) nextErrors.address = "Please enter your full address.";
     if (contactNumber.replace(/\D/g, "").length < 10)
-      nextErrors.contactNumber = "Please enter a valid phone number.";
-    // if (!selectedDistrict) nextErrors.district = "Please select your district.";
+      nextErrors.contactNumber = "Please enter a valid phone number (11 digit).";
+    if (!address.trim()) nextErrors.address = "Please enter your full address.";
     setErrors(nextErrors);
 
-    // ✅ scroll to first invalid field
-    const order: Array<keyof typeof nextErrors> = ["name", "address", "contactNumber"];
+    const order: Array<keyof typeof nextErrors> = ["name", "contactNumber", "address"];
     const firstKey = order.find((k) => nextErrors[k]);
 
     if (firstKey === "name") scrollToField(nameRef.current);
-    if (firstKey === "address") scrollToField(addressRef.current);
     if (firstKey === "contactNumber") scrollToField(phoneRef.current);
+    if (firstKey === "address") scrollToField(addressRef.current);
 
     return Object.keys(nextErrors).length === 0;
   };
@@ -495,7 +578,7 @@ export default function CheckoutPage() {
   const applyPromo = async () => {
     if (appliedPromoCode) {
       setAppliedPromoCode(null);
-      setAppliedCouponCode?.(""); // safe
+      setAppliedCouponCode?.("");
       clearAppliedCouponCode?.();
       setCouponDiscount(0);
       setDiscountInfo(null);
@@ -555,7 +638,6 @@ export default function CheckoutPage() {
 
   // --- Submit order ---
   const handleSubmit = async () => {
-    // HARD block: prevents double click even if state is late
     if (isSubmittingRef.current) return;
     if (isPlacingOrder || isBkashRedirecting) return;
 
@@ -592,12 +674,18 @@ export default function CheckoutPage() {
         coupon: appliedPromoCode ?? null,
         discountAmount: Number(displayedDiscount || 0),
 
-        customerInfo: { name, phone: contactNumber, email, address, district: selectedDistrict, thana: customThana },
-        shippingAddress: { name, phone: contactNumber, email, address, district: selectedDistrict, thana: customThana },
+        // ✅ no thana; district optional; store EN
+        customerInfo: { name, phone: contactNumber, email, address, district: selectedDistrictEn },
+        shippingAddress: { name, phone: contactNumber, email, address, district: selectedDistrictEn },
         billingAddress:
           billingType === "sameAsShipping"
-            ? { name, phone: contactNumber, email, address, district: selectedDistrict, thana: customThana }
-            : { name: billingName, phone: billingContactNumber, address: billingAddress, district: billingDistrict, thana: billingThana },
+            ? { name, phone: contactNumber, email, address, district: selectedDistrictEn }
+            : {
+              name: billingName || name,
+              phone: billingContactNumber || contactNumber,
+              address: billingAddress || address,
+              district: billingDistrictEn || selectedDistrictEn,
+            },
       };
 
       const res: any = await handleCreateOrder(payload);
@@ -614,6 +702,7 @@ export default function CheckoutPage() {
 
       setSubmitStep("redirecting");
 
+      // ✅ COD: go thank you immediately (no artificial delay)
       if (paymentMethod === "cashOnDelivery") {
         clearCart();
         setSubmitStep("done");
@@ -645,13 +734,11 @@ export default function CheckoutPage() {
       setSubmitStep("error");
       toast.error(err?.data?.message || "Failed to place order. Please try again.");
     } finally {
-      // if redirect happens, page unloads; otherwise reset safely
-      setTimeout(() => {
-        isSubmittingRef.current = false;
-        if (submitStep !== "redirecting" && submitStep !== "done") {
-          setSubmitStep("idle");
-        }
-      }, 150);
+      // ✅ instant unlock if we didn't redirect
+      isSubmittingRef.current = false;
+      if (submitStepRef.current !== "redirecting" && submitStepRef.current !== "done") {
+        setSubmitStep("idle");
+      }
     }
   };
 
@@ -667,15 +754,14 @@ export default function CheckoutPage() {
 
   function scrollToField(el: HTMLElement | null) {
     if (!el) return;
-    // smooth scroll to element
     el.scrollIntoView({ behavior: "smooth", block: "center" });
-
-    // focus after a tick (important for mobile + smooth scroll)
-    setTimeout(() => {
-      // focus if it is input/textarea/select button etc
-      (el as any)?.focus?.();
-    }, 800);
+    setTimeout(() => (el as any)?.focus?.(), 300);
   }
+
+  // ✅ Mobile speed: auto focus + next behavior
+  useEffect(() => {
+    nameRef.current?.focus?.();
+  }, []);
 
   return (
     <StoreContainer>
@@ -716,6 +802,7 @@ export default function CheckoutPage() {
           </div>
         </div>
       )}
+
       <div className="min-h-screen bg-gray-50 pt-2 sm:pt-6 pb-6">
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           {/* Header */}
@@ -773,9 +860,6 @@ export default function CheckoutPage() {
                         <div key={`${productDoc?.id}-${product.selectedSize}-${idx}`} className="flex items-start gap-3">
                           <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100">
                             <Image src={productDoc?.primaryImage} alt={productDoc?.name} fill className="object-cover" />
-                            {/* <div className="absolute top-1 right-1 text-xs bg-black text-white rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
-                              {product.quantity}
-                            </div> */}
                           </div>
 
                           <div className="flex-1 min-w-0">
@@ -810,7 +894,6 @@ export default function CheckoutPage() {
                       <span>{formatBDT(subtotal)}</span>
                     </div>
 
-                    {/* ✅ show auto + coupon cleanly */}
                     {autoDiscount > 0 && (
                       <div className="flex justify-between text-sm text-green-700">
                         <span>Discount</span>
@@ -902,23 +985,17 @@ export default function CheckoutPage() {
                       ref={nameRef}
                       placeholder="e.g. Rahim Uddin"
                       value={name}
+                      enterKeyHint="next"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          phoneRef.current?.focus();
+                        }
+                      }}
                       onChange={(e) => setName(e.target.value)}
                       className={errors.name ? "border-red-500 focus-visible:ring-red-500" : ""}
                     />
                     {errors.name && <p className="text-xs text-red-600 mt-1">{errors.name}</p>}
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium text-gray-700">Full Address</label>
-                    <Input
-                      ref={addressRef}
-                      placeholder="House, Road, Area"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      className={errors.address ? "border-red-500 focus-visible:ring-red-500" : ""}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">We deliver across Bangladesh</p>
-                    {errors.address && <p className="text-xs text-red-600 mt-1">{errors.address}</p>}
                   </div>
 
                   <div>
@@ -927,8 +1004,15 @@ export default function CheckoutPage() {
                       ref={phoneRef}
                       placeholder="01XXXXXXXXX"
                       inputMode="numeric"
+                      enterKeyHint="next"
                       value={contactNumber}
-                      onChange={(e) => setContactNumber(e.target.value)}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setContactNumber(v);
+                        if (v.replace(/\D/g, "").length >= 11) {
+                          addressRef.current?.focus();
+                        }
+                      }}
                       className={errors.contactNumber ? "border-red-500 focus-visible:ring-red-500" : ""}
                     />
                     {errors.contactNumber && (
@@ -936,94 +1020,105 @@ export default function CheckoutPage() {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">District</label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button type="button" variant="outline" className="w-full justify-between">
-                            <span className={cn(!selectedDistrict && "text-gray-500")}>
-                              {selectedDistrict ?? "Select your district"}
-                            </span>
-                            <ChevronsUpDown className="h-4 w-4 opacity-60" />
-                          </Button>
-                        </PopoverTrigger>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Full Address</label>
 
-                        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-                          <Command shouldFilter>
-                            <CommandInput
-                              placeholder="Search district..."
-                              value={districtQuery}
-                              onValueChange={(val) => {
-                                setDistrictQuery(val);
+                    {/* ✅ 2-line input (textarea) */}
+                    <textarea
+                      ref={addressRef}
+                      rows={2}
+                      placeholder="House, Road, Area (you can write full address)"
+                      className={cn(
+                        "w-full resize-y min-h-[56px] p-3 border rounded-md bg-white text-sm outline-none",
+                        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                        errors.address ? "border-red-500 focus-visible:ring-red-500" : "border-input"
+                      )}
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                    />
+                    {errors.address && <p className="text-xs text-red-600 mt-1">{errors.address}</p>}
+                  </div>
 
-                                // ✅ auto-select if exact match
-                                const match = districts.find(
-                                  (d) => d.toLowerCase() === val.trim().toLowerCase()
-                                );
+                  {/* ✅ District optional (EN stored, EN-BN shown) */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      District <span className="text-xs text-gray-500">(optional)</span>
+                    </label>
 
-                                if (match) setSelectedDistrict(match);
-                              }}
-                            />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button type="button" variant="outline" className="w-full justify-between">
+                          <span className={cn(!selectedDistrictEn && "text-gray-500")}>
+                            {selectedDistrictLabel ?? "Select your district (optional)"}
+                          </span>
+                          <ChevronsUpDown className="h-4 w-4 opacity-60" />
+                        </Button>
+                      </PopoverTrigger>
 
-                            <CommandList>
-                              <CommandEmpty>No district found.</CommandEmpty>
+                      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                        <Command shouldFilter>
+                          <CommandInput
+                            placeholder="Search district (English / বাংলা)..."
+                            value={districtQuery}
+                            onValueChange={(val) => {
+                              setDistrictQuery(val);
 
-                              <CommandGroup>
-                                <CommandItem
-                                  onSelect={() => {
-                                    setSelectedDistrict(undefined);
-                                    setDistrictQuery("");
-                                  }}
-                                >
-                                  <span className="text-sm text-gray-600">Clear</span>
-                                </CommandItem>
+                              const q = norm(val);
+                              const match = districts.find((d) => {
+                                const label = `${d.en} — ${d.bn}`;
+                                return norm(label) === q || norm(`${d.en} ${d.bn}`) === q;
+                              });
 
-                                {districts.map((d) => (
+                              if (match) {
+                                setSelectedDistrictEn(match.en);
+                                setDistrictSource("manual");
+                              }
+                            }}
+                          />
+
+                          <CommandList>
+                            <CommandEmpty>No district found.</CommandEmpty>
+
+                            <CommandGroup>
+                              <CommandItem
+                                onSelect={() => {
+                                  setSelectedDistrictEn(undefined);
+                                  setDistrictSource(null);
+                                  setDistrictQuery("");
+                                }}
+                              >
+                                <span className="text-sm text-gray-600">Clear</span>
+                              </CommandItem>
+
+                              {districts.map((d) => {
+                                const label = `${d.en} — ${d.bn}`;
+
+                                return (
                                   <CommandItem
-                                    key={d}
-                                    value={d}
+                                    key={d.en}
+                                    value={`${label} ${d.en} ${d.bn}`}
                                     onSelect={() => {
-                                      setSelectedDistrict(d);
-                                      setDistrictQuery(d); // ✅ show selected in search box too
+                                      setSelectedDistrictEn(d.en);
+                                      setDistrictSource("manual");
+                                      setDistrictQuery(label);
                                     }}
                                   >
                                     <Check
                                       className={cn(
                                         "mr-2 h-4 w-4",
-                                        selectedDistrict?.toLowerCase() === d.toLowerCase()
-                                          ? "opacity-100"
-                                          : "opacity-0"
+                                        selectedDistrictEn === d.en ? "opacity-100" : "opacity-0"
                                       )}
                                     />
-                                    {d}
+                                    {label}
                                   </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-
-                      {/* {errors.district && <p className="text-xs text-red-600 mt-1">{errors.district}</p>} */}
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">Thana (optional)</label>
-                      <Input
-                        placeholder="e.g. Gulshan"
-                        value={customThana}
-                        onChange={(e) => setCustomThana(e.target.value)}
-                      />
-                    </div>
+                                );
+                              })}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   </div>
-
-                  {/* <div className="flex items-center gap-2 pt-2">
-                    <Checkbox id="newsletter" />
-                    <label htmlFor="newsletter" className="text-sm text-gray-600">
-                      Save this information for next time
-                    </label>
-                  </div> */}
                 </CardContent>
               </Card>
 
@@ -1035,19 +1130,10 @@ export default function CheckoutPage() {
                 <CardContent>
                   <RadioGroup
                     value={shippingMethod}
+                    // ✅ if district NOT selected => user can choose freely
+                    // ✅ if district selected => auto, so disable manual change
+                    disabled={Boolean(selectedDistrictEn)}
                     onValueChange={(v) => {
-                      if (!selectedDistrict) {
-                        toast.warning("Please select your district first.");
-                        return;
-                      }
-                      if (selectedDistrict === "Dhaka" && v === "outsideDhaka") {
-                        toast.error("Shipping cost is only 50 TK inside Dhaka");
-                        return;
-                      }
-                      if (selectedDistrict !== "Dhaka" && v === "insideDhaka") {
-                        toast.error(` Shipping cost is only 110 TK for ${selectedDistrict}.`);
-                        return;
-                      }
                       setShippingMethod(v as ShippingMethod);
                     }}
                     className="gap-3"
@@ -1072,15 +1158,19 @@ export default function CheckoutPage() {
                 <CardContent className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700">Email (optional)</label>
-                    <Input placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <Input
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
                   </div>
 
                   <div>
                     <p className="text-sm font-medium mb-2">Additional Notes (optional)</p>
                     <textarea
-                      placeholder="Add any specific instructions or notes for your order"
-                      rows={4}
-                      className="w-full p-3 border rounded-md bg-white"
+                      placeholder="Any instructions for delivery"
+                      rows={3}
+                      className="w-full p-3 border rounded-md bg-white text-sm"
                       value={additionalNotes}
                       onChange={(e) => setAdditionalNotes(e.target.value)}
                     />
@@ -1088,7 +1178,7 @@ export default function CheckoutPage() {
                 </CardContent>
               </Card>
 
-              {/* Billing Address */}
+              {/* Billing Address (simple) */}
               <Card className="shadow-sm">
                 <CardHeader>
                   <CardTitle className="text-md">Billing Address</CardTitle>
@@ -1101,7 +1191,7 @@ export default function CheckoutPage() {
                   >
                     <label className="flex items-center gap-3 border rounded-md p-3 hover:bg-gray-50 transition-colors">
                       <RadioGroupItem value="sameAsShipping" />
-                      <span className="text-sm">Same as shipping address</span>
+                      <span className="text-sm">Same as shipping</span>
                     </label>
                     <label className="flex items-center gap-3 border rounded-md p-3 hover:bg-gray-50 transition-colors">
                       <RadioGroupItem value="differentBillingAddress" />
@@ -1110,15 +1200,84 @@ export default function CheckoutPage() {
                   </RadioGroup>
 
                   {billingType === "differentBillingAddress" && (
-                    <div className="space-y-4 border rounded-md p-4">
+                    <div className="space-y-3 border rounded-md p-4">
                       <p className="text-sm font-medium">Billing Information</p>
-                      <Input placeholder="Name" value={billingName} onChange={(e) => setBillingName(e.target.value)} />
-                      <Input placeholder="Address" value={billingAddress} onChange={(e) => setBillingAddress(e.target.value)} />
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Input placeholder="District" value={billingDistrict} onChange={(e) => setBillingDistrict(e.target.value)} />
-                        <Input placeholder="Thana" value={billingThana} onChange={(e) => setBillingThana(e.target.value)} />
-                      </div>
-                      <Input placeholder="Contact Number" value={billingContactNumber} onChange={(e) => setBillingContactNumber(e.target.value)} />
+
+                      <Input
+                        placeholder="Name (optional)"
+                        value={billingName}
+                        onChange={(e) => setBillingName(e.target.value)}
+                      />
+
+                      <Input
+                        placeholder="Contact number (optional)"
+                        value={billingContactNumber}
+                        onChange={(e) => setBillingContactNumber(e.target.value)}
+                      />
+
+                      <textarea
+                        rows={2}
+                        placeholder="Billing address (optional)"
+                        className="w-full resize-y min-h-[56px] p-3 border rounded-md bg-white text-sm"
+                        value={billingAddress}
+                        onChange={(e) => setBillingAddress(e.target.value)}
+                      />
+
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button type="button" variant="outline" className="w-full justify-between">
+                            <span className={cn(!billingDistrictEn && "text-gray-500")}>
+                              {billingDistrictLabel || "Billing district (optional)"}
+                            </span>
+                            <ChevronsUpDown className="h-4 w-4 opacity-60" />
+                          </Button>
+                        </PopoverTrigger>
+
+                        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                          <Command shouldFilter>
+                            <CommandInput
+                              placeholder="Search district (English / বাংলা)..."
+                              value={billingDistrictQuery}
+                              onValueChange={(val) => setBillingDistrictQuery(val)}
+                            />
+                            <CommandList>
+                              <CommandEmpty>No district found.</CommandEmpty>
+                              <CommandGroup>
+                                <CommandItem
+                                  onSelect={() => {
+                                    setBillingDistrictEn(undefined);
+                                    setBillingDistrictQuery("");
+                                  }}
+                                >
+                                  <span className="text-sm text-gray-600">Clear</span>
+                                </CommandItem>
+
+                                {districts.map((d) => {
+                                  const label = `${d.en} — ${d.bn}`;
+                                  return (
+                                    <CommandItem
+                                      key={d.en}
+                                      value={`${label} ${d.en} ${d.bn}`}
+                                      onSelect={() => {
+                                        setBillingDistrictEn(d.en);
+                                        setBillingDistrictQuery(label);
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          billingDistrictEn === d.en ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                      {label}
+                                    </CommandItem>
+                                  );
+                                })}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   )}
                 </CardContent>
@@ -1139,13 +1298,13 @@ export default function CheckoutPage() {
                     className="gap-3"
                   >
                     <label className="flex items-center gap-3 border rounded-md p-3 hover:bg-gray-50 transition-colors">
-                      <RadioGroupItem value="bkash" />
-                      <span className="text-sm">Pay with bKash (Online Payment)</span>
+                      <RadioGroupItem value="cashOnDelivery" />
+                      <span className="text-sm">Cash on Delivery (COD)</span>
                     </label>
 
                     <label className="flex items-center gap-3 border rounded-md p-3 hover:bg-gray-50 transition-colors">
-                      <RadioGroupItem value="cashOnDelivery" />
-                      <span className="text-sm">Cash on Delivery (COD)</span>
+                      <RadioGroupItem value="bkash" />
+                      <span className="text-sm">Pay with bKash (Online Payment)</span>
                     </label>
 
                     {paymentMethod === "cashOnDelivery" && (
@@ -1210,9 +1369,6 @@ export default function CheckoutPage() {
                           <div key={`${productDoc?.id}-${product.selectedSize}-${idx}`} className="flex items-start gap-3">
                             <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100">
                               <Image src={productDoc?.primaryImage} alt={productDoc?.name} fill className="object-cover" />
-                              {/* <div className="absolute top-1 right-1 text-xs bg-black text-white rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
-                                {product.quantity}
-                              </div> */}
                             </div>
 
                             <div className="flex-1 min-w-0">
@@ -1316,7 +1472,6 @@ export default function CheckoutPage() {
                       {discountLabel && appliedPromoCode && (
                         <p className="text-xs text-gray-500 mt-1">Applied: {discountLabel}</p>
                       )}
-                      {/* Optional: show total discount */}
                       {displayedDiscount > 0 && (
                         <p className="text-xs text-gray-500 mt-1">
                           Total discount saved in order: {formatBDT(displayedDiscount)}

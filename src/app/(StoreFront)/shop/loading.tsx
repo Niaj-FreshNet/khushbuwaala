@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { LiveSkeleton } from "./_components/LiveSkeleton";
+import { ShopControlsSkeleton } from "@/components/Modules/Shop/ShopControlsSkeleton";
 
 export default function ShopLoading() {
   return (
@@ -53,9 +54,8 @@ export default function ShopLoading() {
                 speedMs={1350 + i * 120}
               >
                 <Skeleton
-                  className={`h-7 rounded-full ${
-                    i === 0 ? "w-20" : i === 1 ? "w-24" : "w-28"
-                  }`}
+                  className={`h-7 rounded-full ${i === 0 ? "w-20" : i === 1 ? "w-24" : "w-28"
+                    }`}
                 />
               </LiveSkeleton>
             ))}
@@ -66,41 +66,7 @@ export default function ShopLoading() {
       {/* Products */}
       <section className="container mx-auto py-8 px-4 space-y-6">
         {/* Controls */}
-        <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center bg-white py-3 px-3 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center gap-2">
-            <LiveSkeleton delayMs={120} speedMs={1400}>
-              <Skeleton className="h-9 w-24 rounded-full" />
-            </LiveSkeleton>
-            <LiveSkeleton delayMs={200} speedMs={1500}>
-              <Skeleton className="h-9 w-16 rounded-full" />
-            </LiveSkeleton>
-          </div>
-
-          <div className="flex-1 md:max-w-md">
-            <LiveSkeleton delayMs={160} speedMs={1450}>
-              <Skeleton className="h-10 w-full rounded-xl" />
-            </LiveSkeleton>
-          </div>
-
-          <div className="flex items-center justify-between md:justify-end gap-3">
-            <LiveSkeleton delayMs={220} speedMs={1550}>
-              <Skeleton className="h-10 w-28 rounded-xl" />
-            </LiveSkeleton>
-
-            <div className="flex gap-2">
-              {[0, 1, 2, 3].map((i) => (
-                <div key={i} className={i >= 2 ? "hidden md:block" : ""}>
-                  <LiveSkeleton
-                    delayMs={200 + i * 70}
-                    speedMs={1350 + i * 100}
-                  >
-                    <Skeleton className="h-10 w-10 rounded-xl" />
-                  </LiveSkeleton>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <ShopControlsSkeleton />
 
         {/* Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

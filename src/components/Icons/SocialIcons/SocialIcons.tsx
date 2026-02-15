@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Facebook, Instagram, Twitter, Youtube, MessageCircle } from "lucide-react"
+import { Facebook, Instagram, Youtube, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 const SocialIcons = () => {
@@ -15,21 +15,14 @@ const SocialIcons = () => {
     },
     {
       name: "Instagram",
-      href: "https://instagram.com/khushbuwaala",
+      href: "https://www.instagram.com/khushbuwaala_perfumes",
       icon: <Instagram className="h-5 w-5" />,
       color: "hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 hover:text-white",
       followers: "15K+",
     },
     {
-      name: "Twitter",
-      href: "https://twitter.com/khushbuwaala",
-      icon: <Twitter className="h-5 w-5" />,
-      color: "hover:bg-blue-400 hover:text-white",
-      followers: "5K+",
-    },
-    {
       name: "YouTube",
-      href: "https://youtube.com/@khushbuwaala",
+      href: "https://www.youtube.com/@khushbuwaala_perfumes",
       icon: <Youtube className="h-5 w-5" />,
       color: "hover:bg-red-600 hover:text-white",
       followers: "8K+",

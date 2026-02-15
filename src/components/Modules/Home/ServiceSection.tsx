@@ -12,28 +12,32 @@ export function ServicesSection() {
       title: "Fast Delivery",
       description: "Free delivery on orders over 1000 BDT (selected areas).",
       icon: <Package className="h-6 w-6" />,
+      footer: "Quick dispatch • Safe packaging • Real-time order updates",
     },
     {
       title: "Support 24/7",
       description: "Chat or call anytime — we’re always here to help.",
       icon: <LifeBuoy className="h-6 w-6" />,
+      footer: "Friendly assistance • Fast response • Customer-first service",
     },
     {
       title: "Easy Exchange",
       description: "Hassle-free exchange within 7 days (terms apply).",
       icon: <RefreshCcw className="h-6 w-6" />,
+      footer: "Simple process • Transparent policy • Stress-free experience",
     },
     {
       title: "Secure Payment",
       description: "Trusted checkout with encrypted transactions.",
       icon: <Lock className="h-6 w-6" />,
+      footer: "Encrypted checkout • Trusted gateways • Safe transactions",
     },
   ]
 
   return (
     <section className="py-14 px-4" aria-labelledby="services-heading">
       <SectionTitle
-        title="Why Shop With KhushbuWaala"
+        title="Why Choose KhushbuWaala"
         underlineWidth="w-52"
         className="mb-8"
         subtitle="Premium fragrances, authentic sources, and service you can trust."
@@ -70,7 +74,7 @@ export function ServicesSection() {
               {/* subtle divider + micro trust */}
               <div className="mt-5 h-px w-full bg-gradient-to-r from-transparent via-rose-100 to-transparent" />
               <p className="mt-4 text-xs text-gray-500">
-                100% genuine • Carefully packed • Quality checked
+                {service.footer}
               </p>
             </div>
           </motion.div>

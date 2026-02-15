@@ -6,15 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles, Star, Play, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import React, { useMemo, useRef, useState } from "react"
-import {
-  motion,
-  useInView,
-  useMotionValue,
-  useSpring,
-  useScroll,
-  useTransform,
-  Variants,
-} from "framer-motion"
+import { useInViewOnce } from "@/components/Shared/useInViewOnce"
 
 interface BannerProps {
   heading: string
@@ -34,7 +26,7 @@ interface BannerProps {
     value: string
     label: string
   }>
-  priority?: boolean;
+  priority?: boolean
 }
 
 export function BannerSection({
@@ -48,33 +40,24 @@ export function BannerSection({
   showVideoButton = false,
   videoUrl,
   stats,
-  priority = false
+  priority = false,
 }: BannerProps) {
   const sectionRef = useRef<HTMLElement | null>(null)
 
   // ✅ In-view animation (once)
-  const isInView = useInView(sectionRef, { amount: 0.3, once: true })
+  const isInView = useInViewOnce(sectionRef, { threshold: 0.3 })
 
   // ✅ Avoid overlay flicker: wait until image loads
   const [hasLoaded, setHasLoaded] = useState(false)
 
-  // ✅ Smooth mouse highlight without setState re-renders
-  const mouseX = useMotionValue(50)
-  const mouseY = useMotionValue(50)
-  const mx = useSpring(mouseX, { stiffness: 120, damping: 20 })
-  const my = useSpring(mouseY, { stiffness: 120, damping: 20 })
+  // ✅ Determine if pointer is "fine" (desktop mouse/trackpad) once
+  const enableMouse = useMemo(() => {
+    if (typeof window === "undefined") return false
+    return window.matchMedia("(pointer:fine)").matches
+  }, [])
 
-  const bgImage = useTransform([mx, my], ([x, y]) => {
-    return `radial-gradient(circle at ${x}% ${y}%, rgba(255,255,255,0.12) 0%, transparent 52%)`
-  })
-
-  // ✅ Optional parallax (relative to section)
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  })
-  const parallaxY = useTransform(scrollYProgress, [0, 1], ["0px", "50px"])
-  const parallaxScale = useTransform(scrollYProgress, [0, 1], [1, 1.06])
+  // ✅ stable "set loaded once"
+  const markLoaded = () => setHasLoaded((v) => v || true)
 
   const styles = useMemo(() => {
     switch (variant) {
@@ -117,77 +100,29 @@ export function BannerSection({
     }
   }, [variant])
 
-  // ✅ Variants (staggered + consistent)
-  const container: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        when: "beforeChildren",
-        staggerChildren: 0.12,
-      },
-    },
-  }
-
-  const itemUp: Variants = {
-    hidden: { opacity: 0, y: 18, filter: "blur(6px)" },
-    show: {
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.7, ease: [0.21, 0.61, 0.35, 1] },
-    },
-  }
-
-  const itemUpSlow: Variants = {
-    hidden: { opacity: 0, y: 26 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.9, ease: "easeOut" } },
-  }
-
-  function handleMouseMove(e: React.MouseEvent<HTMLElement>) {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width) * 100
-    const y = ((e.clientY - rect.top) / rect.height) * 100
-    mouseX.set(x)
-    mouseY.set(y)
-  }
-
-  const enableMouse =
-    typeof window !== "undefined" &&
-    window.matchMedia("(pointer:fine)").matches
-
   return (
-    <motion.section
-      ref={sectionRef as any}
+    <section
+      ref={sectionRef}
       id="banner-section"
-      onMouseMove={enableMouse ? handleMouseMove : undefined}
       className={cn(
         "relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden mt-12 mb-4 group",
-        hasLoaded ? "opacity-100" : "opacity-0"
+        "transition-all duration-700 ease-out",
+        hasLoaded && isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
       )}
       aria-labelledby="banner-heading"
-      initial="hidden"
-      animate={hasLoaded && isInView ? "show" : "hidden"}
-      variants={container}
     >
-      {/* Background Images (parallax via Motion) */}
-      <motion.div
-        className="absolute inset-0"
-        style={{
-          y: parallaxY,
-          scale: parallaxScale,
-        }}
-      >
+      {/* Background Images (no parallax) */}
+      <div className="absolute inset-0">
         <div className="absolute inset-0 min-h-full block md:hidden">
           <Image
             src={images.mobile || "/placeholder.svg"}
             alt={heading}
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 1200px"
+            sizes="100vw"
             className="object-cover"
             priority={priority}
             quality={85}
-            onLoadingComplete={() => setHasLoaded(true)}
+            onLoadingComplete={markLoaded}
           />
         </div>
 
@@ -196,11 +131,11 @@ export function BannerSection({
             src={images.tablet || images.desktop}
             alt={heading}
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 1200px"
+            sizes="100vw"
             className="object-cover"
             priority={priority}
             quality={90}
-            onLoadingComplete={() => setHasLoaded(true)}
+            onLoadingComplete={markLoaded}
           />
         </div>
 
@@ -209,28 +144,20 @@ export function BannerSection({
             src={images.desktop}
             alt={heading}
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 1200px"
+            sizes="100vw"
             className="object-cover"
             priority={priority}
             quality={95}
-            onLoadingComplete={() => setHasLoaded(true)}
+            onLoadingComplete={markLoaded}
           />
         </div>
-      </motion.div>
+      </div>
 
-      {/* Overlay (radial highlight controlled by MotionValues) */}
-      <motion.div
-        className={cn("absolute inset-0", styles.overlay)}
-        style={{
-          backgroundImage: bgImage,
-        }}
-      />
-
-      {/* Soft overlay gradient so backgroundImage stacks nicely */}
+      {/* Overlay (single layer; removed duplicate) */}
       <div className={cn("absolute inset-0", styles.overlay)} />
 
-      {/* Floating particles */}
-      <div className="absolute inset-0 overflow-hidden">
+      {/* Floating particles (CSS only) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {styles.particleColors.map((color, index) => (
           <div
             key={index}
@@ -247,61 +174,51 @@ export function BannerSection({
 
       {/* Content */}
       <div className="relative h-full flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <motion.div
-            variants={itemUp}
+        <div className="max-w-4xl mx-auto text-center space-y-8 relative">
+          <div
             className={cn(
               "inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md border border-white/20 text-sm font-medium",
-              styles.decorativeColor
+              styles.decorativeColor,
+              "transition-all duration-700 ease-out delay-75",
+              hasLoaded && isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
             )}
           >
             <Sparkles className="h-4 w-4" />
             <span>Premium Fragrance Collection</span>
             <Star className="h-4 w-4" />
-          </motion.div>
+          </div>
 
-          <motion.h1
+          <h1
             id="banner-heading"
-            variants={itemUp}
-            className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight"
+            className={cn(
+              "text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight",
+              "transition-all duration-700 ease-out delay-100",
+              hasLoaded && isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+            )}
           >
             <span className={cn("bg-gradient-to-r bg-clip-text text-transparent", styles.accent)}>
               {heading.split(" ")[0]}
             </span>{" "}
             {heading.split(" ").slice(1).join(" ")}
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            variants={itemUp}
-            className="text-md md:text-lg lg:text-xl text-gray-200 max-w-2xl mx-auto leading-relaxed"
+          <p
+            className={cn(
+              "text-md md:text-lg lg:text-xl text-gray-200 max-w-2xl mx-auto leading-relaxed",
+              "transition-all duration-700 ease-out delay-150",
+              hasLoaded && isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+            )}
           >
             {text}
-          </motion.p>
+          </p>
 
-          {stats && (
-            <motion.div
-              variants={itemUp}
-              className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto"
-            >
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div
-                    className={cn(
-                      "text-2xl md:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent",
-                      styles.accent
-                    )}
-                  >
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-gray-300 mt-1">{stat.label}</div>
-                </div>
-              ))}
-            </motion.div>
-          )}
-
-          <motion.div
-            variants={itemUp}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          {/* CTA */}
+          <div
+            className={cn(
+              "flex flex-col sm:flex-row gap-4 justify-center items-center",
+              "transition-all duration-700 ease-out delay-200",
+              hasLoaded && isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+            )}
           >
             <Button
               asChild
@@ -320,29 +237,52 @@ export function BannerSection({
 
             {showVideoButton && videoUrl && (
               <Button
+                type="button"
                 variant="ghost"
                 size="lg"
-                className="group/play"
-                onClick={() => window.open(videoUrl, "_blank")}
+                className="group/play text-white hover:bg-white/10"
+                onClick={() => window.open(videoUrl, "_blank", "noopener,noreferrer")}
               >
                 <Play className="h-5 w-5 mr-2 transition-transform duration-300 group-hover/play:scale-110" />
                 Watch Video
               </Button>
             )}
-          </motion.div>
+          </div>
 
-          <motion.div
-            variants={itemUpSlow}
-            className="absolute bottom-2 md:bottom-12 left-1/2 transform -translate-x-1/2"
+          {/* Stats (optional) */}
+          {stats?.length ? (
+            <div
+              className={cn(
+                "pt-2 flex flex-wrap justify-center gap-6",
+                "transition-all duration-700 ease-out delay-300",
+                hasLoaded && isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+              )}
+            >
+              {stats.map((s, i) => (
+                <div key={i} className="text-center">
+                  <div className="text-white font-bold text-2xl">{s.value}</div>
+                  <div className="text-white/70 text-sm">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {/* Scroll hint */}
+          <div
+            className={cn(
+              "absolute bottom-2 md:bottom-12 left-1/2 -translate-x-1/2",
+              "transition-opacity duration-500",
+              hasLoaded && isInView ? "opacity-100" : "opacity-0"
+            )}
           >
             <div className="animate-bounce">
               <ChevronDown className="h-6 w-6 text-white/60" />
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
 
-      {/* Patterns */}
+      {/* Patterns (keep as-is) */}
       {overlayPattern === "geometric" && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-32 h-32 border border-white/10 rotate-45 animate-spin-slow" />
@@ -353,16 +293,16 @@ export function BannerSection({
 
       {overlayPattern === "radial" && (
         <div
-          className="absolute inset-0 opacity-20"
+          className="absolute inset-0 opacity-20 pointer-events-none"
           style={{
-            background: `radial-gradient(circle at center, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)`,
+            background:
+              "radial-gradient(circle at center, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)",
           }}
         />
       )}
 
-      {/* Edge fades */}
-      <div className="absolute inset-x-0 bottom-0 h-12 md:h-28 bg-gradient-to-t from-black/30 to-transparent" />
-      <div className="absolute inset-x-0 top-0 h-12 md:h-28 bg-gradient-to-b from-black/20 to-transparent" />
-    </motion.section>
+      <div className="absolute inset-x-0 bottom-0 h-12 md:h-28 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 top-0 h-12 md:h-28 bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
+    </section>
   )
 }

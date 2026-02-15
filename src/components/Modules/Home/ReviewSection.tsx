@@ -4,24 +4,22 @@ import { ReviewsGridClient } from "./ReviewsGridClient"
 const REVIEWS = [
   {
     image: "/images/reviews1.webp",
-    facebook: "#",
-    instagram: "#",
-    youtube: "#",
-    tiktok: "#",
+    facebook: "https://www.facebook.com/khushbuwaala",
+    instagram: "https://www.instagram.com/khushbuwaala_perfumes",
+    youtube: "https://www.youtube.com/@khushbuwaala_perfumes",
   },
   {
     image: "/images/reviews2.webp",
-    instagram: "#",
-    youtube: "#",
+    instagram: "https://www.instagram.com/khushbuwaala_perfumes",
+    youtube: "https://www.youtube.com/@khushbuwaala_perfumes",
   },
   {
     image: "/images/reviews3.webp",
-    facebook: "#",
-    tiktok: "#",
+    facebook: "https://www.facebook.com/khushbuwaala",
   },
   {
     image: "/images/reviews4.webp",
-    instagram: "#",
+    instagram: "https://www.instagram.com/khushbuwaala_perfumes",
   },
 ]
 

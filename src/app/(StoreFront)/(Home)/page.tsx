@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { BannerSection } from "@/components/Modules/Home/BannerSection"
 import { CarouselSlider } from "@/components/Modules/Home/CaoruselSlider"
 import { CategoryBanner } from "@/components/Modules/Home/CategoryBanner"
 import { ReviewsSection } from "@/components/Modules/Home/ReviewSection"
@@ -9,6 +8,7 @@ import { Crown, Gem, Sparkles, Star } from "lucide-react"
 import { ProductCarouselSection } from "@/components/Modules/Home/ProductCarouselSection"
 import Deferred from "@/components/Shared/Deferred"
 import MountOnView from "@/components/Shared/MountOnView"
+import BannerSection from "@/components/Modules/Home/BannerSection.client"
 
 // SEO: Page-specific Metadata for the homepage
 export const metadata: Metadata = {

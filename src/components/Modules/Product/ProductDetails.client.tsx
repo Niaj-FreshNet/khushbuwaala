@@ -23,7 +23,7 @@ export default function ProductDetailsClient({
 
   // keep your selection context support
   const selection = useProductSelectionOptional();
-  console.log('selection', selection);
+  // console.log('selection', selection);
 
   const sortedVariants = useMemo(() => {
     return [...(product.variants ?? [])].sort((a, b) => a.size - b.size);
@@ -73,7 +73,7 @@ export default function ProductDetailsClient({
   const selectedVariant = selection?.selectedVariant ?? null;
   const effectiveVariant = selectedVariant ?? fallbackSelected ?? lowestPriceVariant;
 
-  console.log('effectiveVariant', effectiveVariant);
+  // console.log('effectiveVariant', effectiveVariant);
 
   const selectedSizeLabel = effectiveVariant
     ? `${effectiveVariant.size} ${safeUnit(effectiveVariant.unit)}`

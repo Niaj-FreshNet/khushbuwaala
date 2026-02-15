@@ -2,301 +2,271 @@
 
 import type React from "react"
 import Link from "next/link"
-import { useRouter, usePathname } from "next/navigation"
-import { Home, ShoppingBag, Heart, MessageCircle, User, Search } from "lucide-react"
+import { usePathname } from "next/navigation"
+import { Home, ShoppingBag, Heart, MessageCircle, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import SearchDrawer from "../Modules/Search/SearchDrawer"
+import { useEffect, useMemo, useRef, useState } from "react"
 
-// Client Component - Contains interactivity and browser-specific APIs
-export default function BottomBar() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const [isMobileDevice, setIsMobileDevice] = useState(false)
-  const [cartCount, setCartCount] = useState(2) // Mock cart count
-  const [wishlistCount, setWishlistCount] = useState(5) // Mock wishlist count
-  const [isVisible, setIsVisible] = useState(true)
-  const [lastScrollY, setLastScrollY] = useState(0)
-  const [searchVisible, setSearchVisible] = useState(false)
+type NavItem = {
+  key: string
+  label: string
+  path?: string
+  ariaLabel: string
+  icon: React.ReactNode
+  onClick?: (e: React.MouseEvent) => void
+}
+
+function useIsMobileUA() {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
+  }, [])
+  return isMobile
+}
+
+function useHideOnScroll() {
+  const [visible, setVisible] = useState(true)
+  const lastY = useRef(0)
+  const ticking = useRef(false)
 
   useEffect(() => {
-    // This check needs to run on the client side
-    setIsMobileDevice(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
+    const onScroll = () => {
+      if (ticking.current) return
+      ticking.current = true
+
+      requestAnimationFrame(() => {
+        const y = window.scrollY || 0
+        const goingDown = y > lastY.current
+        const pastThreshold = y > 120
+        setVisible(!(goingDown && pastThreshold))
+        lastY.current = y
+        ticking.current = false
+      })
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  // Hide/show bottom bar on scroll for better UX
-  useEffect(() => {
-    const controlBottomBar = () => {
-      if (typeof window !== 'undefined') {
-        if (window.scrollY > lastScrollY && window.scrollY > 100) {
-          // Scrolling down
-          setIsVisible(false)
-        } else {
-          // Scrolling up
-          setIsVisible(true)
-        }
-        setLastScrollY(window.scrollY)
-      }
-    }
+  return visible
+}
 
-    if (typeof window !== 'undefined') {
-      window.addEventListener('scroll', controlBottomBar)
-      return () => {
-        window.removeEventListener('scroll', controlBottomBar)
-      }
-    }
-  }, [lastScrollY])
+export default function BottomBar() {
+  const pathname = usePathname()
+  const isMobileDevice = useIsMobileUA()
+  const isVisible = useHideOnScroll()
 
-  const [cartBump, setCartBump] = useState(false);
+  const [searchVisible, setSearchVisible] = useState(false)
+  const [cartBump, setCartBump] = useState(false)
 
   useEffect(() => {
     const onCartAdded = () => {
-      setCartBump(true);
-      setTimeout(() => setCartBump(false), 5000);
-    };
-
-    window.addEventListener("kw:cart-added", onCartAdded);
-    return () => window.removeEventListener("kw:cart-added", onCartAdded);
-  }, []);
-
-  const handlers = {
-    openSearch: () => setSearchVisible(true),
-    closeSearch: () => setSearchVisible(false),
-  }
-
-  const handleNavigation = (path: string) => {
-    // Add haptic feedback for mobile devices
-    if (isMobileDevice && 'vibrate' in navigator) {
-      navigator.vibrate(50)
+      setCartBump(true)
+      setTimeout(() => setCartBump(false), 900)
     }
-    router.push(path)
+    window.addEventListener("kw:cart-added", onCartAdded)
+    return () => window.removeEventListener("kw:cart-added", onCartAdded)
+  }, [])
+
+  const haptic = (ms: number) => {
+    if (isMobileDevice && "vibrate" in navigator) navigator.vibrate(ms)
   }
 
   const handleMessengerClick = (e: React.MouseEvent) => {
     e.preventDefault()
-
-    // Add haptic feedback
-    if (isMobileDevice && 'vibrate' in navigator) {
-      navigator.vibrate(100)
-    }
+    haptic(70)
 
     const messengerAppUrl = "fb-messenger://user-thread/111483794112905"
     const messengerWebUrl = "https://m.me/111483794112905"
 
     if (isMobileDevice) {
-      // Attempt to open the Messenger app
       window.location.href = messengerAppUrl
-      // Fallback for when the app is not installed or cannot be opened
       setTimeout(() => {
         window.open(messengerWebUrl, "_blank", "noopener noreferrer")
-      }, 500) // Small delay before opening web fallback
+      }, 450)
     } else {
-      // Open in a new tab for desktop users
       window.open(messengerWebUrl, "_blank", "noopener noreferrer")
     }
   }
 
-  const isActiveRoute = (path: string) => {
-    if (path === '/') {
-      return pathname === '/'
-    }
+  const isActive = (path?: string) => {
+    if (!path) return false
+    if (path === "/") return pathname === "/"
     return pathname.startsWith(path)
   }
 
-  const navItems = [
-    {
-      label: "Home",
-      icon: <Home className="h-5 w-5" />,
-      path: "/",
-      ariaLabel: "Go to homepage",
-      showBadge: false,
-    },
-    {
-      label: "Shop",
-      icon: <ShoppingBag className="h-5 w-5" />,
-      path: "/shop",
-      ariaLabel: "Go to shop page",
-      showBadge: false,
-    },
-    {
-      label: "Support",
-      icon: <MessageCircle className="h-7 w-7 text-[#0078FF]" />, // Larger icon for Messenger
-      onClick: handleMessengerClick,
-      ariaLabel: "Chat with us on Messenger",
-      showBadge: false,
-      isSpecial: true, // Special styling for messenger button
-    },
-    {
-      label: "Wishlist",
-      icon: <Heart className="h-5 w-5" />,
-      path: "/wishlist",
-      ariaLabel: "View your wishlist",
-      showBadge: true,
-      // badgeCount: wishlistCount,
-    },
-    {
-      label: "Cart",
-      icon: <ShoppingBag className="h-5 w-5" />,
-      path: "/cart",
-      ariaLabel: "View your shopping cart",
-      showBadge: true,
-      // badgeCount: cartCount,
-    },
-  ]
+  const navItems: NavItem[] = useMemo(
+    () => [
+      { key: "home", label: "Home", path: "/", ariaLabel: "Go to homepage", icon: <Home className="h-5 w-5" /> },
+      { key: "shop", label: "Shop", path: "/shop", ariaLabel: "Go to shop page", icon: <ShoppingBag className="h-5 w-5" /> },
+      { key: "support", label: "Support", ariaLabel: "Chat with us on Messenger", icon: <MessageCircle className="h-5 w-5" />, onClick: handleMessengerClick },
+      { key: "wishlist", label: "Wishlist", path: "/wishlist", ariaLabel: "View wishlist", icon: <Heart className="h-5 w-5" /> },
+      { key: "cart", label: "Cart", path: "/cart", ariaLabel: "View cart", icon: <ShoppingBag className="h-5 w-5" /> },
+    ],
+    [pathname, isMobileDevice]
+  )
 
   return (
     <>
-      {/* Backdrop blur overlay when bottom bar is visible */}
+      {/* subtle fade above */}
       <div
         className={cn(
-          "fixed lg:hidden bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white/80 to-transparent backdrop-blur-xl pointer-events-none z-40 transition-all duration-300",
+          "fixed lg:hidden left-0 right-0 bottom-0 z-40 pointer-events-none",
+          "h-16 bg-gradient-to-t from-white/75 via-white/25 to-transparent backdrop-blur-[2px] transition-opacity duration-200",
           isVisible ? "opacity-100" : "opacity-0"
         )}
       />
 
-      <div
+      <nav
         className={cn(
-          "fixed lg:hidden bottom-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
+          "fixed lg:hidden left-0 right-0 bottom-0 z-50 transition-transform duration-200 ease-out",
           isVisible ? "translate-y-0" : "translate-y-full"
         )}
-        role="navigation"
         aria-label="Mobile bottom navigation"
       >
-        {/* Enhanced glassmorphism background */}
         <div className="relative">
-          <div className="absolute inset-0 bg-white/90 backdrop-blur-xl border-t border-gray-200/50 shadow-2xl" />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-50/30 to-transparent" />
+          <div className="absolute inset-0 bg-white/92 backdrop-blur-xl border-t border-gray-200/60 shadow-[0_-12px_28px_-18px_rgba(0,0,0,0.45)]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-50/35 to-transparent" />
 
-          <div className="relative flex justify-around items-center h-16 px-2">
-            {navItems.map((item, index) => {
-              const isActive = item.path ? isActiveRoute(item.path) : false
-              const isCart = item.label === "Cart";
+          <div className="relative max-w-7xl mx-auto px-2">
+            {/* ✅ A bit taller + better bottom padding so labels look “normal” */}
+            <div className="h-[62px] flex items-center justify-between px-1 pt-1 pb-2">
+              {navItems.map((item) => {
+                const active = isActive(item.path)
+                const isCart = item.key === "cart"
 
-              return (
-                <div key={item.label} className="relative flex-1 flex justify-center">
-                  {item.path ? (
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "relative flex flex-col items-center justify-center h-14 w-14 rounded-lg transition-all duration-300 group",
-                        "hover:bg-red-50/80 active:scale-95",
-                        isActive
-                          ? "bg-red-50/80 text-red-600 shadow-lg shadow-red-500/10"
-                          : "text-gray-600 hover:text-red-600",
-                        item.isSpecial && "bg-blue-50/80 hover:bg-blue-100/80",
-                        isCart && cartBump && "animate-bounce ring-4 ring-emerald-200"
-                      )}
-                      asChild
-                      aria-label={item.ariaLabel}
-                      title={item.ariaLabel}
-                    >
-                      <Link href={item.path} className="flex flex-col items-center justify-center relative">
-                        {/* Icon with enhanced animations */}
-                        <div className={cn(
-                          "relative transition-all duration-300 ease-out",
-                          "group-hover:scale-110 group-active:scale-95",
-                          isActive && "scale-110"
-                        )}>
-                          {item.icon}
+                const container =
+                  "group relative w-full flex justify-center"
+                const tap =
+                  "active:scale-[0.97] transition-transform duration-150"
 
-                          {/* Badge for notifications */}
-                          {/* {item.showBadge && item.badgeCount && item.badgeCount > 0 && (
-                            <Badge 
-                              className={cn(
-                                "absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs font-bold",
-                                "bg-gradient-to-r from-red-500 to-pink-500 text-white border-2 border-white",
-                                "animate-pulse shadow-lg"
-                              )}
-                            >
-                              {item.badgeCount > 99 ? '99+' : item.badgeCount}
-                            </Badge>
-                          )} */}
-                        </div>
+                const ActiveBG =
+                  "bg-gradient-to-b from-red-50 to-white ring-1 ring-red-200 shadow-[0_10px_18px_-14px_rgba(239,68,68,0.65)]"
 
-                        {/* Label with better typography */}
-                        <span className={cn(
-                          "text-xs mt-1 font-medium transition-all duration-300",
-                          isActive && "font-semibold"
-                        )}>
-                          {item.label}
-                        </span>
+                const InactiveBG =
+                  "hover:bg-gray-50/80"
 
-                        {/* {isCart && cartBump && (
-                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 rounded-xl bg-gray-900 text-white text-[11px] px-3 py-1 shadow-xl">
-                            Added ✅
-                          </div>
-                        )} */}
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "relative flex flex-col items-center justify-center h-14 w-14 rounded-lg transition-all duration-300 group",
-                        "hover:bg-red-50/80 active:scale-95",
-                        "text-gray-600 hover:text-red-600",
-                        item.isSpecial && "bg-blue-50/80 hover:bg-blue-100/80"
-                      )}
-                      onClick={item.onClick}
-                      aria-label={item.ariaLabel}
-                      title={item.ariaLabel}
-                    >
-                      <div className="flex flex-col items-center justify-center relative">
-                        {/* Icon with enhanced animations */}
-                        <div className={cn(
-                          "relative transition-all duration-300 ease-out",
-                          "group-hover:scale-110 group-active:scale-95"
-                        )}>
-                          {item.icon}
+                const Content = (
+                  <div
+                    className={cn(
+                      "relative flex flex-col items-center justify-center",
+                      "w-[74px] rounded-2xl",
+                      "py-2", // ✅ gives space for label (fix weird text)
+                      "transition-all duration-200",
+                      active ? ActiveBG : InactiveBG
+                    )}
+                  >
+                    {/* soft glow for full area (not only icon) */}
+                    {active && (
+                      <span className="pointer-events-none absolute -inset-2 rounded-[22px] bg-red-500/10 blur-md" />
+                    )}
 
-                          {/* Special messenger indicator */}
-                          {item.isSpecial && (
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-ping" />
+                    <div className="relative">
+                      <div
+                        className={cn(
+                          "h-9 w-9 rounded-xl flex items-center justify-center",
+                          "transition-colors duration-200",
+                          active ? "text-red-600" : "text-gray-600 group-hover:text-gray-900"
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "transition-transform duration-200",
+                            "group-hover:scale-110",
+                            active && "scale-110"
                           )}
+                        >
+                          {item.icon}
                         </div>
-
-                        {/* Label with better typography */}
-                        <span className="text-xs mt-1 font-medium transition-all duration-300">
-                          {item.label}
-                        </span>
                       </div>
-                    </Button>
-                  )}
 
-                  {/* Ripple effect on touch */}
-                  <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-                    <div className="absolute inset-0 bg-red-400/20 rounded-2xl scale-0 group-active:scale-100 transition-transform duration-200 ease-out" />
+                      {isCart && cartBump && (
+                        <span className="absolute inset-0 rounded-xl ring-4 ring-emerald-200 animate-pulse" />
+                      )}
+                    </div>
+
+                    <span
+                      className={cn(
+                        "mt-0.5 text-[10.5px] leading-none font-semibold tracking-tight",
+                        active ? "text-red-600" : "text-gray-700"
+                      )}
+                    >
+                      {item.label}
+                    </span>
+
+                    {/* selected indicator line */}
+                    <span
+                      className={cn(
+                        "mt-1 h-[3px] w-8 rounded-full transition-all duration-200",
+                        active ? "bg-gradient-to-r from-red-500 to-pink-500" : "bg-transparent"
+                      )}
+                    />
                   </div>
-                </div>
-              )
-            })}
+                )
+
+                return (
+                  <div key={item.key} className={container}>
+                    {item.path ? (
+                      <Link
+                        href={item.path}
+                        aria-label={item.ariaLabel}
+                        onClick={() => haptic(30)}
+                        className={cn("flex-1 flex justify-center", tap)}
+                      >
+                        {Content}
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          haptic(40)
+                          item.onClick?.(e)
+                        }}
+                        aria-label={item.ariaLabel}
+                        className={cn("flex-1 flex justify-center", tap)}
+                      >
+                        {Content}
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* safe area (small, but keeps iPhone home bar happy) */}
+            <div className="h-[max(4px,env(safe-area-inset-bottom))]" />
           </div>
-
-          {/* Bottom safe area for devices with home indicator */}
-          <div className="h-2 bg-transparent" />
         </div>
-      </div>
+      </nav>
 
-      {/* Floating Action Button for Search (optional enhancement) */}
-      <div className={cn(
-        "fixed lg:hidden right-4 z-40 transition-all duration-300",
-        isVisible ? "bottom-20" : "bottom-4"
-      )}>
+      {/* Search FAB (compact) */}
+      <div
+        className={cn(
+          "fixed lg:hidden right-4 z-40 transition-all duration-200",
+          isVisible ? "bottom-[78px]" : "bottom-3"
+        )}
+      >
         <Button
           size="icon"
-          className="h-12 w-12 rounded-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white shadow-xl hover:shadow-2xl hover:scale-110 transition-all duration-300 border-2 border-white/20"
-          // onClick={() => handleNavigation('/search')}
-          onClick={handlers.openSearch}
+          onClick={() => {
+            haptic(20)
+            setSearchVisible(true)
+          }}
           aria-label="Search products"
+          className={cn(
+            "h-11 w-11 rounded-full",
+            "bg-gray-900 text-white hover:bg-gray-800",
+            "shadow-xl transition-all duration-200",
+            "border border-white/10"
+          )}
         >
           <Search className="h-5 w-5" />
         </Button>
       </div>
 
-      {/* --- Search Drawer --- */}
-      <SearchDrawer visible={searchVisible} onClose={handlers.closeSearch} />
+      <SearchDrawer visible={searchVisible} onClose={() => setSearchVisible(false)} />
     </>
   )
 }

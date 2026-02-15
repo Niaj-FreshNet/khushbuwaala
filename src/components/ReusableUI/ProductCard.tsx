@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import { Heart, ShoppingCart, Eye, Star } from "lucide-react";
@@ -162,6 +162,45 @@ export function ProductCard({
 
   const [imageError, setImageError] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+  const [touchHover, setTouchHover] = useState(false);
+  const touchStart = useRef<{ x: number; y: number; t: number } | null>(null);
+
+  const TOUCH_MOVE_THRESHOLD = 6;  // px (small move)
+  const LONG_PRESS_MS = 120;       // ms
+  const longPressTimer = useRef<number | null>(null);
+
+  const onTouchStartCard = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStart.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+    setTouchHover(false);
+
+    // long-press shows overlay without blocking tap immediately
+    longPressTimer.current = window.setTimeout(() => {
+      setTouchHover(true);
+    }, LONG_PRESS_MS);
+  };
+
+  const onTouchMoveCard = (e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+    const t = e.touches[0];
+    const dx = Math.abs(t.clientX - touchStart.current.x);
+    const dy = Math.abs(t.clientY - touchStart.current.y);
+
+    if (dy > dx && dy > TOUCH_MOVE_THRESHOLD) return; // user is scrolling vertically
+    if (dx > TOUCH_MOVE_THRESHOLD || dy > TOUCH_MOVE_THRESHOLD) {
+      if (longPressTimer.current) window.clearTimeout(longPressTimer.current);
+      setTouchHover(true);
+    }
+  };
+
+  const onTouchEndCard = () => {
+    if (longPressTimer.current) window.clearTimeout(longPressTimer.current);
+
+    // hide overlay shortly after touch ends (so it feels like hover)
+    window.setTimeout(() => setTouchHover(false), 450);
+    touchStart.current = null;
+  };
 
   // tolerant product id
   const productId = (product as any).id ?? (product as any)._id ?? product.slug ?? product.name;
@@ -453,9 +492,10 @@ export function ProductCard({
                 src={!imageError ? product.primaryImage : "/placeholder.svg?height=320&width=320&text=No+Image"}
                 alt={product.name}
                 fill
-                sizes="(max-width:600px) 100vw, 320px"
+                sizes="(max-width: 640px) 40vw, 320px" // ✅ list thumb behavior
                 className="object-cover transition-all duration-700 group-hover:scale-110"
-                priority
+                loading="lazy"       // ✅
+                priority={false}     // ✅
                 onError={() => setImageError(true)}
               />
               {/* Secondary Image Hover */}
@@ -464,8 +504,10 @@ export function ProductCard({
                   src={product.otherImages[0]}
                   alt={`${product.name} - alternate view`}
                   fill
-                  sizes="(max-width:600px) 100vw, 320px"
+                  sizes="(max-width: 640px) 40vw, 320px"
                   className="object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110"
+                  loading="lazy"
+                  priority={false}
                 />
               )}
 
@@ -653,6 +695,10 @@ export function ProductCard({
   return (
     <Link href={productLink} aria-label={`View ${product.name}`}>
       <Card
+        onTouchStart={onTouchStartCard}
+        onTouchMove={onTouchMoveCard}
+        onTouchEnd={onTouchEndCard}
+        onTouchCancel={onTouchEndCard}
         className={cn(
           "h-full flex flex-col overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-500 group hover:border-red-200 hover:-translate-y-1",
           className
@@ -675,15 +721,28 @@ export function ProductCard({
                 alt={`${product.name} - alternate view`}
                 fill
                 sizes="(max-width:600px) 100vw, (max-width:1200px) 50vw, 33vw"
-                className="object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110"
+                className={cn(
+                  "object-cover absolute inset-0 transition-all duration-700",
+                  touchHover ? "opacity-100 scale-110" : "opacity-0 group-hover:opacity-100 group-hover:scale-110"
+                )}
               />
             )}
 
             {/* Gradient overlay on hover */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div
+              className={cn(
+                "absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent transition-opacity duration-500",
+                touchHover ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+              )}
+            />
 
             {/* Enhanced Wishlist Button */}
-            <div className="absolute top-2 right-3 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <div
+              className={cn(
+                "absolute top-2 right-3 z-10 transition-all duration-300",
+                touchHover ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+              )}
+            >
               <Button
                 variant="outline"
                 size="icon"
@@ -730,7 +789,12 @@ export function ProductCard({
             </div> */}
             {/* ✅ Quick View Icon (pro + mobile friendly) */}
             {onQuickView && (
-              <div className="absolute top-14 md:top-12 right-3 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
+              <div
+                className={cn(
+                  "absolute top-14 md:top-12 right-3 z-10 transition-all duration-300",
+                  touchHover ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                )}
+              >
                 <Button
                   type="button"
                   variant="outline"
@@ -739,14 +803,12 @@ export function ProductCard({
                     "h-8 w-8 rounded-full backdrop-blur-md border shadow-lg",
                     "bg-white/85 hover:bg-white",
                     "text-gray-800 hover:text-gray-900",
-                    "transition-all duration-200 active:scale-95",
-                    // Desktop: subtle hide until hover. Mobile: always visible.
-                    "opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                    "transition-all duration-200 active:scale-95"
                   )}
                   onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    onQuickView()
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onQuickView();
                   }}
                   aria-label={`Quick view ${product.name}`}
                   title="Quick view"

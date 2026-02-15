@@ -107,7 +107,7 @@ export default function ProductAccordion({ product, initialOpenSection }: Produc
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [newReview, setNewReview] = useState({
     rating: 0,
-    title: "",
+    name: "",
     comment: "",
   });
   const { user, isAuthenticated } = useAuth();
@@ -159,33 +159,43 @@ export default function ProductAccordion({ product, initialOpenSection }: Produc
   // Handle review form submission
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isAuthenticated) {
-      toast("Please log in to submit a review.");
-      return;
+
+    // validation
+    // if (newReview.rating < 1 || newReview.rating > 5) {
+    //   toast("Rating must be between 1 and 5.");
+    //   return;
+    // }
+
+    if (!newReview.comment.trim()) {
+      toast("Review comment is required.");
+      return; // ✅ IMPORTANT (you forgot return)
     }
-    if (newReview.rating < 1 || newReview.rating > 5) {
-      toast("Rating must be between 1 and 5.",);
-      return;
-    }
-    if (!newReview.title.trim() || !newReview.comment.trim()) {
-      toast("Title and comment are required.");
-    }
+
     setSubmitting(true);
+
     try {
+      const safeName = newReview.name.trim() || "Anonymous";
+
       await createReview({
         rating: newReview.rating,
-        title: newReview.title,
-        comment: newReview.comment,
+        title: safeName, // ✅ backend unchanged (we store name in title)
+        comment: newReview.comment.trim(),
         productId: product.id!,
         userId: user?.id,
       }).unwrap();
 
-      setNewReview({ rating: 0, title: "", comment: "" });
+      setNewReview({ rating: 0, name: "", comment: "" });
       toast("Your review has been submitted and is pending approval.");
-
-      await refetch(); // ✅ Refresh reviews list
+      await refetch();
     } catch (err: any) {
-      toast(error.message);
+      // ✅ RTK Query unwrap error safe handling
+      const msg =
+        err?.data?.message ||
+        err?.error ||
+        err?.message ||
+        "Failed to submit review. Please try again.";
+
+      toast(msg);
     } finally {
       setSubmitting(false);
     }
@@ -461,7 +471,9 @@ export default function ProductAccordion({ product, initialOpenSection }: Produc
                         key={i}
                         className={cn(
                           "w-5 h-5",
-                          i < Math.floor(avgRating) ? "text-yellow-500 fill-current" : "text-gray-300"
+                          i < Math.floor(avgRating)
+                            ? "text-yellow-500 fill-current"
+                            : "text-gray-300"
                         )}
                       />
                     ))}
@@ -477,8 +489,8 @@ export default function ProductAccordion({ product, initialOpenSection }: Produc
 
               <div className="space-y-2">
                 {[5, 4, 3, 2, 1].map((rating) => {
-                  const count = reviews.filter((r) => r.rating === rating).length;
-                  const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+                  const count = reviews.filter((r) => r.rating === rating).length
+                  const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0
                   return (
                     <div key={rating} className="flex items-center gap-3">
                       <div className="flex items-center gap-1 w-12">
@@ -491,9 +503,11 @@ export default function ProductAccordion({ product, initialOpenSection }: Produc
                           style={{ width: `${percentage}%` }}
                         />
                       </div>
-                      <span className="text-xs text-gray-600 w-6 text-right font-medium">{count}</span>
+                      <span className="text-xs text-gray-600 w-6 text-right font-medium">
+                        {count}
+                      </span>
                     </div>
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -502,30 +516,40 @@ export default function ProductAccordion({ product, initialOpenSection }: Produc
           {/* Review Submission Form */}
           <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-200 shadow-sm">
             <h4 className="font-semibold text-gray-900 mb-4">Write a Review</h4>
+
             <form onSubmit={handleSubmitReview} className="space-y-4">
+              {/* Rating */}
               <div>
                 <Label htmlFor="rating">Your Rating</Label>
                 <div className="flex gap-1 mt-2">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-6 h-6 sm:w-7 sm:h-7 cursor-pointer ${i < newReview.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'
-                        }`}
+                      className={cn(
+                        "w-6 h-6 sm:w-7 sm:h-7 cursor-pointer",
+                        i < newReview.rating
+                          ? "text-yellow-500 fill-current"
+                          : "text-gray-300"
+                      )}
                       onClick={() => handleRatingSelect(i + 1)}
                     />
                   ))}
                 </div>
               </div>
+
+              {/* Name (optional) */}
               <div>
-                <Label htmlFor="title">Review Title</Label>
+                <Label htmlFor="name">Your name (optional)</Label>
                 <Input
-                  id="title"
-                  value={newReview.title}
-                  onChange={(e) => setNewReview({ ...newReview, title: e.target.value })}
-                  placeholder="Enter a title for your review"
+                  id="name"
+                  value={newReview.name || ""}
+                  onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
+                  placeholder="Leave blank to post as Anonymous"
                   className="mt-1"
                 />
               </div>
+
+              {/* Comment */}
               <div>
                 <Label htmlFor="comment">Your Review</Label>
                 <Textarea
@@ -537,6 +561,7 @@ export default function ProductAccordion({ product, initialOpenSection }: Produc
                   rows={4}
                 />
               </div>
+
               <Button type="submit" disabled={submitting} className="bg-blue-600 hover:bg-blue-700">
                 {submitting ? "Submitting..." : "Submit Review"}
               </Button>
@@ -547,52 +572,73 @@ export default function ProductAccordion({ product, initialOpenSection }: Produc
           {loadingReviews ? (
             <div className="text-center text-gray-600">Loading reviews...</div>
           ) : reviews.length === 0 ? (
-            <div className="text-center text-gray-600">No reviews yet. Be the first to review this product!</div>
+            <div className="text-center text-gray-600">
+              No reviews yet. Be the first to review this product!
+            </div>
           ) : (
             <div className="space-y-6">
-              {reviews.map((review) => (
-                <div
-                  key={review.id}
-                  className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                        {review.user.name.charAt(0)}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h5 className="font-bold text-gray-900 text-lg">{review.user.name}</h5>
-                          {review.isPublished && (
-                            <Badge
-                              variant="secondary"
-                              className="text-xs bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border border-green-200"
-                            >
-                              <Verified className="w-3 h-3 mr-1" />
-                              Verified Review
-                            </Badge>
-                          )}
+              {reviews.map((review) => {
+                const displayName =
+                  review?.user?.name?.trim() ||
+                  review?.title?.trim() || // ✅ name stored in title (backend unchanged)
+                  "Anonymous"
+
+                const initial = displayName.charAt(0).toUpperCase()
+
+                return (
+                  <div
+                    key={review.id}
+                    className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-300"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                          {initial}
                         </div>
-                        <div className="flex items-center gap-3">
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`w-5 h-5 ${i < review.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'}`}
-                              />
-                            ))}
+
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h5 className="font-bold text-gray-900 text-lg">{displayName}</h5>
+
+                            {review.isPublished && (
+                              <Badge
+                                variant="secondary"
+                                className="text-xs bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border border-green-200"
+                              >
+                                <Verified className="w-3 h-3 mr-1" />
+                                Verified Review
+                              </Badge>
+                            )}
                           </div>
-                          <span className="text-sm text-gray-500 font-medium">
-                            {new Date(review.createdAt).toLocaleDateString()}
-                          </span>
+
+                          <div className="flex items-center gap-3">
+                            <div className="flex">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={cn(
+                                    "w-5 h-5",
+                                    i < review.rating
+                                      ? "text-yellow-500 fill-current"
+                                      : "text-gray-300"
+                                  )}
+                                />
+                              ))}
+                            </div>
+
+                            <span className="text-sm text-gray-500 font-medium">
+                              {new Date(review.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
+
+                    {/* ✅ No title shown now */}
+                    <p className="text-gray-700 leading-relaxed">{review.comment}</p>
                   </div>
-                  <h6 className="font-semibold text-gray-900 mb-2">{review.title}</h6>
-                  <p className="text-gray-700 mb-4 leading-relaxed">{review.comment}</p>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>

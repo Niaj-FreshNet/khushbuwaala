@@ -45,8 +45,10 @@ export function ReviewsGridClient({ items }: { items: ReviewItem[] }) {
               alt="Customer review"
               width={420}
               height={420}
-              className="w-full h-56 sm:h-60 md:h-64 object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, 523px"
               priority={idx === 0}
+              quality={70}
+              className="w-full h-56 sm:h-60 md:h-64 object-cover transition-transform duration-500 group-hover:scale-105"
             />
 
             {/* Premium dark overlay */}

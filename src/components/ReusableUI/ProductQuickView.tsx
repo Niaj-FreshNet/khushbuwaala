@@ -297,7 +297,8 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                       fill
                       sizes="(max-width: 768px) 95vw, 50vw"
                       className="object-contain p-4"
-                      priority
+                      loading="lazy"       // ✅
+                      priority={false}     // ✅
                       onError={() => setImageError(true)}
                     />
 
@@ -732,7 +733,8 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                 fill
                 sizes="95vw"
                 className="object-contain"
-                priority
+                loading="lazy"
+                priority={false}
               />
             </div>
 

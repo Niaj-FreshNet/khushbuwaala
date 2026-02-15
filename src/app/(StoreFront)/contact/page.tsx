@@ -23,7 +23,7 @@ export default function StoresPage() {
       address: "Shop-G/138, Eastern Banabithi Shopping Complex, South Banasree, Khilgaon, Dhaka-1219",
       phone: "+8801566395807",
       hours: "10:00 AM – 10:00 PM (Daily)",
-      mapLink: "https://goo.gl/maps/example-dhaka", // Replace with real Google Maps link
+      mapLink: "https://maps.app.goo.gl/kEXvaRHQ46CbRh7f7", // Replace with real Google Maps link
     },
     // Add more stores if available
   ];

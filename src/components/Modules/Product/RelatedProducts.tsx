@@ -187,29 +187,31 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
                   {/* <span className="text-[11px] font-semibold text-gray-600">
                     {unit ? `${sizeCount}+ sizes • ${unit}` : "Standard size"}
                   </span> */}
-
-                  <span className="inline-flex items-center gap-1 text-xs font-bold text-gray-900">
-                    View
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-                  </span>
                 </div>
 
                 {/* Price */}
-                <div className="mt-3 flex items-center gap-2">
+                <div className="mt-3 flex items-center justify-between gap-2">
                   {activeDiscount ? (
                     <>
-                      <span className="text-sm md:text-base font-extrabold text-red-600">
-                        ৳{discountedPrice.toFixed(0)}
-                      </span>
-                      <span className="text-xs text-gray-400 line-through">
-                        ৳{basePrice.toFixed(0)}
-                      </span>
+                      <div className="flex flex-row items-baseline gap-1 md:gap-2">
+                        <span className="text-sm md:text-base font-extrabold text-red-600">
+                          ৳{discountedPrice.toFixed(0)}
+                        </span>
+                        <span className="text-xs text-gray-400 line-through">
+                          ৳{basePrice.toFixed(0)}
+                        </span>
+                      </div>
                     </>
                   ) : (
                     <span className="text-sm md:text-base font-extrabold text-gray-900">
                       ৳{basePrice.toFixed(0)}
                     </span>
                   )}
+
+                  <span className="inline-flex items-center underline gap-1 text-xs font-bold text-gray-900">
+                    View
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                  </span>
                 </div>
 
                 {/* Divider + CTA */}

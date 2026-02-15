@@ -721,3 +721,24 @@
   0% { transform: translateX(-120%); }
   100% { transform: translateX(220%); }
 }
+
+@keyframes kwshine {
+  0% { transform: translateX(-30%) rotate(12deg); opacity: 0.2; }
+  50% { opacity: 0.7; }
+  100% { transform: translateX(30%) rotate(12deg); opacity: 0.2; }
+}
+
+@layer utilities {
+  .shimmer-sweep {
+    animation: shimmer-sweep 2.2s ease-in-out infinite;
+  }
+
+  @keyframes shimmer-sweep {
+    0% {
+      transform: translateX(-120%) skewX(-12deg);
+    }
+    100% {
+      transform: translateX(120%) skewX(-12deg);
+    }
+  }
+}

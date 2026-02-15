@@ -1,5 +1,6 @@
-import type { NavLink } from '../types';
-import MainNavLink from './Navlink';
+import MainNavLink from "@/components/Shared/Dashboard/MainNavLink";
+import { NavLink } from "@/types/navlink.types";
+
 
 export default function SideBar({ navRef, isOpen, isShort, additionalRoutes, navLink, setIsShort, dark }: { navRef: React.RefObject<HTMLDivElement | null>, isOpen: boolean, isShort: boolean, navLink: NavLink[], additionalRoutes: NavLink[] | null, setIsShort: React.Dispatch<React.SetStateAction<boolean>>, dark?: boolean }) {
 

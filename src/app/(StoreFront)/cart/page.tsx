@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ShoppingBag, ArrowLeft, Package2, Loader2 } from "lucide-react";
+import { ShoppingBag, ArrowLeft, Package2, Loader2, Sparkles, BadgeCheck, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,7 +63,8 @@ const EmptyCartIllustration = () => (
 
 export default function CartPage() {
   const router = useRouter();
-  const { cartItems, appliedCouponCode, setAppliedCouponCode, clearAppliedCouponCode } = useCart()
+  const { cartItems, appliedCouponCode, setAppliedCouponCode, clearAppliedCouponCode } =
+    useCart();
 
   const [couponCode, setCouponCode] = useState("");
   const [isRouting, startTransition] = useTransition();
@@ -123,10 +124,7 @@ export default function CartPage() {
       const price = Number(item?.selectedPrice ?? matchedVariant?.price ?? 0);
       const qty = Number(item?.quantity || 1);
 
-      const productId =
-        item?.product?.id ||
-        item?.product?._id ||
-        item?.productId;
+      const productId = item?.product?.id || item?.product?._id || item?.productId;
 
       const variantId =
         item?.variantId ||
@@ -138,9 +136,7 @@ export default function CartPage() {
     });
   };
 
-
-  const pickDiscountAmount = (res: any) =>
-    Number(res?.data?.discountAmount ?? res?.discountAmount ?? 0);
+  const pickDiscountAmount = (res: any) => Number(res?.data?.discountAmount ?? res?.discountAmount ?? 0);
 
   const pickDiscountInfo = (res: any): DiscountLabel => {
     const items = res?.data?.items ?? res?.items ?? [];
@@ -169,7 +165,6 @@ export default function CartPage() {
     if (discountInfo.type === "percentage") return `${Math.round(discountInfo.value)}%`;
     return formatBDT(discountInfo.value);
   }, [discountInfo]);
-
 
   const discountedSubtotal = Math.max(0, subtotal - discount);
   const total = discountedSubtotal; // shipping calculated at checkout
@@ -226,29 +221,29 @@ export default function CartPage() {
 
   useEffect(() => {
     const revalidate = async () => {
-      if (!appliedCouponCode) return
+      if (!appliedCouponCode) return;
       if (!cartItems?.length) {
-        clearAppliedCouponCode()
-        setDiscount(0)
-        setDiscountInfo(null)
-        return
+        clearAppliedCouponCode();
+        setDiscount(0);
+        setDiscountInfo(null);
+        return;
       }
 
       try {
-        const items = buildDiscountItems()
-        const res = await applyDiscount({ code: appliedCouponCode, items }).unwrap()
-        setDiscount(pickDiscountAmount(res))
-        setDiscountInfo(pickDiscountInfo(res))
+        const items = buildDiscountItems();
+        const res = await applyDiscount({ code: appliedCouponCode, items }).unwrap();
+        setDiscount(pickDiscountAmount(res));
+        setDiscountInfo(pickDiscountInfo(res));
       } catch {
-        clearAppliedCouponCode()
-        setDiscount(0)
-        setDiscountInfo(null)
+        clearAppliedCouponCode();
+        setDiscount(0);
+        setDiscountInfo(null);
       }
-    }
+    };
 
-    revalidate()
+    revalidate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cartItems, appliedCouponCode])
+  }, [cartItems, appliedCouponCode]);
 
   const totalItems = useMemo(() => {
     if (!Array.isArray(cartItems)) return 0;
@@ -256,36 +251,38 @@ export default function CartPage() {
   }, [cartItems]);
 
   const handleCheckout = () => {
-    if (checkoutClicked) return
-    setCheckoutClicked(true)
+    if (checkoutClicked) return;
+    setCheckoutClicked(true);
 
-    const items = (cartItems || []).map((item: any) => ({
-      item_id: String(item?.product?.id || item?.product?.slug || ""),
-      item_name: String(item?.product?.name || ""),
-      item_brand: String(item?.product?.brand || "KhushbuWaala"),
-      item_category: String(item?.product?.categoryId || ""),
-      item_variant: String(item?.selectedSize || ""),
-      price: Number(item?.selectedPrice || 0),
-      quantity: Number(item?.quantity || 1),
-    })).filter((i: any) => i.item_id)
+    const items = (cartItems || [])
+      .map((item: any) => ({
+        item_id: String(item?.product?.id || item?.product?.slug || ""),
+        item_name: String(item?.product?.name || ""),
+        item_brand: String(item?.product?.brand || "KhushbuWaala"),
+        item_category: String(item?.product?.categoryId || ""),
+        item_variant: String(item?.selectedSize || ""),
+        price: Number(item?.selectedPrice || 0),
+        quantity: Number(item?.quantity || 1),
+      }))
+      .filter((i: any) => i.item_id);
 
     kwPushBeginCheckout({
       currency: "BDT",
-      value: Number(total || 0), // you already compute total
+      value: Number(total || 0),
       items,
-    })
+    });
 
     startTransition(() => {
-      router.push("/checkout")
-    })
+      router.push("/checkout");
+    });
 
-    window.setTimeout(() => setCheckoutClicked(false), 5000)
-  }
+    window.setTimeout(() => setCheckoutClicked(false), 5000);
+  };
 
   return (
     <StoreContainer>
       {/* ✅ IMPORTANT: Shell must match loading.tsx */}
-      <div className="min-h-screen bg-gray-50 pt-4 sm:pt-8 pb-6">
+      <div className="min-h-screen bg-gray-50 pt-4 sm:pt-8 pb-8">
         <div className="container mx-auto px-4 py-6 sm:py-8 max-w-7xl">
           {/* Header */}
           <div className="flex items-start sm:items-center justify-between gap-4 mb-8">
@@ -307,8 +304,11 @@ export default function CartPage() {
             </div>
 
             {totalItems > 0 && (
-              <Badge variant="secondary" className="text-base sm:text-lg font-semibold px-3 py-1 shrink-0">
-                ৳{subtotal.toFixed(2)}
+              <Badge
+                variant="secondary"
+                className="text-sm sm:text-base font-semibold px-3 py-1.5 shrink-0"
+              >
+                {formatBDT(subtotal)}
               </Badge>
             )}
           </div>
@@ -334,28 +334,99 @@ export default function CartPage() {
                   <DesktopCartTable items={cartItems} />
                 </div>
 
-                {/* Order Notes */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Order Notes</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <textarea
-                      placeholder="Special instructions for your order..."
-                      className="w-full p-3 border rounded-lg resize-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      rows={3}
-                    />
-                  </CardContent>
-                </Card>
+                {/* Desktop Promo Banner (keeps layout consistent after removing Order Notes) */}
+                <div className="hidden lg:block">
+                  <Card className="overflow-hidden border bg-white">
+                    <CardContent className="p-0">
+                      {/* Header strip */}
+                      <div className="relative p-6">
+                        <div className="absolute inset-0 bg-gradient-to-r from-red-50 via-pink-50 to-rose-50" />
+                        <div className="relative">
+                          <div className="flex items-start justify-between gap-6">
+                            <div className="min-w-0">
+                              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/70 border text-sm font-medium text-gray-800">
+                                <Sparkles className="h-4 w-4" />
+                                Premium Perfume House
+                              </div>
+
+                              <h3 className="mt-3 text-xl font-bold text-gray-900">
+                                Make it a signature set ✨
+                              </h3>
+                              <p className="mt-1 text-sm text-gray-600 max-w-xl">
+                                Pair your current picks with a complementary note for a richer, longer-lasting scent experience.
+                              </p>
+                            </div>
+
+                            <div className="shrink-0">
+                              <Button asChild variant="outline" className="bg-white/70">
+                                <Link href="/shop">
+                                  <ShoppingBag className="h-4 w-4 mr-2" />
+                                  Explore More
+                                </Link>
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Perks */}
+                          <div className="mt-5 grid grid-cols-3 gap-3">
+                            <div className="rounded-lg border bg-white/70 p-3">
+                              <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                                <BadgeCheck className="h-4 w-4" />
+                                Authentic Oils
+                              </div>
+                              <p className="mt-1 text-xs text-gray-600 leading-relaxed">
+                                Carefully crafted blends for premium projection.
+                              </p>
+                            </div>
+
+                            <div className="rounded-lg border bg-white/70 p-3">
+                              <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                                <Sparkles className="h-4 w-4" />
+                                Best Sellers
+                              </div>
+                              <p className="mt-1 text-xs text-gray-600 leading-relaxed">
+                                Add a crowd favorite to complete your lineup.
+                              </p>
+                            </div>
+
+                            <div className="rounded-lg border bg-white/70 p-3">
+                              <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                                <Truck className="h-4 w-4" />
+                                Fast Delivery
+                              </div>
+                              <p className="mt-1 text-xs text-gray-600 leading-relaxed">
+                                Quick dispatch so you enjoy your scent sooner.
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Quick links */}
+                          <div className="mt-5 flex flex-wrap gap-2">
+                            <Button asChild size="sm" variant="secondary" className="bg-white/70">
+                              <Link href="/new-arrivals">New Arrivals</Link>
+                            </Button>
+                            <Button asChild size="sm" variant="secondary" className="bg-white/70">
+                              <Link href="/shop">Best Sellers</Link>
+                            </Button>
+                            <Button asChild size="sm" variant="secondary" className="bg-white/70">
+                              <Link href="/gifts-and-packages">Gift and Combo Packs </Link>
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
 
               {/* Order Summary */}
               <div className="space-y-6 lg:sticky lg:top-24 h-fit">
                 {/* Coupon */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Discount Code</CardTitle>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Discount Code</CardTitle>
                   </CardHeader>
+
                   <CardContent className="space-y-4">
                     {appliedCouponCode ? (
                       // ✅ COUPON APPLIED VIEW
@@ -406,20 +477,20 @@ export default function CartPage() {
 
                 {/* Summary */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Order Summary</CardTitle>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Order Summary</CardTitle>
                   </CardHeader>
+
                   <CardContent className="space-y-4">
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between text-gray-800">
                         <span>Subtotal</span>
-                        <span>৳{subtotal.toFixed(2)}</span>
+                        <span>{formatBDT(subtotal)}</span>
                       </div>
 
                       {discount > 0 && (
-                        <div className="flex justify-between text-green-600">
+                        <div className="flex justify-between text-green-700">
                           <span className="flex items-center gap-2">
-                            {/* <Percent className="h-4 w-4" /> */}
                             {discountLabel ? `${discountLabel} ` : ""}
                             Discount{appliedCouponCode ? ` (${appliedCouponCode})` : ""}
                           </span>
@@ -428,20 +499,20 @@ export default function CartPage() {
                       )}
 
                       {discount > 0 && (
-                        <div className="flex justify-between text-sm text-gray-700">
+                        <div className="flex justify-between text-gray-700">
                           <span>Subtotal after discount</span>
                           <span>{formatBDT(discountedSubtotal)}</span>
                         </div>
                       )}
 
-                      <div className="flex justify-between text-sm text-gray-600">
+                      <div className="flex justify-between text-gray-600">
                         <span>Shipping</span>
                         <span>Calculated at checkout</span>
                       </div>
 
                       <Separator />
 
-                      <div className="flex justify-between text-lg font-semibold">
+                      <div className="flex justify-between text-base font-semibold text-gray-900">
                         <span>Total</span>
                         <span>{formatBDT(total)}</span>
                       </div>
@@ -453,7 +524,7 @@ export default function CartPage() {
                       size="lg"
                       disabled={checkoutClicked || isRouting}
                     >
-                      {(checkoutClicked || isRouting) ? (
+                      {checkoutClicked || isRouting ? (
                         <span className="flex items-center justify-center gap-2">
                           <Loader2 className="h-5 w-5 animate-spin" />
                           Processing...
@@ -471,19 +542,21 @@ export default function CartPage() {
 
                 {/* Payment Methods */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">We Accept</CardTitle>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">We Accept</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-3 gap-2">
-                      {["Visa", "Mastercard", "bKash", "Nagad", "Rocket", "Cash"].map((method) => (
-                        <div
-                          key={method}
-                          className="p-2 border rounded text-center text-xs font-medium bg-gray-50"
-                        >
-                          {method}
-                        </div>
-                      ))}
+                      {["Visa", "Mastercard", "bKash", "Nagad", "Rocket", "Cash"].map(
+                        (method) => (
+                          <div
+                            key={method}
+                            className="p-2 border rounded text-center text-xs font-medium bg-gray-50"
+                          >
+                            {method}
+                          </div>
+                        )
+                      )}
                     </div>
                   </CardContent>
                 </Card>

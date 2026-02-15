@@ -71,7 +71,7 @@ export function ShopShell({
         variant="premium"
       />
 
-      <div className="py-8 bg-gradient-to-r from-gray-50 via-white to-gray-50">
+      <div className="py-0 bg-gradient-to-r from-gray-50 via-white to-gray-50">
         <NoticeBar heading={noticesHeading} notices={notices} interval={4500} />
       </div>
 

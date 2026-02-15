@@ -60,7 +60,7 @@ export default function ProductDetailsUI({
   isBuyingNow,
   isPending,
 }: Props) {
-  console.log('currentPrice', currentPrice);
+  // console.log('currentPrice', currentPrice);
   const fragrances = product.fragrances ?? [];
   return (
     <div className="space-y-3 sm:space-y-4 lg:space-y-5">
@@ -320,7 +320,7 @@ export default function ProductDetailsUI({
       <div id="action-buttons" className="flex flex-col sm:flex-row gap-3 sm:gap-5 mt-3 sm:mt-6 w-full">
         <Button
           className={cn(
-            "flex-1 h-14 sm:h-16 text-base sm:text-xl font-bold rounded-2xl transition-all duration-300 active:scale-[0.99] sm:hover:scale-[1.03]",
+            "flex-1 h-16 sm:h-18 text-base sm:text-xl font-bold rounded-xl transition-all duration-300 active:scale-[0.99] sm:hover:scale-[1.03]",
             isOutOfStock
               ? "bg-gray-400 cursor-not-allowed text-white"
               : isAddingToCart
@@ -346,7 +346,7 @@ export default function ProductDetailsUI({
         {!isOutOfStock && (
           <Button
             className={cn(
-              "flex-1 h-12 sm:h-16 text-base sm:text-xl font-bold rounded-2xl transition-all duration-300 active:scale-[0.99] sm:hover:scale-[1.03]",
+              "flex-1 h-16 sm:h-18 text-base sm:text-xl font-bold rounded-xl transition-all duration-300 active:scale-[0.99] sm:hover:scale-[1.03]",
               isBuyingNow
                 ? "bg-gray-400 cursor-not-allowed text-white"
                 : "bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white shadow-md sm:shadow-xl"

@@ -10,6 +10,7 @@ import { IDiscount, IProduct, IProductVariant } from "@/types/product.types";
 import { useRouter } from "next/navigation";
 import flyToCart from "./FlyToCart";
 import { kwPushAddToCart } from "@/lib/Analytics/kwEcom";
+import Image from "next/image";
 
 export default function ProductPageBottomBar({ product }: { product: IProduct }) {
     const cart = useCart()
@@ -240,9 +241,11 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                         {/* Left: product */}
                         <div className="flex items-center gap-4 min-w-0">
                             <div className="w-14 h-14 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shrink-0">
-                                <img
+                                <Image
                                     src={product.primaryImage}
                                     alt={product.name}
+                                    width={56}
+                                    height={56}
                                     className="w-full h-full object-cover"
                                 />
                             </div>
@@ -293,7 +296,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                 disabled={isOutOfStock || busy}
                                 aria-busy={busy}
                                 onClick={handleAddToCart}
-                                className="h-12 px-6 rounded-2xl font-bold shadow-lg transition-all duration-200
+                                className="h-14 px-6 rounded-xl font-bold shadow-lg transition-all duration-200
                  bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white
                  hover:shadow-xl hover:scale-[1.02]
                  disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
@@ -308,7 +311,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                 disabled={isOutOfStock || busy}
                                 aria-busy={busy}
                                 onClick={handleBuyNow}
-                                className="h-12 px-7 rounded-2xl font-extrabold shadow-lg transition-all duration-200
+                                className="h-14 px-7 rounded-xl font-extrabold shadow-lg transition-all duration-200
                  bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white
                  hover:shadow-xl hover:scale-[1.02]
                  disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
@@ -328,9 +331,11 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                         {/* Row 1: product + price + quick meta */}
                         <div className="flex items-center gap-3">
                             <div className="w-12 h-12 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 shrink-0">
-                                <img
+                                <Image
                                     src={product.primaryImage}
                                     alt={product.name}
+                                    width={48}
+                                    height={48}
                                     className="w-full h-full object-cover"
                                 />
                             </div>
@@ -368,7 +373,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                 disabled={isOutOfStock || busy}
                                 aria-busy={busy}
                                 onClick={handleAddToCart}
-                                className="h-12 rounded-2xl font-extrabold shadow-lg transition-all duration-200
+                                className="h-14 rounded-xl font-extrabold shadow-lg transition-all duration-200
                          bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white
                          active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                             >
@@ -382,7 +387,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                 disabled={isOutOfStock || busy}
                                 aria-busy={busy}
                                 onClick={handleBuyNow}
-                                className="h-12 rounded-2xl font-extrabold shadow-lg transition-all duration-200
+                                className="h-14 rounded-xl font-extrabold shadow-lg transition-all duration-200
                          bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white
                          active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                             >
@@ -393,7 +398,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                             </button>
                         </div>
 
-                        {/* <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2">
                                 <span className="text-[11px] px-2 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 font-semibold">
                                     Cash on Delivery
@@ -403,8 +408,9 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                 </span>
                             </div>
 
-                            <div className="flex items-center rounded-2xl border border-gray-200 bg-white overflow-hidden">
+                            <div className="flex items-center rounded-xl border border-gray-200 bg-white overflow-hidden">
                                 <button
+                                    type="button"
                                     onClick={() => handleQuantityChange("decrement")}
                                     disabled={busy || quantity <= 1}
                                     className="h-9 w-10 grid place-items-center text-gray-700 disabled:opacity-50"
@@ -415,14 +421,15 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                     {quantity}
                                 </div>
                                 <button
+                                    type="button"
                                     onClick={() => handleQuantityChange("increment")}
-                                    disabled={busy || quantity >= 10}
+                                    disabled={busy || quantity >= 100}
                                     className="h-9 w-10 grid place-items-center text-gray-700 disabled:opacity-50"
                                 >
                                     +
                                 </button>
                             </div>
-                        </div> */}
+                        </div>
                     </div>
                 </div>
             </div>

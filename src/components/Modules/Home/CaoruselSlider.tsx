@@ -13,14 +13,13 @@ import {
 } from "@/components/ui/carousel"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 
-const home1 = "/hero1desktop.webp"
-const home2 = "/hero2desktop.webp"
-const home3 = "/hero3desktop.webp"
-const homeMobile1 = "/hero1mobile.webp"
-const homeMobile2 = "/hero2mobile.webp"
-const homeMobile3 = "/hero3mobile.webp"
+const home1 = "/hero1desktop11.webp"
+const home2 = "/hero2desktop22.webp"
+const home3 = "/hero3desktop33.webp"
+const homeMobile1 = "/hero1mobile11.webp"
+const homeMobile2 = "/hero2mobile22.webp"
+const homeMobile3 = "/hero3mobile33.webp"
 
 type Slide = {
   src: string              // desktop
@@ -33,7 +32,6 @@ type Slide = {
 }
 
 export function CarouselSlider() {
-  const reduce = useReducedMotion()
 
   const plugin = React.useRef(
     Autoplay({ delay: 4500, stopOnInteraction: false, stopOnMouseEnter: true })
@@ -90,20 +88,6 @@ export function CarouselSlider() {
 
   const goTo = (index: number) => api?.scrollTo(index)
 
-  // CTA entrance (safe + premium)
-  const ctaWrap = reduce
-    ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
-    : {
-      hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
-      show: {
-        opacity: 1,
-        y: 0,
-        filter: "blur(0px)",
-        transition: { duration: 0.45, ease: "easeOut" },
-      },
-      exit: { opacity: 0, y: 6, transition: { duration: 0.2 } },
-    }
-
   return (
     <section className="w-full overflow-hidden relative mb-6 mt-6" aria-label="Hero Carousel">
       <Carousel setApi={setApi} plugins={[plugin.current]} className="w-full">
@@ -116,10 +100,12 @@ export function CarouselSlider() {
                   src={slide.mobileSrc || slide.src}
                   alt={slide.alt}
                   fill
-                  sizes="(max-width: 768px) 100vw, 1200px"
+                  sizes="100vw"
                   className="object-cover md:hidden"
-                  priority={index === 0}
+                  priority={index === 0} // ✅ only this is priority on mobile
+                  fetchPriority={index === 0 ? "high" : "auto"} // ✅
                   loading={index === 0 ? "eager" : "lazy"}
+                  quality={70} // ✅ reduce a bit on mobile
                 />
 
                 {/* Desktop image */}
@@ -127,10 +113,11 @@ export function CarouselSlider() {
                   src={slide.src}
                   alt={slide.alt}
                   fill
-                  sizes="(max-width: 768px) 100vw, 1200px"
+                  sizes="100vw"
                   className="object-cover hidden md:block"
-                  priority={index === 0}
-                  loading={index === 0 ? "eager" : "lazy"}
+                  priority={false} // ✅ DO NOT priority here
+                  loading="lazy"
+                  quality={85}
                 />
                 {/* Minimal vignette ONLY for CTA readability (doesn't fight your image text) */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/0 to-transparent" />
@@ -139,38 +126,36 @@ export function CarouselSlider() {
                 <div className="absolute inset-0 flex items-end">
                   <div className="container mx-auto sm:px-4 md:px-8 pb-8 sm:pb-10 md:pb-24">
                     <div className="flex justify-center md:justify-start">
-                      <AnimatePresence mode="wait">
-                        {active === index && (
-                          <motion.div
-                            variants={ctaWrap as any}
-                            initial="hidden"
-                            animate="show"
-                            exit="exit"
-                            className={[
-                              "relative z-20 pointer-events-auto",
+                      <div
+                        className={[
+                          "relative z-20 pointer-events-auto",
 
-                              // size behavior
-                              "w-auto max-w-[92%] md:max-w-[520px]",
+                          // size behavior
+                          "w-auto max-w-[92%] md:max-w-[520px]",
 
-                              // layout
-                              "flex items-center gap-2 md:gap-3",
+                          // layout
+                          "flex items-center gap-2 md:gap-3",
 
-                              // padding (smaller on mobile, bigger on desktop)
-                              "px-6 py-4 md:px-10 md:py-8",
+                          // padding
+                          "px-6 py-4 md:px-10 md:py-8",
 
-                              // look
-                              "rounded-xl md:rounded-2xl",
-                              "bg-black/25 md:bg-white/10 backdrop-blur-md",
-                              "border border-white/10 md:border-white/15",
+                          // look
+                          "rounded-xl md:rounded-2xl",
+                          "bg-black/25 md:bg-white/10 backdrop-blur-md",
+                          "border border-white/10 md:border-white/15",
+                          "shadow-lg md:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
 
-                              // lighter shadow on mobile
-                              "shadow-lg md:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
-                            ].join(" ")}
-                          >
-                            {/* Primary CTA */}
-                            <Button
-                              asChild
-                              className="
+                          // ✅ CSS-only entrance/exit
+                          "transition-all duration-300 ease-out motion-reduce:transition-none",
+                          active === index
+                            ? "opacity-100 translate-y-0 blur-0"
+                            : "opacity-0 translate-y-2 blur-[6px] pointer-events-none",
+                        ].join(" ")}
+                      >
+                        {/* Primary CTA */}
+                        <Button
+                          asChild
+                          className="
 h-12 md:h-14
 px-8 md:px-16
 text-sm md:text-xl
@@ -181,19 +166,19 @@ shadow-md md:shadow-lg
 hover:scale-[1.03]
 transition-transform
 "
-                            >
-                              <Link href={slide.primaryLink} aria-label={slide.primaryText}>
-                                {slide.primaryText}
-                                <ArrowRight className="ml-2 h-5 w-8" />
-                              </Link>
-                            </Button>
+                        >
+                          <Link href={slide.primaryLink} aria-label={slide.primaryText}>
+                            {slide.primaryText}
+                            <ArrowRight className="ml-2 h-5 w-8" />
+                          </Link>
+                        </Button>
 
-                            {/* Secondary CTA (ghost/glass) */}
-                            {slide.secondaryText && slide.secondaryLink && (
-                              <Button
-                                asChild
-                                variant="ghost"
-                                className="
+                        {/* Secondary CTA */}
+                        {slide.secondaryText && slide.secondaryLink && (
+                          <Button
+                            asChild
+                            variant="ghost"
+                            className="
 h-12 md:h-14
 px-6 md:px-12
 text-sm md:text-xl
@@ -202,15 +187,13 @@ text-white
 border border-white/20
 hover:bg-white/10
 "
-                              >
-                                <Link href={slide.secondaryLink} aria-label={slide.secondaryText}>
-                                  {slide.secondaryText}
-                                </Link>
-                              </Button>
-                            )}
-                          </motion.div>
+                          >
+                            <Link href={slide.secondaryLink} aria-label={slide.secondaryText}>
+                              {slide.secondaryText}
+                            </Link>
+                          </Button>
                         )}
-                      </AnimatePresence>
+                      </div>
                     </div>
                   </div>
                 </div>

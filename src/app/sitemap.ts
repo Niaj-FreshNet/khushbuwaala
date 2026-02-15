@@ -1,46 +1,99 @@
 import { MetadataRoute } from "next";
 
-// If you have dynamic product pages, you can optionally fetch product slugs at runtime.
-// For build-time static sitemap, keep it simple.
-export default function sitemap(): MetadataRoute.Sitemap {
-  const urls: MetadataRoute.Sitemap = [
+const BASE_URL = "https://khushbuwaala.com";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const now = new Date();
+
+  /* --------------------------------
+     Static Pages (HIGH SEO VALUE)
+  -------------------------------- */
+  const staticPages: MetadataRoute.Sitemap = [
     {
-      url: "https://khushbuwaala.com",
-      lastModified: new Date(),
+      url: `${BASE_URL}`,
+      lastModified: now,
       changeFrequency: "daily",
       priority: 1.0,
     },
     {
-      url: "https://khushbuwaala.com/shop",
-      lastModified: new Date(),
+      url: `${BASE_URL}/shop`,
+      lastModified: now,
       changeFrequency: "daily",
-      priority: 0.8,
-    },
-    // Example static pages
-    {
-      url: "https://khushbuwaala.com/about",
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.5,
+      priority: 0.9,
     },
     {
-      url: "https://khushbuwaala.com/contact",
-      lastModified: new Date(),
+      url: `${BASE_URL}/manifesto`,
+      lastModified: now,
       changeFrequency: "monthly",
-      priority: 0.5,
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/privacy-policy`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.4,
+    },
+    {
+      url: `${BASE_URL}/terms-conditions`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.4,
+    },
+    {
+      url: `${BASE_URL}/refund-policy`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.4,
     },
   ];
 
-  // Example::: paginate shop pages statically
-  const totalPages = 5; // You can set a static number here
+  /* --------------------------------
+     Shop Pagination (SEO crawl depth)
+  -------------------------------- */
+  const pagination: MetadataRoute.Sitemap = [];
+  const totalPages = 5; // adjust later if needed
+
   for (let i = 2; i <= totalPages; i++) {
-    urls.push({
-      url: `https://khushbuwaala.com/shop?page=${i}`,
-      lastModified: new Date(),
+    pagination.push({
+      url: `${BASE_URL}/shop?page=${i}`,
+      lastModified: now,
       changeFrequency: "daily",
-      priority: 0.6,
+      priority: 0.7,
     });
   }
 
-  return urls;
+  /* --------------------------------
+     Dynamic Product Pages (OPTIONAL)
+     Fetch from your API
+  -------------------------------- */
+
+  let products: MetadataRoute.Sitemap = [];
+
+  try {
+    const res = await fetch(
+      "https://api.khushbuwaala.com/products/slugs",
+      {
+        // helps ISR cache
+        next: { revalidate: 3600 },
+      }
+    );
+
+    if (res.ok) {
+      const data: { slug: string; updatedAt?: string }[] =
+        await res.json();
+
+      products = data.map((product) => ({
+        url: `${BASE_URL}/product/${product.slug}`,
+        lastModified: product.updatedAt
+          ? new Date(product.updatedAt)
+          : now,
+        changeFrequency: "weekly",
+        priority: 0.8,
+      }));
+    }
+  } catch {
+    // silently fail — sitemap still works
+  }
+
+  return [...staticPages, ...pagination, ...products];
 }

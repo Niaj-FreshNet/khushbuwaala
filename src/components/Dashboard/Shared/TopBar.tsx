@@ -3,7 +3,7 @@
 import { useSelector } from "react-redux";
 import type { Dispatch, SetStateAction } from "react";
 import { LuMenu, LuX } from "react-icons/lu";
-import { RootState } from "../../../redux/store"; // Assuming Redux is set up similarly
+import { RootState } from "@/redux/store/store";
 
 export default function TopBar({
     isOpen,

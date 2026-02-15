@@ -45,7 +45,7 @@ export function ShopProductsSkeletonGrid({
         >
           <div className="relative">
             <LiveSkeleton delayMs={80 + i * 30} speedMs={1450 + (i % 3) * 120}>
-              <Skeleton className="w-full h-60 sm:h-64" />
+              <Skeleton className="w-full h-52 sm:h-64" />
             </LiveSkeleton>
 
             <div className="absolute top-3 left-3 flex gap-2">

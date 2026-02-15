@@ -4,7 +4,6 @@ import type React from "react"
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Home, Package, Gift, Info, Heart, MapPin, ChevronRight, Sparkles, Star, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetClose, SheetContent } from "@/components/ui/sheet"
@@ -12,6 +11,24 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
 import Image from "next/image"
+import {
+  Home,
+  Package,
+  Gift,
+  Info,
+  Heart,
+  MapPin,
+  ChevronRight,
+  Sparkles,
+  Star,
+  X,
+  Droplets,
+  Globe,
+  Flame,
+  Leaf,
+} from "lucide-react"
+import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 interface NavDrawerProps {
   open: boolean
@@ -31,6 +48,16 @@ interface MenuItem {
 export default function NavDrawer({ open, onClose }: NavDrawerProps) {
   const router = useRouter()
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
+  const pathname = usePathname()
+
+  const categoryIconMap: Record<string, React.ReactNode> = {
+    "inspired-perfume-oil": <Sparkles className="h-4 w-4" />,
+    "oriental-attar": <Globe className="h-4 w-4" />,
+    "artificial-oud": <Flame className="h-4 w-4" />,
+    "natural-attar": <Leaf className="h-4 w-4" />,
+  }
+
+  const isActive = (href?: string) => !!href && (pathname === href || pathname.startsWith(href + "/"))
 
   const menuItems: MenuItem[] = [
     {
@@ -205,27 +232,59 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                           </div>
                         </Button>
                       </CollapsibleTrigger>
-                      <CollapsibleContent className="mt-2 ml-6 space-y-1">
-                        {item.children.map((child) => (
-                          <Button
-                            key={child.key}
-                            variant="ghost"
-                            className="w-full justify-start h-12 px-4 text-sm text-gray-600 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 hover:text-red-600 transition-all duration-300 rounded-lg group"
-                            onClick={() => handleNavigation(child.href!)}
-                          >
-                            <div className="flex items-center space-x-3">
-                              <div className="w-2 h-2 bg-red-400 rounded-full group-hover:bg-red-600 transition-colors duration-300" />
-                              <div className="flex flex-col items-start">
-                                <span className="font-medium">{child.label}</span>
-                                {child.description && (
-                                  <span className="text-xs text-gray-400 group-hover:text-red-400">
-                                    {child.description}
+                      <CollapsibleContent className="mt-2 pl-3 space-y-1">
+                        {item.children.map((child) => {
+                          const active = isActive(child.href)
+                          const icon = categoryIconMap[child.key] ?? <Droplets className="h-4 w-4" />
+
+                          return (
+                            <Button
+                              key={child.key}
+                              variant="ghost"
+                              className={cn(
+                                "w-full justify-start h-12 px-3 text-sm rounded-xl transition-all duration-200 group",
+                                "hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50",
+                                active ? "bg-red-50/80 text-red-700" : "text-gray-700"
+                              )}
+                              onClick={() => handleNavigation(child.href!)}
+                            >
+                              <div className="flex items-center gap-3 w-full">
+                                {/* Icon chip */}
+                                <div
+                                  className={cn(
+                                    "h-9 w-9 rounded-xl grid place-items-center border shrink-0 transition-colors duration-200",
+                                    active
+                                      ? "bg-red-100 border-red-200 text-red-700"
+                                      : "bg-white border-gray-200 text-gray-600 group-hover:bg-red-100 group-hover:border-red-200 group-hover:text-red-700"
+                                  )}
+                                >
+                                  {icon}
+                                </div>
+
+                                {/* Text */}
+                                <div className="flex flex-col items-start leading-tight">
+                                  <span className={cn("font-semibold", active ? "text-red-700" : "text-gray-800")}>
+                                    {child.label}
                                   </span>
-                                )}
+
+                                  {child.description && (
+                                    <span className={cn("text-xs", active ? "text-red-600" : "text-gray-500 group-hover:text-red-600")}>
+                                      {child.description}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Right caret (subtle) */}
+                                <ChevronRight
+                                  className={cn(
+                                    "ml-auto h-4 w-4 transition-all duration-200",
+                                    active ? "text-red-600 translate-x-0.5" : "text-gray-300 group-hover:text-red-400 group-hover:translate-x-0.5"
+                                  )}
+                                />
                               </div>
-                            </div>
-                          </Button>
-                        ))}
+                            </Button>
+                          )
+                        })}
                       </CollapsibleContent>
                     </Collapsible>
                   ) : (

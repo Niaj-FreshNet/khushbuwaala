@@ -110,10 +110,16 @@ export const metadata: Metadata = {
   publisher: siteConfig.publisher,
   robots: "index, follow",
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
+    icon: [
+      { url: "/favicon.png" },
+      // { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      // { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    ],
+    // apple: [
+    //   { url: "/favicon-180x180.png", sizes: "180x180" },
+    // ],
   },
+  // manifest: "/site.webmanifest",
   openGraph: {
     title: `${siteConfig.name} - Premium Perfumes & Attars`,
     description: siteConfig.description,
@@ -160,10 +166,14 @@ export default function RootLayout({
       className={`${inter.variable}`}
     >
       <head>
-        {/* Google Tag Manager - as high in <head> as possible */}
+        {/* Optional: speed up DNS/TLS for GTM */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+
+        {/* GTM: do NOT block initial render */}
         <Script
           id="gtm-script"
-          strategy="beforeInteractive"
+          strategy="afterInteractive" // ✅ was beforeInteractive
           dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],

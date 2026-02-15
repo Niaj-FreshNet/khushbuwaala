@@ -2,8 +2,6 @@ import type React from "react"
 import Link from "next/link"
 import { Home, Mail, Phone, Users, MapPin } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import NewsletterForm from "./Newsletter"
 import FooterCollapsible from "./FooterCollapsible"
 import SocialIcons from "../Icons/SocialIcons/SocialIcons"
 import Image from "next/image"
@@ -37,9 +35,8 @@ const footerStructuredData = {
   },
   sameAs: [
     "https://facebook.com/khushbuwaala",
-    "https://instagram.com/khushbuwaala",
-    "https://twitter.com/khushbuwaala",
-    "https://youtube.com/@khushbuwaala",
+    "https://www.instagram.com/khushbuwaala_perfumes",
+    "https://www.youtube.com/@khushbuwaala_perfumes",
   ],
 }
 
@@ -183,9 +180,12 @@ export const Footer = () => {
           </div>
 
           {/* Footer Sections */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-8 lg:gap-12">
             {footerSections.map((section) => (
-              <div key={section.id} className="space-y-6">
+              <div
+                key={section.id}
+                className="space-y-2 md:space-y-6" // ✅ tight on mobile, same on desktop
+              >
                 {/* Mobile Collapsible - Client Component */}
                 <div className="md:hidden">
                   <FooterCollapsible section={section} />
@@ -289,25 +289,14 @@ export const Footer = () => {
       </footer>
 
       {/* Footer Bottom - Server Component */}
-      <div className="bg-gray-900 text-white py-4" role="contentinfo">
+      <div className="bg-gray-900 text-white py-2" role="contentinfo">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-gray-300 text-center md:text-left">
-              © {new Date().getFullYear()} KhushbuWaala. All rights reserved. Crafted with ❤️ in Bangladesh.
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+            <p className="text-sm text-gray-300 text-center">
+              © {new Date().getFullYear()} KhushbuWaala Perfumes. All rights reserved.
             </p>
-            <div className="flex items-center gap-6 text-sm text-gray-300">
-              <Link href="/sitemap" className="hover:text-white transition-colors">
-                Sitemap
-              </Link>
-              <Separator orientation="vertical" className="h-4 bg-gray-600" />
-              <Link href="/accessibility" className="hover:text-white transition-colors">
-                Accessibility
-              </Link>
-              <Separator orientation="vertical" className="h-4 bg-gray-600" />
-              <span>Made with Next.js</span>
-            </div>
           </div>
-        </div>
+      </div>
       </div>
     </>
   )

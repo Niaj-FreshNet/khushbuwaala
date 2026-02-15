@@ -1,12 +1,4 @@
-import { Suspense } from "react";
 import { Metadata } from "next";
-import { NoticeBar } from "@/components/Modules/Shop/NoticeBar";
-import { ShopBanner } from "@/components/Modules/Shop/ShopBanner";
-import { ShopProducts } from "@/components/Modules/Shop/ShopProducts";
-import { initializeStore } from "@/redux/store/ssrStore";
-import { productApi } from "@/redux/store/api/product/productApi";
-import { IProductResponse } from "@/types/product.types";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ShopShell } from "@/components/Modules/Shop/ShopShell";
 
 // Metadata
@@ -58,8 +50,6 @@ export default async function ArtificialOudPage({
   const categoryName = "ARTIFICIAL-OUD";
   const categoryId = "6904ab807a035c41185d2729";
 
-  const sortBy = "a-z" as string | undefined;
-
   return (
     <>
       {/* Hidden crawlable pagination links */}
@@ -90,7 +80,6 @@ export default async function ArtificialOudPage({
         initialPage={page}
         categoryId={categoryId}
         categoryName={categoryName}
-        sortBy={sortBy}
         lockCategory={true} // ✅ category locked
       />
     </>

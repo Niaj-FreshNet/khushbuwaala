@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import { useGetAllProductsQuery, useGetProductsByCategoryIdQuery } from "@/redux/store/api/product/productApi";
 import { IProductResponse } from "@/types/product.types";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   FilterIcon,
   ListFilter,
@@ -667,7 +666,7 @@ export function ShopProducts(props: ShopProductProps) {
 
   return (
     <section
-      className="container mx-auto py-6 sm:py-8 px-3 sm:px-4 relative overflow-x-hidden"
+      className="container mx-auto py-6 sm:py-8 px-3 sm:px-4 relative"
       aria-labelledby="shop-products-heading"
     >
       {/* Hidden crawlable pagination links for SEO */}
@@ -807,143 +806,147 @@ export function ShopProducts(props: ShopProductProps) {
         </Button>
       </div>
 
-      {/* Product List */}
-      <div ref={productsTopRef} />
+      {/* ✅ Put overflow-x-hidden AFTER sticky */}
+      <div className="overflow-x-hidden">
 
-      {showInitialSkeleton ? (
-        // ✅ First load only (no products yet)
-        <ShopProductsSkeletonGrid colsClass={gridColsClass} />
-      ) : error ? (
-        <ErrorUI />
-      ) : products.length > 0 ? (
-        // ✅ Normal render (never blank)
-        <ProductsGrid
-          products={products}
-          visibleProductsCount={visibleProductsCount}
-          gridColsClass={gridColsClass}
-          columns={columns}
-          isBusy={isBusy}
-          onQuickView={handleQuickView}
-        />
-      ) : showEmptyState ? (
-        // ✅ show empty state ONLY after first real resolve
-        <NoProductsUI timedOut={timedOut} />
-      ) : (
-        // ✅ fallback during hydration/transient state to prevent flash
-        <ShopProductsSkeletonGrid colsClass={gridColsClass} />
-      )}
+        {/* Product List */}
+        <div ref={productsTopRef} />
+
+        {showInitialSkeleton ? (
+          // ✅ First load only (no products yet)
+          <ShopProductsSkeletonGrid colsClass={gridColsClass} />
+        ) : error ? (
+          <ErrorUI />
+        ) : products.length > 0 ? (
+          // ✅ Normal render (never blank)
+          <ProductsGrid
+            products={products}
+            visibleProductsCount={visibleProductsCount}
+            gridColsClass={gridColsClass}
+            columns={columns}
+            isBusy={isBusy}
+            onQuickView={handleQuickView}
+          />
+        ) : showEmptyState ? (
+          // ✅ show empty state ONLY after first real resolve
+          <NoProductsUI timedOut={timedOut} />
+        ) : (
+          // ✅ fallback during hydration/transient state to prevent flash
+          <ShopProductsSkeletonGrid colsClass={gridColsClass} />
+        )}
 
 
-      {/* Load More Button */}
-      {/* {totalFilteredProducts > visibleProductsCount && (
-        <div className="text-center mt-8">
-          <p className="text-sm text-gray-600 mb-6">
-            You&apos;ve viewed{" "}
-            {Math.min(visibleProductsCount, totalFilteredProducts)} of{" "}
-            {totalFilteredProducts} products
-          </p>
-          <Button
-            className="px-10 py-4 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-            onClick={handleLoadMore}
-            disabled={loadingMore}
-          >
-            {loadingMore ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" /> Loading More...
-              </span>
-            ) : (
-              "Load More"
-            )}
-          </Button>
-        </div>
-      )} */}
+        {/* Load More Button */}
+        {/* {totalFilteredProducts > visibleProductsCount && (
+      <div className="text-center mt-8">
+        <p className="text-sm text-gray-600 mb-6">
+          You&apos;ve viewed{" "}
+          {Math.min(visibleProductsCount, totalFilteredProducts)} of{" "}
+          {totalFilteredProducts} products
+        </p>
+        <Button
+          className="px-10 py-4 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          onClick={handleLoadMore}
+          disabled={loadingMore}
+        >
+          {loadingMore ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading More...
+            </span>
+          ) : (
+            "Load More"
+          )}
+        </Button>
+      </div>
+    )} */}
 
-      {/* Pagination */}
-      <div className="mt-10">
-        <div className="mx-auto w-full max-w-full overflow-x-hidden">
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {/* Previous */}
-            <Button
-              variant="outline"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="h-9 px-3 rounded-lg"
-            >
-              Previous
-            </Button>
+        {/* Pagination */}
+        <div className="mt-10">
+          <div className="mx-auto w-full max-w-full overflow-x-hidden">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {/* Previous */}
+              <Button
+                variant="outline"
+                disabled={page <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className="h-9 px-3 rounded-lg"
+              >
+                Previous
+              </Button>
 
-            {/* Page numbers (responsive, capped, no overflow) */}
-            {(() => {
-              const total = totalPages;
-              const current = page;
+              {/* Page numbers (responsive, capped, no overflow) */}
+              {(() => {
+                const total = totalPages;
+                const current = page;
 
-              // how many pages to show around current
-              const delta = 1; // current +/- 1 (mobile friendly)
-              const range: number[] = [];
-              const rangeWithDots: (number | "...")[] = [];
+                // how many pages to show around current
+                const delta = 1; // current +/- 1 (mobile friendly)
+                const range: number[] = [];
+                const rangeWithDots: (number | "...")[] = [];
 
-              const left = Math.max(2, current - delta);
-              const right = Math.min(total - 1, current + delta);
+                const left = Math.max(2, current - delta);
+                const right = Math.min(total - 1, current + delta);
 
-              range.push(1);
-              for (let i = left; i <= right; i++) range.push(i);
-              if (total > 1) range.push(total);
+                range.push(1);
+                for (let i = left; i <= right; i++) range.push(i);
+                if (total > 1) range.push(total);
 
-              // remove duplicates + sort
-              const uniq = Array.from(new Set(range)).sort((a, b) => a - b);
+                // remove duplicates + sort
+                const uniq = Array.from(new Set(range)).sort((a, b) => a - b);
 
-              // build with dots
-              for (let i = 0; i < uniq.length; i++) {
-                const n = uniq[i];
-                const prev = uniq[i - 1];
+                // build with dots
+                for (let i = 0; i < uniq.length; i++) {
+                  const n = uniq[i];
+                  const prev = uniq[i - 1];
 
-                if (i > 0 && prev !== undefined && n - prev > 1) {
-                  rangeWithDots.push("...");
+                  if (i > 0 && prev !== undefined && n - prev > 1) {
+                    rangeWithDots.push("...");
+                  }
+                  rangeWithDots.push(n);
                 }
-                rangeWithDots.push(n);
-              }
 
-              return rangeWithDots.map((item, idx) => {
-                if (item === "...") {
+                return rangeWithDots.map((item, idx) => {
+                  if (item === "...") {
+                    return (
+                      <span
+                        key={`dots-${idx}`}
+                        className="px-2 text-sm text-gray-500 select-none"
+                      >
+                        …
+                      </span>
+                    );
+                  }
+
+                  const pageNum = item as number;
+
                   return (
-                    <span
-                      key={`dots-${idx}`}
-                      className="px-2 text-sm text-gray-500 select-none"
+                    <Button
+                      key={pageNum}
+                      onClick={() => setPage(pageNum)}
+                      className={[
+                        "h-9 min-w-9 px-3 rounded-lg",
+                        "text-sm",
+                        page === pageNum
+                          ? "bg-red-600 text-white hover:bg-red-700"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                      ].join(" ")}
                     >
-                      …
-                    </span>
+                      {pageNum}
+                    </Button>
                   );
-                }
+                });
+              })()}
 
-                const pageNum = item as number;
-
-                return (
-                  <Button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum)}
-                    className={[
-                      "h-9 min-w-9 px-3 rounded-lg",
-                      "text-sm",
-                      page === pageNum
-                        ? "bg-red-600 text-white hover:bg-red-700"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200",
-                    ].join(" ")}
-                  >
-                    {pageNum}
-                  </Button>
-                );
-              });
-            })()}
-
-            {/* Next */}
-            <Button
-              variant="outline"
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              className="h-9 px-3 rounded-lg"
-            >
-              Next
-            </Button>
+              {/* Next */}
+              <Button
+                variant="outline"
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                className="h-9 px-3 rounded-lg"
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </div>
       </div>
