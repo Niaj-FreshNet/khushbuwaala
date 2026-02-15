@@ -6,7 +6,6 @@ import FormWrapper from '@/components/ReusableUI/FormWrapper';
 import FormInput from '@/components/ReusableUI/FormInput';
 import {
   useGetAllProductsAdminQuery,
-  useGetProductVariantsQuery,
   useUpdateProductStockMutation,
 } from '@/redux/store/api/product/productApi';
 import { toast } from 'sonner';

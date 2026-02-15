@@ -125,7 +125,7 @@ export default function ThankYouPage() {
 
   // ✅ prefer query order > last order
   const order = (orderById as any)?.data || (lastOrder as any)?.data;
-  // console.log("order", order);
+  console.log("order", order);
 
   // discount breakdown (optional)
   const [discountBreakdown, setDiscountBreakdown] = useState<any>(null);

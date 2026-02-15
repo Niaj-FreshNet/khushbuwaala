@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import AddBlogClient from "./AddBlogClient";
 
 export default function Page() {
-  return <AddBlogClient />;
+  return (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <AddBlogClient />
+    </Suspense>
+  );
 }
