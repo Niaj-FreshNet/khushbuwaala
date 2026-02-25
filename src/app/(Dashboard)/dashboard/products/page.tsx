@@ -217,7 +217,7 @@ const ProductList = () => {
                                       {variant.size} {variant.unit}
                                     </p>
                                     <p>Price: {variant.price} BDT</p>
-                                    <p>SKU: {variant.sku}</p>
+                                    {/* <p>SKU: {variant.sku}</p> */}
                                   </div>
                                 )
                               )
