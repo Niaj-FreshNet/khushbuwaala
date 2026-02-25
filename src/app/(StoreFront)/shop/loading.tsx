@@ -4,9 +4,9 @@ import { ShopControlsSkeleton } from "@/components/Modules/Shop/ShopControlsSkel
 
 export default function ShopLoading() {
   return (
-    <div className="w-full mx-auto">
+    <div className="w-full mx-auto mt-12 mb-8 ">
       {/* Banner */}
-      <div className="relative w-full h-[250px] md:h-[360px] mt-16 mb-8 overflow-hidden">
+      {/* <div className="relative w-full h-[250px] md:h-[360px] overflow-hidden">
         <LiveSkeleton delayMs={0} speedMs={1600} className="h-full">
           <Skeleton className="w-full h-full" />
         </LiveSkeleton>
@@ -33,7 +33,7 @@ export default function ShopLoading() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Notice Bar */}
       <div className="py-6 bg-gray-50 border-y border-gray-100">

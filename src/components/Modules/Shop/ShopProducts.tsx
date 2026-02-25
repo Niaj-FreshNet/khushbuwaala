@@ -19,9 +19,7 @@ import { SortSheet } from "./SortSheet";
 import { ProductCard } from "@/components/ReusableUI/ProductCard";
 import { ProductQuickView } from "@/components/ReusableUI/ProductQuickView";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { fi } from "zod/v4/locales";
 import { ShopProductsSkeletonGrid } from "./ShopProductsSkeletonGrid";
-import { activeAnimations } from "framer-motion";
 
 interface ShopProductProps {
   // initialProducts: IProductResponse[];
@@ -720,7 +718,7 @@ export function ShopProducts(props: ShopProductProps) {
       </h2>
 
       {/* Enhanced Sticky Controls: Filter, Sort, Column Layout */}
-      <div className="sticky top-0 z-40 flex justify-between items-center bg-white/95 backdrop-blur-xl py-2 sm:py-4 px-2 sm:px-4 rounded-b-xl shadow-lg mb-4 sm:mb-8 border border-gray-200/50 transition-all duration-300">
+      <div className="sticky top-0 z-40 flex justify-between items-center bg-white/95 backdrop-blur-xl py-1 sm:py-3 px-2 sm:px-4 rounded-b-xl shadow-lg mb-4 sm:mb-8 border border-gray-200/50 transition-all duration-300">
         <Button
           variant="outline"
           className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all duration-300 bg-transparent rounded-lg px-4 py-2 shadow-sm hover:shadow-md"
@@ -814,7 +812,7 @@ export function ShopProducts(props: ShopProductProps) {
 
         {showInitialSkeleton ? (
           // ✅ First load only (no products yet)
-          <ShopProductsSkeletonGrid colsClass={gridColsClass} />
+          <ShopProductsSkeletonGrid />
         ) : error ? (
           <ErrorUI />
         ) : products.length > 0 ? (

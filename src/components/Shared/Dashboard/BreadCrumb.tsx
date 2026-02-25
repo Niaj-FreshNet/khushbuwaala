@@ -21,7 +21,7 @@ const BreadCrumb: React.FC = () => {
 
     return (
         <div className="hidden sm:block">
-            <div className="flex items-start gap-2 font-semibold sm:text-base text-xs md:text-lg text-wrap">
+            <div className="flex flex-wrap items-center gap-2 font-semibold text-xs sm:text-sm md:text-base">
                 {/* Render path-based breadcrumbs */}
                 {pathnames?.map((breadcrumb, index) => {
                     const path = `/${pathnames.slice(0, index + 1).join("/")}`;

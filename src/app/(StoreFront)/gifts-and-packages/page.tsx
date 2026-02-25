@@ -85,7 +85,7 @@ export default async function GiftsAndPackagesPage({
         bannerText="Choose Your Desired Perfume Oil Packages and Gifts for The Season"
         bannerImages={{ desktop: "/images/n111.png", mobile: "/images/n1.webp" }}
         bannerAlt="Banner displaying the best quality perfume oil gift packages"
-        noticesHeading="Gifts & Packages"
+        noticesHeading="Gifts & Combo Packages"
         initialPage={page}
         categoryId={categoryId}
         categoryName={categoryName}

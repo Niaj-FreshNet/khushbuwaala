@@ -2,9 +2,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export default function ShopLoading() {
   return (
-    <div className="w-full mx-auto">
+    <div className="w-full mx-auto mt-12 mb-8">
       {/* Shop Banner Skeleton */}
-      <Skeleton className="w-full h-[250px] md:h-[360px] mt-16 mb-8" />
+      {/* <Skeleton className="w-full h-[250px] md:h-[360px]" /> */}
 
       {/* Notice Bar Skeleton */}
       <div className="py-6 bg-gray-50">

@@ -71,6 +71,49 @@ export interface IPaginatedResponse<T> {
   data: T[]
 }
 
+export type IUpdateOrderPayload = {
+  id: string;
+
+  status?: "PENDING" | "PROCESSING" | "DELIVERED" | "COMPLETED" | "CANCELED";
+  isPaid?: boolean;
+  method?: string | null;
+
+  orderSource?: "WEBSITE" | "SHOWROOM" | "WHOLESALE" | "MANUAL";
+  saleType?: "SINGLE" | "BULK";
+
+  shippingCost?: number;
+  additionalNotes?: string | null;
+
+  coupon?: string | null;
+  discountAmount?: number;
+
+  shipping?: any; // or define the address type
+  billing?: any;
+
+  salesmanId?: string | null;
+
+  name?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+
+  amount?: number;
+  customerId?: string | null;
+};
+
+export type DashboardMetrics = {
+  todayOrders: number;
+  monthOrders: number;
+  monthSales: number;
+  totalSales: number;
+};
+
+export type WeeklySalesPoint = {
+  day: string;
+  sales: number;
+  orders: number;
+};
+
 export const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // ✅ Create order (customer or guest)
@@ -99,13 +142,31 @@ export const orderApi = baseApi.injectEndpoints({
     }),
 
     // ✅ Update order status (Admin)
-    updateOrderStatus: builder.mutation<IOrderResponse, { id: string; data: Record<string, any> }>({
-      query: ({ id, data }) => ({
+    updateOrderStatus: builder.mutation<IOrderResponse, { id: string; status: string }>({
+      query: ({ id, status }) => ({
         url: `/order/update-order-status/${id}`,
         method: 'PATCH',
-        body: data,
+        body: { status }, // ✅
       }),
       invalidatesTags: ['Order'],
+    }),
+
+    updatePaymentStatus: builder.mutation<IOrderResponse, { id: string; isPaid: boolean }>({
+      query: ({ id, isPaid }) => ({
+        url: `/order/update-payment-status/${id}`,
+        method: 'PATCH',
+        body: { isPaid },
+      }),
+      invalidatesTags: ['Order'],
+    }),
+
+    updateOrder: builder.mutation<IOrderResponse, IUpdateOrderPayload>({
+      query: ({ id, ...body }) => ({
+        url: `/order/update-order/${id}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Order"],
     }),
 
     // ✅ Get all customers (Admin)
@@ -134,9 +195,28 @@ export const orderApi = baseApi.injectEndpoints({
       query: (id) => `/order/my-order/${id}`,
       providesTags: (result, error, id) => [{ type: 'Order' as const, id }],
     }),
+
+    getDashboardMetrics: builder.query<ApiResponse<DashboardMetrics & { type: string }>, { type?: "all" | "website" | "manual" } | void>({
+      query: (arg) => ({
+        url: "/order/dashboard/metrics",
+        params: arg?.type ? { type: arg.type } : undefined,
+      }),
+      providesTags: ["Order"],
+    }),
+
+    getWeeklySalesOverview: builder.query<
+      ApiResponse<{ day: string; sales: number; orders: number }[]>,
+      { type?: "all" | "website" | "manual" } | void
+    >({
+      query: (arg) => ({
+        url: "/order/dashboard/weekly-sales",
+        params: arg?.type ? { type: arg.type } : undefined,
+      }),
+      providesTags: ["Order"],
+    }),
   }),
   overrideExisting: true,
-})
+});
 
 export const {
   useCreateOrderMutation,
@@ -144,8 +224,12 @@ export const {
   useGetOrderByIdQuery,
   useLazyGetOrderByIdQuery,
   useUpdateOrderStatusMutation,
+  useUpdatePaymentStatusMutation,
+  useUpdateOrderMutation,
   useGetAllCustomersQuery,
   useGetUserOrdersQuery,
   useGetMyOrdersQuery,
   useGetMyOrderByIdQuery,
+  useGetDashboardMetricsQuery,
+  useGetWeeklySalesOverviewQuery,
 } = orderApi

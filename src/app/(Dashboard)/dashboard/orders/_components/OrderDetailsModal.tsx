@@ -108,7 +108,7 @@ const OrderDetailsModal = ({ orderId, visible, onClose }: OrderDetailsModalProps
         return 'bg-blue-500';
       case 'COMPLETED':
         return 'bg-[#4CD964]';
-      case 'CANCEL':
+      case 'CANCELED':
         return 'bg-red-500';
       default:
         return 'bg-gray-400';
@@ -166,7 +166,7 @@ const OrderDetailsModal = ({ orderId, visible, onClose }: OrderDetailsModalProps
   return (
     <>
       <Dialog open={visible} onOpenChange={onClose}>
-        <DialogContent className="max-w-8xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-8xl max-h-screen overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-[#FB923C] flex items-center justify-between">
               <span>Order Details</span>
@@ -382,7 +382,7 @@ const OrderDetailsModal = ({ orderId, visible, onClose }: OrderDetailsModalProps
                             <div className="flex-1">
                               <h4 className="font-medium text-lg">{productName}</h4>
 
-                              <div className="grid grid-cols-2 gap-2 mt-2">
+                              <div className="grid grid-cols-1 gap-2 mt-2">
                                 <p>
                                   <span className="text-gray-600">Variant:</span>{' '}
                                   {size ? `${size} ${unit ?? ''}`.trim() : 'N/A'}

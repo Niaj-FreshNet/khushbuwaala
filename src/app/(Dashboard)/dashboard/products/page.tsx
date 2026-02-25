@@ -176,7 +176,7 @@ const ProductList = () => {
                   return (
                     <TableRow key={product.id}>
                       <TableCell className="capitalize">
-                        <Link href={`/product/${product.slug}`}>
+                        <Link target="_blank" href={`/product/${product.slug}`}>
                           <span className='text-sky-700 hover:underline'>
                             {product.name?.toLowerCase() || 'N/A'}
                           </span>
