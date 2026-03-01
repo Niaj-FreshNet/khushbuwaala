@@ -176,6 +176,7 @@ export default function OrderInvoice({ order, visible, onClose }: OrderInvoicePr
             const unitOriginal = Number(it.price ?? it.variant?.price ?? 0);
             const key = `${productId}__${variantId || ""}`;
             const unitDisc = discountedUnitMap.get(key) ?? unitOriginal;
+            console.log('unitOriginal', unitOriginal, 'unitDisc', unitDisc);
 
             const lineOriginal = Math.max(0, Math.round(unitOriginal * qty));
             const lineDisc = Math.max(0, Math.round(unitDisc * qty));
@@ -202,23 +203,51 @@ export default function OrderInvoice({ order, visible, onClose }: OrderInvoicePr
     }, [order, discountedUnitMap]);
 
     // ✅ Totals (server truth)
+    // ✅ Totals (prefer computed discount from lines)
     const totals = useMemo(() => {
         const subtotalOriginal = lines.reduce((s, x) => s + x.lineOriginal, 0);
-        const subtotalDisc = lines.reduce((s, x) => s + x.lineDisc, 0);
+        console.log("subtotalOriginal", subtotalOriginal);
 
-        const discountAmount = Math.max(0, Number(order?.discountAmount ?? 0));
+        // ✅ this is the REAL discount for all quantities (sum of per-line savings)
+        const computedDiscount = lines.reduce((s, x) => s + (x.save || 0), 0);
+        console.log("computedDiscount", computedDiscount);
+
+        // server value (can be wrong / per-qty in your case)
+        const serverDiscount = Math.max(0, Number(order?.discountAmount ?? 0));
+        console.log("serverDiscount", serverDiscount);
+
+        // ✅ Prefer computed discount if it exists, otherwise fallback to server
+        const discountAmount = computedDiscount > 0 ? computedDiscount : serverDiscount;
+        console.log("discountAmount", discountAmount);
+
         const coupon = order?.coupon ? String(order.coupon).toUpperCase() : null;
 
         const shipping = Math.max(0, Number(order?.shippingCost ?? 0));
         const tax = Math.max(0, Number(order?.estimatedTaxes ?? 0));
 
-        // ✅ Always trust server
-        const totalPayable = Math.max(0, Number(order?.amount ?? (subtotalDisc + shipping + tax)));
+        // ✅ correct subtotal after discount
+        const subtotalDisc = Math.max(0, subtotalOriginal - discountAmount);
+
+        // ✅ Always trust server payable if present
+        const totalPayable = Math.max(
+            0,
+            Number(order?.amount ?? (subtotalDisc + shipping + tax))
+        );
 
         const received = order?.isPaid ? totalPayable : 0;
         const due = Math.max(0, totalPayable - received);
 
-        return { subtotalOriginal, subtotalDisc, discountAmount, coupon, shipping, tax, totalPayable, received, due };
+        return {
+            subtotalOriginal,
+            subtotalDisc,
+            discountAmount,
+            coupon,
+            shipping,
+            tax,
+            totalPayable,
+            received,
+            due,
+        };
     }, [lines, order]);
 
     const handlePrint = () => {
@@ -323,14 +352,14 @@ export default function OrderInvoice({ order, visible, onClose }: OrderInvoicePr
 
     return (
         <Dialog open={visible} onOpenChange={onClose}>
-            <DialogContent className="max-w-[95vw] max-h-[95vh] overflow-y-auto p-0">
+            <DialogContent className="w-full max-h-[95vh] overflow-y-auto p-0">
                 <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 border-b">
                     <DialogTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-[#FB923C]">
                         <span className="text-base sm:text-lg font-semibold">Order Invoice</span>
 
                         <div className="flex gap-2">
                             <Button asChild variant="outline">
-                                <Link href={`/order/invoice/${order.id}`} target="_blank">
+                                <Link href={`/orders/invoice/${order.id}`} target="_blank">
                                     Print Invoice
                                 </Link>
                             </Button>
@@ -347,7 +376,7 @@ export default function OrderInvoice({ order, visible, onClose }: OrderInvoicePr
                     </DialogTitle>
                 </DialogHeader>
 
-                <div className="p-4 sm:p-6">
+                <div className="p-1 sm:p-2">
                     <div ref={invoiceRef} className="w-full bg-white rounded-xl border border-gray-200 shadow-sm text-gray-900">
                         {/* Header */}
                         <div className="px-5 sm:px-8 pt-6 pb-4 border-b-4 border-[#FB923C]">
@@ -564,7 +593,7 @@ export default function OrderInvoice({ order, visible, onClose }: OrderInvoicePr
 
                             {/* Footer */}
                             <div className="mt-10 text-center text-gray-600 text-xs border-t pt-5">
-                                <p className="font-semibold text-gray-800">Thank you for your business!</p>
+                                <p className="font-semibold text-gray-800">Thank you for your purchase</p>
                                 <p>For any queries, contact khushbuwaala@gmail.com</p>
                             </div>
                         </div>

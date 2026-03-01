@@ -6,6 +6,7 @@ import { Printer, Download } from "lucide-react";
 import { useGetOrderByIdQuery } from "@/redux/store/api/order/ordersApi";
 import { useApplyDiscountMutation } from "@/redux/store/api/discount/discountApi";
 import InvoiceDocument from "@/components/Modules/Orders/InvoiceDocument";
+import StoreContainer from "@/components/Layout/StoreContainer";
 
 export default function InvoicePageClient({ orderId }: { orderId: string }) {
     const { data, isLoading } = useGetOrderByIdQuery(orderId, { skip: !orderId });
@@ -106,27 +107,29 @@ export default function InvoicePageClient({ orderId }: { orderId: string }) {
     if (!order) return <div className="p-6">Order not found.</div>;
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Actions (hidden in print) */}
-            <div className="print:hidden sticky top-0 z-10 bg-white border-b">
-                <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-                    <div className="font-semibold">Invoice #{invoiceNo}</div>
-                    <div className="flex gap-2">
-                        <Button onClick={handlePrint} variant="outline">
-                            <Printer className="w-4 h-4 mr-2" /> Print
-                        </Button>
-                        <Button onClick={handleDownloadPDF} disabled={isDownloading}>
-                            <Download className="w-4 h-4 mr-2" />
-                            {isDownloading ? "Downloading…" : "Download PDF"}
-                        </Button>
+        <StoreContainer>
+            <div className="min-h-screen bg-gray-50 pt-2 sm:pt-8 pb-6">
+                {/* Actions (hidden in print) */}
+                <div className="print:hidden sticky top-0 z-10 bg-white border-b">
+                    <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+                        <div className="font-semibold">Invoice #{invoiceNo}</div>
+                        <div className="flex gap-2">
+                            <Button onClick={handlePrint} variant="outline">
+                                <Printer className="w-4 h-4 mr-2" /> Print
+                            </Button>
+                            <Button onClick={handleDownloadPDF} disabled={isDownloading}>
+                                <Download className="w-4 h-4 mr-2" />
+                                {isDownloading ? "Downloading…" : "Download PDF"}
+                            </Button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Document */}
-            <div className="max-w-5xl mx-auto px-4 py-6">
-                <InvoiceDocument ref={invoiceRef} order={order} discountBreakdown={discountBreakdown} />
+                {/* Document */}
+                <div className="max-w-5xl mx-auto px-4 py-6">
+                    <InvoiceDocument ref={invoiceRef} order={order} discountBreakdown={discountBreakdown} />
+                </div>
             </div>
-        </div>
+        </StoreContainer>
     );
 }

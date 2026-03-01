@@ -351,18 +351,27 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-[11px] px-2 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-700">
-                                        {selectedSize}
-                                    </span>
-                                    <span className="text-[11px] px-2 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-700">
-                                        Qty {quantity}
-                                    </span>
-                                    {totalDiscounted !== totalCurrent && (
-                                        <span className="text-[11px] px-2 py-1 rounded-lg bg-green-50 border border-green-100 text-green-700 font-semibold">
-                                            Save ৳{(totalCurrent - totalDiscounted).toLocaleString()}
+                                <div className="flex items-center justify-between gap-2 mt-0">
+                                    <div>
+                                        <span className="text-[11px] px-2 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-700">
+                                            {selectedSize}
                                         </span>
-                                    )}
+                                        <span className="text-[11px] px-2 py-1 rounded-lg bg-gray-50 border border-gray-200 text-gray-700">
+                                            Qty {quantity}
+                                        </span>
+                                        {totalDiscounted !== totalCurrent && (
+                                            <span className="text-[11px] px-2 py-1 rounded-lg bg-green-50 border border-green-100 text-green-700 font-semibold">
+                                                Save ৳{(totalCurrent - totalDiscounted).toLocaleString()}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div>
+                                        {totalDiscounted !== totalCurrent && (
+                                            <div className="text-sm text-gray-500 line-through font-semibold">
+                                                ৳{totalCurrent.toLocaleString()}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

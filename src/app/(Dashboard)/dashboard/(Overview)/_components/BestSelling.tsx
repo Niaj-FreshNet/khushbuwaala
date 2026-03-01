@@ -1,86 +1,104 @@
 // File: components/BestSelling.tsx
-'use client';
+"use client";
 
+import { useMemo } from "react";
 import { useGetBestSellersQuery } from "@/redux/store/api/product/productApi";
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import {
+    ResponsiveContainer,
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    Tooltip,
+    CartesianGrid,
+} from "recharts";
 
-const COLORS = ["#f59e0b", "#10b981", "#000000", "#22c55e", "#6366f1", "#f43f5e"];
+type ApiItem = {
+    id: string;
+    name: string;
+    totalSold?: number;
+    salesCount?: number;
+};
 
-interface PieData {
-    label: string;
-    value: number;
-    color: string;
-}
+type Row = {
+    name: string;
+    sold: number;
+};
 
-const BestSelling: React.FC = () => {
+export default function BestSelling() {
     const { data, isLoading, isError } = useGetBestSellersQuery();
-    console.log('best seller: ', data)
 
-    const pieData: PieData[] =
-        data?.data?.map((item: any, index: number) => ({
-            label: item.category,
-            value: item.percentage,
-            color: COLORS[index % COLORS.length],
-        })) || [];
-
-    const renderLabel = () => (
-        <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle">
-            <tspan x="50%" dy="-0.5em" fontSize={12}>
-                This Week
-            </tspan>
-        </text>
-    );
+    const rows: Row[] = useMemo(() => {
+        const items: ApiItem[] = data?.data ?? [];
+        return items
+            .map((p) => ({
+                name: p.name,
+                sold: Number(p.totalSold ?? p.salesCount ?? 0),
+            }))
+            .sort((a, b) => b.sold - a.sold)
+            .slice(0, 6);
+    }, [data]);
 
     return (
         <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">This Week</h2>
-            {isLoading ? (
-                <p className="text-gray-500">Loading...</p>
-            ) : isError ? (
-                <p className="text-red-500">Failed to load data</p>
-            ) : (
-                <div className="flex flex-col">
-                    {/* Pie Chart */}
-                    <div className="w-full h-48">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={pieData}
-                                    dataKey="value"
-                                    innerRadius={50}
-                                    outerRadius={65}
-                                    paddingAngle={3}
-                                    startAngle={90}
-                                    endAngle={-270}
-                                >
-                                    {pieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                    ))}
-                                    <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle">
-                                        <tspan x="50%" dy="-0.5em" fontSize={12}>
-                                            This Week
-                                        </tspan>
-                                    </text>
-                                </Pie>
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-800">Best Selling</h2>
+                <span className="text-xs text-gray-500">This Week</span>
+            </div>
 
-                    {/* Legend */}
-                    <div className="mt-4 space-y-2">
-                        {pieData.map((item, index) => (
-                            <div key={index} className="flex justify-between items-center">
-                                {/* <span className="text-gray-700">{item.label}</span> */}
-                                <span className="font-semibold" style={{ color: item.color }}>
-                                    {item.value}%
-                                </span>
-                            </div>
-                        ))}
-                    </div>
+            {isLoading ? (
+                <div className="space-y-3">
+                    <div className="h-4 w-3/5 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-4 w-4/5 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-4 w-2/3 bg-gray-200 rounded animate-pulse" />
+                    <div className="h-4 w-5/6 bg-gray-200 rounded animate-pulse" />
+                </div>
+            ) : isError ? (
+                <p className="text-red-500 text-sm">Failed to load best sellers.</p>
+            ) : rows.length === 0 ? (
+                <p className="text-gray-500 text-sm">No sales data found.</p>
+            ) : (
+                <div className="h-56">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                            data={rows}
+                            layout="vertical"
+                            margin={{ top: 5, right: 16, left: 40, bottom: 0 }}
+                        >
+                            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                            <XAxis type="number" allowDecimals={false} />
+                            <YAxis
+                                type="category"
+                                dataKey="name"
+                                width={140}
+                                tick={{ fontSize: 12 }}
+                            />
+                            <Tooltip
+                                formatter={(v: any) => [`${v}`, "Sold"]}
+                                labelFormatter={(label) => `Product: ${label}`}
+                                contentStyle={{
+                                    backgroundColor: "#fff",
+                                    border: "1px solid #e5e7eb",
+                                    borderRadius: 10,
+                                }}
+                            />
+                            <Bar dataKey="sold" radius={[6, 6, 6, 6]} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            )}
+
+            {/* Small list under chart (clean) */}
+            {!isLoading && !isError && rows.length > 0 && (
+                <div className="mt-4 space-y-2">
+                    {rows.map((r) => (
+                        <div key={r.name} className="flex items-center justify-between text-sm">
+                            <span className="text-gray-700 truncate pr-3">{r.name}</span>
+                            <span className="font-semibold text-gray-900">{r.sold}</span>
+                        </div>
+                    ))}
                 </div>
             )}
         </div>
     );
-};
-
-export default BestSelling;
+}
