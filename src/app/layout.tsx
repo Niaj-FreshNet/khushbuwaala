@@ -109,16 +109,16 @@ export const metadata: Metadata = {
   creator: siteConfig.creator,
   publisher: siteConfig.publisher,
   robots: "index, follow",
-  icons: {
-    icon: [
-      { url: "/favicon.png" },
-      // { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      // { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-    ],
-    // apple: [
-    //   { url: "/favicon-180x180.png", sizes: "180x180" },
-    // ],
-  },
+  // icons: {
+  //   icon: [
+  //     { url: "/favicon.png" },
+  //     { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+  //     { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+  //   ],
+  //   apple: [
+  //     { url: "/favicon-180x180.png", sizes: "180x180" },
+  //   ],
+  // },
   // manifest: "/site.webmanifest",
   openGraph: {
     title: `${siteConfig.name} - Premium Perfumes & Attars`,
