@@ -127,12 +127,10 @@ export default function ProductDetailsUI({
       </div>
 
       {/* Description */}
-      <div className="p-2.5 sm:p-4 bg-white rounded-2xl border border-gray-200">
+      {/* <div className="p-2.5 sm:p-4 bg-white rounded-2xl border border-gray-200">
         <div className="flex items-center justify-between gap-3 mb-2">
           <h3 className="text-sm sm:text-base font-bold text-gray-900">Description</h3>
 
-          {/* optional: show "Read more" button in header when long */}
-          {/* (keeps UI clean) */}
         </div>
 
         {(() => {
@@ -179,10 +177,10 @@ export default function ProductDetailsUI({
             </div>
           );
         })()}
-      </div>
+      </div> */}
 
       {/* Fragrance Notes */}
-      {fragrances.length > 0 && (
+      {/* {fragrances.length > 0 && (
         <div className="p-2.5 sm:p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100">
           <h3 className="font-semibold text-purple-800 mb-2 sm:mb-4 flex items-center justify-between gap-2 text-sm sm:text-base">
             <span>Fragrance Family</span>
@@ -205,7 +203,7 @@ export default function ProductDetailsUI({
             )}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Size Selection */}
       <div className="space-y-3 sm:space-y-4 p-3.5 sm:p-6 bg-white rounded-2xl border border-gray-200">
