@@ -323,11 +323,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                               {product.name}
                             </h4>
                             <p className="text-sm text-gray-600">
-                              {product.variants.length > 0
-                                ? `৳${product.variants[0].price} - ৳${product.variants[product.variants.length - 1].price} BDT`
-                                : product.minPrice && product.maxPrice
-                                  ? `৳${product.minPrice} - ৳${product.maxPrice} BDT`
-                                  : "Price not available"}
+                              {product.minPrice} BDT
                             </p>
                             <div className="flex flex-wrap gap-1">
                               {product.accords?.map((acc: string) => (

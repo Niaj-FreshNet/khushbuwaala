@@ -222,10 +222,10 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
       {/* Thumbnail Gallery */}
       {images.length > 1 && (
         <div className="space-y-4">
-          <div className="text-center">
+          {/* <div className="text-center">
             <h3 className="text-md font-semibold text-gray-900 mb-1">Product Views</h3>
             <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
-          </div>
+          </div> */}
 
           <div className="flex gap-4 overflow-x-auto py-2 justify-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {images.map((src, idx) => (

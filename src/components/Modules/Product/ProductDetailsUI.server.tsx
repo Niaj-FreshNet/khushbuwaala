@@ -131,8 +131,6 @@ export default function ProductDetailsUI({
         <div className="flex items-center justify-between gap-3 mb-2">
           <h3 className="text-sm sm:text-base font-bold text-gray-900">Description</h3>
 
-          {/* optional: show "Read more" button in header when long */}
-          {/* (keeps UI clean) */}
         </div>
 
         {(() => {
@@ -162,7 +160,7 @@ export default function ProductDetailsUI({
             lines.length > PREVIEW_LINES;
 
           return (
-            <div className="space-y-3">
+            <div className="space-y-1">
               <div className="text-gray-700 leading-relaxed whitespace-pre-wrap break-words text-sm sm:text-md">
                 {preview}
               </div>
@@ -171,7 +169,7 @@ export default function ProductDetailsUI({
                 <button
                   onClick={onReadMore}
                   type="button"
-                  className="inline-flex items-center rounded-md px-0 py-1.5 text-sm sm:text-base text-blue-700 hover:text-blue-900 font-semibold hover:underline active:scale-[0.98]"
+                  className="inline-flex items-center rounded-md px-0 py-0.5 text-sm sm:text-base text-blue-700 hover:text-blue-900 font-semibold hover:underline active:scale-[0.98]"
                 >
                   Read more
                 </button>
@@ -182,7 +180,7 @@ export default function ProductDetailsUI({
       </div>
 
       {/* Fragrance Notes */}
-      {fragrances.length > 0 && (
+      {/* {fragrances.length > 0 && (
         <div className="p-2.5 sm:p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100">
           <h3 className="font-semibold text-purple-800 mb-2 sm:mb-4 flex items-center justify-between gap-2 text-sm sm:text-base">
             <span>Fragrance Family</span>
@@ -205,7 +203,7 @@ export default function ProductDetailsUI({
             )}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Size Selection */}
       <div className="space-y-3 sm:space-y-4 p-3.5 sm:p-6 bg-white rounded-2xl border border-gray-200">
@@ -229,7 +227,7 @@ export default function ProductDetailsUI({
                 key={variant.id}
                 onClick={() => onSelectVariant(variant)}
                 className={cn(
-                  "group relative p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 active:scale-[0.98] sm:hover:scale-105",
+                  "group relative p-1 sm:p-4 rounded-xl border-2 transition-all duration-200 active:scale-[0.98] sm:hover:scale-105",
                   isSelected
                     ? "border-blue-500 bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-700 shadow-sm sm:shadow-md ring-2 ring-blue-200"
                     : "border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50"
