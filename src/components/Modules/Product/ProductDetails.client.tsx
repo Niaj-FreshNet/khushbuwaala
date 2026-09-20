@@ -118,7 +118,8 @@ export default function ProductDetailsClient({
     return { discount: active as IDiscount | null, discountedPrice: final };
   }, [product, effectiveVariant, currentPrice]);
 
-  const isOutOfStock = (product.totalStock ?? 0) <= 0;
+  // const isOutOfStock = (product.totalStock ?? 0) <= 0;
+  const isOutOfStock = false; // OUT OF STOCK - disabled
 
   const onSelectVariant = useCallback(
     (variant: IProductVariant) => {
@@ -158,7 +159,7 @@ export default function ProductDetailsClient({
 
   const onAddToCart = useCallback(
     async (e: React.MouseEvent<HTMLButtonElement>) => {
-      if (isOutOfStock || isAddingToCart || isBuyingNow) return;
+      if (/* isOutOfStock || */ isAddingToCart || isBuyingNow) return;
 
       setIsAddingToCart(true);
       try {
@@ -194,10 +195,10 @@ export default function ProductDetailsClient({
       } finally {
         setIsAddingToCart(false);
       }
-    }, [cart, product, quantity, selectedSizeLabel, currentPrice, isOutOfStock, isAddingToCart, isBuyingNow]);
+    }, [cart, product, quantity, selectedSizeLabel, discountedPrice, /* isOutOfStock, */ isAddingToCart, isBuyingNow]);
 
   const onBuyNow = useCallback(async () => {
-    if (isOutOfStock || isBuyingNow || isAddingToCart) return;
+    if (/* isOutOfStock || */ isBuyingNow || isAddingToCart) return;
 
     setIsBuyingNow(true);
     try {
@@ -225,7 +226,7 @@ export default function ProductDetailsClient({
     } finally {
       setIsBuyingNow(false);
     }
-  }, [cart, product, quantity, selectedSizeLabel, currentPrice, router, startTransition, isOutOfStock, isBuyingNow, isAddingToCart]);
+  }, [cart, product, quantity, selectedSizeLabel, discountedPrice, router, startTransition, /* isOutOfStock, */ isBuyingNow, isAddingToCart]);
 
   const getActiveAutoDiscountForVariant = useCallback(
     (variant?: IProductVariant): IDiscount | null => {
