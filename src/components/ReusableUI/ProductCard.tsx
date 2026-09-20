@@ -97,15 +97,19 @@ const priceFormatter = new Intl.NumberFormat("en-BD", {
 });
 const formatPriceBDT = (price: number) => priceFormatter.format(price).replace("BDT", "৳");
 
-// Helper: find active AUTO discount only (variant-first)
-// ❌ promo-code discounts must NOT be visible on card
+// Helper: find active AUTO discount only (supports light listing and full detail)
 function getActiveDiscount(product: any, variant?: any) {
+  // 1. Direct light discount from listing API (e.g. { type: "percentage", value: 34.1 })
+  if (product?.discount && typeof product.discount === "object") {
+    return product.discount;
+  }
+
   const now = new Date();
 
   const isActiveAuto = (d: any) => {
     if (!d) return false;
 
-    // ✅ hide promo-code discounts
+    // Hide promo-code discounts
     if (d.code && String(d.code).trim() !== "") return false;
 
     const start = d.startDate ?? d.start ?? d.from;
@@ -120,7 +124,6 @@ function getActiveDiscount(product: any, variant?: any) {
   const variantAuto = (variant?.discounts ?? []).find(isActiveAuto) || null;
   const productAuto = (product?.discounts ?? []).find(isActiveAuto) || null;
 
-  // ✅ variant first
   return variantAuto || productAuto || null;
 }
 

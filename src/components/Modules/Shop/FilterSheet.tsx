@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { FilterIcon } from "lucide-react"
+import { ChevronDown, FilterIcon } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -30,7 +30,7 @@ interface FilterSheetProps {
   initialFilters?: {
     categoryName?: string;
   };
-  lockCategory?: boolean; // ✅ add
+  lockCategory?: boolean;
 }
 
 export function FilterSheet({
@@ -46,11 +46,20 @@ export function FilterSheet({
   const [selectedAccords, setSelectedAccords] = useState<string[]>([]);
   const [selectedPerfumeNotes, setSelectedPerfumeNotes] = useState<string[]>([]);
   const [selectedPerformance, setSelectedPerformance] = useState<string[]>([]);
+  const [selectedProjection, setSelectedProjection] = useState<string[]>([]);
 
-  // put near the top of component
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    smellAccords: true,
+    perfumeNotes: false,
+    performance: true,
+    projection: true,
+  });
+
+  const toggleGroup = (groupName: string) =>
+    setOpenGroups((prev) => ({ ...prev, [groupName]: !prev[groupName] }));
+
   const lockedCategory = initialFilters?.categoryName?.trim() || "";
 
-  // your normal categories should match DB categoryName exactly
   const CATEGORY_OPTIONS = [
     { value: "INSPIRED PERFUME OIL", label: "Inspired Perfume Oil" },
     { value: "ORIENTAL ATTAR", label: "Oriental & Arabian Attar" },
@@ -60,17 +69,14 @@ export function FilterSheet({
     { value: "ORGANIC ATTAR", label: "Organic Attar" },
   ];
 
-  // If locked, show only locked option
   const visibleCategoryOptions =
     lockCategory && lockedCategory
       ? [{ value: lockedCategory, label: lockedCategory }]
       : CATEGORY_OPTIONS;
 
-  // optional: label pretty
   const getCategoryLabel = (val: string) =>
     CATEGORY_OPTIONS.find(o => o.value === val)?.label ?? val;
 
-  // inside FilterSheet
   const prevFiltersRef = useRef({
     priceRange,
     selectedCategories,
@@ -78,6 +84,7 @@ export function FilterSheet({
     selectedAccords,
     selectedPerfumeNotes,
     selectedPerformance,
+    selectedProjection,
   });
 
   useEffect(() => {
@@ -88,6 +95,7 @@ export function FilterSheet({
       selectedAccords,
       selectedPerfumeNotes,
       selectedPerformance,
+      selectedProjection,
     };
 
     const changed =
@@ -97,7 +105,8 @@ export function FilterSheet({
       prevFiltersRef.current.selectedCategories.join(",") !== currentFilters.selectedCategories.join(",") ||
       prevFiltersRef.current.selectedAccords.join(",") !== currentFilters.selectedAccords.join(",") ||
       prevFiltersRef.current.selectedPerfumeNotes.join(",") !== currentFilters.selectedPerfumeNotes.join(",") ||
-      prevFiltersRef.current.selectedPerformance.join(",") !== currentFilters.selectedPerformance.join(",");
+      prevFiltersRef.current.selectedPerformance.join(",") !== currentFilters.selectedPerformance.join(",") ||
+      prevFiltersRef.current.selectedProjection.join(",") !== currentFilters.selectedProjection.join(",");
 
     if (changed) {
       onApplyFilters(currentFilters);
@@ -110,6 +119,7 @@ export function FilterSheet({
     selectedAccords,
     selectedPerfumeNotes,
     selectedPerformance,
+    selectedProjection,
     onApplyFilters,
   ]);
 
@@ -124,6 +134,7 @@ export function FilterSheet({
       selectedAccords: [],
       selectedPerfumeNotes: [],
       selectedPerformance: [],
+      selectedProjection: [],
     };
 
     setPriceRange(resetFilters.priceRange);
@@ -132,44 +143,59 @@ export function FilterSheet({
     setSelectedAccords(resetFilters.selectedAccords);
     setSelectedPerfumeNotes(resetFilters.selectedPerfumeNotes);
     setSelectedPerformance(resetFilters.selectedPerformance);
+    setSelectedProjection(resetFilters.selectedProjection);
 
     onApplyFilters(resetFilters);
   };
 
   const smellTypes = {
     smellAccords: [
-      "Corporate",
-      "Refreshing",
-      "Manly",
-      "Floral",
-      "Fruity",
-      "Sweet",
-      "Spicy",
-      "Strong",
+      { value: "Corporate", label: "Corporate" },
+      { value: "Refreshing", label: "Refreshing" },
+      { value: "Manly", label: "Manly" },
+      { value: "Floral", label: "Floral" },
+      { value: "Fruity", label: "Fruity" },
+      { value: "Sweet", label: "Sweet" },
+      { value: "Spicy", label: "Spicy" },
+      { value: "Strong", label: "Strong" },
     ],
     perfumeNotes: [
-      "Citrusy",
-      "Earthy",
-      "Leathery",
-      "Soapy",
-      "Chocolate",
-      "Vanilla",
-      "Candy",
-      "Powdery",
-      "Bergamote",
-      "Lavender",
-      "Vetiver",
-      "Woody",
-      "Smooky",
-      "Amber",
-      "Musky",
+      { value: "Musk", label: "Musk" },
+      { value: "Amber", label: "Amber" },
+      { value: "Rose", label: "Rose" },
+      { value: "Jasmine", label: "Jasmine" },
+      { value: "Vanilla", label: "Vanilla" },
+      { value: "Sandalwood", label: "Sandalwood" },
+      { value: "Oud", label: "Oud" },
+      { value: "Bergamot", label: "Bergamot" },
+      { value: "Patchouli", label: "Patchouli" },
+      { value: "Saffron", label: "Saffron" },
+      { value: "Cedarwood", label: "Cedarwood" },
+      { value: "Vetiver", label: "Vetiver" },
+      { value: "Lavender", label: "Lavender" },
+      { value: "Citrus", label: "Citrus" },
+      { value: "Iris", label: "Iris" },
+      { value: "Incense", label: "Incense" },
+      { value: "Leather", label: "Leather" },
+      { value: "Coconut", label: "Coconut" },
+      { value: "Caramel", label: "Caramel" },
+      { value: "Honey", label: "Honey" },
+      { value: "Geranium", label: "Geranium" },
+      { value: "Mint", label: "Mint" },
+      { value: "Tonka Bean", label: "Tonka Bean" },
+      { value: "Cinnamon", label: "Cinnamon" },
     ],
     performance: [
-      "Projective",
-      "Longetive",
-      "Nostalgic",
-      "Synthetic",
-      "Organic",
+      { value: "BEAST_MODE", label: "Ultra (12hrs+)" },
+      { value: "EXCELLENT", label: "Excellent (8-10hrs)" },
+      { value: "GOOD", label: "Good (5-6hrs)" },
+      { value: "MODERATE", label: "Moderate (3-4hrs)" },
+    ],
+    projection: [
+      { value: "NUCLEAR", label: "Nuclear (10+ feet)" },
+      { value: "STRONG", label: "Strong (7-9 feet)" },
+      { value: "MODERATE", label: "Moderate (4-6 feet)" },
+      { value: "INTIMATE", label: "Intimate (1-2 feet)" },
     ],
   };
 
@@ -201,13 +227,10 @@ export function FilterSheet({
                   }
                 >
                   <SelectTrigger className="w-full h-10 bg-white border-gray-200 rounded-md">
-                    {/* show locked label nicely */}
-                    <SelectValue placeholder="Select Category">
-                    </SelectValue>
+                    <SelectValue placeholder="Select Category" />
                   </SelectTrigger>
 
                   <SelectContent>
-                    {/* Hide "all" when locked (optional but cleaner) */}
                     {!lockCategory && <SelectItem value="all">All Categories</SelectItem>}
 
                     {visibleCategoryOptions.map((opt) => (
@@ -224,20 +247,27 @@ export function FilterSheet({
 
             <Collapsible defaultOpen>
               <CollapsibleContent>
-                {Object.entries(smellTypes).map(([groupName, smells]) => {
+                {Object.entries(smellTypes).map(([groupName, items]) => {
+                  const isSingleSelect = groupName === "performance" || groupName === "projection";
+                  const isLongList = items.length > 12;
+
                   const selected =
                     groupName === "smellAccords"
                       ? selectedAccords
                       : groupName === "perfumeNotes"
                         ? selectedPerfumeNotes
-                        : selectedPerformance;
+                        : groupName === "performance"
+                          ? selectedPerformance
+                          : selectedProjection;
 
                   const setSelected =
                     groupName === "smellAccords"
                       ? setSelectedAccords
                       : groupName === "perfumeNotes"
                         ? setSelectedPerfumeNotes
-                        : setSelectedPerformance;
+                        : groupName === "performance"
+                          ? setSelectedPerformance
+                          : setSelectedProjection;
 
                   return (
                     <div key={groupName} className="mb-6">
@@ -246,17 +276,22 @@ export function FilterSheet({
                       </h5>
                       <div className="h-1 w-64 lg:w-72 mb-4 rounded-full bg-gradient-to-r from-pink-500 via-pink-600 to-purple-600" />
 
-                      <div className="grid grid-cols-2 sm:grid-cols-2 gap-2">
-                        {smells.map((smell) => {
-                          const id = `${groupName}-${smell}`
-                          const checked = selected.includes(smell)
+                      <div
+                        className={cn(
+                          "grid grid-cols-1 sm:grid-cols-2 gap-2",
+                          (groupName === "performance" || groupName === "projection") && "grid-cols-1 sm:grid-cols-1",
+                          isLongList && "max-h-56 overflow-y-auto pr-1"
+                        )}
+                      >
+                        {items.map((item) => {
+                          const id = `${groupName}-${item.value}`;
+                          const checked = selected.includes(item.value);
 
                           return (
                             <Label
-                              key={smell}
+                              key={item.value}
                               htmlFor={id}
                               className={cn(
-                                // whole row becomes clickable
                                 "flex items-center gap-3 cursor-pointer select-none",
                                 "rounded-xl border px-3 py-3 bg-white",
                                 "transition-all duration-150",
@@ -268,17 +303,21 @@ export function FilterSheet({
                                 id={id}
                                 checked={checked}
                                 onCheckedChange={(isChecked) => {
-                                  setSelected((prev) =>
-                                    isChecked ? [...prev, smell] : prev.filter((s) => s !== smell)
-                                  )
+                                  if (isSingleSelect) {
+                                    setSelected(isChecked ? [item.value] : []);
+                                  } else {
+                                    setSelected((prev) =>
+                                      isChecked ? [...prev, item.value] : prev.filter((s) => s !== item.value)
+                                    );
+                                  }
                                 }}
                               />
 
                               <span className="text-sm font-medium text-gray-700 flex-1">
-                                {smell}
+                                {item.label}
                               </span>
                             </Label>
-                          )
+                          );
                         })}
                       </div>
                     </div>
@@ -286,8 +325,6 @@ export function FilterSheet({
                 })}
               </CollapsibleContent>
             </Collapsible>
-
-            <Separator />
 
             <Collapsible defaultOpen>
               <CollapsibleTrigger className="text-md font-semibold text-gray-800 mb-3">
@@ -303,8 +340,9 @@ export function FilterSheet({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="male">For Men</SelectItem>
-                    <SelectItem value="female">For Women</SelectItem>
+                    <SelectItem value="unisex">Unisex</SelectItem>
+                    <SelectItem value="male">Men</SelectItem>
+                    <SelectItem value="female">Women</SelectItem>
                   </SelectContent>
                 </Select>
               </CollapsibleContent>

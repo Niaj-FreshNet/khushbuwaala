@@ -34,6 +34,7 @@ interface ShopProductProps {
   accords?: string;
   perfumeNotes?: string;
   performance?: string;
+  projection?: string;
   sortBy?: string;
   lockCategory?: boolean; // ✅ add
 }
@@ -44,6 +45,7 @@ type Filters = {
   selectedAccords: string[];
   selectedPerfumeNotes: string[];
   selectedPerformance: string[];
+  selectedProjection: string[];
   selectedSpecification: string; // "all" | "male" | "female"
 };
 
@@ -53,6 +55,7 @@ const normalizeFilters = (f: Partial<Filters> | undefined, fallback: Filters): F
   selectedAccords: Array.isArray(f?.selectedAccords) ? f!.selectedAccords : fallback.selectedAccords,
   selectedPerfumeNotes: Array.isArray(f?.selectedPerfumeNotes) ? f!.selectedPerfumeNotes : fallback.selectedPerfumeNotes,
   selectedPerformance: Array.isArray(f?.selectedPerformance) ? f!.selectedPerformance : fallback.selectedPerformance,
+  selectedProjection: Array.isArray(f?.selectedProjection) ? f!.selectedProjection : fallback.selectedProjection,
   selectedSpecification: typeof f?.selectedSpecification === "string" ? f!.selectedSpecification : fallback.selectedSpecification,
 });
 
@@ -112,6 +115,7 @@ export function ShopProducts(props: ShopProductProps) {
     selectedAccords: props.accords ? props.accords.split(",") : [],
     selectedPerfumeNotes: props.perfumeNotes ? props.perfumeNotes.split(",") : [],
     selectedPerformance: props.performance ? props.performance.split(",") : [],
+    selectedProjection: props.projection ? props.projection.split(",") : [],
     selectedSpecification: props.specification || "all",
   };
 
@@ -231,6 +235,7 @@ export function ShopProducts(props: ShopProductProps) {
     accords: filters.selectedAccords.join(",") || undefined,
     perfumeNotes: filters.selectedPerfumeNotes.join(",") || undefined,
     performance: filters.selectedPerformance.join(",") || undefined,
+    projection: filters.selectedProjection.join(",") || undefined,
     sortBy: sortMap[sortOption] as any,
   },
     {
@@ -425,6 +430,8 @@ export function ShopProducts(props: ShopProductProps) {
     else params.delete("perfumeNotes");
     if (filters.selectedPerformance.length) params.set("performance", filters.selectedPerformance.join(","));
     else params.delete("performance");
+    if (filters.selectedProjection.length) params.set("projection", filters.selectedProjection.join(","));
+    else params.delete("projection");
     if (filters.priceRange[0] !== 100) params.set("minPrice", filters.priceRange[0].toString());
     else params.delete("minPrice");
     if (filters.priceRange[1] !== 5000) params.set("maxPrice", filters.priceRange[1].toString());
