@@ -163,7 +163,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
     // );
 
     // const isOutOfStock = (product.totalStock ?? 0) <= 0 || (totalVariantStock ?? 0) <= 0;
-    const isOutOfStock = (product.totalStock ?? 0) <= 0;
+    // const isOutOfStock = (product.totalStock ?? 0) <= 0;
 
     // const handleAddToCart = async () => {
     //     if (isOutOfStock) return;
@@ -172,7 +172,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
 
     const handleAddToCart = useCallback(
         async (e: React.MouseEvent<HTMLButtonElement>) => {
-            if (isOutOfStock || busy) return;
+            if (/* isOutOfStock || */ busy) return;
 
             setIsAdding(true);
             try {
@@ -205,10 +205,10 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
             } finally {
                 setIsAdding(false);
             }
-        }, [cart, product, quantity, selectedSize, selectedPrice, isOutOfStock, busy]);
+        }, [cart, product, quantity, selectedSize, selectedPrice, /* isOutOfStock, */ busy]);
 
     const handleBuyNow = useCallback(async () => {
-        if (isOutOfStock || busy) return;
+        if (/* isOutOfStock || */ busy) return;
 
         setIsBuying(true);
         try {
@@ -221,7 +221,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
         } finally {
             setIsBuying(false);
         }
-    }, [cart, product, quantity, selectedSize, selectedPrice, router, isOutOfStock, busy, startTransition]);
+    }, [cart, product, quantity, selectedSize, selectedPrice, router, /* isOutOfStock, */ busy, startTransition]);
 
     return (
         <>
@@ -293,32 +293,32 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                             </div>
 
                             <button
-                                disabled={isOutOfStock || busy}
+                                disabled={/* isOutOfStock || */ busy}
                                 aria-busy={busy}
                                 onClick={handleAddToCart}
                                 className="h-14 px-6 rounded-xl font-bold shadow-lg transition-all duration-200
-                 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white
-                 hover:shadow-xl hover:scale-[1.02]
-                 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white
+                  hover:shadow-xl hover:scale-[1.02]
+                  disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
                             >
                                 <span className="flex items-center gap-2">
                                     {isAdding ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShoppingCart className="w-5 h-5" />}
-                                    {isOutOfStock ? "Out of Stock" : isAdding ? "Adding..." : "Add to Cart"}
+                                    {/* isOutOfStock ? "Out of Stock" : */ isAdding ? "Adding..." : "Add to Cart"}
                                 </span>
                             </button>
 
                             <button
-                                disabled={isOutOfStock || busy}
+                                disabled={/* isOutOfStock || */ busy}
                                 aria-busy={busy}
                                 onClick={handleBuyNow}
                                 className="h-14 px-7 rounded-xl font-extrabold shadow-lg transition-all duration-200
-                 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white
-                 hover:shadow-xl hover:scale-[1.02]
-                 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white
+                  hover:shadow-xl hover:scale-[1.02]
+                  disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
                             >
                                 <span className="flex items-center gap-2">
                                     {isBuying || isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
-                                    {isOutOfStock ? "Out of Stock" : isBuying || isPending ? "Processing..." : "Buy Now"}
+                                    {/* isOutOfStock ? "Out of Stock" : */ isBuying || isPending ? "Processing..." : "Buy Now"}
                                 </span>
                             </button>
                         </div>
@@ -379,7 +379,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                         {/* Row 2: main CTAs (big + thumb friendly) */}
                         <div className="grid grid-cols-2 gap-3">
                             <button
-                                disabled={isOutOfStock || busy}
+                                disabled={/* isOutOfStock || */ busy}
                                 aria-busy={busy}
                                 onClick={handleAddToCart}
                                 className="h-14 rounded-xl font-extrabold shadow-lg transition-all duration-200
@@ -388,12 +388,12 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                             >
                                 <span className="flex items-center justify-center gap-2">
                                     {isAdding ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShoppingCart className="w-5 h-5" />}
-                                    {isOutOfStock ? "Out" : isAdding ? "Adding..." : "Cart"}
+                                    {/* isOutOfStock ? "Out" : */ isAdding ? "Adding..." : "Cart"}
                                 </span>
                             </button>
 
                             <button
-                                disabled={isOutOfStock || busy}
+                                disabled={/* isOutOfStock || */ busy}
                                 aria-busy={busy}
                                 onClick={handleBuyNow}
                                 className="h-14 rounded-xl font-extrabold shadow-lg transition-all duration-200
@@ -402,7 +402,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                             >
                                 <span className="flex items-center justify-center gap-2">
                                     {isBuying || isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
-                                    {isOutOfStock ? "Out" : isBuying || isPending ? "..." : "Buy Now"}
+                                    {/* isOutOfStock ? "Out" : */ isBuying || isPending ? "..." : "Buy Now"}
                                 </span>
                             </button>
                         </div>

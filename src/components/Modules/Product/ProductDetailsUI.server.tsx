@@ -22,7 +22,7 @@ type Props = {
   discountedPrice: number;
   currentPrice: number;
   quantity: number;
-  isOutOfStock: boolean;
+  isOutOfStock?: boolean; /* OUT OF STOCK - disabled */
   selectedSizeLabel: string;
   availableVariants: IProductVariant[];
   getVariantDiscount: (variant?: IProductVariant) => IDiscount | null;
@@ -46,7 +46,7 @@ export default function ProductDetailsUI({
   discountedPrice,
   currentPrice,
   quantity,
-  isOutOfStock,
+  isOutOfStock, /* OUT OF STOCK - disabled */
   selectedSizeLabel,
   availableVariants,
   getVariantDiscount,
@@ -130,7 +130,6 @@ export default function ProductDetailsUI({
       <div className="p-2.5 sm:p-4 bg-white rounded-2xl border border-gray-200">
         <div className="flex items-center justify-between gap-3 mb-2">
           <h3 className="text-sm sm:text-base font-bold text-gray-900">Description</h3>
-
         </div>
 
         {(() => {
@@ -325,14 +324,14 @@ export default function ProductDetailsUI({
         <Button
           className={cn(
             "flex-1 h-16 sm:h-18 text-base sm:text-xl font-bold rounded-xl transition-all duration-300 active:scale-[0.99] sm:hover:scale-[1.03]",
-            isOutOfStock
+            /* isOutOfStock
               ? "bg-gray-400 cursor-not-allowed text-white"
-              : isAddingToCart
-                ? "bg-gray-400 cursor-not-allowed text-white"
-                : "bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-700 text-white shadow-md sm:shadow-xl"
+              : */ isAddingToCart
+              ? "bg-gray-400 cursor-not-allowed text-white"
+              : "bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-700 text-white shadow-md sm:shadow-xl"
           )}
           onClick={(e) => onAddToCart(e)}
-          disabled={isOutOfStock || isAddingToCart || isBuyingNow}
+          disabled={/* isOutOfStock || */ isAddingToCart || isBuyingNow}
         >
           {isAddingToCart ? (
             <div className="flex items-center gap-3">
@@ -342,35 +341,35 @@ export default function ProductDetailsUI({
           ) : (
             <div className="flex items-center gap-3">
               <ShoppingCart className="w-6 h-6" />
-              <span>{isOutOfStock ? "Out of Stock" : "Add to Cart"}</span>
+              <span>{/* isOutOfStock ? "Out of Stock" : */ "Add to Cart"}</span>
             </div>
           )}
         </Button>
 
-        {!isOutOfStock && (
-          <Button
-            className={cn(
-              "flex-1 h-16 sm:h-18 text-base sm:text-xl font-bold rounded-xl transition-all duration-300 active:scale-[0.99] sm:hover:scale-[1.03]",
-              isBuyingNow
-                ? "bg-gray-400 cursor-not-allowed text-white"
-                : "bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white shadow-md sm:shadow-xl"
-            )}
-            onClick={onBuyNow}
-            disabled={isAddingToCart || isBuyingNow || isPending}
-          >
-            {isBuyingNow ? (
-              <div className="flex items-center gap-3">
-                <div className="animate-spin h-5 w-5 border-b-2 border-white rounded-full"></div>
-                <span>Processing...</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <Zap className="w-6 h-6" />
-                <span>Buy Now</span>
-              </div>
-            )}
-          </Button>
-        )}
+        {/* {!isOutOfStock && ( */}
+        <Button
+          className={cn(
+            "flex-1 h-16 sm:h-18 text-base sm:text-xl font-bold rounded-xl transition-all duration-300 active:scale-[0.99] sm:hover:scale-[1.03]",
+            isBuyingNow
+              ? "bg-gray-400 cursor-not-allowed text-white"
+              : "bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white shadow-md sm:shadow-xl"
+          )}
+          onClick={onBuyNow}
+          disabled={isAddingToCart || isBuyingNow || isPending}
+        >
+          {isBuyingNow ? (
+            <div className="flex items-center gap-3">
+              <div className="animate-spin h-5 w-5 border-b-2 border-white rounded-full"></div>
+              <span>Processing...</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Zap className="w-6 h-6" />
+              <span>Buy Now</span>
+            </div>
+          )}
+        </Button>
+        {/* )} */}
       </div>
 
       {/* Trust Indicators */}
