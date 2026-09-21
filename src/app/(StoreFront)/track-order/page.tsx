@@ -39,7 +39,8 @@ import { useLazyTrackOrdersQuery } from "@/redux/store/api/order/ordersApi";
 
 const STATUS_STEPS = [
   { key: "PENDING", label: "Order Placed", icon: ClipboardCopy },
-  { key: "PROCESSING", label: "Processing", icon: Clock },
+  { key: "PROCESSING", label: "Parcel Is Being Ready", icon: Clock },
+  { key: "SHIPPED", label: "Shipped to Courier", icon: Truck },
   { key: "DELIVERED", label: "Delivered", icon: CheckCircle2 },
 ];
 
@@ -321,7 +322,7 @@ export default function TrackOrderPage() {
                         {renderStatusBadge(selectedOrder.status)}
                       </div>
                     </CardHeader>
-                    <CardContent className="p-4 sm:p-6">
+                    <CardContent className="p-2 sm:p-4">
                       <div className="flex items-center justify-between relative">
                         {STATUS_STEPS.map((step, idx) => {
                           const Icon = step.icon;
