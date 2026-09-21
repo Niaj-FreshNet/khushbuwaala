@@ -331,6 +331,13 @@ export const navLinks: NavLink[] = [
   },
 
   {
+    name: "Carts",
+    href: "/dashboard/carts",
+    icon: ShoppingCart,
+    roles: ["SUPER_ADMIN"],
+  },
+
+  {
     name: "User Management",
     href: "#",
     icon: UserCog,

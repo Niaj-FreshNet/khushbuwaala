@@ -214,6 +214,11 @@ export const orderApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Order"],
     }),
+
+    trackOrders: builder.query<ApiResponse<any[]>, string>({
+      query: (query) => `/order/track/${encodeURIComponent(query)}`,
+      providesTags: ["Order"],
+    }),
   }),
   overrideExisting: true,
 });
@@ -232,4 +237,5 @@ export const {
   useGetMyOrderByIdQuery,
   useGetDashboardMetricsQuery,
   useGetWeeklySalesOverviewQuery,
+  useLazyTrackOrdersQuery,
 } = orderApi

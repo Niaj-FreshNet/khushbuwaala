@@ -504,42 +504,42 @@ export default function CheckoutPage() {
     return Object.keys(nextErrors).length === 0;
   };
 
-const buildDiscountItems = () => {
-  return itemsToDisplay.map((product: any) => {
-    const productDoc = product?.product || product;
+  const buildDiscountItems = () => {
+    return itemsToDisplay.map((product: any) => {
+      const productDoc = product?.product || product;
 
-    const [sizeValue, sizeUnit] = String(product?.selectedSize || "").split(" ");
+      const [sizeValue, sizeUnit] = String(product?.selectedSize || "").split(" ");
 
-    const matchedVariant = productDoc?.variants?.find(
-      (v: any) =>
-        Number(v.size) === Number(sizeValue) &&
-        String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
-    );
+      const matchedVariant = productDoc?.variants?.find(
+        (v: any) =>
+          Number(v.size) === Number(sizeValue) &&
+          String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
+      );
 
-    // ✅ original/regular unit price (NOT selectedPrice)
-    const originalUnitPrice = Number(matchedVariant?.price ?? product?.price ?? 0);
+      // ✅ original/regular unit price (NOT selectedPrice)
+      const originalUnitPrice = Number(matchedVariant?.price ?? product?.price ?? 0);
 
-    const qty = Math.max(1, Number(product?.quantity || 1));
+      const qty = Math.max(1, Number(product?.quantity || 1));
 
-    const productId =
-      productDoc?.id ||
-      productDoc?._id ||
-      product?.productId;
+      const productId =
+        productDoc?.id ||
+        productDoc?._id ||
+        product?.productId;
 
-    const variantId =
-      product?.variantId ||
-      product?.selectedVariantId ||
-      matchedVariant?.id ||
-      matchedVariant?._id;
+      const variantId =
+        product?.variantId ||
+        product?.selectedVariantId ||
+        matchedVariant?.id ||
+        matchedVariant?._id;
 
-    return {
-      productId,
-      variantId,
-      price: originalUnitPrice, // ✅ important
-      qty,
-    };
-  });
-};
+      return {
+        productId,
+        variantId,
+        price: originalUnitPrice, // ✅ important
+        qty,
+      };
+    });
+  };
 
   const pickDiscountAmount = (res: any) => {
     const root = res?.data ?? res;
@@ -671,8 +671,27 @@ const buildDiscountItems = () => {
         .map((item: any) => item.cartItemId)
         .filter(Boolean) as string[];
 
+      const items = itemsToDisplay.map((item: any) => {
+        const productDoc = item?.product || item;
+        const [sizeValue, sizeUnit] = String(item?.selectedSize || "").split(" ");
+
+        const matchedVariant = productDoc?.variants?.find(
+          (v: any) =>
+            Number(v.size) === Number(sizeValue) &&
+            String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
+        );
+
+        return {
+          cartItemId: item?.cartItemId || item?.id || undefined,
+          productId: productDoc?.id || productDoc?._id || item?.productId,
+          variantId: item?.variantId || matchedVariant?.id || undefined,
+          quantity: Math.max(1, Number(item?.quantity || 1)),
+        };
+      });
+
       const payload: any = {
         cartItemIds,
+        items,
         amount: total,
         isPaid: false,
         method: paymentMethod,
@@ -683,7 +702,6 @@ const buildDiscountItems = () => {
         coupon: appliedPromoCode ?? null,
         discountAmount: Number(displayedDiscount || 0),
 
-        // ✅ no thana; district optional; store EN
         customerInfo: { name, phone: contactNumber, email, address, district: selectedDistrictEn },
         shippingAddress: { name, phone: contactNumber, email, address, district: selectedDistrictEn },
         billingAddress:
