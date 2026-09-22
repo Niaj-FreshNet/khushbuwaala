@@ -15,9 +15,9 @@ const userApi = baseApi.injectEndpoints({
         getUserProfile: builder.query({
             query: () => ({
                 url: '/user/profile',
-                transformResponse: (response: { success: boolean; data: TUser[] }) => response.data,
-                method: 'GET'
+                method: 'GET',
             }),
+            transformResponse: (response: { success: boolean; data: any }) => response.data,
             providesTags: ['User'],
         }),
 

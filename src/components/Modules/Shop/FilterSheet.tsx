@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Slider } from "@/components/ui/slider"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -12,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ChevronDown, FilterIcon } from "lucide-react"
+import { Check, FilterIcon } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -21,16 +20,16 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
 interface FilterSheetProps {
   visible: boolean
   onClose: (open: boolean) => void
   onApplyFilters: (filters: any) => void
   initialFilters?: {
-    categoryName?: string;
-  };
-  lockCategory?: boolean;
+    categoryName?: string
+  }
+  lockCategory?: boolean
 }
 
 export function FilterSheet({
@@ -40,25 +39,17 @@ export function FilterSheet({
   initialFilters,
   lockCategory,
 }: FilterSheetProps) {
-  const [priceRange, setPriceRange] = useState<[number, number]>([100, 5000]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialFilters?.categoryName ? [initialFilters.categoryName] : []);
-  const [selectedSpecification, setSelectedSpecification] = useState<string>("all");
-  const [selectedAccords, setSelectedAccords] = useState<string[]>([]);
-  const [selectedPerfumeNotes, setSelectedPerfumeNotes] = useState<string[]>([]);
-  const [selectedPerformance, setSelectedPerformance] = useState<string[]>([]);
-  const [selectedProjection, setSelectedProjection] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([100, 5000])
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    initialFilters?.categoryName ? [initialFilters.categoryName] : []
+  )
+  const [selectedSpecification, setSelectedSpecification] = useState<string>("all")
+  const [selectedAccords, setSelectedAccords] = useState<string[]>([])
+  const [selectedPerfumeNotes, setSelectedPerfumeNotes] = useState<string[]>([])
+  const [selectedPerformance, setSelectedPerformance] = useState<string[]>([])
+  const [selectedProjection, setSelectedProjection] = useState<string[]>([])
 
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
-    smellAccords: true,
-    perfumeNotes: false,
-    performance: true,
-    projection: true,
-  });
-
-  const toggleGroup = (groupName: string) =>
-    setOpenGroups((prev) => ({ ...prev, [groupName]: !prev[groupName] }));
-
-  const lockedCategory = initialFilters?.categoryName?.trim() || "";
+  const lockedCategory = initialFilters?.categoryName?.trim() || ""
 
   const CATEGORY_OPTIONS = [
     { value: "INSPIRED PERFUME OIL", label: "Inspired Perfume Oil" },
@@ -67,15 +58,12 @@ export function FilterSheet({
     { value: "GIFTS AND PACKAGES", label: "Gifts & Packages" },
     { value: "NATURAL ATTAR", label: "Natural Attar" },
     { value: "ORGANIC ATTAR", label: "Organic Attar" },
-  ];
+  ]
 
   const visibleCategoryOptions =
     lockCategory && lockedCategory
       ? [{ value: lockedCategory, label: lockedCategory }]
-      : CATEGORY_OPTIONS;
-
-  const getCategoryLabel = (val: string) =>
-    CATEGORY_OPTIONS.find(o => o.value === val)?.label ?? val;
+      : CATEGORY_OPTIONS
 
   const prevFiltersRef = useRef({
     priceRange,
@@ -85,7 +73,7 @@ export function FilterSheet({
     selectedPerfumeNotes,
     selectedPerformance,
     selectedProjection,
-  });
+  })
 
   useEffect(() => {
     const currentFilters = {
@@ -96,7 +84,7 @@ export function FilterSheet({
       selectedPerfumeNotes,
       selectedPerformance,
       selectedProjection,
-    };
+    }
 
     const changed =
       prevFiltersRef.current.priceRange[0] !== currentFilters.priceRange[0] ||
@@ -106,11 +94,11 @@ export function FilterSheet({
       prevFiltersRef.current.selectedAccords.join(",") !== currentFilters.selectedAccords.join(",") ||
       prevFiltersRef.current.selectedPerfumeNotes.join(",") !== currentFilters.selectedPerfumeNotes.join(",") ||
       prevFiltersRef.current.selectedPerformance.join(",") !== currentFilters.selectedPerformance.join(",") ||
-      prevFiltersRef.current.selectedProjection.join(",") !== currentFilters.selectedProjection.join(",");
+      prevFiltersRef.current.selectedProjection.join(",") !== currentFilters.selectedProjection.join(",")
 
     if (changed) {
-      onApplyFilters(currentFilters);
-      prevFiltersRef.current = currentFilters;
+      onApplyFilters(currentFilters)
+      prevFiltersRef.current = currentFilters
     }
   }, [
     priceRange,
@@ -121,7 +109,7 @@ export function FilterSheet({
     selectedPerformance,
     selectedProjection,
     onApplyFilters,
-  ]);
+  ])
 
   const handleReset = () => {
     const resetFilters = {
@@ -135,18 +123,18 @@ export function FilterSheet({
       selectedPerfumeNotes: [],
       selectedPerformance: [],
       selectedProjection: [],
-    };
+    }
 
-    setPriceRange(resetFilters.priceRange);
-    setSelectedCategories(resetFilters.selectedCategories);
-    setSelectedSpecification(resetFilters.selectedSpecification);
-    setSelectedAccords(resetFilters.selectedAccords);
-    setSelectedPerfumeNotes(resetFilters.selectedPerfumeNotes);
-    setSelectedPerformance(resetFilters.selectedPerformance);
-    setSelectedProjection(resetFilters.selectedProjection);
+    setPriceRange(resetFilters.priceRange)
+    setSelectedCategories(resetFilters.selectedCategories)
+    setSelectedSpecification(resetFilters.selectedSpecification)
+    setSelectedAccords(resetFilters.selectedAccords)
+    setSelectedPerfumeNotes(resetFilters.selectedPerfumeNotes)
+    setSelectedPerformance(resetFilters.selectedPerformance)
+    setSelectedProjection(resetFilters.selectedProjection)
 
-    onApplyFilters(resetFilters);
-  };
+    onApplyFilters(resetFilters)
+  }
 
   const smellTypes = {
     smellAccords: [
@@ -186,200 +174,219 @@ export function FilterSheet({
       { value: "Cinnamon", label: "Cinnamon" },
     ],
     performance: [
-      { value: "BEAST_MODE", label: "Ultra (12hrs+)" },
-      { value: "EXCELLENT", label: "Excellent (8-10hrs)" },
-      { value: "GOOD", label: "Good (5-6hrs)" },
-      { value: "MODERATE", label: "Moderate (3-4hrs)" },
+      { value: "BEAST_MODE", label: "Ultra (12h+)" },
+      { value: "EXCELLENT", label: "Excellent (8-10h)" },
+      { value: "GOOD", label: "Good (5-6h)" },
+      { value: "MODERATE", label: "Moderate (3-4h)" },
     ],
     projection: [
-      { value: "NUCLEAR", label: "Nuclear (10+ feet)" },
-      { value: "STRONG", label: "Strong (7-9 feet)" },
-      { value: "MODERATE", label: "Moderate (4-6 feet)" },
-      { value: "INTIMATE", label: "Intimate (1-2 feet)" },
+      { value: "NUCLEAR", label: "Nuclear (10ft+)" },
+      { value: "STRONG", label: "Strong (7-9ft)" },
+      { value: "MODERATE", label: "Moderate (4-6ft)" },
+      { value: "INTIMATE", label: "Intimate (1-2ft)" },
     ],
-  };
+  }
 
   return (
     <Sheet open={visible} onOpenChange={onClose}>
       <SheetContent
         side="left"
-        className="w-[320px] sm:w-[380px] flex flex-col h-full p-0 bg-gray-50"
+        className="w-[88vw] max-w-[360px] flex flex-col h-full p-0 bg-gray-50 border-r"
       >
-        <SheetHeader className="px-6 py-4 border-b bg-gradient-to-r from-red-50 to-pink-50">
-          <SheetTitle className="flex items-center gap-2 text-xl">
-            <FilterIcon className="h-6 w-6 text-red-600" />
+        <SheetHeader className="px-5 py-3.5 border-b bg-white shrink-0">
+          <SheetTitle className="flex items-center gap-2 text-lg font-bold text-gray-900">
+            <FilterIcon className="h-5 w-5 text-red-600" />
             Filter Products
           </SheetTitle>
         </SheetHeader>
 
-        <ScrollArea className="flex-1 px-6 py-4 overflow-auto">
-          <div className="flex flex-col space-y-6 pb-4">
-            <Collapsible defaultOpen>
-              <CollapsibleTrigger className="text-md font-semibold text-gray-800 mb-3">
+        <ScrollArea className="flex-1 px-5 py-4 overflow-y-auto">
+          <div className="flex flex-col space-y-5 pb-6">
+            {/* Category Dropdown */}
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 block">
                 Category
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <Select
-                  disabled={!!lockCategory}
-                  value={selectedCategories[0] || "all"}
-                  onValueChange={(value) =>
-                    setSelectedCategories(value === "all" ? [] : [value])
-                  }
-                >
-                  <SelectTrigger className="w-full h-10 bg-white border-gray-200 rounded-md">
-                    <SelectValue placeholder="Select Category" />
-                  </SelectTrigger>
+              </label>
+              <Select
+                disabled={!!lockCategory}
+                value={selectedCategories[0] || "all"}
+                onValueChange={(value) =>
+                  setSelectedCategories(value === "all" ? [] : [value])
+                }
+              >
+                <SelectTrigger className="w-full h-9 bg-white text-sm border-gray-200 rounded-lg">
+                  <SelectValue placeholder="Select Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {!lockCategory && <SelectItem value="all">All Categories</SelectItem>}
+                  {visibleCategoryOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-                  <SelectContent>
-                    {!lockCategory && <SelectItem value="all">All Categories</SelectItem>}
-
-                    {visibleCategoryOptions.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </CollapsibleContent>
-            </Collapsible>
+            {/* Specification Dropdown */}
+            <div>
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 block">
+                For Whom
+              </label>
+              <Select
+                value={selectedSpecification}
+                onValueChange={setSelectedSpecification}
+              >
+                <SelectTrigger className="w-full h-9 bg-white text-sm border-gray-200 rounded-lg">
+                  <SelectValue placeholder="For Men or Women?" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="unisex">Unisex</SelectItem>
+                  <SelectItem value="male">Men</SelectItem>
+                  <SelectItem value="female">Women</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <Separator />
 
-            <Collapsible defaultOpen>
-              <CollapsibleContent>
-                {Object.entries(smellTypes).map(([groupName, items]) => {
-                  const isSingleSelect = groupName === "performance" || groupName === "projection";
-                  const isLongList = items.length > 12;
+            {/* Filter Groups */}
+            {Object.entries(smellTypes).map(([groupName, items]) => {
+              const isSingleSelect = groupName === "performance" || groupName === "projection"
+              const isChipLayout = groupName === "smellAccords" || groupName === "perfumeNotes"
 
-                  const selected =
-                    groupName === "smellAccords"
-                      ? selectedAccords
-                      : groupName === "perfumeNotes"
-                        ? selectedPerfumeNotes
-                        : groupName === "performance"
-                          ? selectedPerformance
-                          : selectedProjection;
+              const selected =
+                groupName === "smellAccords"
+                  ? selectedAccords
+                  : groupName === "perfumeNotes"
+                    ? selectedPerfumeNotes
+                    : groupName === "performance"
+                      ? selectedPerformance
+                      : selectedProjection
 
-                  const setSelected =
-                    groupName === "smellAccords"
-                      ? setSelectedAccords
-                      : groupName === "perfumeNotes"
-                        ? setSelectedPerfumeNotes
-                        : groupName === "performance"
-                          ? setSelectedPerformance
-                          : setSelectedProjection;
+              const setSelected =
+                groupName === "smellAccords"
+                  ? setSelectedAccords
+                  : groupName === "perfumeNotes"
+                    ? setSelectedPerfumeNotes
+                    : groupName === "performance"
+                      ? setSelectedPerformance
+                      : setSelectedProjection
 
-                  return (
-                    <div key={groupName} className="mb-6">
-                      <h5 className="text-md font-semibold text-gray-800 mb-0 capitalize">
-                        {groupName.replace(/([A-Z])/g, " $1")}
-                      </h5>
-                      <div className="h-1 w-64 lg:w-72 mb-4 rounded-full bg-gradient-to-r from-pink-500 via-pink-600 to-purple-600" />
+              const handleToggle = (val: string) => {
+                if (isSingleSelect) {
+                  setSelected(selected.includes(val) ? [] : [val])
+                } else {
+                  setSelected((prev) =>
+                    prev.includes(val) ? prev.filter((s) => s !== val) : [...prev, val]
+                  )
+                }
+              }
 
-                      <div
-                        className={cn(
-                          "grid grid-cols-1 sm:grid-cols-2 gap-2",
-                          (groupName === "performance" || groupName === "projection") && "grid-cols-1 sm:grid-cols-1",
-                          isLongList && "max-h-56 overflow-y-auto pr-1"
-                        )}
-                      >
-                        {items.map((item) => {
-                          const id = `${groupName}-${item.value}`;
-                          const checked = selected.includes(item.value);
+              return (
+                <div key={groupName} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-gray-500 capitalize">
+                      {groupName.replace(/([A-Z])/g, " $1")}
+                    </span>
+                    {selected.length > 0 && (
+                      <span className="text-xs font-semibold text-red-600">
+                        {selected.length} selected
+                      </span>
+                    )}
+                  </div>
 
-                          return (
-                            <Label
-                              key={item.value}
-                              htmlFor={id}
-                              className={cn(
-                                "flex items-center gap-3 cursor-pointer select-none",
-                                "rounded-xl border px-3 py-3 bg-white",
-                                "transition-all duration-150",
-                                "hover:border-primary/50 hover:bg-primary/5 active:scale-[0.99]",
-                                checked && "border-primary bg-primary/10"
-                              )}
-                            >
-                              <Checkbox
-                                id={id}
-                                checked={checked}
-                                onCheckedChange={(isChecked) => {
-                                  if (isSingleSelect) {
-                                    setSelected(isChecked ? [item.value] : []);
-                                  } else {
-                                    setSelected((prev) =>
-                                      isChecked ? [...prev, item.value] : prev.filter((s) => s !== item.value)
-                                    );
-                                  }
-                                }}
-                              />
-
-                              <span className="text-sm font-medium text-gray-700 flex-1">
-                                {item.label}
-                              </span>
-                            </Label>
-                          );
-                        })}
-                      </div>
+                  {/* Accords & Perfume Notes as Multi-select Chips/Pills */}
+                  {isChipLayout ? (
+                    <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto pr-1">
+                      {items.map((item) => {
+                        const checked = selected.includes(item.value)
+                        return (
+                          <button
+                            key={item.value}
+                            type="button"
+                            onClick={() => handleToggle(item.value)}
+                            className={cn(
+                              "inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md border font-medium transition-all active:scale-95",
+                              checked
+                                ? "bg-red-500 border-red-500 text-white font-semibold shadow-xs"
+                                : "bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                            )}
+                          >
+                            {checked && <Check className="w-3 h-3 stroke-[3]" />}
+                            {item.label}
+                          </button>
+                        )
+                      })}
                     </div>
-                  );
-                })}
-              </CollapsibleContent>
-            </Collapsible>
-
-            <Collapsible defaultOpen>
-              <CollapsibleTrigger className="text-md font-semibold text-gray-800 mb-3">
-                Specification
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <Select
-                  value={selectedSpecification}
-                  onValueChange={setSelectedSpecification}
-                >
-                  <SelectTrigger className="w-full h-10 bg-white border-gray-200 rounded-md">
-                    <SelectValue placeholder="For Men or Women?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="unisex">Unisex</SelectItem>
-                    <SelectItem value="male">Men</SelectItem>
-                    <SelectItem value="female">Women</SelectItem>
-                  </SelectContent>
-                </Select>
-              </CollapsibleContent>
-            </Collapsible>
+                  ) : (
+                    /* Performance & Projection in clean 2-column grid */
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {items.map((item) => {
+                        const checked = selected.includes(item.value)
+                        return (
+                          <button
+                            key={item.value}
+                            type="button"
+                            onClick={() => handleToggle(item.value)}
+                            className={cn(
+                              "text-xs px-2.5 py-2 rounded-lg border text-left font-medium transition-all truncate active:scale-98",
+                              checked
+                                ? "bg-red-50 border-red-500 text-red-700 font-semibold shadow-xs"
+                                : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                            )}
+                          >
+                            {item.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
 
             <Separator />
 
-            <Collapsible defaultOpen>
-              <CollapsibleTrigger className="text-md font-semibold text-gray-800 mb-3">
+            {/* Price Range */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-gray-500 block">
                 Price Range
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <Slider
-                  min={100}
-                  max={5000}
-                  step={50}
-                  value={priceRange}
-                  onValueChange={(value) => setPriceRange(value as [number, number])}
-                  className="w-full"
-                />
-                <p className="text-sm text-gray-600 mt-2">
-                  BDT {priceRange[0]} - {priceRange[1]}
-                </p>
-              </CollapsibleContent>
-            </Collapsible>
+              </label>
+              <Slider
+                min={100}
+                max={5000}
+                step={50}
+                value={priceRange}
+                onValueChange={(value) => setPriceRange(value as [number, number])}
+                className="w-full py-1"
+              />
+              <div className="flex justify-between items-center text-xs font-semibold text-gray-700">
+                <span>৳ {priceRange[0]}</span>
+                <span>৳ {priceRange[1]}</span>
+              </div>
+            </div>
           </div>
         </ScrollArea>
 
-        <div className="p-6 pt-0 bg-white shrink-0 flex">
+        {/* Footer Actions */}
+        <div className="p-4 border-t bg-white shrink-0 flex gap-2">
           <Button
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition-colors cursor-pointer"
+            variant="outline"
+            className="flex-1 h-10 border-gray-200 text-xs font-semibold hover:bg-gray-100"
             onClick={handleReset}
           >
             Reset
           </Button>
+          <Button
+            className="flex-1 h-10 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold"
+            onClick={() => onClose(false)}
+          >
+            Apply Filters
+          </Button>
         </div>
       </SheetContent>
     </Sheet>
-  );
+  )
 }

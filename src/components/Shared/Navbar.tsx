@@ -6,11 +6,12 @@ import {
   Search,
   Heart,
   ShoppingCart,
-  MapPin,
   Menu,
   ChevronDown,
   Sparkles,
   ArrowRight,
+  Navigation,
+  User,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -423,7 +424,23 @@ export function Navbar() {
                       aria-label="Track your order"
                       title="Track your order status"
                     >
-                      <MapPin className="h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:animate-bounce z-10" />
+                      <Navigation className="h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:animate-bounce z-10" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-100/50 to-violet-100/50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300" />
+                      <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-purple-200/30 to-transparent animate-shimmer" />
+                      </div>
+                    </Button>
+                  </Link>
+
+                  <Link href="/profile">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="relative h-11 w-11 hover:bg-gradient-to-r hover:from-purple-50 hover:to-violet-50 hover:text-purple-600 transition-all duration-300 rounded-xl group"
+                      aria-label="Track your order"
+                      title="Track your order status"
+                    >
+                      <User className="h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:animate-bounce z-10" />
                       <div className="absolute inset-0 bg-gradient-to-r from-purple-100/50 to-violet-100/50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300" />
                       <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-purple-200/30 to-transparent animate-shimmer" />

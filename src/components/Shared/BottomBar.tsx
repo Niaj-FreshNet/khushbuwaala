@@ -3,7 +3,7 @@
 import type React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, ShoppingBag, Heart, MessageCircle, Search } from "lucide-react"
+import { Home, ShoppingBag, Heart, MessageCircle, Search, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import SearchDrawer from "../Modules/Search/SearchDrawer"
@@ -101,9 +101,9 @@ export default function BottomBar() {
     () => [
       { key: "home", label: "Home", path: "/", ariaLabel: "Go to homepage", icon: <Home className="h-5 w-5" /> },
       { key: "shop", label: "Shop", path: "/shop", ariaLabel: "Go to shop page", icon: <ShoppingBag className="h-5 w-5" /> },
-      { key: "support", label: "Support", ariaLabel: "Chat with us on Messenger", icon: <MessageCircle className="h-5 w-5" />, onClick: handleMessengerClick },
       { key: "wishlist", label: "Wishlist", path: "/wishlist", ariaLabel: "View wishlist", icon: <Heart className="h-5 w-5" /> },
-      { key: "cart", label: "Cart", path: "/cart", ariaLabel: "View cart", icon: <ShoppingBag className="h-5 w-5" /> },
+      { key: "support", label: "Support", ariaLabel: "Chat with us on Messenger", icon: <MessageCircle className="h-5 w-5" />, onClick: handleMessengerClick },
+      { key: "profile", label: "Profile", path: "/profile", ariaLabel: "View profile", icon: <User className="h-5 w-5" /> },
     ],
     [pathname, isMobileDevice]
   )
@@ -242,7 +242,7 @@ export default function BottomBar() {
       </nav>
 
       {/* Search FAB (compact) */}
-      <div
+      {/* <div
         className={cn(
           "fixed lg:hidden right-4 z-40 transition-all duration-200",
           isVisible ? "bottom-[78px]" : "bottom-3"
@@ -264,7 +264,7 @@ export default function BottomBar() {
         >
           <Search className="h-5 w-5" />
         </Button>
-      </div>
+      </div> */}
 
       <SearchDrawer visible={searchVisible} onClose={() => setSearchVisible(false)} />
     </>

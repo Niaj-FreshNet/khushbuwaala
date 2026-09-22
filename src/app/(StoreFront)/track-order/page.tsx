@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { format } from "date-fns";
@@ -36,15 +36,19 @@ import {
   ListOrdered,
 } from "lucide-react";
 import { useLazyTrackOrdersQuery } from "@/redux/store/api/order/ordersApi";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const STATUS_STEPS = [
   { key: "PENDING", label: "Order Placed", icon: ClipboardCopy },
-  { key: "PROCESSING", label: "Parcel Is Being Ready", icon: Clock },
+  { key: "PROCESSING", label: "Parcel is being Ready", icon: Clock },
   { key: "SHIPPED", label: "Shipped to Courier", icon: Truck },
   { key: "DELIVERED", label: "Delivered", icon: CheckCircle2 },
 ];
 
 export default function TrackOrderPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlQuery = searchParams.get("query");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -52,6 +56,21 @@ export default function TrackOrderPage() {
 
   const [triggerTrackOrders, { data, isFetching, isUninitialized, error }] =
     useLazyTrackOrdersQuery();
+
+  useEffect(() => {
+    if (urlQuery && urlQuery.trim()) {
+      setSearchQuery(urlQuery.trim());
+      triggerTrackOrders(urlQuery.trim());
+    }
+  }, [urlQuery, triggerTrackOrders])
+
+  const handleBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/shop");
+    }
+  };
 
   const orders: any[] = data?.data || [];
   const selectedOrder = orders[selectedIndex] || orders[0] || null;
@@ -109,10 +128,14 @@ export default function TrackOrderPage() {
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           {/* Header */}
           <div className="flex items-center gap-4 mb-8">
-            <Button variant="ghost" size="icon" asChild className="rounded-full bg-white shadow-xs">
-              <Link href="/shop" aria-label="Back to shop">
-                <ArrowLeft className="w-5 h-5 text-gray-700" />
-              </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBack}
+              aria-label="Go back"
+              className="rounded-full bg-white shadow-xs hover:bg-gray-100 cursor-pointer"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-700" />
             </Button>
             <div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-gray-900">

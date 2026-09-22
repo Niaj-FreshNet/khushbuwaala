@@ -1,14 +1,23 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Inter } from "next/font/google"
+import { Inter, Noto_Serif_Bengali } from "next/font/google"
 import Script from "next/script"
 import "./globals.css"
 import { siteConfig } from "@/config/site"
 import { Providers } from "@/lib/Providers"
 
+// English Font
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
+})
+
+// Bangla Serif Font
+const notoSerifBengali = Noto_Serif_Bengali({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["bengali"],
+  variable: "--font-noto-serif-bengali",
   display: "swap",
 })
 
@@ -163,7 +172,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable}`}
+      className={`${inter.variable} ${notoSerifBengali.variable}`}
     >
       <head>
         {/* Optional: speed up DNS/TLS for GTM */}
@@ -185,8 +194,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       </head>
 
       <body
-        className={`min-h-screen text-foreground bg-background font-sans antialiased ${inter.className}`}
-      >
+        className={`min-h-screen text-foreground bg-background font-sans antialiased`}      >
         {/* Google Tag Manager (noscript) - immediately after opening <body> */}
         <noscript>
           <iframe

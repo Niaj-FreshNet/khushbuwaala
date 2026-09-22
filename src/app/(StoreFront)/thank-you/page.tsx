@@ -11,23 +11,21 @@ import { Separator } from "@/components/ui/separator";
 import { useAppSelector } from "@/redux/store/hooks";
 import { selectLastOrder, selectOrderById } from "@/redux/store/features/orders/ordersSlice";
 import OrderInvoiceModal from "@/components/Modules/Orders/OrderInvoiceModal";
-import { ChevronDown } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronDown,
+  FileText,
+  MapPin,
+  Phone,
+  ShoppingBag,
+  Truck,
+  CreditCard,
+  Sparkles,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import StoreContainer from "@/components/Layout/StoreContainer";
 import { kwPushPurchase } from "@/lib/Analytics/kwEcom";
 import { useApplyDiscountMutation } from "@/redux/store/api/discount/discountApi";
-
-type CartLikeItem = {
-  id: string;
-  productId?: string;
-  variantId?: string;
-  name: string;
-  primaryImage: string;
-  size: string;
-  quantity: number;
-  unitOriginal: number;
-  unitDiscounted: number;
-};
 
 function formatBDT(amount: number) {
   return new Intl.NumberFormat("en-BD", {
@@ -50,70 +48,10 @@ function safeStr(v: any, fallback = "N/A") {
 }
 
 function orderPaymentLabel(method: any) {
-  const m = String(method ?? "").toLowerCase();
-  if (m === "bkash") return "bKash (Online Payment)";
-  if (m === "cashondelivery" || m === "cash_on_delivery" || m === "cashondelivery") return "Cash on Delivery";
-  if (m === "cashondelivery" || m === "cashondelivery") return "Cash on Delivery";
-  if (m === "cashondelivery" || m === "cashondelivery") return "Cash on Delivery";
-  // your checkout uses "cashOnDelivery"
-  if (m === "cashondelivery" || m === "cashondelivery") return "Cash on Delivery";
-  if (m === "cashondelivery") return "Cash on Delivery";
-  if (m === "cashondelivery") return "Cash on Delivery";
-  if (m === "cashondelivery") return "Cash on Delivery";
-  if (m === "cashondelivery") return "Cash on Delivery";
-  if (m === "cashondelivery") return "Cash on Delivery";
-  if (m === "cashondelivery") return "Cash on Delivery";
-  if (m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery" || m === "cashondelivery") return "Cash on Delivery";
-  if (m === "cashondelivery") return "Cash on Delivery";
-  if (m === "cashondelivery") return "Cash on Delivery";
-  if (m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery" || m === "cashondelivery") return "Cash on Delivery";
-  if (m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery" || m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery" || m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery" || m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery" || m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery" || m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery" || m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery" || m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery" || m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery" || m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery") return "Cash on Delivery";
-  if (m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery") return "Cash on Delivery";
-
-  if (m === "cashondelivery") return "Cash on Delivery";
-
-  // final fallback: pretty print
-  return upper(method || "Not Selected");
+  const m = String(method ?? "").toLowerCase().replace(/[\s_-]/g, "");
+  if (m === "bkash") return "bKash Online Payment";
+  if (m.includes("cashondelivery") || m === "cod") return "Cash on Delivery";
+  return upper(method || "Cash on Delivery");
 }
 
 export default function ThankYouPage() {
@@ -123,11 +61,9 @@ export default function ThankYouPage() {
   const lastOrder = useAppSelector(selectLastOrder);
   const orderById = useAppSelector(queryOrderId ? selectOrderById(queryOrderId) : () => undefined);
 
-  // ✅ prefer query order > last order
+  // Prefer query order > last order
   const order = (orderById as any)?.data || (lastOrder as any)?.data;
-  console.log("order", order);
 
-  // discount breakdown (optional)
   const [discountBreakdown, setDiscountBreakdown] = useState<any>(null);
   const [applyDiscount] = useApplyDiscountMutation();
 
@@ -138,19 +74,16 @@ export default function ThankYouPage() {
     if (typeof window !== "undefined") window.scrollTo(0, 0);
   }, []);
 
-  // ✅ fetch breakdown only when order is ready
+  // Fetch breakdown only when order is ready
   useEffect(() => {
     const run = async () => {
       if (!order?.orderItems?.length) return;
 
       const code = order?.coupon ? String(order.coupon) : undefined;
-
       const items = order.orderItems
         .map((it: any) => ({
           productId: it.productId || it.product?.id,
           variantId: it.variantId || it.variant?.id,
-          // backend might store item.price as "original unit" OR "final unit"
-          // we pass what exists; breakdown will be best-effort
           price: Number(it.price ?? it.variant?.price ?? 0),
           qty: Math.max(1, Number(it.quantity || 1)),
         }))
@@ -173,19 +106,17 @@ export default function ThankYouPage() {
     run();
   }, [order?.id, order?.coupon, applyDiscount]);
 
-  // ✅ discounted unit map must be created BEFORE cartItems uses it (fixes hoisting crash)
   const discountedUnitMap = useMemo(() => {
     const map = new Map<string, number>();
     const items = discountBreakdown?.items ?? [];
 
     for (const it of items) {
       const key = `${it.productId}__${it.variantId || ""}`;
-      map.set(key, Number(it.discountedPrice ?? it.price ?? 0)); // per unit
+      map.set(key, Number(it.discountedPrice ?? it.price ?? 0));
     }
     return map;
   }, [discountBreakdown]);
 
-  // ✅ map orderItems -> display items (original + discounted)
   const cartItems = useMemo(() => {
     if (!order?.orderItems?.length) return [];
 
@@ -195,11 +126,7 @@ export default function ThankYouPage() {
       const key = `${productId}__${variantId || ""}`;
 
       const qty = Math.max(1, Number(item.quantity || 1));
-
-      // ✅ original unit (regular price)
       const originalUnit = Number(item.price ?? item.variant?.price ?? 0);
-
-      // ✅ discounted unit from breakdown
       const discountedUnit = discountedUnitMap.get(key) ?? originalUnit;
 
       const lineOriginal = Math.max(0, Math.round(originalUnit * qty));
@@ -224,19 +151,15 @@ export default function ThankYouPage() {
     });
   }, [order, discountedUnitMap]);
 
-  // ✅ totals: trust server truth first, display breakdown if available
   const totals = useMemo(() => {
     const subtotalOriginal = cartItems.reduce((sum, p) => sum + p.lineOriginal, 0);
     const subtotalDiscounted = cartItems.reduce((sum, p) => sum + p.lineDiscounted, 0);
 
     const discountAmount = Math.max(0, Number(order?.discountAmount ?? 0));
     const coupon = order?.coupon ? String(order.coupon) : null;
-
     const shippingCost = Number(order?.shippingCost ?? 0);
     const estimatedTaxes = 0;
-
-  const discountedSubtotal = Math.max(0, Math.round(subtotalOriginal - discountAmount));
-
+    const discountedSubtotal = Math.max(0, Math.round(subtotalOriginal - discountAmount));
     const total = Number(order?.amount ?? (subtotalDiscounted + shippingCost + estimatedTaxes));
 
     return {
@@ -251,7 +174,7 @@ export default function ThankYouPage() {
     };
   }, [cartItems, order]);
 
-  // ✅ Purchase tracking (safe + dedupe)
+  // Purchase tracking with deduplication
   const purchaseSentRef = useRef<string>("");
 
   const purchaseUserData = useMemo(() => {
@@ -296,7 +219,6 @@ export default function ThankYouPage() {
 
     const badStatuses = new Set(["CANCELLED", "FAILED", "REFUNDED"]);
     if (order.status && badStatuses.has(String(order.status).toUpperCase())) return;
-
     if (String(order.method).toLowerCase() === "bkash" && !order.isPaid) return;
 
     const transactionId = String(order.id || "");
@@ -328,306 +250,277 @@ export default function ThankYouPage() {
 
   if (!order) {
     return (
-      <div className="min-h-[60vh] pt-24 container mx-auto px-4 flex flex-col items-center text-center gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold">Thank you!</h1>
-        <p className="text-gray-600">We could not find your order details. You can continue shopping.</p>
-        <Button asChild>
-          <Link href="/shop">Continue Shopping</Link>
-        </Button>
-      </div>
+      <StoreContainer>
+        <div className="min-h-[70vh] pt-28 pb-16 px-4 flex flex-col items-center justify-center text-center max-w-md mx-auto">
+          <div className="h-16 w-16 bg-amber-50 rounded-full flex items-center justify-center mb-4 text-amber-600">
+            <ShoppingBag className="h-8 w-8" />
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Order Information</h1>
+          <p className="text-sm text-gray-500 mt-2">
+            We couldn’t find any active order details. If you recently completed an order, please check you
+            r SMS or email for confirmation.
+          </p>
+          <Button asChild className="mt-6 bg-amber-600 hover:bg-amber-700 text-white rounded-xl px-6">
+            <Link href="/shop">Continue Shopping</Link>
+          </Button>
+        </div>
+      </StoreContainer>
     );
   }
 
-  const customerName = order?.customer?.name || order?.shipping?.name || order?.customerInfo?.name || "Customer";
+  const customerName = order?.customer?.name || order?.shipping?.name || order?.customerInfo?.name || "Valued Customer";
   const orderPublicId = order?.invoice || order?.id;
 
   return (
     <StoreContainer>
-      <div className="min-h-screen bg-gray-50 pt-4 sm:pt-6 pb-8">
-        <div className="container mx-auto px-4 max-w-7xl">
-          {/* Header */}
-          <div className="mb-4 sm:mb-6">
-            <div className="rounded-2xl bg-gradient-to-r from-red-50 via-pink-50 to-red-50 border border-red-100 p-5">
-              <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 leading-snug">
-                Congratulations, your order has been confirmed{" "}
-                <span className="text-green-600">successfully</span>.
-              </h1>
-              <p className="text-gray-700 mt-1 text-sm sm:text-base break-words">
-                Order ID: <span className="font-semibold">#{safeStr(orderPublicId)}</span>
-              </p>
+      <div className="bg-[#FBFBFA] pt-8 sm:pt-12 pb-8 lg:pb-12">
+        <div className="container mx-auto px-3 sm:px-4 max-w-6xl">
+
+          {/* Success Banner */}
+          <div className="mb-4 rounded-2xl bg-gradient-to-r from-red-600 via-red-500 to-pink-600 p-5 text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0">
+                <CheckCircle2 className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-base sm:text-lg font-bold leading-tight flex items-center gap-1.5">
+                  Congratulations! Order Confirmed <Sparkles className="h-4 w-4" />
+                </h1>
+                <p className="text-xs text-red-100 mt-0.5">
+                  Order ID: <span className="font-bold text-white tracking-wider">#{safeStr(orderPublicId)}</span>
+                </p>
+              </div>
             </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsInvoiceOpen(true)}
+              className="bg-white/10 hover:bg-white/20 text-white border-white/30 text-xs font-semibold h-9 rounded-xl self-start sm:self-auto"
+            >
+              <FileText className="h-3.5 w-3.5 mr-1.5" /> Download Invoice
+            </Button>
           </div>
 
-          {/* Mobile summary toggle */}
-          <div className="lg:hidden mb-6">
-            <Button
+          {/* Mobile Accordion Summary */}
+          <div className="lg:hidden mb-4">
+            <button
               type="button"
-              variant="outline"
               className={cn(
-                "w-full h-auto py-4 px-4 flex items-center justify-between gap-3 rounded-xl bg-white shadow-sm",
-                isMobileSummaryOpen && "ring-1 ring-gray-200"
+                "w-full p-3.5 flex items-center justify-between gap-3 rounded-xl bg-white border border-gray-200 shadow-sm transition-all",
+                isMobileSummaryOpen && "border-amber-500 ring-1 ring-amber-500"
               )}
               onClick={() => setIsMobileSummaryOpen((s) => !s)}
-              aria-expanded={isMobileSummaryOpen}
-              aria-controls="mobile-order-summary"
             >
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="text-sm font-medium text-gray-700">Order summary</span>
-                <span className="text-xs text-gray-500">{isMobileSummaryOpen ? "Tap to hide" : "Tap to view"}</span>
+              <div className="flex items-center gap-2 text-left">
+                <span className="text-xs font-semibold text-gray-700">Order Items & Summary</span>
+                <span className="text-xs bg-gray-100 text-gray-700 font-semibold px-2 py-0.5 rounded-full">
+                  {cartItems.reduce((acc: number, it: any) => acc + (it?.quantity || 1), 0)} items
+                </span>
               </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-base font-semibold text-gray-900">{formatBDT(totals.total)}</span>
-                <ChevronDown
-                  className={`h-4 w-4 text-gray-600 transition-transform duration-200 ${isMobileSummaryOpen ? "rotate-180" : ""}`}
-                />
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-gray-900">{formatBDT(totals.total)}</span>
+                <ChevronDown className={cn("h-4 w-4 text-gray-500 transition-transform duration-200", isMobileSummaryOpen && "rotate-180")} />
               </div>
-            </Button>
+            </button>
 
             {isMobileSummaryOpen && (
-              <div id="mobile-order-summary" className="mt-4 space-y-4">
-                <Card>
-                  <CardContent className="p-4 space-y-3">
-                    {cartItems.map((p, idx) => {
-                      const lineOriginal = p.unitOriginal * p.quantity;
-                      const lineDisc = p.unitDiscounted * p.quantity;
-                      const hasDisc = p.unitDiscounted !== p.unitOriginal;
-
-                      return (
-                        <div key={`${p.id}-${p.size}-${idx}`} className="flex items-start gap-3">
-                          <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100">
-                            <Image src={p.primaryImage} alt={p.name} fill className="object-cover" />
-                            <div className="absolute top-1 right-1 text-xs bg-black text-white rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
-                              {p.quantity}
-                            </div>
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{p.name}</p>
-                            <p className="text-xs text-gray-500">Size: {p.size}</p>
-                          </div>
-
-                          <div className="text-right">
-                            <div className="text-sm font-semibold text-gray-900">
-                              {formatBDT(p.lineDiscounted)}
-                            </div>
-
-                            {p.hasDiscount && (
-                              <>
-                                <div className="text-xs text-gray-500 line-through">
-                                  {formatBDT(p.lineOriginal)}
-                                </div>
-                                <span className="inline-flex mt-1 text-[11px] font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-                                  Save {formatBDT(p.save)}
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                    <Separator />
-
-                    <div className="flex justify-between text-sm">
-                      <span>Subtotal</span>
-                      <span>{formatBDT(totals.subtotalOriginal)}</span>
+              <div className="mt-2 p-3.5 bg-white rounded-xl border border-gray-200 space-y-3 animate-in fade-in-50 duration-150">
+                {cartItems.map((p, idx) => (
+                  <div key={`${p.id}-${p.size}-${idx}`} className="flex gap-3 items-center">
+                    <div className="relative w-12 h-14 rounded-md overflow-hidden bg-gray-100 shrink-0 border border-gray-100">
+                      <Image src={p.primaryImage} alt={p.name} fill className="object-cover" />
                     </div>
-
-                    {totals.discountAmount > 0 && (
-                      <div className="flex justify-between text-sm text-green-700">
-                        <span>Discount{totals.coupon ? ` (${totals.coupon})` : ""}</span>
-                        <span>-{formatBDT(totals.discountAmount)}</span>
+                    <div className="flex-1 min-w-0 text-xs">
+                      <p className="font-semibold text-gray-800 truncate">{p.name}</p>
+                      <p className="text-gray-500 text-[11px]">{p.size} · Qty: {p.quantity}</p>
+                      <div className="text-gray-900 font-bold mt-0.5">{formatBDT(p.lineDiscounted)}</div>
+                    </div>
+                    {p.hasDiscount && (
+                      <div className="text-right text-[10px]">
+                        <span className="line-through text-gray-400 block">{formatBDT(p.lineOriginal)}</span>
+                        <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-bold">
+                          Save {formatBDT(p.save)}
+                        </span>
                       </div>
                     )}
+                  </div>
+                ))}
 
-                    {totals.discountAmount > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span>Subtotal after discount</span>
-                        <span>{formatBDT(totals.discountedSubtotal)}</span>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between text-sm">
-                      <span>Shipping</span>
-                      <span>{formatBDT(totals.shippingCost)}</span>
+                <Separator />
+                <div className="space-y-1.5 text-xs text-gray-600">
+                  <div className="flex justify-between">
+                    <span>Subtotal</span>
+                    <span className="font-medium text-gray-900">{formatBDT(totals.subtotalOriginal)}</span>
+                  </div>
+                  {totals.discountAmount > 0 && (
+                    <div className="flex justify-between text-emerald-700">
+                      <span>Discount {totals.coupon ? `(${totals.coupon})` : ""}</span>
+                      <span>-{formatBDT(totals.discountAmount)}</span>
                     </div>
-
-                    <div className="flex justify-between text-sm">
-                      <span>Estimated Taxes</span>
-                      <span>{formatBDT(totals.estimatedTaxes)}</span>
-                    </div>
-
-                    <Separator />
-
-                    <div className="flex justify-between text-base font-semibold">
-                      <span>Total</span>
-                      <span>{formatBDT(totals.total)}</span>
-                    </div>
-                  </CardContent>
-                </Card>
+                  )}
+                  <div className="flex justify-between">
+                    <span>Delivery Charge</span>
+                    <span className="font-medium text-gray-900">{formatBDT(totals.shippingCost)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-black text-gray-900 pt-1.5 border-t">
+                    <span>Total Paid / Payable</span>
+                    <span className="text-amber-600">{formatBDT(totals.total)}</span>
+                  </div>
+                </div>
               </div>
             )}
           </div>
 
-          {/* MAIN GRID */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-6 lg:gap-8 pb-8">
-            {/* Left */}
-            <div className="space-y-4">
-              <Card className="shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-md">Thank you, {customerName}!</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm text-gray-700">
-                  <p>Your order is confirmed. We’ll notify you when it ships.</p>
-                  <p>You can track your order status anytime using the order ID.</p>
+          {/* Main Content Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            {/* Left Details Column */}
+            <div className="lg:col-span-7 space-y-4">
 
-                  <p>
-                    Payment Method:{" "}
-                    <span className="font-semibold">{orderPaymentLabel(order.method)}</span>
-                  </p>
-                  <p>
-                    Order Status: <span className="font-semibold">{safeStr(order.status, "PENDING")}</span>
-                  </p>
+              {/* Order Status Card */}
+              <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 shadow-sm space-y-3">
+                <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                  <span className="w-2 h-4 rounded-full bg-amber-500" />
+                  <h2 className="text-sm sm:text-base font-bold text-gray-900">Thank you, {customerName}!</h2>
+                </div>
 
-                  <div className="pt-2">
-                    <Button variant="outline" onClick={() => setIsInvoiceOpen(true)}>
-                      View Invoice
-                    </Button>
+                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                  Your order is received and is currently being processed. You will receive a phone call and delivery updates as soon as your package is dispatched.
+                </p>
+
+                <div className="grid grid-cols-2 gap-2.5 pt-2">
+                  <div className="p-3 bg-gray-50/70 border border-gray-100 rounded-xl">
+                    <span className="text-[11px] font-medium text-gray-500 block">Payment Method</span>
+                    <span className="text-xs sm:text-sm font-bold text-gray-900 mt-0.5 flex items-center gap-1.5">
+                      <CreditCard className="h-3.5 w-3.5 text-amber-600" />
+                      {orderPaymentLabel(order.method)}
+                    </span>
                   </div>
-                </CardContent>
-              </Card>
 
-              <Card className="shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-base sm:text-lg">Order details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="rounded-xl border bg-white p-4 sm:p-5">
-                      <p className="text-sm font-semibold text-gray-900 mb-2">Contact Information</p>
-                      <Separator className="mb-3" />
-                      <div className="space-y-1 text-sm text-gray-700">
-                        <p className="break-words">{safeStr(order?.shipping?.name || order?.customerInfo?.name)}</p>
-                        <p className="break-words">{safeStr(order?.shipping?.address || order?.customerInfo?.address)}</p>
-                        <p className="break-words">{safeStr(order?.shipping?.phone || order?.customerInfo?.phone)}</p>
-                      </div>
-                    </div>
+                  <div className="p-3 bg-gray-50/70 border border-gray-100 rounded-xl">
+                    <span className="text-[11px] font-medium text-gray-500 block">Current Status</span>
+                    <span className="text-xs sm:text-sm font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full inline-flex mt-0.5 items-center gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                      {safeStr(order.status, "CONFIRMED")}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-                    <div className="rounded-xl border bg-white p-4 sm:p-5">
-                      <p className="text-sm font-semibold text-gray-900 mb-2">Payment Summary</p>
-                      <Separator className="mb-3" />
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Total</span>
-                        <span className="font-semibold text-gray-900">{formatBDT(totals.total)}</span>
-                      </div>
+              {/* Delivery Details */}
+              <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 shadow-sm space-y-3">
+                <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                  <span className="w-2 h-4 rounded-full bg-amber-500" />
+                  <h2 className="text-sm sm:text-base font-bold text-gray-900">Delivery Information</h2>
+                </div>
 
-                      {totals.discountAmount > 0 && (
-                        <div className="flex items-center justify-between text-sm mt-2 text-green-700">
-                          <span>Discount</span>
-                          <span>-{formatBDT(totals.discountAmount)}</span>
-                        </div>
+                <div className="text-xs sm:text-sm text-gray-700 space-y-2">
+                  <div className="flex items-start gap-2.5">
+                    <MapPin className="h-4 w-4 text-gray-400 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        {safeStr(order?.shipping?.name || order?.customerInfo?.name)}
+                      </p>
+                      <p className="text-gray-600 mt-0.5">
+                        {safeStr(order?.shipping?.address || order?.customerInfo?.address)}
+                      </p>
+                      {order?.shipping?.district && (
+                        <p className="text-gray-500 text-xs mt-0.5">
+                          District: {order.shipping.district}
+                        </p>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Button asChild variant="outline">
-                      <Link href="/track-order">Track Order</Link>
-                    </Button>
-                    <Button asChild>
-                      <Link href="/shop">Continue Shopping</Link>
-                    </Button>
+                  <div className="flex items-center gap-2.5 pt-1">
+                    <Phone className="h-4 w-4 text-gray-400 shrink-0" />
+                    <p className="text-gray-900 font-medium">
+                      {safeStr(order?.shipping?.phone || order?.customerInfo?.phone)}
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="flex-1 h-11 text-xs sm:text-sm font-semibold border-gray-200 rounded-xl"
+                >
+                  <Link href="/track-order">
+                    <Truck className="h-4 w-4 mr-2 text-amber-600" /> Track Order Status
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  className="flex-1 h-11 text-xs sm:text-sm font-semibold bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-sm"
+                >
+                  <Link href="/shop">Continue Shopping</Link>
+                </Button>
+              </div>
             </div>
 
-            {/* Right desktop summary */}
-            <div className="hidden lg:block">
-              <div className="sticky top-24">
-                <Card className="shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="text-md">Order Summary</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-3">
-                      {cartItems.map((p, idx) => {
-                        const lineOriginal = p.unitOriginal * p.quantity;
-                        const lineDisc = p.unitDiscounted * p.quantity;
-                        const hasDisc = p.unitDiscounted !== p.unitOriginal;
+            {/* Right Summary Column (Desktop) */}
+            <div className="hidden lg:block lg:col-span-5">
+              <div className="sticky top-24 bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 shadow-sm space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                  <h3 className="text-sm font-bold text-gray-900">Order Summary</h3>
+                  <span className="text-xs bg-gray-100 text-gray-700 font-semibold px-2 py-0.5 rounded-full">
+                    {cartItems.reduce((acc: number, it: any) => acc + (it?.quantity || 1), 0)} items
+                  </span>
+                </div>
 
-                        return (
-                          <div key={`${p.id}-${p.size}-${idx}`} className="flex items-start gap-3">
-                            <div className="relative w-16 h-20 rounded-md overflow-hidden bg-gray-100">
-                              <Image src={p.primaryImage} alt={p.name} fill className="object-cover" />
-                              <div className="absolute top-1 right-1 text-xs bg-black text-white rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
-                                {p.quantity}
-                              </div>
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">{p.name}</p>
-                              <p className="text-xs text-gray-500">Size: {p.size}</p>
-                            </div>
-
-                            <div className="text-sm font-medium shrink-0 text-right">
-                              {p.hasDiscount ? (
-                                <div className="leading-tight">
-                                  <div className="font-semibold text-gray-900">{formatBDT(p.lineDiscounted)}</div>
-                                  <div className="text-xs text-gray-400 line-through">{formatBDT(p.lineOriginal)}</div>
-                                  <span className="inline-flex mt-1 text-[11px] font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
-                                    Save {formatBDT(p.save)}
-                                  </span>
-                                </div>
-                              ) : (
-                                <span>{formatBDT(p.lineDiscounted)}</span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    <Separator />
-
-                    <div className="flex justify-between text-sm">
-                      <span>Subtotal</span>
-                      <span>{formatBDT(totals.subtotalOriginal)}</span>
-                    </div>
-
-                    {totals.discountAmount > 0 && (
-                      <div className="flex justify-between text-sm text-green-700">
-                        <span>Discount{totals.coupon ? ` (${totals.coupon})` : ""}</span>
-                        <span>-{formatBDT(totals.discountAmount)}</span>
+                <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+                  {cartItems.map((p, idx) => (
+                    <div key={`${p.id}-${p.size}-${idx}`} className="flex gap-3 items-center">
+                      <div className="relative w-12 h-14 rounded-lg overflow-hidden bg-gray-50 border shrink-0">
+                        <Image src={p.primaryImage} alt={p.name} fill className="object-cover" />
                       </div>
-                    )}
-
-                    {totals.discountAmount > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span>Subtotal after discount</span>
-                        <span>{formatBDT(totals.discountedSubtotal)}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-gray-900 truncate">{p.name}</p>
+                        <p className="text-[11px] text-gray-500">{p.size} · Qty: {p.quantity}</p>
+                        <div className="text-xs font-bold text-gray-900 mt-0.5">{formatBDT(p.lineDiscounted)}</div>
                       </div>
-                    )}
-
-                    <div className="flex justify-between text-sm">
-                      <span>Shipping</span>
-                      <span>{formatBDT(totals.shippingCost)}</span>
+                      {p.hasDiscount && (
+                        <div className="text-right">
+                          <span className="text-[10px] line-through text-gray-400 block">{formatBDT(p.lineOriginal)}</span>
+                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded">
+                            Save {formatBDT(p.save)}
+                          </span>
+                        </div>
+                      )}
                     </div>
+                  ))}
+                </div>
 
-                    <div className="flex justify-between text-sm">
-                      <span>Estimated Taxes</span>
-                      <span>{formatBDT(totals.estimatedTaxes)}</span>
+                <Separator />
+
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between text-gray-600">
+                    <span>Subtotal</span>
+                    <span className="font-semibold text-gray-900">{formatBDT(totals.subtotalOriginal)}</span>
+                  </div>
+
+                  {totals.discountAmount > 0 && (
+                    <div className="flex justify-between text-emerald-700 font-medium">
+                      <span>Discount {totals.coupon ? `(${totals.coupon})` : ""}</span>
+                      <span>-{formatBDT(totals.discountAmount)}</span>
                     </div>
+                  )}
 
-                    <Separator />
+                  <div className="flex justify-between text-gray-600">
+                    <span>Shipping Fee</span>
+                    <span className="font-semibold text-gray-900">{formatBDT(totals.shippingCost)}</span>
+                  </div>
 
-                    <div className="flex justify-between text-base font-semibold">
-                      <span>Total</span>
-                      <span>{formatBDT(totals.total)}</span>
-                    </div>
-                  </CardContent>
-                </Card>
+                  <Separator />
+
+                  <div className="flex justify-between items-baseline pt-1">
+                    <span className="text-sm font-bold text-gray-900">Total</span>
+                    <span className="text-lg font-black text-amber-600">{formatBDT(totals.total)}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
