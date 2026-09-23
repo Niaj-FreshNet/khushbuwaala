@@ -22,9 +22,9 @@ export function CategoryBanner() {
       description: "Premium artificial oud fragrances, offering deep and captivating woody notes.",
     },
     {
-      CategoryName: "Natural Collections",
+      CategoryName: "Organic Attar",
       CategoryImage: "/images/natural-category.jpg",
-      CategoryLink: "/natural-attar",
+      CategoryLink: "/organic-attar",
       description: "Pure natural attar and organic fragrances, crafted from the finest natural ingredients.",
     },
   ]

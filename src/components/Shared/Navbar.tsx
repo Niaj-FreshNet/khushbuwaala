@@ -67,14 +67,9 @@ const navigationStructuredData = {
 export function Navbar() {
   const menuItems = [
     {
-      label: "Inspired Perfume Oil",
-      href: "/inspired-perfume-oil",
-      description: "High-quality inspired perfume oils with long-lasting fragrance",
-    },
-    {
-      label: "Oriental & Arabian Attar",
-      href: "/oriental-attar",
-      description: "Authentic oriental and Arabian attar collection",
+      label: "Organic Attar",
+      href: "/organic-attar",
+      description: "Pure natural attar and organic fragrance collections",
     },
     {
       label: "Artificial Oud",
@@ -82,9 +77,29 @@ export function Navbar() {
       description: "Premium artificial oud fragrances and blends",
     },
     {
-      label: "Natural Collections",
-      href: "/natural-attar",
-      description: "Pure natural attar and organic fragrance collections",
+      label: "Oriental & Arabian Attar",
+      href: "/oriental-attar",
+      description: "Authentic oriental and Arabian attar collection",
+    },
+    {
+      label: "Inspired Perfume Oil",
+      href: "/inspired-perfume-oil",
+      description: "High-quality inspired perfume oils with long-lasting fragrance",
+    },
+    {
+      label: "Brand Perfumes",
+      href: "/brand-perfumes",
+      description: "Popular Brand Perfumes",
+    },
+    {
+      label: "Niche Perfumes",
+      href: "/niche-perfumes",
+      description: "Our In-house Creations",
+    },
+    {
+      label: "Accessories",
+      href: "/accessories",
+      description: "Perfume-related accessories and gifts",
     },
   ]
 
@@ -432,7 +447,7 @@ export function Navbar() {
                     </Button>
                   </Link>
 
-                  <Link href="/profile">
+                  <Link href="/my-account">
                     <Button
                       variant="ghost"
                       size="icon"

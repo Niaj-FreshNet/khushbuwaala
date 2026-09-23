@@ -24,13 +24,13 @@ export function ShopControlsSkeleton() {
 
                 {/* CENTER: columns group (same p-1 + icon sizes + responsive hidden buttons) */}
                 <div className="flex gap-1 bg-gray-50 p-1 rounded-lg">
-                    <LiveSkeleton delayMs={170} speedMs={1450}>
+                    {/* <LiveSkeleton delayMs={170} speedMs={1450}>
                         <Skeleton className="h-8 w-8 rounded-md" />
                     </LiveSkeleton>
 
                     <LiveSkeleton delayMs={220} speedMs={1500}>
                         <Skeleton className="h-8 w-8 rounded-md" />
-                    </LiveSkeleton>
+                    </LiveSkeleton> */}
 
                     <div className="hidden md:block">
                         <LiveSkeleton delayMs={270} speedMs={1550}>

@@ -23,26 +23,29 @@ export default function ProductDetailsClient({
 
   // keep your selection context support
   const selection = useProductSelectionOptional();
-  // console.log('selection', selection);
+
+  // Safe numeric extractor for sizes (handles 6, "6", "6ml", "100", etc.)
+  const getNumericSize = (v: any) => {
+    const raw = v?.size ?? v?.title ?? v?.name ?? "";
+    const parsed = parseFloat(String(raw).replace(/[^0-9.]/g, ""));
+    return Number.isFinite(parsed) ? parsed : Infinity;
+  };
 
   const sortedVariants = useMemo(() => {
-    return [...(product.variants ?? [])].sort((a, b) => a.size - b.size);
+    return [...(product.variants ?? [])].sort((a: any, b: any) => {
+      const sA = getNumericSize(a);
+      const sB = getNumericSize(b);
+      if (sA !== sB) return sA - sB;
+      return Number(a?.price ?? 0) - Number(b?.price ?? 0);
+    });
   }, [product.variants]);
 
   const availableVariants = useMemo(() => sortedVariants.slice(0, 4), [sortedVariants]);
 
   function pickLowestPriceVariant(product: any) {
-    const variants = Array.isArray(product?.variants) ? product.variants : [];
-    if (!variants.length) return null;
-
-    const priced = variants
-      .map((v: any) => ({ v, price: Number(v?.price ?? 0) }))
-      .filter((x: any) => Number.isFinite(x.price) && x.price > 0);
-
-    if (!priced.length) return variants[0] ?? null;
-
-    priced.sort((a: any, b: any) => a.price - b.price);
-    return priced[0].v ?? null;
+    if (!sortedVariants.length) return null;
+    // Pick 2nd lowest variant (index 1), fallback to index 0
+    return sortedVariants[1] ?? sortedVariants[0] ?? null;
   }
 
   function safeUnit(unit: any) {
@@ -51,15 +54,9 @@ export default function ProductDetailsClient({
 
   const lowestPriceVariant = useMemo(() => {
     return pickLowestPriceVariant(product as any) as IProductVariant | null;
-  }, [product]);
+  }, [product, sortedVariants]);
 
   const [fallbackSelected, setFallbackSelected] = useState<IProductVariant | null>(null);
-
-  useEffect(() => {
-    if (!selection?.selectedVariant) {
-      setFallbackSelected(lowestPriceVariant);
-    }
-  }, [lowestPriceVariant, selection?.selectedVariant]);
 
   const [fallbackQuantity, setFallbackQuantity] = useState(1);
 
@@ -70,16 +67,12 @@ export default function ProductDetailsClient({
 
   const setQuantity = selection?.setQuantity ?? setFallbackQuantity;
 
-  const selectedVariant = selection?.selectedVariant ?? null;
-  const effectiveVariant = selectedVariant ?? fallbackSelected ?? lowestPriceVariant;
-
-  // console.log('effectiveVariant', effectiveVariant);
+  // Effective variant prioritizes user selection context, then fallback, then lowestPriceVariant
+  const effectiveVariant = selection?.selectedVariant ?? fallbackSelected ?? lowestPriceVariant;
 
   const selectedSizeLabel = effectiveVariant
-    ? `${effectiveVariant.size} ${safeUnit(effectiveVariant.unit)}`
-    : product.variants?.[0]
-      ? `${product.variants[0].size} ${safeUnit(product.variants[0].unit)}`
-      : "3 ml";
+    ? `${String(effectiveVariant.size).trim()} ${safeUnit(effectiveVariant.unit)}`
+    : "6 ml";
 
   const currentPrice = effectiveVariant?.price ?? product.minPrice ?? 0;
 
@@ -263,6 +256,7 @@ export default function ProductDetailsClient({
   return (
     <ProductDetailsUI
       product={product}
+      selectedVariantId={effectiveVariant?.id}
       discount={discount}
       discountedPrice={discountedPrice}
       currentPrice={currentPrice}
@@ -282,4 +276,4 @@ export default function ProductDetailsClient({
       isPending={isPending}
     />
   );
-}
+};

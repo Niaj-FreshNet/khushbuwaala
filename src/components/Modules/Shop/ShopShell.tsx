@@ -60,7 +60,7 @@ export function ShopShell({
   ];
 
   return (
-    <div className="w-full mx-auto mt-8 md:mt-10">
+    <div className="w-full mx-auto mt-4 md:mt-8">
       {/* <ShopBanner
         heading={bannerHeading}
         text={bannerText}

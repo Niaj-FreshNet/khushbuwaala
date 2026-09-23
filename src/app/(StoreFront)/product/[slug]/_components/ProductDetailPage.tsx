@@ -121,10 +121,10 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                     <section className="bg-white relative">
                         {/* ✅ same container + less padding */}
                         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
-                            <div className="flex items-center gap-2 sm:gap-3 mb-3">
-                                <div className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+                            <div className="flex items-center gap-2 sm:gap-3 mb-1">
+                                {/* <div className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
                                     <Info className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                                </div>
+                                </div> */}
                                 <h2 className="text-base sm:text-lg font-bold text-gray-900">
                                     Product Details
                                 </h2>
@@ -140,7 +140,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                     <section className="bg-gradient-to-b from-gray-50 to-white relative">
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-50/30 to-transparent pointer-events-none" />
                         {/* ✅ MUCH smaller padding */}
-                        <div className="relative max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-2 sm:py-4 lg:py-6">
+                        <div className="relative max-w-7xl mx-auto">
                             <Suspense fallback={<RelatedProductsLoading />}>
                                 <RelatedProductsWrapper product={mappedProduct} />
                             </Suspense>
@@ -148,12 +148,11 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                     </section>
 
                     {/* Trust Signals Section */}
-                    <section className="relative bg-gradient-to-r from-slate-50 via-blue-50/50 to-indigo-50/30">
-                        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] pointer-events-none" />
+                    <section>
 
                         {/* ✅ reduced padding + reduced heading gap */}
-                        <div className="relative max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-8 sm:py-10 lg:py-12">
-                            <div className="text-center mb-6 sm:mb-8">
+                        <div className="relative max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 -mb-50 sm:-mb-20">
+                            <div className="text-center mb-3 sm:mb-6 mt-2 sm:mt-4">
                                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">
                                     Why Choose KhushbuWaala?
                                 </h2>

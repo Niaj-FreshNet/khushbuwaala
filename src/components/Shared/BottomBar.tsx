@@ -3,11 +3,11 @@
 import type React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, ShoppingBag, Heart, MessageCircle, Search, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Home, ShoppingBag, Heart, MessageCircle, User, LogIn } from "lucide-react"
 import { cn } from "@/lib/utils"
 import SearchDrawer from "../Modules/Search/SearchDrawer"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { useAuth } from "@/redux/store/hooks/useAuth"
 
 type NavItem = {
   key: string
@@ -57,6 +57,7 @@ export default function BottomBar() {
   const pathname = usePathname()
   const isMobileDevice = useIsMobileUA()
   const isVisible = useHideOnScroll()
+  const { user } = useAuth()
 
   const [searchVisible, setSearchVisible] = useState(false)
   const [cartBump, setCartBump] = useState(false)
@@ -97,15 +98,26 @@ export default function BottomBar() {
     return pathname.startsWith(path)
   }
 
+  // Determine path, icon, and label based on authentication status
+  const profilePath = user ? "/my-account" : "/login"
+  const profileLabel = user ? "Profile" : "Login"
+  const profileIcon = user ? <User className="h-5 w-5" /> : <LogIn className="h-5 w-5" />
+
   const navItems: NavItem[] = useMemo(
     () => [
       { key: "home", label: "Home", path: "/", ariaLabel: "Go to homepage", icon: <Home className="h-5 w-5" /> },
       { key: "shop", label: "Shop", path: "/shop", ariaLabel: "Go to shop page", icon: <ShoppingBag className="h-5 w-5" /> },
       { key: "wishlist", label: "Wishlist", path: "/wishlist", ariaLabel: "View wishlist", icon: <Heart className="h-5 w-5" /> },
       { key: "support", label: "Support", ariaLabel: "Chat with us on Messenger", icon: <MessageCircle className="h-5 w-5" />, onClick: handleMessengerClick },
-      { key: "profile", label: "Profile", path: "/profile", ariaLabel: "View profile", icon: <User className="h-5 w-5" /> },
+      {
+        key: "profile",
+        label: profileLabel,
+        path: profilePath,
+        ariaLabel: user ? "View profile" : "Log in to your account",
+        icon: profileIcon,
+      },
     ],
-    [pathname, isMobileDevice]
+    [pathname, isMobileDevice, user, profilePath, profileLabel, profileIcon]
   )
 
   return (
@@ -131,34 +143,29 @@ export default function BottomBar() {
           <div className="absolute inset-0 bg-gradient-to-t from-gray-50/35 to-transparent" />
 
           <div className="relative max-w-7xl mx-auto px-2">
-            {/* ✅ A bit taller + better bottom padding so labels look “normal” */}
             <div className="h-[62px] flex items-center justify-between px-1 pt-1 pb-2">
               {navItems.map((item) => {
                 const active = isActive(item.path)
                 const isCart = item.key === "cart"
 
-                const container =
-                  "group relative w-full flex justify-center"
-                const tap =
-                  "active:scale-[0.97] transition-transform duration-150"
+                const container = "group relative w-full flex justify-center"
+                const tap = "active:scale-[0.97] transition-transform duration-150"
 
                 const ActiveBG =
                   "bg-gradient-to-b from-red-50 to-white ring-1 ring-red-200 shadow-[0_10px_18px_-14px_rgba(239,68,68,0.65)]"
 
-                const InactiveBG =
-                  "hover:bg-gray-50/80"
+                const InactiveBG = "hover:bg-gray-50/80"
 
                 const Content = (
                   <div
                     className={cn(
                       "relative flex flex-col items-center justify-center",
                       "w-[74px] rounded-2xl",
-                      "py-2", // ✅ gives space for label (fix weird text)
+                      "py-2",
                       "transition-all duration-200",
                       active ? ActiveBG : InactiveBG
                     )}
                   >
-                    {/* soft glow for full area (not only icon) */}
                     {active && (
                       <span className="pointer-events-none absolute -inset-2 rounded-[22px] bg-red-500/10 blur-md" />
                     )}
@@ -196,7 +203,6 @@ export default function BottomBar() {
                       {item.label}
                     </span>
 
-                    {/* selected indicator line */}
                     <span
                       className={cn(
                         "mt-1 h-[3px] w-8 rounded-full transition-all duration-200",
@@ -235,36 +241,10 @@ export default function BottomBar() {
               })}
             </div>
 
-            {/* safe area (small, but keeps iPhone home bar happy) */}
             <div className="h-[max(4px,env(safe-area-inset-bottom))]" />
           </div>
         </div>
       </nav>
-
-      {/* Search FAB (compact) */}
-      {/* <div
-        className={cn(
-          "fixed lg:hidden right-4 z-40 transition-all duration-200",
-          isVisible ? "bottom-[78px]" : "bottom-3"
-        )}
-      >
-        <Button
-          size="icon"
-          onClick={() => {
-            haptic(20)
-            setSearchVisible(true)
-          }}
-          aria-label="Search products"
-          className={cn(
-            "h-11 w-11 rounded-full",
-            "bg-gray-900 text-white hover:bg-gray-800",
-            "shadow-xl transition-all duration-200",
-            "border border-white/10"
-          )}
-        >
-          <Search className="h-5 w-5" />
-        </Button>
-      </div> */}
 
       <SearchDrawer visible={searchVisible} onClose={() => setSearchVisible(false)} />
     </>

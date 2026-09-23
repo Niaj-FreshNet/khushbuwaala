@@ -671,7 +671,7 @@ export function ShopProducts(props: ShopProductProps) {
 
   return (
     <section
-      className="container mx-auto py-6 sm:py-8 px-3 sm:px-4 relative"
+      className="container mx-auto py-0 px-3 sm:px-4 relative"
       aria-labelledby="shop-products-heading"
     >
       {/* Hidden crawlable pagination links for SEO */}
@@ -738,7 +738,7 @@ export function ShopProducts(props: ShopProductProps) {
 
         <div className="flex gap-1 bg-gray-50 p-1 rounded-lg">
           {/* Column Layout Buttons */}
-          <Button
+          {/* <Button
             variant="outline"
             size="icon"
             className={`sm:flex h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 1
@@ -749,8 +749,8 @@ export function ShopProducts(props: ShopProductProps) {
             aria-label="Show products in 1 column"
           >
             <LayoutList className="h-4 w-4" />
-          </Button>
-          <Button
+          </Button> */}
+          {/* <Button
             variant="outline"
             size="icon"
             className={`h-8 w-8 text-gray-700 hover:bg-white hover:text-blue-600 transition-all duration-300 rounded-md shadow-sm ${columns === 2
@@ -761,7 +761,7 @@ export function ShopProducts(props: ShopProductProps) {
             aria-label="Show products in 2 columns"
           >
             <Grid2X2 className="h-4 w-4" />
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             size="icon"
