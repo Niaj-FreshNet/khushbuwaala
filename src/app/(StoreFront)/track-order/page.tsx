@@ -1,16 +1,15 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, Suspense } from "react";
 import Image from "next/image";
 import { format } from "date-fns";
 import StoreContainer from "@/components/Layout/StoreContainer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
 import {
   Sheet,
   SheetContent,
@@ -33,71 +32,40 @@ import {
   Mail,
   MapPin,
   ListOrdered,
-  Lock,
-  Eye,
-  EyeOff,
-  History,
-  Check,
+  HelpCircle,
+  Hash,
 } from "lucide-react";
 import { useLazyTrackOrdersQuery } from "@/redux/store/api/order/ordersApi";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/redux/store/hooks/useAuth";
-import { districts } from "../checkout/_components/districts";
-import { Tabs } from "radix-ui";
 
 const STATUS_STEPS = [
   { key: "PENDING", label: "Order Placed", icon: ClipboardCopy },
-  { key: "PROCESSING", label: "Parcel Readying", icon: Clock },
-  { key: "SHIPPED", label: "Shipped to Courier", icon: Truck },
+  { key: "PROCESSING", label: "Processing", icon: Clock },
+  { key: "SHIPPED", label: "Shipped", icon: Truck },
   { key: "DELIVERED", label: "Delivered", icon: CheckCircle2 },
 ];
 
-export default function TrackOrderPage() {
+function TrackOrderContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("query");
-  const { user } = useAuth();
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<"current" | "history" | "profile">("current");
+  const [searchQuery, setSearchQuery] = useState(urlQuery || "");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const detailSectionRef = useRef<HTMLDivElement | null>(null);
 
-  // Profile Form States
-  const [profileName, setProfileName] = useState(user?.name || "");
-  const [profileEmail, setProfileEmail] = useState(user?.email || "");
-  const [profilePhone, setProfilePhone] = useState(user?.phone || "");
-  const [profileAddress, setProfileAddress] = useState(user?.address || "");
-  const [selectedDistrict, setSelectedDistrict] = useState(user?.district || "");
+  const [triggerTrackOrders, { data, isFetching, isUninitialized }] =
+    useLazyTrackOrdersQuery();
 
-  // Password States
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showCurrentPass, setShowCurrentPass] = useState(false);
-  const [showNewPass, setShowNewPass] = useState(false);
-  const [showConfirmPass, setShowConfirmPass] = useState(false);
-
-  const [triggerTrackOrders, { data, isFetching, isUninitialized }] = useLazyTrackOrdersQuery();
-
+  // Single Source of Truth: Listen directly to URL query param
   useEffect(() => {
-    const q = urlQuery?.trim() || user?.phone || user?.email;
-    if (q) {
-      setSearchQuery(q);
-      triggerTrackOrders(q);
+    if (urlQuery && urlQuery.trim()) {
+      setSearchQuery(urlQuery.trim());
+      setSelectedIndex(0);
+      triggerTrackOrders(urlQuery.trim());
     }
-  }, [urlQuery, user, triggerTrackOrders]);
-
-  useEffect(() => {
-    if (user) {
-      setProfileName(user.name || "");
-      setProfileEmail(user.email || "");
-      setProfilePhone(user.phone || "");
-      setProfileAddress(user.address || "");
-      setSelectedDistrict(user.district || "");
-    }
-  }, [user]);
+  }, [urlQuery, triggerTrackOrders]);
 
   const handleBack = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
@@ -107,33 +75,14 @@ export default function TrackOrderPage() {
     }
   };
 
-  const allOrders: any[] = data?.data || [];
+  const orders: any[] = data?.data || [];
+  const selectedOrder = orders[selectedIndex] || orders[0] || null;
 
-  // Categorize orders
-  const currentOrders = useMemo(() => {
-    return allOrders.filter((ord) => {
-      const s = String(ord?.status || "").toUpperCase();
-      return s === "PENDING" || s === "PROCESSING";
-    });
-  }, [allOrders]);
-
-  const purchaseHistory = useMemo(() => {
-    return allOrders.filter((ord) => {
-      const s = String(ord?.status || "").toUpperCase();
-      return s !== "PENDING" && s !== "PROCESSING";
-    });
-  }, [allOrders]);
-
-  const displayedOrders = activeTab === "current" ? currentOrders : purchaseHistory;
-  const selectedOrder = displayedOrders[selectedIndex] || displayedOrders[0] || null;
-
-  const onSearch = async () => {
-    if (searchQuery.trim()) {
-      setSelectedIndex(0);
-      await triggerTrackOrders(searchQuery.trim());
-    } else {
-      await triggerTrackOrders("");
-    }
+  // Update URL param; the useEffect triggers data fetching
+  const onSearch = () => {
+    const trimmed = searchQuery.trim();
+    if (!trimmed) return;
+    router.replace(`/track-order?query=${encodeURIComponent(trimmed)}`, { scroll: false });
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -143,6 +92,7 @@ export default function TrackOrderPage() {
   const selectOrder = (idx: number) => {
     setSelectedIndex(idx);
     setIsPickerOpen(false);
+
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setTimeout(() => {
         detailSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -155,7 +105,7 @@ export default function TrackOrderPage() {
     const s = String(selectedOrder.status || "").toUpperCase();
     if (s === "DELIVERED" || s === "COMPLETED") return 3;
     if (s === "SHIPPED") return 2;
-    if (s === "PROCESSING") return 1;
+    if (s === "PROCESSING" || s === "CONFIRMED") return 1;
     return 0;
   }, [selectedOrder]);
 
@@ -164,63 +114,63 @@ export default function TrackOrderPage() {
   const renderStatusBadge = (status: string) => {
     const s = String(status || "").toUpperCase();
     if (s === "DELIVERED" || s === "COMPLETED") {
-      return <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">Delivered</Badge>;
+      return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] px-2 py-0.5">Delivered</Badge>;
     }
-    if (s === "PROCESSING") {
-      return <Badge className="bg-blue-100 text-blue-800 border-blue-300">Processing</Badge>;
+    if (s === "PROCESSING" || s === "CONFIRMED") {
+      return <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] px-2 py-0.5">Processing</Badge>;
     }
     if (s === "SHIPPED") {
-      return <Badge className="bg-purple-100 text-purple-800 border-purple-300">Shipped</Badge>;
+      return <Badge className="bg-purple-50 text-purple-700 border-purple-200 text-[10px] px-2 py-0.5">Shipped</Badge>;
     }
-    if (s === "CANCELED" || s === "CANCELLED") {
-      return <Badge className="bg-red-100 text-red-800 border-red-300">Canceled</Badge>;
+    if (s === "CANCELED") {
+      return <Badge className="bg-rose-50 text-rose-700 border-rose-200 text-[10px] px-2 py-0.5">Canceled</Badge>;
     }
-    return <Badge className="bg-amber-100 text-amber-800 border-amber-300">Pending</Badge>;
+    return <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] px-2 py-0.5">Pending</Badge>;
   };
 
   return (
     <StoreContainer>
-      <div className="min-h-screen bg-gray-50 pt-4 sm:pt-8 pb-12">
-        <div className="container mx-auto px-4 max-w-7xl">
+      <div className="min-h-screen bg-gray-50/70 pt-10 sm:pt-14 pb-4 sm:pb-6 px-3 sm:px-6 lg:px-8">
+        <div className="container mx-auto px-3 sm:px-6 max-w-6xl space-y-3.5">
           {/* Header */}
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={handleBack}
               aria-label="Go back"
-              className="rounded-full bg-white shadow-xs hover:bg-gray-100 cursor-pointer"
+              className="h-8 w-8 rounded-full bg-white shadow-2xs hover:bg-gray-100 cursor-pointer shrink-0"
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700" />
+              <ArrowLeft className="w-4 h-4 text-gray-700" />
             </Button>
             <div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
-                Track Order & Account
+              <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-gray-900 leading-tight">
+                Track Your Order
               </h1>
-              <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-                Check active deliveries, order history, and account settings
+              <p className="text-[11px] sm:text-xs text-gray-500">
+                Real-time tracking for parcels and delivery updates
               </p>
             </div>
           </div>
 
           {/* Search Box */}
-          <Card className="border-gray-200/80 shadow-xs mb-6">
-            <CardContent className="p-3 sm:p-5">
-              <div className="flex flex-col sm:flex-row gap-2.5">
+          <Card className="border-gray-200/80 shadow-2xs bg-white">
+            <CardContent className="p-2.5 sm:p-3.5">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Enter Invoice #, Phone (01...), or Email..."
+                    placeholder="Enter Order ID, Phone no., or Email..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={onKeyDown}
-                    className="h-11 sm:h-12 pl-10 text-sm sm:text-base bg-white border-gray-200 focus-visible:ring-red-500"
+                    className="h-9 sm:h-10 pl-9 text-xs sm:text-sm bg-gray-50/50 border-gray-200 focus-visible:ring-emerald-500"
                   />
                 </div>
                 <Button
                   onClick={onSearch}
-                  className="h-11 sm:h-12 px-6 font-semibold bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white shadow-sm"
-                  disabled={isFetching}
+                  className="h-9 sm:h-10 px-5 text-xs sm:text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs shrink-0"
+                  disabled={!searchQuery.trim() || isFetching}
                 >
                   {isFetching ? "Searching..." : "Track Order"}
                 </Button>
@@ -228,259 +178,385 @@ export default function TrackOrderPage() {
             </CardContent>
           </Card>
 
-          {/* 3 Main Tabs Navigation Bar */}
-          <div className="w-full max-w-xl mx-auto mb-6">
-            <div className="grid grid-cols-3 h-12 p-1 bg-gray-200/80 rounded-xl">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("current");
-                  setSelectedIndex(0);
-                }}
-                className={`rounded-lg text-xs sm:text-sm font-semibold transition-all ${activeTab === "current"
-                    ? "bg-white text-red-600 shadow-xs"
-                    : "text-gray-600 hover:text-gray-900"
-                  }`}
-              >
-                Current Orders ({currentOrders.length})
-              </button>
+          {/* Search Guide Instructions */}
+          {isUninitialized && orders.length === 0 && (
+            <div className="rounded-xl border border-gray-200/70 bg-white p-3.5 sm:p-4 space-y-2.5 shadow-2xs">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-800">
+                <HelpCircle className="w-3.5 h-3.5 text-emerald-600" />
+                <span>How to track your parcel</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-left">
+                <div className="p-2.5 rounded-lg bg-gray-50/80 border border-gray-100 flex items-start gap-2">
+                  <div className="p-1 rounded bg-emerald-100 text-emerald-700 shrink-0 mt-0.5">
+                    <Hash className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-800">By Order ID</p>
+                    <p className="text-[10.5px] text-gray-500 mt-0.5">Enter the order ID (Invoice no.) from your order Invoice or confirmation email (e.g. 586488).</p>
+                  </div>
+                </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("history");
-                  setSelectedIndex(0);
-                }}
-                className={`rounded-lg text-xs sm:text-sm font-semibold transition-all ${activeTab === "history"
-                    ? "bg-white text-red-600 shadow-xs"
-                    : "text-gray-600 hover:text-gray-900"
-                  }`}
-              >
-                Purchase History ({purchaseHistory.length})
-              </button>
+                <div className="p-2.5 rounded-lg bg-gray-50/80 border border-gray-100 flex items-start gap-2">
+                  <div className="p-1 rounded bg-blue-100 text-blue-600 shrink-0 mt-0.5">
+                    <Phone className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-800">By Phone Number</p>
+                    <p className="text-[10.5px] text-gray-500 mt-0.5">Enter the contact number used during checkout to view all matching orders.</p>
+                  </div>
+                </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("profile");
-                  setSelectedIndex(0);
-                }}
-                className={`rounded-lg text-xs sm:text-sm font-semibold transition-all ${activeTab === "profile"
-                    ? "bg-white text-red-600 shadow-xs"
-                    : "text-gray-600 hover:text-gray-900"
-                  }`}
-              >
-                My Profile
-              </button>
+                <div className="p-2.5 rounded-lg bg-gray-50/80 border border-gray-100 flex items-start gap-2">
+                  <div className="p-1 rounded bg-purple-100 text-purple-600 shrink-0 mt-0.5">
+                    <Mail className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-800">By Email Address</p>
+                    <p className="text-[10.5px] text-gray-500 mt-0.5">Use your account or checkout email to review your complete shipment history.</p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Not Found State */}
+          {!isFetching && orders.length === 0 && !isUninitialized && (
+            <Card className="border-amber-200 bg-amber-50/70 shadow-2xs">
+              <CardContent className="p-3.5 sm:p-4 flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-amber-900 text-xs sm:text-sm">No orders found</h3>
+                  <p className="text-[11px] text-amber-700 mt-0.5">
+                    No orders match <span className="font-semibold text-amber-900">"{searchQuery}"</span>. Please
+                    check for typos or search using your mobile number.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Loading Indicator */}
           {isFetching && (
-            <div className="space-y-4 animate-pulse mt-6">
+            <div className="space-y-3 animate-pulse">
               <div className="h-16 bg-gray-200 rounded-xl" />
-              <div className="h-64 bg-gray-200 rounded-xl" />
+              <div className="h-44 bg-gray-200 rounded-xl" />
             </div>
           )}
 
-          {/* TAB 1 & TAB 2 CONTENT (Current Orders & Purchase History) */}
-          {(activeTab === "current" || activeTab === "history") && !isFetching && (
-            <>
-              {displayedOrders.length === 0 ? (
-                <Card className="border-gray-200 bg-white text-center py-12">
-                  <CardContent className="space-y-3">
-                    <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-                      {activeTab === "current" ? <Package className="w-6 h-6" /> : <History className="w-6 h-6" />}
-                    </div>
-                    <h3 className="font-semibold text-gray-800 text-base">
-                      {activeTab === "current" ? "No Active Orders" : "No Past Orders"}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-gray-500 max-w-sm mx-auto">
-                      {activeTab === "current"
-                        ? "You don't have any pending or processing orders right now."
-                        : "You have no completed or delivered purchases under this query."}
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-4">
-                  {/* ... mobile and desktop order lists remain exactly the same ... */}
+          {/* Results: Stepper & Details */}
+          {orders.length > 0 && selectedOrder && (
+            <div className="space-y-3">
+              {/* Mobile Multi-Order Selector */}
+              {orders.length > 1 && (
+                <div className="lg:hidden space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                      Orders Found ({orders.length})
+                    </span>
+
+                    <Sheet open={isPickerOpen} onOpenChange={setIsPickerOpen}>
+                      <SheetTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-6 text-[11px] text-emerald-700 flex items-center gap-1 px-1">
+                          <ListOrdered className="h-3 w-3" /> View All ({orders.length})
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent side="bottom" className="rounded-t-2xl max-h-[75vh] p-3.5">
+                        <SheetHeader className="pb-2 text-left">
+                          <SheetTitle className="text-sm font-bold">Select Order to Track</SheetTitle>
+                        </SheetHeader>
+                        <ScrollArea className="h-[55vh] pr-1">
+                          <div className="space-y-1.5 pb-4">
+                            {orders.map((ord, idx) => (
+                              <div
+                                key={ord.id}
+                                onClick={() => selectOrder(idx)}
+                                className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${idx === selectedIndex ? "border-emerald-500 bg-emerald-50/50" : "border-gray-200 bg-white"
+                                  }`}
+                              >
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-bold text-xs text-gray-900">
+                                      #{ord.invoice || ord.id.slice(-6)}
+                                    </span>
+                                    {renderStatusBadge(ord.status)}
+                                  </div>
+                                  <p className="text-[11px] text-gray-500 mt-0.5">
+                                    {ord.createdAt ? format(new Date(ord.createdAt), "dd MMM yyyy") : ""} • {formatBDT(ord.amount)}
+                                  </p>
+                                </div>
+                                <ChevronRight className="h-3.5 w-3.5 text-gray-400" />
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </SheetContent>
+                    </Sheet>
+                  </div>
+
+                  {/* Horizontal Scrollable Pills */}
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none snap-x">
+                    {orders.map((ord, idx) => {
+                      const isSelected = idx === selectedIndex;
+                      return (
+                        <div
+                          key={ord.id}
+                          onClick={() => selectOrder(idx)}
+                          className={`snap-start shrink-0 px-2.5 py-1.5 rounded-lg border text-left cursor-pointer transition-all ${isSelected
+                            ? "bg-white border-emerald-500 ring-1 ring-emerald-100 shadow-2xs"
+                            : "bg-white/80 border-gray-200"
+                            }`}
+                        >
+                          <div className="flex items-center gap-1">
+                            <span className="font-bold text-[11px] text-gray-900">
+                              #{ord.invoice || ord.id.slice(-6)}
+                            </span>
+                            {renderStatusBadge(ord.status)}
+                          </div>
+                          <p className="text-[10px] text-gray-500 mt-0.5">{formatBDT(ord.amount)}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
-            </>
-          )}
 
-          {/* TAB 3: MY PROFILE */}
-          {activeTab === "profile" && (
-            <div className="mt-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Personal & Address Card */}
-                <Card className="border-gray-200 shadow-xs">
-                  <CardHeader>
-                    <CardTitle className="text-base font-bold flex items-center gap-2">
-                      <User className="h-4 w-4 text-red-600" /> Personal & Delivery Information
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      Update your shipping and contact information
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <label className="text-xs font-semibold text-gray-700 block mb-1.5">Full Name</label>
-                      <Input
-                        value={profileName}
-                        onChange={(e) => setProfileName(e.target.value)}
-                        placeholder="Your full name"
-                        className="h-10 text-sm"
-                      />
-                    </div>
+              {/* Master-Detail Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+                {/* Desktop Left Sidebar: Order List */}
+                {orders.length > 1 && (
+                  <div className="hidden lg:block lg:col-span-4 space-y-2">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                      Orders Found ({orders.length})
+                    </span>
 
-                    <div>
-                      <label className="text-xs font-semibold text-gray-700 block mb-1.5">Email Address</label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <Input
-                          type="email"
-                          value={profileEmail}
-                          onChange={(e) => setProfileEmail(e.target.value)}
-                          placeholder="your.email@example.com"
-                          className="h-10 pl-9 text-sm"
-                        />
+                    <ScrollArea className="h-[520px] rounded-xl border border-gray-200/80 bg-white p-1.5">
+                      <div className="space-y-1.5 pr-1.5">
+                        {orders.map((ord, idx) => {
+                          const isSelected = idx === selectedIndex;
+                          return (
+                            <div
+                              key={ord.id}
+                              onClick={() => selectOrder(idx)}
+                              className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${isSelected
+                                ? "bg-emerald-50/50 border-emerald-500 ring-1 ring-emerald-500/20 shadow-2xs"
+                                : "bg-white border-gray-200/70 hover:border-gray-300"
+                                }`}
+                            >
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-bold text-gray-900 text-xs">
+                                    #{ord.invoice || ord.id.slice(-6)}
+                                  </span>
+                                  {renderStatusBadge(ord.status)}
+                                </div>
+                                <p className="text-[10.5px] text-gray-500 mt-0.5">
+                                  {ord.createdAt ? format(new Date(ord.createdAt), "dd MMM yyyy") : ""} •{" "}
+                                  <span className="font-semibold text-gray-800">{formatBDT(ord.amount)}</span>
+                                </p>
+                              </div>
+                              <ChevronRight className={`h-3.5 w-3.5 shrink-0 ${isSelected ? "text-emerald-700" : "text-gray-300"}`} />
+                            </div>
+                          );
+                        })}
                       </div>
-                    </div>
+                    </ScrollArea>
+                  </div>
+                )}
 
-                    <div>
-                      <label className="text-xs font-semibold text-gray-700 block mb-1.5">Phone Number</label>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                        <Input
-                          value={profilePhone}
-                          onChange={(e) => setProfilePhone(e.target.value)}
-                          placeholder="01XXXXXXXXX"
-                          className="h-10 pl-9 text-sm"
-                        />
+                {/* Right Side: Selected Order Details */}
+                <div
+                  ref={detailSectionRef}
+                  className={`space-y-3.5 ${orders.length > 1 ? "lg:col-span-8" : "lg:col-span-12"}`}
+                >
+                  {/* Status Progress Stepper */}
+                  <Card className="border-gray-200/80 shadow-2xs overflow-hidden bg-white">
+                    <CardHeader className="p-3 border-b bg-gray-50/50">
+                      <div className="flex flex-wrap items-center justify-between gap-1.5">
+                        <div>
+                          <CardTitle className="text-xs sm:text-sm font-bold text-gray-900">
+                            Invoice: <span className="text-emerald-700 font-extrabold">#{selectedOrder.invoice || selectedOrder.id}</span>
+                          </CardTitle>
+                          <p className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5">
+                            Placed on {selectedOrder.createdAt ? format(new Date(selectedOrder.createdAt), "dd MMM yyyy, p") : "—"}
+                          </p>
+                        </div>
+                        {renderStatusBadge(selectedOrder.status)}
                       </div>
-                    </div>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="flex items-center justify-between relative">
+                        {STATUS_STEPS.map((step, idx) => {
+                          const Icon = step.icon;
+                          const isDone = idx <= activeStepIndex;
+                          return (
+                            <div key={step.key} className="flex-1 flex flex-col items-center z-10">
+                              <div
+                                className={`h-8 w-8 sm:h-9 sm:w-9 rounded-full flex items-center justify-center border transition-all ${isDone
+                                  ? "bg-emerald-500 border-emerald-500 text-white shadow-xs"
+                                  : "bg-white border-gray-200 text-gray-300"
+                                  }`}
+                              >
+                                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                              </div>
+                              <span
+                                className={`text-[10px] sm:text-[11px] mt-1.5 text-center font-medium ${isDone ? "text-gray-900 font-semibold" : "text-gray-400"
+                                  }`}
+                              >
+                                {step.label}
+                              </span>
 
-                    <div>
-                      <label className="text-xs font-semibold text-gray-700 block mb-1.5">Full Delivery Address</label>
-                      <Input
-                        value={profileAddress}
-                        onChange={(e) => setProfileAddress(e.target.value)}
-                        placeholder="House, Road, Area details..."
-                        className="h-10 text-sm"
-                      />
-                    </div>
-
-                    {/* District Dropdown below Full Address */}
-                    <div>
-                      <label className="text-xs font-semibold text-gray-700 block mb-1.5">
-                        District (জেলা)
-                      </label>
-                      <select
-                        value={selectedDistrict}
-                        onChange={(e) => setSelectedDistrict(e.target.value)}
-                        className="w-full h-10 px-3 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
-                      >
-                        <option value="">Select District</option>
-                        {districts.map((d) => (
-                          <option key={d.en} value={d.en}>
-                            {d.en} ({d.bn})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <Button className="w-full mt-2 bg-red-600 hover:bg-red-700 text-white font-medium">
-                      Save Profile Changes
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Password Changing Section with Eye Toggles */}
-                <Card className="border-gray-200 shadow-xs">
-                  <CardHeader>
-                    <CardTitle className="text-base font-bold flex items-center gap-2">
-                      <Lock className="h-4 w-4 text-red-600" /> Change Password
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      Ensure your account is using a strong password
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <label className="text-xs font-semibold text-gray-700 block mb-1.5">Current Password</label>
-                      <div className="relative">
-                        <Input
-                          type={showCurrentPass ? "text" : "password"}
-                          value={currentPassword}
-                          onChange={(e) => setCurrentPassword(e.target.value)}
-                          placeholder="••••••••"
-                          className="h-10 pr-10 text-sm"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowCurrentPass(!showCurrentPass)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                          {showCurrentPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
+                              {idx < STATUS_STEPS.length - 1 && (
+                                <div
+                                  className={`absolute top-4 sm:top-4.5 h-0.5 -z-10 transition-colors ${idx < activeStepIndex ? "bg-emerald-500" : "bg-gray-200"
+                                    }`}
+                                  style={{
+                                    left: `${(100 / (STATUS_STEPS.length * 2)) * (idx * 2 + 1)}%`,
+                                    width: `${100 / STATUS_STEPS.length}%`,
+                                  }}
+                                />
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
-                    </div>
+                    </CardContent>
+                  </Card>
 
-                    <div>
-                      <label className="text-xs font-semibold text-gray-700 block mb-1.5">New Password</label>
-                      <div className="relative">
-                        <Input
-                          type={showNewPass ? "text" : "password"}
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          placeholder="••••••••"
-                          className="h-10 pr-10 text-sm"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowNewPass(!showNewPass)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                          {showNewPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-                      </div>
-                    </div>
+                  {/* Items List */}
+                  <Card className="border-gray-200/80 shadow-2xs bg-white">
+                    <CardHeader className="border-b bg-gray-50/50 p-2.5 sm:p-3">
+                      <CardTitle className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                        <Package className="h-3.5 w-3.5 text-emerald-600" />
+                        Items (
+                        {selectedOrder.orderItems?.reduce((a: number, b: any) => a + (b.quantity || 1), 0) || 0})
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-2.5 sm:p-3 divide-y divide-gray-100">
+                      {(selectedOrder.orderItems || []).map((item: any) => {
+                        const sizePart = item.size || item.variant?.size;
+                        const unitPart = item.unit || item.variant?.unit;
+                        return (
+                          <div key={item.id} className="py-2 first:pt-0 last:pb-0 flex items-center justify-between gap-2.5">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="relative h-10 w-10 sm:h-11 sm:w-11 rounded-lg overflow-hidden bg-gray-100 border shrink-0">
+                                <Image
+                                  src={item.product?.primaryImage || "/placeholder.png"}
+                                  alt={item.product?.name || "Product"}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+                              <div className="min-w-0">
+                                <h4 className="text-xs font-semibold text-gray-900 truncate">
+                                  {item.product?.name || "Perfume Item"}
+                                </h4>
+                                <p className="text-[10px] text-gray-400 mt-0.5">
+                                  Size: {sizePart} {String(unitPart || "").toUpperCase()}
+                                </p>
+                                <span className="text-[10.5px] text-gray-600 font-medium sm:hidden">
+                                  Qty: {item.quantity} × {formatBDT(item.price)}
+                                </span>
+                              </div>
+                            </div>
 
-                    <div>
-                      <label className="text-xs font-semibold text-gray-700 block mb-1.5">Confirm New Password</label>
-                      <div className="relative">
-                        <Input
-                          type={showConfirmPass ? "text" : "password"}
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder="••••••••"
-                          className="h-10 pr-10 text-sm"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPass(!showConfirmPass)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                          {showConfirmPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-                      </div>
-                    </div>
+                            <div className="text-right shrink-0">
+                              <p className="text-[10px] text-gray-400 hidden sm:block">Qty: {item.quantity}</p>
+                              <p className="text-xs font-bold text-gray-900">
+                                {formatBDT(item.price * item.quantity)}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </CardContent>
+                  </Card>
 
-                    <Button
-                      variant="outline"
-                      className="w-full mt-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 font-medium"
-                    >
-                      Update Password
-                    </Button>
-                  </CardContent>
-                </Card>
+                  {/* Summary & Address Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {/* Financial Summary */}
+                    <Card className="border-gray-200/80 shadow-2xs bg-white">
+                      <CardHeader className="p-2.5 border-b bg-gray-50/50">
+                        <CardTitle className="text-[10px] font-bold text-gray-900 uppercase tracking-wider">
+                          Payment Details
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-2.5 space-y-1.5 text-[11px]">
+                        <div className="flex justify-between text-gray-600">
+                          <span>Method</span>
+                          <span className="font-semibold text-gray-900 capitalize">
+                            {selectedOrder.method === "cashOnDelivery" ? "Cash on Delivery" : selectedOrder.method}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-gray-600">
+                          <span>Status</span>
+                          <span className={`font-semibold ${selectedOrder.isPaid ? "text-emerald-600" : "text-amber-600"}`}>
+                            {selectedOrder.isPaid ? "Paid" : "Due on Delivery"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-gray-600">
+                          <span>Delivery Fee</span>
+                          <span className="text-gray-900">{formatBDT(selectedOrder.shippingCost || 0)}</span>
+                        </div>
+                        {selectedOrder.discountAmount > 0 && (
+                          <div className="flex justify-between text-emerald-600 font-medium">
+                            <span>Discount</span>
+                            <span>-{formatBDT(selectedOrder.discountAmount)}</span>
+                          </div>
+                        )}
+                        <Separator />
+                        <div className="flex justify-between text-xs font-bold text-gray-900 pt-0.5">
+                          <span>Total</span>
+                          <span className="text-emerald-700">{formatBDT(selectedOrder.amount)}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Delivery Destination */}
+                    <Card className="border-gray-200/80 shadow-2xs bg-white">
+                      <CardHeader className="p-2.5 border-b bg-gray-50/50">
+                        <CardTitle className="text-[10px] font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1">
+                          <MapPin className="h-3 w-3 text-emerald-600" />
+                          Delivery Destination
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-2.5 space-y-1 text-[11px] text-gray-700">
+                        <div className="font-semibold text-gray-900 flex items-center gap-1.5">
+                          <User className="h-3 w-3 text-gray-400" />
+                          {selectedOrder.shipping?.name || selectedOrder.name || "Customer"}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-gray-600">
+                          <Phone className="h-3 w-3 text-gray-400" />
+                          {selectedOrder.shipping?.phone || selectedOrder.phone || "—"}
+                        </div>
+                        <div className="pt-1 text-gray-600 leading-relaxed border-t mt-1">
+                          {selectedOrder.shipping?.address || selectedOrder.address || "Address provided at checkout"}
+                          {selectedOrder.shipping?.district ? `, ${selectedOrder.shipping.district}` : ""}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
               </div>
             </div>
           )}
         </div>
       </div>
     </StoreContainer>
+  );
+}
+
+export default function TrackOrderPage() {
+  return (
+    <Suspense
+      fallback={
+        <StoreContainer>
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        </StoreContainer>
+      }
+    >
+      <TrackOrderContent />
+    </Suspense>
   );
 }

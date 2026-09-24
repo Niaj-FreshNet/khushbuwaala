@@ -127,6 +127,13 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Universal placeholder font size across the entire website */
+  input::placeholder,
+  textarea::placeholder {
+    font-size: 12px;
+    line-height: 1rem;
+  }
 }
 
 /* Enhanced Custom Animations */
@@ -612,11 +619,11 @@
 
 /* Enhanced focus styles for accessibility */
 .focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 focus:ring-offset-white;
+  @apply focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-white;
 }
 
 .focus-ring-inset {
-  @apply focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-inset;
+  @apply focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-inset;
 }
 
 /* Mobile-specific enhancements */
@@ -637,11 +644,12 @@
     touch-action: manipulation;
   }
 
-  /* Prevent zoom on inputs */
+  /* Slightly reduced font size for compact, clean inputs */
   input,
   select,
   textarea {
-    font-size: 16px;
+    font-size: 13px;
+    /* 👈 Changed from 16px */
   }
 
   /* Smooth scrolling */

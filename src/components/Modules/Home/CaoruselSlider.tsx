@@ -60,7 +60,7 @@ export function CarouselSlider() {
       src: home3,
       mobileSrc: homeMobile3,
       alt: "KhushbuWaala Attars & Oud",
-      primaryText: "Explore Collections",
+      primaryText: "Best Sellers",
       primaryLink: "/shop",
       secondaryText: "Best Sellers",
       secondaryLink: "/shop",
@@ -89,12 +89,12 @@ export function CarouselSlider() {
   const goTo = (index: number) => api?.scrollTo(index)
 
   return (
-    <section className="w-full overflow-hidden relative mb-6 mt-6" aria-label="Hero Carousel">
+    <section className="w-full overflow-hidden relative mt-2" aria-label="Hero Carousel">
       <Carousel setApi={setApi} plugins={[plugin.current]} className="w-full">
         <CarouselContent>
           {slides.map((slide, index) => (
             <CarouselItem key={index}>
-              <div className="relative w-full h-[420px] md:h-[600px]">
+              <div className="relative w-full h-[280px] md:h-[400px]">
                 {/* Mobile image */}
                 <Image
                   src={slide.mobileSrc || slide.src}
@@ -124,75 +124,64 @@ export function CarouselSlider() {
 
                 {/* CTA Dock: bottom-left on desktop, centered on mobile */}
                 <div className="absolute inset-0 flex items-end">
-                  <div className="container mx-auto sm:px-4 md:px-8 pb-8 sm:pb-10 md:pb-24">
-                    <div className="flex justify-center md:justify-start">
+                  <div className="container mx-auto sm:px-4 md:px-8 pb-8 sm:pb-10 md:pb-16">
+                    <div className="flex justify-center">
                       <div
                         className={[
                           "relative z-20 pointer-events-auto",
-
-                          // size behavior
-                          "w-auto max-w-[92%] md:max-w-[520px]",
-
-                          // layout
-                          "flex items-center gap-2 md:gap-3",
-
-                          // padding
-                          "px-6 py-4 md:px-10 md:py-8",
-
-                          // look
-                          "rounded-xl md:rounded-2xl",
-                          "bg-black/25 md:bg-white/10 backdrop-blur-md",
-                          "border border-white/10 md:border-white/15",
-                          "shadow-lg md:shadow-[0_18px_60px_rgba(0,0,0,0.35)]",
-
-                          // ✅ CSS-only entrance/exit
+                          "w-auto max-w-[92%] md:max-w-none",
+                          "flex items-center gap-2.5 sm:gap-3",
                           "transition-all duration-300 ease-out motion-reduce:transition-none",
                           active === index
                             ? "opacity-100 translate-y-0 blur-0"
                             : "opacity-0 translate-y-2 blur-[6px] pointer-events-none",
                         ].join(" ")}
                       >
-                        {/* Primary CTA */}
                         <Button
                           asChild
                           className="
-h-12 md:h-14
-px-8 md:px-16
-text-sm md:text-xl
-rounded-full
-bg-gradient-to-r from-rose-600 to-pink-600
-text-white font-semibold
-shadow-md md:shadow-lg
-hover:scale-[1.03]
-transition-transform
-"
+                          h-10 md:h-11
+                          px-5 md:px-7
+                          text-xs md:text-sm font-medium
+                          rounded-2xl
+                          text-white
+                          bg-transparent hover:bg-white/[0.08]
+                          backdrop-blur-sm
+                          border border-white/25 hover:border-white/40
+                          shadow-[0_4px_20px_rgba(0,0,0,0.15),inset_0_1px_1px_rgba(255,255,255,0.3)]
+                          hover:scale-[1.03]
+                          transition-all duration-200
+                        "
                         >
-                          <Link href={slide.primaryLink} aria-label={slide.primaryText}>
+                          <Link href={slide.primaryLink} aria-label={slide.primaryText} className="flex items-center">
                             {slide.primaryText}
-                            <ArrowRight className="ml-2 h-5 w-8" />
+                            <ArrowRight className="h-4 w-4" />
                           </Link>
                         </Button>
 
-                        {/* Secondary CTA */}
-                        {slide.secondaryText && slide.secondaryLink && (
+                        {/* {slide.secondaryText && slide.secondaryLink && (
                           <Button
                             asChild
                             variant="ghost"
                             className="
-h-12 md:h-14
-px-6 md:px-12
-text-sm md:text-xl
-rounded-full
-text-white
-border border-white/20
-hover:bg-white/10
-"
+                            h-10 md:h-11
+                            px-5 md:px-7
+                            text-xs md:text-sm font-medium
+                            rounded-2xl
+                            text-white/90 hover:text-white
+                            bg-white/[0.04] hover:bg-white/[0.14]
+                            backdrop-blur-sm
+                            border border-white/15 hover:border-white/30
+                            shadow-[0_4px_20px_rgba(0,0,0,0.1),inset_0_1px_1px_rgba(255,255,255,0.15)]
+                            hover:scale-[1.03]
+                            transition-all duration-200
+                          "
                           >
                             <Link href={slide.secondaryLink} aria-label={slide.secondaryText}>
                               {slide.secondaryText}
                             </Link>
                           </Button>
-                        )}
+                        )} */}
                       </div>
                     </div>
                   </div>

@@ -10,7 +10,6 @@ import { useInViewOnce } from "@/components/Shared/useInViewOnce";
 interface SectionTitleProps {
   title: string;
   subtitle?: string;
-  underlineWidth?: string;
   className?: string;
   variant?: "default" | "gradient" | "elegant" | "modern" | "premium";
   animated?: boolean;
@@ -22,7 +21,6 @@ interface SectionTitleProps {
 export function SectionTitle({
   title,
   subtitle,
-  underlineWidth = "w-36",
   className,
   variant = "default",
   animated = true,
@@ -32,7 +30,6 @@ export function SectionTitle({
 }: SectionTitleProps) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
-  // respects reduced motion (no framer)
   const reduce =
     typeof window !== "undefined" &&
     window.matchMedia &&
@@ -40,7 +37,6 @@ export function SectionTitle({
 
   const inView = useInViewOnce(wrapRef, { threshold: 0.15 });
 
-  // styles (you can tweak later, but keeps same structure)
   const styles = useMemo(() => {
     const base = {
       container: "",
@@ -54,7 +50,8 @@ export function SectionTitle({
 
     if (variant === "premium") {
       base.title = "text-white";
-      base.container = "rounded-2xl bg-gradient-to-r from-black via-zinc-900 to-black py-6";
+      /* ◄◄ REDUCED: py-6 -> py-2 */
+      base.container = "rounded-none bg-gradient-to-r from-black via-zinc-900 to-black py-2";
     }
 
     return base;
@@ -65,17 +62,18 @@ export function SectionTitle({
     const full = underlineVariant === "full";
 
     return {
-      widthClass: full ? "w-full" : wide ? "w-64 md:w-80" : underlineWidth,
+      widthClass: full ? "w-full" : wide ? "w-64 md:w-80" : "w-36",
       heightClass: "h-1",
       gradientClass: "bg-gradient-to-r from-red-400 via-pink-400 to-purple-400",
       shadowClass: "shadow-sm",
       borderClass: "",
       showSideLines: !full,
     };
-  }, [underlineVariant, underlineWidth]);
+  }, [underlineVariant]);
 
   return (
-    <div ref={wrapRef} className={cn("text-center py-4 relative overflow-hidden", styles.container, className)}>
+    /* ◄◄ REDUCED: py-4 -> py-1.5 */
+    <div ref={wrapRef} className={cn("text-center py-1.5 relative overflow-hidden", styles.container, className)}>
       {showDecorations && (
         <>
           <div className="absolute inset-0 pointer-events-none">
@@ -116,7 +114,8 @@ export function SectionTitle({
       <div className="relative z-10">
         <h2
           className={cn(
-            "text-3xl md:text-4xl lg:text-5xl font-bold mb-3 relative",
+            /* ◄◄ REDUCED: mb-3 -> mb-1 */
+            "text-2xl md:text-3xl font-bold mb-1 relative",
             styles.title,
             animated && !reduce
               ? cn(
@@ -130,9 +129,9 @@ export function SectionTitle({
 
           {variant === "premium" && (
             <>
-              <span className="absolute -top-2 -left-2 text-amber-400 opacity-20 text-6xl font-black -z-10">
+              {/* <span className="absolute -top-2 -left-2 text-amber-400 opacity-20 text-6xl font-black -z-10">
                 {title.charAt(0)}
-              </span>
+              </span> */}
               <Sparkles className="absolute -top-1 -right-1 h-6 w-6 text-amber-400 opacity-60 animate-pulse" />
             </>
           )}
@@ -146,18 +145,19 @@ export function SectionTitle({
 
           {title}
 
-          {variant === "modern" && (
+          {/* {variant === "modern" && (
             <span className="absolute inset-0 text-red-100 transform translate-x-1 translate-y-1 -z-10">
               {title}
             </span>
-          )}
+          )} */}
         </h2>
 
         {subtitle && (
           <p
             className={cn(
               variant === "premium" ? "text-gray-200" : "text-gray-600",
-              "text-md md:text-lg mb-4 max-w-2xl mx-auto",
+              /* ◄◄ REDUCED: mb-4 -> mb-1.5 */
+              "text-md md:text-lg mb-1.5 max-w-2xl mx-auto",
               animated && !reduce
                 ? cn(
                   "transition-all duration-700 ease-out delay-75",
@@ -171,8 +171,9 @@ export function SectionTitle({
         )}
 
         {/* underline */}
-        <div className="flex justify-center items-center space-x-4 mb-2 w-full">
-          {underlineStyles.showSideLines && (
+        {/* ◄◄ REDUCED: mb-2 -> mb-1 */}
+        <div className="flex justify-center items-center space-x-4 -mb-1 w-full">
+          {/* {underlineStyles.showSideLines && (
             <div
               className={cn(
                 "h-px bg-gradient-to-r from-transparent to-red-300 w-8 md:w-16 origin-left",
@@ -181,7 +182,7 @@ export function SectionTitle({
                   : "scale-x-100"
               )}
             />
-          )}
+          )} */}
 
           <div className={cn("relative", underlineVariant === "full" ? "w-full" : underlineStyles.widthClass)}>
             <div
@@ -192,7 +193,7 @@ export function SectionTitle({
                   : "opacity-100 scale-x-100"
               )}
             >
-              <Separator
+              {/* <Separator
                 className={cn(
                   "rounded-full relative overflow-hidden",
                   underlineStyles.heightClass,
@@ -208,15 +209,15 @@ export function SectionTitle({
                     animated && !reduce && "shimmer-sweep motion-reduce:animate-none"
                   )}
                 />
-              </Separator>
+              </Separator> */}
 
               {underlineVariant === "full" && (
-                <div className="absolute inset-x-0 -bottom-1 h-4 bg-gradient-to-r from-red-300/50 via-pink-300/50 to-purple-300/50 blur-md opacity-70 rounded-full" />
+                <div className="absolute inset-x-0 -bottom-1 h-4 bg-gradient-to-r from-red-400/50 via-pink-400/50 to-purple-400/50 blur-md opacity-50 rounded-full" />
               )}
             </div>
           </div>
 
-          {underlineStyles.showSideLines && (
+          {/* {underlineStyles.showSideLines && (
             <div
               className={cn(
                 "h-px bg-gradient-to-l from-transparent to-red-300 w-8 md:w-16 origin-right",
@@ -225,10 +226,10 @@ export function SectionTitle({
                   : "scale-x-100"
               )}
             />
-          )}
+          )} */}
         </div>
 
-        <div
+        {/* <div
           className={cn(
             "flex justify-center space-x-2 transition-opacity duration-700",
             animated && !reduce ? (inView ? "opacity-100" : "opacity-0") : "opacity-100"
@@ -239,7 +240,7 @@ export function SectionTitle({
           <div className="w-1 h-1 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: "0.6s" }} />
           <div className="w-1.5 h-1.5 bg-pink-400 rounded-full animate-pulse" style={{ animationDelay: "0.9s" }} />
           <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" style={{ animationDelay: "1.2s" }} />
-        </div>
+        </div> */}
       </div>
 
       <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-pink-500/5 to-purple-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none" />

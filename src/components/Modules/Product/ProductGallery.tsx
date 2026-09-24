@@ -6,10 +6,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Maximize2,
-  RotateCw,
   Sparkles,
   Search,
   X,
+  Shuffle,
 } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { IProduct } from "@/types/product.types";
@@ -79,7 +79,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
   const zoomActive = zoomEnabled && isHovering;
 
   return (
-    <section className="space-y-8" aria-label="Product gallery">
+    <section className="space-y-1" aria-label="Product gallery">
       {/* Main Image Container */}
       <div className="relative group">
         <div
@@ -119,7 +119,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
           </div>
 
           {/* Control Buttons */}
-          <div className="absolute top-3 right-3 sm:top-2 sm:right-6 flex flex-col sm:flex-row gap-2 sm:gap-3 z-20">
+          <div className="absolute bottom-3 right-3 sm:bottom-2 sm:right-6 flex flex-col sm:flex-row gap-2 sm:gap-3 z-20">
             {images.length > 1 && (
               <button
                 className={`p-2.5 sm:p-3 rounded-full backdrop-blur-sm transition-all duration-300 shadow-lg ${isRotating
@@ -134,13 +134,13 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
                 title="360° View"
                 type="button"
               >
-                <RotateCw size={14} className={`${isRotating ? "animate-spin" : ""} sm:hidden`} />
-                <RotateCw size={16} className={`${isRotating ? "animate-spin" : ""} hidden sm:block`} />
+                <Shuffle size={14} className={`${isRotating ? "animate-spin" : ""} sm:hidden`} />
+                <Shuffle size={16} className={`${isRotating ? "animate-spin" : ""} hidden sm:block`} />
               </button>
             )}
 
             {/* Zoom Button */}
-            <button
+            {/* <button
               className={`p-2.5 sm:p-3 rounded-full backdrop-blur-sm transition-all duration-300 shadow-lg ${zoomEnabled
                 ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white"
                 : "bg-white/90 text-gray-700 hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-600 hover:text-white border border-gray-200"
@@ -155,10 +155,10 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
             >
               <Search size={14} className={`${zoomEnabled ? "animate-spin" : ""} sm:hidden`} />
               <Search size={16} className={`${zoomEnabled ? "animate-spin" : ""} hidden sm:block`} />
-            </button>
+            </button> */}
 
             {/* Expand Button */}
-            <button
+            {/* <button
               className="p-2.5 sm:p-3 rounded-full backdrop-blur-sm transition-all duration-300 shadow-lg
                 bg-gradient-to-r bg-white/90 text-gray-700 hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-600 hover:text-white border border-gray-200"
               aria-label="Expand image"
@@ -167,7 +167,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
             >
               <Maximize2 size={14} className="sm:hidden" />
               <Maximize2 size={16} className="hidden sm:block" />
-            </button>
+            </button> */}
           </div>
 
           {/* Navigation Arrows */}
@@ -214,9 +214,9 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
         </div>
 
         {/* Premium Badge */}
-        <div className="absolute uppercase -bottom-5 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-500 text-gray-900 px-4 py-1 rounded-full text-xs font-semibold shadow-xl flex items-center gap-2 border-2 border-white">
+        {/* <div className="absolute uppercase -bottom-5 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-500 text-gray-900 px-4 py-1 rounded-full text-xs font-semibold shadow-xl flex items-center gap-2 border-2 border-white">
           Authentic
-        </div>
+        </div> */}
       </div>
 
       {/* Thumbnail Gallery */}
@@ -227,7 +227,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
             <div className="w-16 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
           </div> */}
 
-          <div className="flex gap-4 overflow-x-auto py-2 justify-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-3 overflow-x-auto py-2 justify-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {images.map((src, idx) => (
               <button
                 key={src + idx}

@@ -152,14 +152,14 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
 
                         {/* ✅ reduced padding + reduced heading gap */}
                         <div className="relative max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 -mb-50 sm:-mb-20">
-                            <div className="text-center mb-3 sm:mb-6 mt-2 sm:mt-4">
+                            {/* <div className="text-center mb-3 sm:mb-6 mt-2 sm:mt-4">
                                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">
                                     Why Choose KhushbuWaala?
                                 </h2>
                                 <p className="text-sm sm:text-base text-gray-600 max-w-3xl mx-auto">
                                     Your trusted partner for authentic, premium fragrances with exceptional service
                                 </p>
-                            </div>
+                            </div> */}
 
                             <TrustSignals />
                         </div>

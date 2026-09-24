@@ -50,8 +50,8 @@ export default function HomePage() {
           section="bestSeller"
           linkPath="/shop"
           titleVariant="premium"
-          titleSubtitle="Discover our most loved fragrances"
-          titleIcon={<Crown className="h-6 w-6" />}
+          titleSubtitle=""
+          titleIcon={null}
           titleUnderlineVariant="full"
         />
 

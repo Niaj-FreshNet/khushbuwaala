@@ -138,9 +138,9 @@ export function Navbar() {
             </div>
 
             {/* NAV: Mobile uses 3-column grid (menu / centered logo / icons). Desktop uses flex. */}
-            <nav className="mx-auto w-full max-w-screen-xl px-2 sm:px-4 lg:px-8" aria-label="Main navigation">
+            <nav className="mx-auto w-full px-2 sm:px-4 lg:px-8" aria-label="Main navigation">
               {/* Mobile / Tablet (below lg) */}
-              <div className="lg:hidden grid grid-cols-[auto_1fr_auto] items-center gap-2 h-16 sm:h-18">
+              <div className="lg:hidden grid grid-cols-[auto_1fr_auto] items-center gap-2 h-12 sm:h-14">
                 {/* Left: Menu */}
                 <div className="flex items-center">
                   <Button
@@ -223,7 +223,7 @@ export function Navbar() {
               </div>
 
               {/* Desktop (lg+) */}
-              <div className="hidden lg:flex items-center justify-between gap-6 h-20">
+              <div className="hidden lg:flex items-center justify-between gap-6 h-14">
                 {/* Left: Logo */}
                 <div className="flex items-center flex-shrink-0">
                   <Link
@@ -383,6 +383,22 @@ export function Navbar() {
                     </div>
                   </Button>
 
+                  <Link href="/track-order">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="relative h-11 w-11 hover:bg-gradient-to-r hover:from-purple-50 hover:to-violet-50 hover:text-purple-600 transition-all duration-300 rounded-xl group"
+                      aria-label="Track your order"
+                      title="Track your order status"
+                    >
+                      <Navigation className="h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:animate-bounce z-10" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-100/50 to-violet-100/50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300" />
+                      <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-purple-200/30 to-transparent animate-shimmer" />
+                      </div>
+                    </Button>
+                  </Link>
+
                   <Link href="/wishlist">
                     <Button
                       variant="ghost"
@@ -430,22 +446,6 @@ export function Navbar() {
                       </div>
                     )}
                   </Button>
-
-                  <Link href="/track-order">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="relative h-11 w-11 hover:bg-gradient-to-r hover:from-purple-50 hover:to-violet-50 hover:text-purple-600 transition-all duration-300 rounded-xl group"
-                      aria-label="Track your order"
-                      title="Track your order status"
-                    >
-                      <Navigation className="h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:animate-bounce z-10" />
-                      <div className="absolute inset-0 bg-gradient-to-r from-purple-100/50 to-violet-100/50 rounded-xl scale-0 group-hover:scale-100 transition-transform duration-300" />
-                      <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-purple-200/30 to-transparent animate-shimmer" />
-                      </div>
-                    </Button>
-                  </Link>
 
                   <Link href="/my-account">
                     <Button

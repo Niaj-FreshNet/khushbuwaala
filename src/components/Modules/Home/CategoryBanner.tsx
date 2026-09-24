@@ -30,14 +30,14 @@ export function CategoryBanner() {
   ]
 
   return (
-    <section className="py-1 sm:py-2" aria-labelledby="categories-heading">
-      <div className="px-4">
+    <section className="pt-1 sm:pt-2 pb-0 sm:pb-0" aria-labelledby="categories-heading">
+      <div className="px-0">
         <SectionTitle
           title="Shop by Categories"
-          subtitle="Explore our diverse range of exquisite fragrances"
-          underlineWidth="w-48"
-          className="mb-4"
-          variant="modern"
+          subtitle=""
+          // className="mb-4"
+          variant="premium"
+          underlineVariant="full"
         />
       </div>
 

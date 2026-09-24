@@ -48,13 +48,12 @@ export function ProductCarouselClient({
   const wrapRef = useRef<HTMLDivElement | null>(null)
 
   return (
-    <section ref={wrapRef} className="mx-auto w-full max-w-7xl px-3 sm:px-4 lg:px-6 py-2">
+    <section ref={wrapRef} className="mx-auto w-full max-w-7xl px-0 sm:px-4 lg:px-6">
       <SectionTitle
         title={title}
         subtitle={titleSubtitle}
         variant={titleVariant}
         icon={titleIcon}
-        underlineWidth={titleUnderlineWidth}
         animated={titleAnimated}
         showDecorations={titleShowDecorations}
         underlineVariant={titleUnderlineVariant}
