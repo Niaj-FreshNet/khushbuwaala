@@ -4,13 +4,13 @@ import { CategoryGridClient } from "./CategoryGridClient"
 export function CategoryBanner() {
   const categories = [
     {
-      CategoryName: "Inspired Perfume Oil",
-      CategoryImage: "/images/inspired-category.jpg",
-      CategoryLink: "/inspired-perfume-oil",
-      description: "High-quality inspired perfume oils that capture the essence of luxury fragrances.",
+      CategoryName: "Organic Attar",
+      CategoryImage: "/images/natural-category.jpg",
+      CategoryLink: "/organic-attar",
+      description: "Pure natural attar and organic fragrances, crafted from the finest natural ingredients.",
     },
     {
-      CategoryName: "Oriental & Arabian Attar",
+      CategoryName: "Oriental Collections",
       CategoryImage: "/images/oriental-category.jpg",
       CategoryLink: "/oriental-attar",
       description: "Authentic oriental and Arabian attar, rich in tradition and exotic aromas.",
@@ -22,27 +22,35 @@ export function CategoryBanner() {
       description: "Premium artificial oud fragrances, offering deep and captivating woody notes.",
     },
     {
-      CategoryName: "Organic Attar",
-      CategoryImage: "/images/natural-category.jpg",
-      CategoryLink: "/organic-attar",
-      description: "Pure natural attar and organic fragrances, crafted from the finest natural ingredients.",
+      CategoryName: "Inspired Perfume Oil",
+      CategoryImage: "/images/inspired-category.jpg",
+      CategoryLink: "/inspired-perfume-oil",
+      description: "High-quality inspired perfume oils that capture the essence of luxury fragrances.",
+    },
+    {
+      CategoryName: "Brand Perfumes",
+      CategoryImage: "/images/brand-perfume-category.jpg",
+      CategoryLink: "/brand-perfumes",
+      description: "Designer Perfumes from Popular Brands.",
+    },
+    {
+      CategoryName: "Niche Perfumes",
+      CategoryImage: "/images/niche-perfume-category.jpg",
+      CategoryLink: "/niche-perfumes",
+      description: "Our In-house Perfume Creations.",
     },
   ]
 
   return (
-    <section className="pt-1 sm:pt-2 pb-0 sm:pb-0" aria-labelledby="categories-heading">
+    <section className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-1 sm:px-2 lg:px-3" aria-labelledby="categories-heading">
       <div className="px-0">
         <SectionTitle
           title="Shop by Categories"
-          subtitle=""
-          // className="mb-4"
           variant="premium"
-          underlineVariant="full"
         />
       </div>
 
-      <div className="max-w-7xl mx-auto">
-        {/* ✅ Client component handles motion + rendering */}
+      <div className="w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] mx-auto">        {/* ✅ Client component handles motion + rendering */}
         <CategoryGridClient categories={categories} />
       </div>
     </section>

@@ -107,7 +107,7 @@ export function SectionTitle({
             />
           </div>
 
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-50/30 to-transparent blur-3xl opacity-50" />
+          <div className="absolute inset-0 bg-linear-to-r from-transparent via-red-50/30 to-transparent blur-3xl opacity-50" />
         </>
       )}
 
@@ -143,7 +143,11 @@ export function SectionTitle({
             </>
           )}
 
-          {title}
+          <p
+            className="mb-2"
+          >
+            {title}
+          </p>
 
           {/* {variant === "modern" && (
             <span className="absolute inset-0 text-red-100 transform translate-x-1 translate-y-1 -z-10">
@@ -151,12 +155,11 @@ export function SectionTitle({
             </span>
           )} */}
         </h2>
-
+        
         {subtitle && (
           <p
             className={cn(
               variant === "premium" ? "text-gray-200" : "text-gray-600",
-              /* ◄◄ REDUCED: mb-4 -> mb-1.5 */
               "text-md md:text-lg mb-1.5 max-w-2xl mx-auto",
               animated && !reduce
                 ? cn(
@@ -212,7 +215,7 @@ export function SectionTitle({
               </Separator> */}
 
               {underlineVariant === "full" && (
-                <div className="absolute inset-x-0 -bottom-1 h-4 bg-gradient-to-r from-red-400/50 via-pink-400/50 to-purple-400/50 blur-md opacity-50 rounded-full" />
+                <div className="absolute inset-x-0 -bottom-1 h-4 bg-linear-to-r from-red-400/50 via-pink-400/50 to-purple-400/50 blur-md opacity-50 rounded-full" />
               )}
             </div>
           </div>
@@ -243,7 +246,7 @@ export function SectionTitle({
         </div> */}
       </div>
 
-      <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-pink-500/5 to-purple-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute inset-0 bg-linear-to-r from-red-500/5 via-pink-500/5 to-purple-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
     </div>
   );
 }

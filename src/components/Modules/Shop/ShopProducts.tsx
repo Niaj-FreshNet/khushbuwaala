@@ -627,18 +627,15 @@ export function ShopProducts(props: ShopProductProps) {
       <div className="relative">
         <div
           className={[
-            `grid gap-2 sm:gap-3 md:gap-4 ${gridColsClass}`,
+            `grid gap-2 sm:gap-3 md:gap-4 items-start ${gridColsClass}`, // 👈 Added items-start here
             isBusy ? "opacity-60" : "opacity-100",
             "transition-opacity duration-200",
           ].join(" ")}
         >
           {products.slice(0, visibleProductsCount).map((product) => (
             <ProductCard
-              className="py-0 px-0 sm:px-0"
               key={product.id}
               product={product}
-              layout={columns === 1 ? "list" : "grid"}
-              showDescription={columns === 1}
               onQuickView={() => onQuickView(product)}
             />
           ))}

@@ -55,6 +55,8 @@ function useHideOnScroll() {
 
 export default function BottomBar() {
   const pathname = usePathname()
+  if (pathname.startsWith("/product/")) return null;
+  
   const isMobileDevice = useIsMobileUA()
   const isVisible = useHideOnScroll()
   const { user } = useAuth()

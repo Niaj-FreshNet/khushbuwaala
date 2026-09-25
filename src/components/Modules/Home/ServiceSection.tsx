@@ -12,38 +12,36 @@ export function ServicesSection() {
       title: "Fast Delivery",
       description: "Free delivery on orders over 1000 BDT (selected areas).",
       icon: <Package className="h-6 w-6" />,
-      footer: "Quick dispatch • Safe packaging • Real-time order updates",
     },
     {
       title: "Support 24/7",
       description: "Chat or call anytime — we’re always here to help.",
       icon: <LifeBuoy className="h-6 w-6" />,
-      footer: "Friendly assistance • Fast response • Customer-first service",
     },
     {
       title: "Easy Exchange",
       description: "Hassle-free exchange within 7 days (terms apply).",
       icon: <RefreshCcw className="h-6 w-6" />,
-      footer: "Simple process • Transparent policy • Stress-free experience",
     },
     {
       title: "Secure Payment",
       description: "Trusted checkout with encrypted transactions.",
       icon: <Lock className="h-6 w-6" />,
-      footer: "Encrypted checkout • Trusted gateways • Safe transactions",
     },
   ]
 
   return (
-    <section className="py-14 px-4" aria-labelledby="services-heading">
+    <section
+      className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-6 lg:px-8"
+      aria-labelledby="services-heading"
+    >
       <SectionTitle
         title="Why Choose KhushbuWaala"
-        underlineWidth="w-52"
-        className="mb-8"
-        subtitle="Premium fragrances, authentic sources, and service you can trust."
+        className="mt-6 sm:mt-8 lg:mt-10 mb-2 sm:mb-4"
       />
 
-      <div className="max-w-screen-xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Grid: Removed max-w-7xl so it fills the outer container smoothly */}
+      <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-2 lg:gap-3">
         {services.map((service, index) => (
           <motion.div
             key={index}
@@ -52,30 +50,24 @@ export function ServicesSection() {
             viewport={{ once: true, amount: 0.2 }}
             transition={reduce ? undefined : { duration: 0.5, ease: "easeOut", delay: index * 0.06 }}
             whileHover={reduce ? undefined : { y: -4 }}
-            className="group rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow"
+            className="group rounded-lg border border-emerald-200 bg-white shadow-xs hover:shadow-md transition-shadow"
           >
-            <div className="p-5">
-              <div className="flex items-start gap-4">
+            <div className="p-5 flex flex-col justify-between h-full">
+              <div className="flex items-start gap-3.5 sm:gap-4">
                 {/* Icon badge */}
-                <div className="shrink-0 rounded-xl bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100 p-3 text-red-600 group-hover:scale-105 transition-transform">
+                <div className="shrink-0 rounded-xl bg-linear-to-br from-rose-50 to-pink-50 border border-rose-100 p-2.5 sm:p-3 text-emerald-600 group-hover:scale-105 transition-transform">
                   {service.icon}
                 </div>
 
                 <div>
-                  <h3 className="text-base font-semibold text-gray-900">
+                  <h3 className="text-sm  font-semibold text-gray-900 leading-snug">
                     {service.title}
                   </h3>
-                  <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+                  <p className="text-xs text-gray-600 mt-1 leading-relaxed">
                     {service.description}
                   </p>
                 </div>
               </div>
-
-              {/* subtle divider + micro trust */}
-              <div className="mt-5 h-px w-full bg-gradient-to-r from-transparent via-rose-100 to-transparent" />
-              <p className="mt-4 text-xs text-gray-500">
-                {service.footer}
-              </p>
             </div>
           </motion.div>
         ))}
