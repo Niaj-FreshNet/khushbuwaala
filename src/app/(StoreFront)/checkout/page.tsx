@@ -765,31 +765,6 @@ export default function CheckoutPage() {
     nameRef.current?.focus?.();
   }, []);
 
-  // Track whether the site's global bottom bar is visible
-  const [isBottomBarVisible, setIsBottomBarVisible] = useState(true);
-  const lastScrollYRef = useRef(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentY = window.pageYOffset || document.documentElement.scrollTop;
-      const lastY = lastScrollYRef.current;
-
-      // Scrolling down past threshold -> bottom bar hides
-      if (currentY > lastY && currentY > 120) {
-        setIsBottomBarVisible(false);
-      }
-      // Scrolling up -> bottom bar slides back into view
-      else if (currentY < lastY) {
-        setIsBottomBarVisible(true);
-      }
-
-      lastScrollYRef.current = currentY <= 0 ? 0 : currentY;
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const inlineButtonRef = useRef<HTMLDivElement | null>(null);
   const [isInlineButtonVisible, setIsInlineButtonVisible] = useState(false);
 
@@ -827,7 +802,7 @@ export default function CheckoutPage() {
     <StoreContainer>
       {/* Processing Modal Screen */}
       {isBlockingUI && (
-        <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center px-4">
+        <div className="fixed inset-0 z-9999 bg-black/50 backdrop-blur-sm flex items-center justify-center px-4">
           <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl p-6 text-center">
             <div className="mx-auto h-12 w-12 rounded-full bg-amber-50 flex items-center justify-center mb-3">
               <Loader2 className="h-6 w-6 animate-spin text-green-600" />
@@ -854,8 +829,8 @@ export default function CheckoutPage() {
         </div>
       )}
 
-      <div className="bg-[#FBFBFA] pt-4 sm:pt-8 pb-8 sm:pb-12">
-        <div className="container mx-auto px-3 py-6 sm:px-4 max-w-6xl">
+      <div className="bg-[#FBFBFA] pt-4 sm:pt-6 pb-4 sm:pb-8">
+        <div className="container mx-auto px-3 py-2 sm:px-4 max-w-6xl">
 
 
           {/* Header & Trust Badge */}
@@ -1334,7 +1309,7 @@ export default function CheckoutPage() {
                 <Button
                   onClick={handleSubmit}
                   disabled={submitStep !== "idle" && submitStep !== "error"}
-                  className="w-full h-14 text-xl font-extrabold tracking-wide rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20 transition-all hover:scale-[1.005] cursor-pointer"
+                  className="w-full h-14 text-xl font-extrabold tracking-wider rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20 transition-all hover:scale-[1.005] cursor-pointer"
                 >
                   {submitStep !== "idle" && submitStep !== "error" ? (
                     <span className="flex items-center gap-2">
@@ -1491,7 +1466,7 @@ export default function CheckoutPage() {
                   <Button
                     onClick={handleSubmit}
                     disabled={submitStep !== "idle" && submitStep !== "error"}
-                    className="w-full h-12 text-lg sm:text-xl font-extrabold tracking-wide rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-md shadow-green-600/30 transition-all hover:scale-[1.005] cursor-pointer"
+                    className="w-full h-12 text-lg sm:text-xl font-extrabold tracking-wider rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-md shadow-green-600/30 transition-all hover:scale-[1.005] cursor-pointer"
                   >
                     {submitStep !== "idle" && submitStep !== "error" ? (
                       <span className="flex items-center gap-2">
@@ -1512,8 +1487,7 @@ export default function CheckoutPage() {
       {/* Floating Mobile Sticky CTA */}
       <div
         className={cn(
-          "lg:hidden fixed left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 py-2.5 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] transition-all duration-200 ease-out",
-          isBottomBarVisible ? "bottom-16" : "bottom-0",
+          "lg:hidden fixed left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.08)] transition-all duration-200 ease-out bottom-0",
           isInlineButtonVisible
             ? "translate-y-full opacity-0 pointer-events-none invisible"
             : "translate-y-0 opacity-100 pointer-events-auto visible"
@@ -1532,7 +1506,7 @@ export default function CheckoutPage() {
           <Button
             onClick={handleSubmit}
             disabled={submitStep !== "idle" && submitStep !== "error"}
-            className="ml-6 flex-1 h-11 text-lg font-extrabold tracking-wide rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-md shadow-green-600/30 cursor-pointer"
+            className="ml-6 flex-1 h-11 text-lg font-extrabold tracking-wider rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-md shadow-green-600/30 cursor-pointer"
           >
             {submitStep !== "idle" && submitStep !== "error" ? (
               <span className="flex items-center gap-2">

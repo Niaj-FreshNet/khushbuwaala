@@ -56,6 +56,7 @@ function useHideOnScroll() {
 export default function BottomBar() {
   const pathname = usePathname()
   if (pathname.startsWith("/product/")) return null;
+  if (pathname.startsWith("/checkout")) return null;
   
   const isMobileDevice = useIsMobileUA()
   const isVisible = useHideOnScroll()
@@ -128,7 +129,7 @@ export default function BottomBar() {
       <div
         className={cn(
           "fixed lg:hidden left-0 right-0 bottom-0 z-40 pointer-events-none",
-          "h-16 bg-gradient-to-t from-white/75 via-white/25 to-transparent backdrop-blur-[2px] transition-opacity duration-200",
+          "h-16 bg-linear-to-t from-white/75 via-white/25 to-transparent backdrop-blur-[2px] transition-opacity duration-200",
           isVisible ? "opacity-100" : "opacity-0"
         )}
       />
@@ -142,10 +143,10 @@ export default function BottomBar() {
       >
         <div className="relative">
           <div className="absolute inset-0 bg-white/92 backdrop-blur-xl border-t border-gray-200/60 shadow-[0_-12px_28px_-18px_rgba(0,0,0,0.45)]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-50/35 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-gray-50/35 to-transparent" />
 
           <div className="relative max-w-7xl mx-auto px-2">
-            <div className="h-[62px] flex items-center justify-between px-1 pt-1 pb-2">
+            <div className="h-11.5 flex items-center justify-between px-1 pt-2 pb-0">
               {navItems.map((item) => {
                 const active = isActive(item.path)
                 const isCart = item.key === "cart"
@@ -154,7 +155,7 @@ export default function BottomBar() {
                 const tap = "active:scale-[0.97] transition-transform duration-150"
 
                 const ActiveBG =
-                  "bg-gradient-to-b from-red-50 to-white ring-1 ring-red-200 shadow-[0_10px_18px_-14px_rgba(239,68,68,0.65)]"
+                  "bg-gradient-to-b from-emerald-50 to-white ring-1 ring-emerald-200 shadow-[0_10px_18px_-14px_rgba(239,68,68,0.65)]"
 
                 const InactiveBG = "hover:bg-gray-50/80"
 
@@ -162,14 +163,14 @@ export default function BottomBar() {
                   <div
                     className={cn(
                       "relative flex flex-col items-center justify-center",
-                      "w-[74px] rounded-2xl",
-                      "py-2",
+                      "w-18.5 rounded-t-2xl",
+                      "py-1.5",
                       "transition-all duration-200",
                       active ? ActiveBG : InactiveBG
                     )}
                   >
                     {active && (
-                      <span className="pointer-events-none absolute -inset-2 rounded-[22px] bg-red-500/10 blur-md" />
+                      <span className="pointer-events-none absolute -inset-2 rounded-[22px] bg-emerald-500/10 blur-md" />
                     )}
 
                     <div className="relative">
@@ -177,7 +178,7 @@ export default function BottomBar() {
                         className={cn(
                           "h-9 w-9 rounded-xl flex items-center justify-center",
                           "transition-colors duration-200",
-                          active ? "text-red-600" : "text-gray-600 group-hover:text-gray-900"
+                          active ? "text-emerald-600" : "text-gray-600 group-hover:text-gray-900"
                         )}
                       >
                         <div
@@ -198,8 +199,8 @@ export default function BottomBar() {
 
                     <span
                       className={cn(
-                        "mt-0.5 text-[10.5px] leading-none font-semibold tracking-tight",
-                        active ? "text-red-600" : "text-gray-700"
+                        "mt-0 text-[10.5px] leading-none font-semibold tracking-tight",
+                        active ? "text-emerald-600" : "text-gray-700"
                       )}
                     >
                       {item.label}
@@ -207,8 +208,8 @@ export default function BottomBar() {
 
                     <span
                       className={cn(
-                        "mt-1 h-[3px] w-8 rounded-full transition-all duration-200",
-                        active ? "bg-gradient-to-r from-red-500 to-pink-500" : "bg-transparent"
+                        "mt-1 h-0.75 w-8 rounded-full transition-all duration-200",
+                        active ? "bg-linear-to-r from-emerald-500 to-green-500" : "bg-transparent"
                       )}
                     />
                   </div>
