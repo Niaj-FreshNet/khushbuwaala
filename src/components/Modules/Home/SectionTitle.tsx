@@ -45,13 +45,15 @@ export function SectionTitle({
     };
 
     if (variant === "gradient") {
-      base.title = "bg-gradient-to-r from-red-600 via-pink-600 to-purple-600 bg-clip-text text-transparent";
+      base.title =
+        "bg-gradient-to-r from-red-600 via-pink-600 to-purple-600 bg-clip-text text-transparent";
     }
 
     if (variant === "premium") {
-      base.title = "text-white";
-      /* ◄◄ REDUCED: py-6 -> py-2 */
-      base.container = "rounded-none bg-gradient-to-r from-black via-zinc-900 to-black py-2";
+      // ✅ Soft, premium whitish aesthetic with clean dark text
+      base.title = "text-gray-900 font-extrabold tracking-tight";
+      base.container =
+        "rounded-none bg-gradient-to-r from-rose-50/40 via-white to-pink-50/40 border-y border-gray-100/80 py-2";
     }
 
     return base;
@@ -65,21 +67,23 @@ export function SectionTitle({
       widthClass: full ? "w-full" : wide ? "w-64 md:w-80" : "w-36",
       heightClass: "h-1",
       gradientClass: "bg-gradient-to-r from-red-400 via-pink-400 to-purple-400",
-      shadowClass: "shadow-sm",
+      shadowClass: "shadow-xs",
       borderClass: "",
       showSideLines: !full,
     };
   }, [underlineVariant]);
 
   return (
-    /* ◄◄ REDUCED: py-4 -> py-1.5 */
-    <div ref={wrapRef} className={cn("text-center py-1.5 relative overflow-hidden", styles.container, className)}>
+    <div
+      ref={wrapRef}
+      className={cn("text-center py-1.5 relative overflow-hidden", styles.container, className)}
+    >
       {showDecorations && (
         <>
           <div className="absolute inset-0 pointer-events-none">
             <div
               className={cn(
-                "absolute top-4 left-1/4 w-2 h-2 bg-red-400 rounded-full opacity-60",
+                "absolute top-4 left-1/4 w-2 h-2 bg-red-400 rounded-full opacity-50",
                 inView && !reduce && "animate-bounce"
               )}
               style={{ animationDelay: "0.5s" }}
@@ -93,7 +97,7 @@ export function SectionTitle({
             />
             <div
               className={cn(
-                "absolute bottom-6 left-1/3 w-1.5 h-1.5 bg-purple-400 rounded-full opacity-50",
+                "absolute bottom-6 left-1/3 w-1.5 h-1.5 bg-purple-400 rounded-full opacity-40",
                 inView && !reduce && "animate-bounce"
               )}
               style={{ animationDelay: "1.5s" }}
@@ -107,33 +111,27 @@ export function SectionTitle({
             />
           </div>
 
-          <div className="absolute inset-0 bg-linear-to-r from-transparent via-red-50/30 to-transparent blur-3xl opacity-50" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-50/20 to-transparent blur-3xl opacity-40" />
         </>
       )}
 
       <div className="relative z-10">
         <h2
           className={cn(
-            /* ◄◄ REDUCED: mb-3 -> mb-1 */
             "text-2xl md:text-3xl font-bold mb-1 relative",
             styles.title,
             animated && !reduce
               ? cn(
-                "transition-all duration-700 ease-out",
-                inView ? "opacity-100 translate-y-0 blur-0" : "opacity-0 translate-y-3 blur-[6px]"
-              )
+                  "transition-all duration-700 ease-out",
+                  inView ? "opacity-100 translate-y-0 blur-0" : "opacity-0 translate-y-3 blur-[6px]"
+                )
               : "opacity-100"
           )}
         >
           {icon && <span className="inline-flex items-center mr-2 align-middle">{icon}</span>}
 
           {variant === "premium" && (
-            <>
-              {/* <span className="absolute -top-2 -left-2 text-amber-400 opacity-20 text-6xl font-black -z-10">
-                {title.charAt(0)}
-              </span> */}
-              <Sparkles className="absolute -top-1 -right-1 h-6 w-6 text-amber-400 opacity-60 animate-pulse" />
-            </>
+            <Sparkles className="absolute -top-1 -right-1 h-5 w-5 text-amber-500 opacity-70 animate-pulse" />
           )}
 
           {variant === "elegant" && (
@@ -143,29 +141,19 @@ export function SectionTitle({
             </>
           )}
 
-          <p
-            className="mb-2"
-          >
-            {title}
-          </p>
-
-          {/* {variant === "modern" && (
-            <span className="absolute inset-0 text-red-100 transform translate-x-1 translate-y-1 -z-10">
-              {title}
-            </span>
-          )} */}
+          <p className="mb-1">{title}</p>
         </h2>
-        
+
         {subtitle && (
           <p
             className={cn(
-              variant === "premium" ? "text-gray-200" : "text-gray-600",
-              "text-md md:text-lg mb-1.5 max-w-2xl mx-auto",
+              variant === "premium" ? "text-gray-600" : "text-gray-600",
+              "text-sm md:text-base mb-1.5 max-w-2xl mx-auto",
               animated && !reduce
                 ? cn(
-                  "transition-all duration-700 ease-out delay-75",
-                  inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-                )
+                    "transition-all duration-700 ease-out delay-75",
+                    inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+                  )
                 : "opacity-100"
             )}
           >
@@ -173,20 +161,7 @@ export function SectionTitle({
           </p>
         )}
 
-        {/* underline */}
-        {/* ◄◄ REDUCED: mb-2 -> mb-1 */}
         <div className="flex justify-center items-center space-x-4 -mb-1 w-full">
-          {/* {underlineStyles.showSideLines && (
-            <div
-              className={cn(
-                "h-px bg-gradient-to-r from-transparent to-red-300 w-8 md:w-16 origin-left",
-                animated && !reduce
-                  ? cn("transition-transform duration-700 ease-out", inView ? "scale-x-100" : "scale-x-0")
-                  : "scale-x-100"
-              )}
-            />
-          )} */}
-
           <div className={cn("relative", underlineVariant === "full" ? "w-full" : underlineStyles.widthClass)}>
             <div
               className={cn(
@@ -196,57 +171,15 @@ export function SectionTitle({
                   : "opacity-100 scale-x-100"
               )}
             >
-              {/* <Separator
-                className={cn(
-                  "rounded-full relative overflow-hidden",
-                  underlineStyles.heightClass,
-                  underlineStyles.gradientClass,
-                  underlineStyles.shadowClass,
-                  underlineStyles.borderClass,
-                  underlineVariant !== "full" && underlineStyles.widthClass
-                )}
-              >
-                <div
-                  className={cn(
-                    "absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent",
-                    animated && !reduce && "shimmer-sweep motion-reduce:animate-none"
-                  )}
-                />
-              </Separator> */}
-
               {underlineVariant === "full" && (
-                <div className="absolute inset-x-0 -bottom-1 h-4 bg-linear-to-r from-red-400/50 via-pink-400/50 to-purple-400/50 blur-md opacity-50 rounded-full" />
+                <div className="absolute inset-x-0 -bottom-1 h-4 bg-gradient-to-r from-red-400/30 via-pink-400/30 to-purple-400/30 blur-md opacity-40 rounded-full" />
               )}
             </div>
           </div>
-
-          {/* {underlineStyles.showSideLines && (
-            <div
-              className={cn(
-                "h-px bg-gradient-to-l from-transparent to-red-300 w-8 md:w-16 origin-right",
-                animated && !reduce
-                  ? cn("transition-transform duration-700 ease-out", inView ? "scale-x-100" : "scale-x-0")
-                  : "scale-x-100"
-              )}
-            />
-          )} */}
         </div>
-
-        {/* <div
-          className={cn(
-            "flex justify-center space-x-2 transition-opacity duration-700",
-            animated && !reduce ? (inView ? "opacity-100" : "opacity-0") : "opacity-100"
-          )}
-        >
-          <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" style={{ animationDelay: "0s" }} />
-          <div className="w-1.5 h-1.5 bg-pink-400 rounded-full animate-pulse" style={{ animationDelay: "0.3s" }} />
-          <div className="w-1 h-1 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: "0.6s" }} />
-          <div className="w-1.5 h-1.5 bg-pink-400 rounded-full animate-pulse" style={{ animationDelay: "0.9s" }} />
-          <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" style={{ animationDelay: "1.2s" }} />
-        </div> */}
       </div>
 
-      <div className="absolute inset-0 bg-linear-to-r from-red-500/5 via-pink-500/5 to-purple-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-pink-500/5 to-purple-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
     </div>
   );
 }

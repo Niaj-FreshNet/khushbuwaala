@@ -204,7 +204,7 @@ export default function ThankYouPage() {
         return {
           item_id: String(productId),
           item_name: String(it?.product?.name || "Product"),
-          item_brand: "KhushbuWaala",
+          item_brand: "Khushbuwaala",
           item_variant: variantLabel,
           price: Number(it?.price ?? 0),
           quantity: Math.max(1, Number(it?.quantity || 1)),

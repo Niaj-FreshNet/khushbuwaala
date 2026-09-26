@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = {
-  title: "Return & Exchange Policy | KhushbuWaala",
+  title: "Return & Exchange Policy | Khushbuwaala",
   description:
     "Apply for return or exchange within 7 days of receiving your product. View eligibility rules and contact details.",
 };

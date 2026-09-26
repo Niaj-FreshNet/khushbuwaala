@@ -170,7 +170,7 @@ export default function ProductDetailsClient({
             {
               item_id: String((product as any).id || (product as any).slug),
               item_name: String((product as any).name || ""),
-              item_brand: String((product as any).brand || "KhushbuWaala"),
+              item_brand: String((product as any).brand || "Khushbuwaala"),
               item_category: String((product as any).categoryId || ""),
               item_variant: selectedSizeLabel, // ✅ variant
               price: discountedPrice,
@@ -205,7 +205,7 @@ export default function ProductDetailsClient({
           {
             item_id: String((product as any).id || (product as any).slug),
             item_name: String((product as any).name || ""),
-            item_brand: String((product as any).brand || "KhushbuWaala"),
+            item_brand: String((product as any).brand || "Khushbuwaala"),
             item_category: String((product as any).categoryId || ""),
             item_variant: selectedSizeLabel,
             price: discountedPrice,

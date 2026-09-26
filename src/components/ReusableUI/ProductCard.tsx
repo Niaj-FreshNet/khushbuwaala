@@ -184,7 +184,7 @@ export function ProductCard({
           {
             item_id: String(productId),
             item_name: product.name,
-            item_brand: (product as any).brand || "KhushbuWaala",
+            item_brand: (product as any).brand || "Khushbuwaala",
             item_category: (product as any).categoryId || (product as any).category?.categoryName || "product",
             item_variant: selectedSizeLabel,
             price: discountedPrice,
@@ -223,7 +223,7 @@ export function ProductCard({
             {
               item_id: String(productId),
               item_name: product.name,
-              item_brand: (product as any).brand || "KhushbuWaala",
+              item_brand: (product as any).brand || "Khushbuwaala",
               item_category: (product as any).categoryId || (product as any).category?.categoryName || "product",
               item_variant: selectedSizeLabel,
               price: discountedPrice,
@@ -352,7 +352,7 @@ export function ProductCard({
           {/* Discount Badge */}
           {discountPercentLabel && (
             <div className="absolute top-2 left-2 z-10 pointer-events-none">
-              <span className="px-1.5 py-0.5 rounded-md bg-emerald-700 text-white text-[10px] font-bold tracking-tight shadow-xs">
+              <span className="px-1.5 py-0.5 rounded-md bg-white text-green-700 text-[10px] font-bold tracking-tight shadow-xs">
                 {discountPercentLabel}
               </span>
             </div>
@@ -361,7 +361,7 @@ export function ProductCard({
 
         {/* Content Details: Snug spacing, zero dead margins */}
         <div className="px-2 pt-1.5 pb-0 flex flex-col items-center text-center">
-          <h3 className="text-sm sm:text-base font-semibold text-gray-900 line-clamp-1 group-hover:text-emerald-800 transition-colors leading-tight">
+          <h3 className="text-sm sm:text-base font-semibold text-gray-900 line-clamp-1 group-hover:text-black transition-colors leading-tight">
             {product.name}
           </h3>
 
@@ -395,10 +395,10 @@ export function ProductCard({
           <Button
             type="button"
             className={cn(
-              "flex-1 h-7.5 sm:h-8 rounded-lg font-bold text-sm shadow-xs transition-all duration-200 active:scale-[0.98] cursor-pointer",
+              "flex-1 h-7.5 sm:h-9 rounded-lg font-bold text-sm shadow-xs transition-all duration-200 active:scale-[0.98] cursor-pointer",
               isBuyingNow
                 ? "bg-gray-400 cursor-not-allowed text-white"
-                : "bg-linear-to-r from-emerald-700 to-emerald-600 hover:from-emerald-800 hover:to-emerald-700 text-white"
+                : "bg-linear-to-r from-orange-600 via-red-600 to-rose-600 hover:from-orange-700 hover:via-red-700 hover:to-rose-700 text-white"
             )}
             onClick={handleBuyNow}
             disabled={isBuyingNow || isAddingToCart}
@@ -418,7 +418,7 @@ export function ProductCard({
             variant="outline"
             size="icon"
             className={cn(
-              "w-7.5 h-7.5 sm:w-8 sm:h-8 min-w-7.5 min-h-7.5 sm:min-w-8 sm:min-h-8 rounded-lg border-emerald-700/30 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900 transition-all duration-200 active:scale-95 shrink-0 p-0 flex items-center justify-center cursor-pointer",
+              "w-7.5 h-7.5 sm:w-9 sm:h-8 min-w-7.5 min-h-7.5 sm:min-w-8 sm:min-h-8 rounded-lg border-blue-700/30 text-blue-800 hover:bg-blue-50 hover:text-blue-900 transition-all duration-200 active:scale-95 shrink-0 p-0 flex items-center justify-center cursor-pointer",
               isAddingToCart && "bg-emerald-50 cursor-not-allowed"
             )}
             onClick={handleAddToCart}
@@ -429,7 +429,7 @@ export function ProductCard({
             {isAddingToCart ? (
               <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-emerald-700" />
             ) : (
-              <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-blue-200" />
             )}
           </Button>
         </div>

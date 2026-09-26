@@ -40,7 +40,7 @@ export function CarouselSlider() {
     {
       src: home1,
       mobileSrc: homeMobile1,
-      alt: "KhushbuWaala Premium Perfumes",
+      alt: "Khushbuwaala Premium Perfumes",
       primaryText: "Shop Now",
       primaryLink: "/shop",
       secondaryText: "Explore Collections",
@@ -49,7 +49,7 @@ export function CarouselSlider() {
     {
       src: home2,
       mobileSrc: homeMobile2,
-      alt: "KhushbuWaala Attars & Oud",
+      alt: "Khushbuwaala Attars & Oud",
       primaryText: "Explore Collections",
       primaryLink: "/shop",
       secondaryText: "Best Sellers",
@@ -58,7 +58,7 @@ export function CarouselSlider() {
     {
       src: home3,
       mobileSrc: homeMobile3,
-      alt: "KhushbuWaala Attars & Oud",
+      alt: "Khushbuwaala Attars & Oud",
       primaryText: "Best Sellers",
       primaryLink: "/shop",
       secondaryText: "Best Sellers",
@@ -88,7 +88,7 @@ export function CarouselSlider() {
   const goTo = (index: number) => api?.scrollTo(index)
 
   return (
-    <section className="w-full overflow-hidden relative mt-1 sm:mt-2" aria-label="Hero Carousel">
+    <section className="w-full overflow-hidden relative mt-1 sm:mt-2 mb-2 sm:mb-4" aria-label="Hero Carousel">
       <Carousel setApi={setApi} plugins={[plugin.current]} className="w-full">
         <CarouselContent>
           {slides.map((slide, index) => (

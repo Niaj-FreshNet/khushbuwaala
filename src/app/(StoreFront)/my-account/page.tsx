@@ -25,8 +25,10 @@ import {
     ChevronDown,
     ChevronLeft,
     ChevronRight,
+    LogOut,
 } from "lucide-react";
 import { useAuth } from "@/redux/store/hooks/useAuth";
+import { useAppDispatch } from "@/redux/store/hooks";
 import {
     useGetUserProfileQuery,
     useUpdateUserProfileMutation,
@@ -43,6 +45,8 @@ import Link from "next/link";
 import { useGetMyOrdersQuery } from "@/redux/store/api/order/ordersApi";
 import StoreContainer from "@/components/Layout/StoreContainer";
 import { districtAliases, districts } from "../checkout/_components/districts";
+import { logout } from "@/redux/store/features/auth/authSlice";
+import { useLogoutMutation } from "@/redux/store/api/auth/authApi";
 
 type TabType = "current-orders" | "purchase-history" | "edit";
 
@@ -63,7 +67,10 @@ function detectDistrictEnFromText(text: string): string | null {
 
 export default function ProfileClient() {
     const router = useRouter();
+    const dispatch = useAppDispatch();
     const { user: authUser } = useAuth();
+    const [logoutApi, { isLoading: isLoggingOut }] = useLogoutMutation();
+
     const [activeTab, setActiveTab] = useState<TabType>("current-orders");
     const [showPointsInfo, setShowPointsInfo] = useState(false);
 
@@ -222,6 +229,18 @@ export default function ProfileClient() {
             setDistrictSource(null);
         }
     }, [profileForm.address, districtSource, profileForm.district]);
+
+    const handleLogout = async () => {
+        try {
+            await logoutApi({}).unwrap();
+            dispatch(logout());
+            toast.success("Logged out successfully!", { duration: 1000 });
+            router.push("/login");
+        } catch (error) {
+            console.error("Logout API failed:", error);
+            toast.error("Failed to log out. Please try again.");
+        }
+    };
 
     const handleImageFile = (file: File) => {
         if (!file.type.startsWith("image/")) {
@@ -548,83 +567,99 @@ export default function ProfileClient() {
                 {/* 1. Header Identity & Points Card */}
                 <div className="rounded-xl border border-gray-200/80 bg-white p-3.5 sm:p-4 shadow-2xs">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-                        <div className="flex items-center gap-3 w-full sm:w-auto">
-                            {currentUser?.imageUrl ? (
-                                <img
-                                    src={currentUser.imageUrl}
-                                    alt={currentUser?.name || "Customer"}
-                                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover border border-emerald-200 shadow-2xs shrink-0"
-                                />
-                            ) : (
-                                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xl flex items-center justify-center border border-emerald-200 shrink-0">
-                                    {currentUser?.name?.charAt(0).toUpperCase() || "U"}
-                                </div>
-                            )}
-
-                            <div className="min-w-0">
-                                <div className="flex items-center gap-1.5">
-                                    <h1 className="text-sm sm:text-base font-bold text-gray-900 truncate">
-                                        {currentUser?.name || "Customer"}
-                                    </h1>
-                                    <span title="Verified Customer" className="text-emerald-600 shrink-0">
-                                        <ShieldCheck className="w-3.5 h-3.5" />
-                                    </span>
-                                </div>
-                                <p className="text-[11px] text-gray-500 truncate flex items-center gap-1">
-                                    <Mail className="w-3 h-3 text-gray-400 shrink-0" /> {currentUser?.email || "No email"}
-                                </p>
-                                {(currentUser?.phone || currentUser?.contact) && (
-                                    <p className="text-[11px] text-gray-500 truncate flex items-center gap-1">
-                                        <Phone className="w-3 h-3 text-gray-400 shrink-0" /> {currentUser.phone || currentUser.contact}
-                                    </p>
+                        <div className="flex items-center justify-between gap-3 w-full sm:w-auto">
+                            <div className="flex items-center gap-3 w-full sm:w-auto">
+                                {currentUser?.imageUrl ? (
+                                    <img
+                                        src={currentUser.imageUrl}
+                                        alt={currentUser?.name || "Customer"}
+                                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover border border-emerald-200 shadow-2xs shrink-0"
+                                    />
+                                ) : (
+                                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xl flex items-center justify-center border border-emerald-200 shrink-0">
+                                        {currentUser?.name?.charAt(0).toUpperCase() || "U"}
+                                    </div>
                                 )}
+
+                                <div className="min-w-0">
+                                    <div className="flex items-center gap-1.5">
+                                        <h1 className="text-sm sm:text-base font-bold text-gray-900 truncate">
+                                            {currentUser?.name || "Customer"}
+                                        </h1>
+                                        <span title="Verified Customer" className="text-emerald-600 shrink-0">
+                                            <ShieldCheck className="w-3.5 h-3.5" />
+                                        </span>
+                                    </div>
+                                    <p className="text-[11px] text-gray-500 truncate flex items-center gap-1">
+                                        <Mail className="w-3 h-3 text-gray-400 shrink-0" /> {currentUser?.email || "No email"}
+                                    </p>
+                                    {(currentUser?.phone || currentUser?.contact) && (
+                                        <p className="text-[11px] text-gray-500 truncate flex items-center gap-1">
+                                            <Phone className="w-3 h-3 text-gray-400 shrink-0" /> {currentUser.phone || currentUser.contact}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
+
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleLogout}
+                                disabled={isLoggingOut}
+                                className="h-10 px-3 rounded-lg border-rose-200 bg-rose-50/50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 transition-colors gap-1.5 text-xs font-semibold shrink-0"
+                                title="Log out from account"
+                            >
+                                <LogOut className={cn("w-3.5 h-3.5", isLoggingOut && "animate-spin")} />
+                                <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Logout"}</span>
+                            </Button>
                         </div>
 
                         {/* Quick Metrics: Orders & Reward Points */}
-                        <div className="flex items-center gap-4 bg-gray-50/90 px-4 py-2 rounded-lg border border-gray-100 w-full sm:w-auto justify-around shrink-0">
-                            <div className="text-center">
-                                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">Total Orders</span>
-                                <span className="text-sm font-bold text-gray-900">{totalOrders}</span>
-                            </div>
-
-                            <div className="w-px h-6 bg-gray-200" />
-
-                            <div className="text-center relative">
-                                <div className="flex items-center justify-center gap-1">
-                                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Points</span>
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPointsInfo(!showPointsInfo)}
-                                        className="text-gray-400 hover:text-emerald-600 transition-colors p-0.5"
-                                        title="Reward Points Info"
-                                    >
-                                        <Info className="w-3 h-3" />
-                                    </button>
-                                </div>
-                                <div className="flex items-center justify-center gap-0.5 text-sm font-bold text-emerald-700">
-                                    <Sparkles className="w-3 h-3 text-amber-500 fill-amber-400" />
-                                    <span>{totalRewardPoints}</span>
+                        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                            <div className="flex items-center gap-4 bg-gray-50/90 px-4 py-2 rounded-lg border border-gray-100 flex-1 sm:flex-initial justify-around shrink-0">
+                                <div className="text-center">
+                                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">Total Orders</span>
+                                    <span className="text-sm font-bold text-gray-900">{totalOrders}</span>
                                 </div>
 
-                                {showPointsInfo && (
-                                    <div className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 w-64 p-3 bg-white border border-gray-200 rounded-xl shadow-lg z-50 text-left text-xs space-y-1.5 animate-in fade-in zoom-in-95 duration-150">
-                                        <div className="flex items-center justify-between pb-1 border-b border-gray-100 font-bold text-gray-900">
-                                            <span className="flex items-center gap-1 text-emerald-700">
-                                                <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Reward Points
-                                            </span>
-                                            <button onClick={() => setShowPointsInfo(false)} className="text-gray-400 hover:text-gray-600">
-                                                <X className="w-3.5 h-3.5" />
-                                            </button>
-                                        </div>
-                                        <p className="text-[11px] text-gray-600 leading-relaxed">
-                                            You earn <strong>10 Points</strong> for every <strong>৳1,000</strong> spent on delivered & completed orders.
-                                        </p>
-                                        <p className="text-[11px] text-gray-600 leading-relaxed">
-                                            Use your points during checkout to unlock special <strong>discounts, free delivery</strong>, and VIP fragrance offers.
-                                        </p>
+                                <div className="w-px h-6 bg-gray-200" />
+
+                                <div className="text-center relative">
+                                    <div className="flex items-center justify-center gap-1">
+                                        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Points</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPointsInfo(!showPointsInfo)}
+                                            className="text-gray-400 hover:text-emerald-600 transition-colors p-0.5"
+                                            title="Reward Points Info"
+                                        >
+                                            <Info className="w-3 h-3" />
+                                        </button>
                                     </div>
-                                )}
+                                    <div className="flex items-center justify-center gap-0.5 text-sm font-bold text-emerald-700">
+                                        <Sparkles className="w-3 h-3 text-amber-500 fill-amber-400" />
+                                        <span>{totalRewardPoints}</span>
+                                    </div>
+
+                                    {showPointsInfo && (
+                                        <div className="absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mt-2 w-64 p-3 bg-white border border-gray-200 rounded-xl shadow-lg z-50 text-left text-xs space-y-1.5 animate-in fade-in zoom-in-95 duration-150">
+                                            <div className="flex items-center justify-between pb-1 border-b border-gray-100 font-bold text-gray-900">
+                                                <span className="flex items-center gap-1 text-emerald-700">
+                                                    <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Reward Points
+                                                </span>
+                                                <button onClick={() => setShowPointsInfo(false)} className="text-gray-400 hover:text-gray-600">
+                                                    <X className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                            <p className="text-[11px] text-gray-600 leading-relaxed">
+                                                You earn <strong>10 Points</strong> for every <strong>৳1,000</strong> spent on delivered & completed orders.
+                                            </p>
+                                            <p className="text-[11px] text-gray-600 leading-relaxed">
+                                                Use your points during checkout to unlock special <strong>discounts, free delivery</strong>, and VIP fragrance offers.
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -633,8 +668,8 @@ export default function ProfileClient() {
                 {/* 2. Navigation Pills */}
                 <div className="flex items-center gap-1 p-1 rounded-xl bg-gray-100 border border-gray-200/60">
                     {[
-                        { id: "current-orders", label: `Current (${currentOrders.length})`, icon: Package },
-                        { id: "purchase-history", label: `History (${purchaseHistory.length})`, icon: History },
+                        { id: "current-orders", label: `Current Orders (${currentOrders.length})`, icon: Package },
+                        { id: "purchase-history", label: `Order History (${purchaseHistory.length})`, icon: History },
                         { id: "edit", label: "Edit Profile", icon: User },
                     ].map((tab) => (
                         <button
@@ -856,7 +891,7 @@ export default function ProfileClient() {
                                                 value={profileForm.address}
                                                 onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
                                                 placeholder="House, Road, Area details"
-                                                className="text-xs min-h-[56px] py-1.5 bg-white resize-none"
+                                                className="text-xs min-h-14 py-1.5 bg-white resize-none"
                                             />
                                         </div>
 

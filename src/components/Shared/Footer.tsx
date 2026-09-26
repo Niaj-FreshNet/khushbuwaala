@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 const footerStructuredData = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "KhushbuWaala",
+  name: "Khushbuwaala",
   url: "https://khushbuwaala.com",
   logo: "https://khushbuwaala.com/images/khushbuwaala-logo.webp",
   description: "Premium perfumes, oriental attars, and natural fragrances with authentic quality",
@@ -158,7 +158,7 @@ export const Footer = () => {
             <Link href="/" className="inline-block shrink-0">
               <Image
                 src="/images/khushbuwaala.webp"
-                alt="KhushbuWaala - Premium Perfumes"
+                alt="Khushbuwaala - Premium Perfumes"
                 className="h-7 sm:h-9 w-auto object-contain transition-transform duration-200 hover:scale-105"
                 width={110}
                 height={36}
@@ -269,13 +269,13 @@ export const Footer = () => {
       {/* Copyright Bar */}
       <div
         className={cn(
-          "bg-gray-950 text-gray-400 py-2 border-t border-gray-800",
+          "bg-gray-950 text-gray-400 py-1 border-t border-gray-800",
           isCheckoutPage && "hidden md:block"
         )}
         role="contentinfo"
       >
         <div className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-4 sm:px-6 lg:px-8 text-center text-[11px] sm:text-xs">
-          © {new Date().getFullYear()} KhushbuWaala Perfumes. All rights reserved.
+          © {new Date().getFullYear()} Khushbuwaala Perfumes. All rights reserved.
         </div>
       </div>
     </>

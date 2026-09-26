@@ -134,6 +134,27 @@
     font-size: 12px;
     line-height: 1rem;
   }
+
+  /* Universal, clean 1px focus state across all text inputs */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+  textarea,
+  select {
+    outline: none !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):focus,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):focus-visible,
+  textarea:focus,
+  textarea:focus-visible,
+  select:focus,
+  select:focus-visible {
+    outline: none !important;
+    border-color: #10b981 !important;
+    /* Elegant Emerald Green */
+    box-shadow: 0 0 0 1px #10b981 !important;
+    /* Crisp 1px thin stroke */
+  }
 }
 
 /* Enhanced Custom Animations */
@@ -619,11 +640,11 @@
 
 /* Enhanced focus styles for accessibility */
 .focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-white;
+  @apply focus:outline-hidden focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 focus:ring-offset-0;
 }
 
 .focus-ring-inset {
-  @apply focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-inset;
+  @apply focus:outline-hidden focus:ring-1 focus:ring-emerald-500 focus:ring-inset focus:border-emerald-500;
 }
 
 /* Mobile-specific enhancements */

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -11,6 +12,7 @@ import {
   ArrowRight,
   Navigation,
   User,
+  LogIn,
   Star,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -23,18 +25,19 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { NavbarClientWrapper } from "./NavbarClientWrapper"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/redux/store/hooks/useAuth"
 
 const navigationStructuredData = {
   "@context": "https://schema.org",
   "@type": "SiteNavigationElement",
-  name: "KhushbuWaala Main Navigation",
+  name: "Khushbuwaala Main Navigation",
   url: "https://khushbuwaala.com",
   hasPart: [
     {
       "@type": "WebPage",
       name: "Home",
       url: "https://khushbuwaala.com/",
-      description: "KhushbuWaala homepage with featured perfumes and collections",
+      description: "Khushbuwaala homepage with featured perfumes and collections",
     },
     {
       "@type": "WebPage",
@@ -63,7 +66,34 @@ const navigationStructuredData = {
   ],
 }
 
-export function Navbar() {
+interface NavbarProps {
+  notices?: string[]
+  noticeInterval?: number
+}
+
+const defaultNotices = [
+  "Free shipping on orders over ৳1000",
+  "100% Authentic & Long-lasting Fragrances",
+  "Cash on Delivery Available Island-wide",
+]
+
+export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: NavbarProps) {
+  const { user } = useAuth()
+  const [currentNoticeIndex, setCurrentNoticeIndex] = useState(0)
+
+  const accountHref = user ? "/my-account" : "/login"
+  const accountTitle = user ? "My Account" : "Login"
+  const AccountIcon = user ? User : User
+
+  useEffect(() => {
+    if (notices.length > 1) {
+      const intervalId = setInterval(() => {
+        setCurrentNoticeIndex((prevIndex) => (prevIndex + 1) % notices.length)
+      }, noticeInterval)
+      return () => clearInterval(intervalId)
+    }
+  }, [notices, noticeInterval])
+
   const menuItems = [
     {
       label: "Organic Attar",
@@ -115,17 +145,21 @@ export function Navbar() {
             className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur-xl shadow-xs transition-all duration-300"
             role="banner"
           >
-            {/* Announcement Bar */}
-            <div className="relative overflow-hidden bg-linear-to-r from-emerald-800 via-emerald-600 to-emerald-700 px-3 py-0.5 sm:py-1 text-white sm:px-4">
-              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent" />
-              <div className="relative flex items-center justify-center gap-2 text-[11px] sm:text-xs font-medium">
-                <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-pulse text-amber-300" />
-                <span className="hidden sm:inline">
-                  Free shipping on orders over ৳1000
+            {/* Announcement Bar with Notice Rotation */}
+            <div className="relative overflow-hidden bg-linear-to-r from-emerald-800 via-emerald-600 to-emerald-700 px-3 py-0 text-white sm:px-4">
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+              <div className="relative flex items-center justify-center gap-2 text-[11px] sm:text-xs min-h-5 sm:min-h-6">
+                <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 animate-pulse text-amber-300" />
+
+                <span
+                  key={currentNoticeIndex}
+                  className="animate-fade-in truncate tracking-wide text-center"
+                >
+                  {notices[currentNoticeIndex]}
                 </span>
-                <span className="sm:hidden">Free shipping over ৳1000</span>
+
                 <Star
-                  className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-pulse text-amber-300"
+                  className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 animate-pulse text-amber-300"
                   style={{ animationDelay: "0.5s" }}
                 />
               </div>
@@ -159,12 +193,12 @@ export function Navbar() {
                   <Link
                     href="/"
                     className="inline-flex items-center transition-transform hover:scale-105"
-                    title="KhushbuWaala - Premium Perfumes and Attars"
-                    aria-label="KhushbuWaala homepage"
+                    title="Khushbuwaala - Premium Perfumes and Attars"
+                    aria-label="Khushbuwaala homepage"
                   >
                     <Image
                       src="/images/khushbuwaala.webp"
-                      alt="KhushbuWaala"
+                      alt="Khushbuwaala"
                       className="h-7 sm:h-8 w-auto object-contain"
                       width={120}
                       height={34}
@@ -197,7 +231,7 @@ export function Navbar() {
                     aria-label={`Shopping cart (${counts.cart} items)`}
                   >
                     <ShoppingCart className="h-4.5 w-4.5" />
-                    <Badge className="absolute -top-1 -right-1 bg-emerald-700 text-white h-4.5 min-w-4.5 text-[9px] flex items-center justify-center p-0.5 rounded-full border border-white">
+                    <Badge className="absolute -top-1 -right-1 bg-red-500 text-white h-4.5 min-w-4.5 text-[9px] flex items-center justify-center p-0.5 rounded-full border border-white">
                       {counts.cart > 99 ? "99+" : counts.cart}
                     </Badge>
                   </Button>
@@ -211,11 +245,11 @@ export function Navbar() {
                   <Link
                     href="/"
                     className="inline-flex items-center transition-transform hover:scale-105"
-                    title="KhushbuWaala - Premium Perfumes"
+                    title="Khushbuwaala - Premium Perfumes"
                   >
                     <Image
                       src="/images/khushbuwaala.webp"
-                      alt="KhushbuWaala"
+                      alt="Khushbuwaala"
                       className="h-8.5 xl:h-9 w-auto object-contain"
                       width={130}
                       height={38}
@@ -223,7 +257,7 @@ export function Navbar() {
                   </Link>
                 </div>
 
-                {/* Center: Navigation (fluid typography & spacing) */}
+                {/* Center: Navigation */}
                 <div className="flex-1 flex justify-center min-w-0">
                   <ul
                     className="flex items-center justify-center gap-0.5 xl:gap-1.5 text-gray-800 font-semibold text-xs xl:text-sm whitespace-nowrap"
@@ -381,20 +415,20 @@ export function Navbar() {
                     title="Cart"
                   >
                     <ShoppingCart className="h-4 w-4 xl:h-4.5 xl:w-4.5" />
-                    <Badge className="absolute -top-0.5 -right-0.5 bg-emerald-700 text-white text-[9px] h-4 min-w-4 flex items-center justify-center p-0 rounded-full border border-white">
+                    <Badge className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] h-4 min-w-4 flex items-center justify-center p-0 rounded-full border border-white">
                       {counts.cart > 99 ? "99+" : counts.cart}
                     </Badge>
                   </Button>
 
-                  <Link href="/my-account">
+                  <Link href={accountHref}>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="h-9 w-9 rounded-lg hover:bg-gray-100 hover:text-emerald-700 text-gray-700"
-                      aria-label="My Account"
-                      title="My Account"
+                      aria-label={accountTitle}
+                      title={accountTitle}
                     >
-                      <User className="h-4 w-4 xl:h-4.5 xl:w-4.5" />
+                      <AccountIcon className="h-4 w-4 xl:h-4.5 xl:w-4.5" />
                     </Button>
                   </Link>
                 </div>

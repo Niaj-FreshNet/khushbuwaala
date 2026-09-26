@@ -10,7 +10,7 @@ export function CategoryBanner() {
       description: "Pure natural attar and organic fragrances, crafted from the finest natural ingredients.",
     },
     {
-      CategoryName: "Oriental Collections",
+      CategoryName: "Orientals",
       CategoryImage: "/images/oriental-category.jpg",
       CategoryLink: "/oriental-attar",
       description: "Authentic oriental and Arabian attar, rich in tradition and exotic aromas.",
@@ -22,7 +22,7 @@ export function CategoryBanner() {
       description: "Premium artificial oud fragrances, offering deep and captivating woody notes.",
     },
     {
-      CategoryName: "Inspired Perfume Oil",
+      CategoryName: "Perfume Oils",
       CategoryImage: "/images/inspired-category.jpg",
       CategoryLink: "/inspired-perfume-oil",
       description: "High-quality inspired perfume oils that capture the essence of luxury fragrances.",
@@ -42,7 +42,7 @@ export function CategoryBanner() {
   ]
 
   return (
-    <section className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-1 sm:px-2 lg:px-3" aria-labelledby="categories-heading">
+    <section className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-1 sm:px-2 lg:px-3 mb-8 sm:mb-10 lg:mb-12" aria-labelledby="categories-heading">
       <div className="px-0">
         <SectionTitle
           title="Shop by Categories"

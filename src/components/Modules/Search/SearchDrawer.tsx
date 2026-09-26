@@ -10,6 +10,7 @@ import {
   Clock,
   Loader2,
   Sparkles,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -138,16 +139,25 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
     }
   };
 
+  // Navigates to shop with filter sheet auto-opened
+  const handleOpenShopFilter = () => {
+    onClose();
+    const query = selectedCategory && selectedCategory !== "all"
+      ? `?category=${encodeURIComponent(selectedCategory)}&openFilters=true`
+      : `?openFilters=true`;
+    router.push(`/shop${query}`);
+  };
+
   return (
     <Sheet open={visible} onOpenChange={onClose}>
       <SheetContent
         side="right"
-        className="w-[320px] md:w-[540px] flex flex-col p-0 bg-white h-full border-l border-gray-200"
+        className="w-[320px] md:w-135 flex flex-col p-0 bg-white h-full border-l border-gray-200"
       >
         {/* Header */}
-        <SheetHeader className="px-6 py-4 border-b bg-gradient-to-r from-red-50/60 via-pink-50/40 to-white">
+        <SheetHeader className="px-6 py-4 border-b bg-linear-to-r from-red-50/60 via-emerald-50/30 to-white">
           <SheetTitle className="flex items-center gap-3 text-lg font-bold text-gray-900">
-            <div className="p-2 bg-red-100/80 rounded-xl text-red-600">
+            <div className="p-2 bg-blue-100/80 rounded-xl text-blue-600">
               <Search className="h-5 w-5" />
             </div>
             <div className="flex flex-col text-left">
@@ -161,14 +171,14 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
 
         {/* Controls Container */}
         <div className="flex flex-col flex-1 min-h-0">
-          <div className="px-6 py-3 space-y-3 border-b bg-white">
+          <div className="px-6 py-3 space-y-2.5 border-b bg-white">
             {/* Search Input with Live Spinner */}
             <div className="relative group">
               <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
                 {isTypingOrSearching && debouncedSearch ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-red-600" />
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
                 ) : (
-                  <Search className="h-4 w-4 group-focus-within:text-red-600 transition-colors" />
+                  <Search className="h-4 w-4 group-focus-within:text-blue-600 transition-colors" />
                 )}
               </div>
 
@@ -180,7 +190,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="pl-10 pr-10 h-11 border-gray-200 focus:border-red-500 rounded-xl text-sm transition-all bg-gray-50/50 focus:bg-white shadow-none focus:ring-1 focus:ring-red-500"
+                className="pl-10 pr-10 h-10 border-gray-200 focus:border-blue-500 rounded-xl text-sm transition-all bg-gray-50/50 focus:bg-white shadow-none focus:ring-1 focus:ring-red-500"
               />
 
               {searchValue && (
@@ -199,23 +209,40 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
               )}
             </div>
 
-            {/* Category Select */}
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="h-10 border-gray-200 rounded-xl bg-white text-xs font-medium text-gray-700">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="INSPIRED PERFUME OIL">Inspired Perfume Oil</SelectItem>
-                <SelectItem value="ORIENTAL ATTAR">Oriental & Arabian Attar</SelectItem>
-                <SelectItem value="ARTIFICIAL OUD">Artificial Oud</SelectItem>
-                <SelectItem value="GIFTS AND PACKAGES">Gifts & Combo Packages</SelectItem>
-                <SelectItem value="NATURAL ATTAR">Natural Attar</SelectItem>
-                <SelectItem value="ORGANIC ATTAR">Organic Attar</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Category Select & Shop Filter Button Side-by-Side */}
+            <div className="flex items-center gap-2">
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="flex-1 h-8.5! min-h-0! py-0 border-gray-200 rounded-lg bg-white text-xs font-medium text-gray-700 focus:ring-1 focus:ring-emerald-600">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="ORGANIC ATTAR">Organic Attar</SelectItem>
+                  <SelectItem value="NATURAL ATTAR">Natural Collections</SelectItem>
+                  <SelectItem value="ORIENTAL ATTAR">Oriental Collections</SelectItem>
+                  <SelectItem value="ARTIFICIAL OUD">Artificial Oud</SelectItem>
+                  <SelectItem value="BRAND PERFUMES">Brand Perfumes</SelectItem>
+                  <SelectItem value="INSPIRED PERFUME OIL">Inspired Perfume Oil</SelectItem>
+                  <SelectItem value="NICHE PERFUMES">Niche Perfumes</SelectItem>
+                  <SelectItem value="GIFTS AND PACKAGES">Combo Packages</SelectItem>
+                  <SelectItem value="ACCESSORIES">Accessories</SelectItem>
+                </SelectContent>
+              </Select>
 
-            {/* Trending & Recent Searches (Empty State) */}
+              {/* Filter Sheet Shortcut */}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleOpenShopFilter}
+                className="h-8.5! min-h-0! py-0 px-3 rounded-lg border-emerald-600/30 bg-gray-50 hover:bg-emerald-100 text-black text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
+                title="Open Shop Filters"
+              >
+                <SlidersHorizontal className="h-3.5 w-3.5 text-black" />
+                <span>Filters</span>
+              </Button>
+            </div>
+
+            {/* Trending & Recent Searches */}
             {debouncedSearch === "" && (
               <div className="space-y-3 pt-1">
                 <div>
@@ -237,7 +264,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                     {trendingSearches.length > 4 && (
                       <Badge
                         variant="outline"
-                        className="cursor-pointer text-xs py-1 px-2 rounded-lg text-gray-500"
+                        className="cursor-pointer text-xs py-1 px-2 rounded-lg text-gray-500 hover:bg-gray-100"
                         onClick={() => setShowMoreTrending(!showMoreTrending)}
                       >
                         {showMoreTrending ? "Less" : "More..."}
@@ -256,7 +283,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                       <Badge
                         key={search}
                         variant="outline"
-                        className="cursor-pointer text-xs py-1 px-2.5 rounded-lg border-gray-200 text-gray-700 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-all"
+                        className="cursor-pointer text-xs py-0.5 px-2 bg-gray-50 text-gray-700 hover:bg-emerald-100 rounded-md border border-gray-200 hover:border-emerald-200 transition-all"
                         onClick={() => handleTagClick(search)}
                       >
                         {search}
@@ -271,7 +298,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
             {debouncedSearch && (
               <div className="pt-1">
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 mb-2">
-                  <TagIcon className="h-3.5 w-3.5 text-purple-600" />
+                  <TagIcon className="h-3.5 w-3.5 text-emerald-600" />
                   Filter by Notes:
                 </div>
                 <div className="flex flex-wrap gap-1.5">
@@ -279,7 +306,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                     <Badge
                       key={type}
                       variant="secondary"
-                      className="cursor-pointer text-[11px] py-0.5 px-2 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-md border border-purple-100 transition-all"
+                      className="cursor-pointer text-[11px] py-0.5 px-2 bg-gray-50 text-gray-700 hover:bg-emerald-100 rounded-md border border-gray-200 hover:border-emerald-200 transition-all"
                       onClick={() => handleTagClick(type)}
                     >
                       {type}
@@ -288,7 +315,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                   {smellTypes.length > 5 && (
                     <Badge
                       variant="outline"
-                      className="cursor-pointer text-[11px] py-0.5 px-2 rounded-md text-gray-500"
+                      className="cursor-pointer text-[11px] py-0.5 px-2 rounded-md text-gray-500 hover:bg-gray-100"
                       onClick={() => setShowMoreRefine(!showMoreRefine)}
                     >
                       {showMoreRefine ? "Less" : "More..."}
@@ -301,10 +328,9 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
 
           {/* Results Area with Live Status Bar */}
           <div className="flex-1 flex flex-col min-h-0 relative">
-            {/* Live Loading Bar Indicator */}
             {isTypingOrSearching && debouncedSearch && (
-              <div className="absolute top-0 left-0 right-0 h-[2px] z-30 bg-red-100 overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-red-600 to-pink-600 w-2/5 animate-[loadingbar_1s_ease-in-out_infinite]" />
+              <div className="absolute top-0 left-0 right-0 h-0.5 z-30 bg-red-100 overflow-hidden">
+                <div className="h-full bg-linear-to-r from-blue-600 via-purple-600 to-pink-600 w-2/5 animate-[loadingbar_1s_ease-in-out_infinite]" />
               </div>
             )}
 
@@ -312,7 +338,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
               <span className="font-semibold text-gray-700">Results</span>
               <div className="flex items-center gap-1.5">
                 {isTypingOrSearching && debouncedSearch ? (
-                  <span className="flex items-center gap-1 text-[11px] font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
+                  <span className="flex items-center gap-1 text-[11px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
                     <Loader2 className="h-3 w-3 animate-spin" /> Searching...
                   </span>
                 ) : (
@@ -328,8 +354,8 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
               <div className="p-4 space-y-2.5">
                 {debouncedSearch === "" ? (
                   <div className="flex flex-col items-center justify-center text-center py-16 px-4 text-gray-400">
-                    <div className="p-3 bg-gray-100 rounded-full mb-3">
-                      <Sparkles className="h-6 w-6 text-gray-400" />
+                    <div className="p-3 bg-gray-100 rounded-full mb-3 text-emerald-600">
+                      <Sparkles className="h-6 w-6" />
                     </div>
                     <p className="text-sm font-medium text-gray-600">Type above to search</p>
                     <p className="text-xs text-gray-400 mt-1 max-w-[240px]">
@@ -337,21 +363,20 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                     </p>
                   </div>
                 ) : isFetching && products.length === 0 ? (
-                  // Initial Loading Skeletons
                   <div className="space-y-3">
                     {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="flex gap-3 p-3 border border-gray-100 rounded-xl bg-white shadow-sm">
-                        <Skeleton className="w-16 h-20 rounded-lg shrink-0" />
+                      <div key={i} className="flex gap-3 p-3 border border-gray-100 rounded-xl bg-white shadow-xs">
+                        <Skeleton className="w-16 h-20 rounded-lg shrink-0 bg-gray-200" />
                         <div className="flex-1 space-y-2 py-1">
-                          <Skeleton className="h-4 w-3/4" />
-                          <Skeleton className="h-3 w-1/3" />
-                          <Skeleton className="h-3 w-1/2" />
+                          <Skeleton className="h-4 w-3/4 bg-gray-200" />
+                          <Skeleton className="h-3 w-1/3 bg-gray-200" />
+                          <Skeleton className="h-3 w-1/2 bg-gray-200" />
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : isError ? (
-                  <div className="text-center text-red-500 py-12 text-sm">
+                  <div className="text-center text-red-500 py-12 text-sm font-medium">
                     Failed to fetch search results. Please try again.
                   </div>
                 ) : products.length > 0 ? (
@@ -359,7 +384,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                     {products.map((product) => {
                       const accords = product.accords || [];
                       const visibleAccords = accords.slice(0, 2);
-                      const extraCount = accords.length - visibleAccords.length;
+                      const extraCount = Math.max(0, accords.length - visibleAccords.length);
 
                       const basePrice = product.minPrice ?? 0;
                       const hasDiscount = Boolean(product.discount);
@@ -381,8 +406,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                           onClick={onClose}
                           className="block"
                         >
-                          <div className="group flex gap-3.5 p-2.5 border border-gray-100 rounded-xl hover:border-red-200 hover:shadow-sm transition-all bg-white">
-                            {/* Product Thumbnail without obstructive badges */}
+                          <div className="group flex gap-3.5 p-2.5 border border-gray-200 rounded-xl hover:border-gray-400 hover:shadow-xs transition-all bg-white">
                             <div className="relative w-16 h-20 shrink-0 rounded-lg overflow-hidden bg-gray-50 border border-gray-100">
                               <img
                                 src={product.primaryImage || "/placeholder.svg?height=80&width=64"}
@@ -391,13 +415,11 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                               />
                             </div>
 
-                            {/* Details Column */}
                             <div className="flex-1 min-w-0 flex flex-col justify-center space-y-1">
-                              <h4 className="font-semibold text-sm leading-tight text-gray-900 group-hover:text-red-600 transition-colors truncate">
+                              <h4 className="font-semibold text-sm leading-tight text-gray-900 group-hover:text-black transition-colors truncate">
                                 {product.name}
                               </h4>
 
-                              {/* Price + Discount inline */}
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="font-bold text-sm text-gray-900">
                                   ৳{finalPrice}
@@ -407,25 +429,24 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
                                     <span className="text-xs text-gray-400 line-through">
                                       ৳{basePrice}
                                     </span>
-                                    <span className="px-1.5 py-0.2 rounded bg-red-50 text-red-700 text-[10px] font-bold border border-red-200">
+                                    <span className="px-1.5 py-0.2 rounded bg-green-50 text-green-600 text-[10px] font-bold border border-green-200">
                                       {discountBadgeText}
                                     </span>
                                   </>
                                 )}
                               </div>
 
-                              {/* Lightweight Notes */}
                               <div className="flex items-center gap-1 pt-0.5">
                                 {visibleAccords.map((acc: string) => (
                                   <span
                                     key={acc}
-                                    className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 truncate max-w-[90px]"
+                                    className="text-[10px] px-1.5 py-0.5 rounded-md bg-gray-50/70 text-gray-800 border border-gray-200 truncate max-w-[90px]"
                                   >
                                     {acc}
                                   </span>
                                 ))}
                                 {extraCount > 0 && (
-                                  <span className="text-[10px] text-gray-400">
+                                  <span className="text-[10px] text-gray-400 font-medium">
                                     +{extraCount}
                                   </span>
                                 )}

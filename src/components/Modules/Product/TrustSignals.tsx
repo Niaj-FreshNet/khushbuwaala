@@ -131,12 +131,12 @@ const TrustSignals = () => {
         </div>
 
         <p className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-300">
-          ⭐ Most of our growth comes from repeat customers & referrals — thank you for trusting KhushbuWaala.
+          ⭐ Most of our growth comes from repeat customers & referrals — thank you for trusting Khushbuwaala.
         </p>
       </div> */}
 
       {/* Contact Section */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-2 sm:p-4 border border-blue-200">
+      <div className="bg-linear-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-200">
         <div className="text-center">
           <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-2 sm:mb-3">
             Need Help Choosing?
@@ -148,7 +148,7 @@ const TrustSignals = () => {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a
               href="tel:+8801566395807"
-              className="inline-flex items-center justify-center px-6 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors duration-200"
+              className="inline-flex items-center justify-center px-6 py-1.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors duration-200"
             >
               <Phone className="w-5 h-5 mr-2" />
               Call Us
@@ -158,7 +158,7 @@ const TrustSignals = () => {
               href="https://wa.me/8801566395807"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-6 py-2 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors duration-200"
+              className="inline-flex items-center justify-center px-6 py-1.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors duration-200"
             >
               <MessageSquare className="w-5 h-5 mr-2" />
               WhatsApp

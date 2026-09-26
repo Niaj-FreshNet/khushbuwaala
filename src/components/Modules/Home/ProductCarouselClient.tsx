@@ -47,7 +47,7 @@ export function ProductCarouselClient({
   const wrapRef = useRef<HTMLDivElement | null>(null)
 
   return (
-    <section ref={wrapRef} className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-1 sm:px-2 lg:px-3 mb-2 sm:mb-3 lg:mb-4">
+    <section ref={wrapRef} className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-1 sm:px-2 lg:px-3 mb-8 sm:mb-10 lg:mb-12">
       <SectionTitle
         title={title}
         subtitle={titleSubtitle}
@@ -73,8 +73,8 @@ export function ProductCarouselClient({
             ))}
           </CarouselContent>
 
-          <CarouselPrevious className="hidden md:flex -left-4 lg:-left-6" />
-          <CarouselNext className="flex -right-4 lg:-right-6" />
+          <CarouselPrevious className="hidden md:flex w-11 h-11 -left-4 lg:-left-6 bg-white/50 hover:bg-white/70 text-gray-800 backdrop-blur-md border border-gray-200 shadow-lg shadow-black/5 hover:scale-105 active:scale-95 transition-all duration-200" />
+          <CarouselNext className="hidden md:flex w-11 h-11 -right-4 lg:-right-6 bg-white/50 hover:bg-white/70 text-gray-800 backdrop-blur-md border border-gray-200 shadow-lg shadow-black/5 hover:scale-105 active:scale-95 transition-all duration-200" />
         </Carousel>
       </div>
 

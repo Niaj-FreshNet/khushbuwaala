@@ -23,18 +23,18 @@ const notoSerifBengali = Noto_Serif_Bengali({
 
 const GTM_ID = "GTM-KDFMX5QL"
 
-// SEO: Structured Data for KhushbuWaala Navigation (moved from navbar)
+// SEO: Structured Data for Khushbuwaala Navigation (moved from navbar)
 const navigationStructuredData = {
   "@context": "https://schema.org",
   "@type": "SiteNavigationElement",
-  name: "KhushbuWaala Main Navigation",
+  name: "Khushbuwaala Main Navigation",
   url: "https://khushbuwaala.com",
   hasPart: [
     {
       "@type": "WebPage",
       name: "Home",
       url: "https://khushbuwaala.com/",
-      description: "KhushbuWaala homepage with featured perfumes and collections",
+      description: "Khushbuwaala homepage with featured perfumes and collections",
     },
     {
       "@type": "WebPage",
@@ -67,7 +67,7 @@ const navigationStructuredData = {
 const organizationStructuredData = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "KhushbuWaala",
+  name: "Khushbuwaala",
   url: "https://khushbuwaala.com",
   logo: "https://khushbuwaala.com/images/khushbuwaala-logo.webp",
   description:

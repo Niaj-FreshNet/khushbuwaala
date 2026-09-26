@@ -225,7 +225,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
             <div className="relative">
               <Image
                 src="/images/khushbuwaala.webp"
-                alt="KhushbuWaala"
+                alt="Khushbuwaala"
                 className="h-9 w-auto transition-transform duration-300 group-hover:scale-105"
                 width={130}
                 height={36}
@@ -236,7 +236,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
         </div>
 
         {/* 1. Track Order Search Bar (Sticky at Top of Drawer) */}
-        <div className="px-2 pt-0 pb-2 border-b bg-white">
+        <div className="px-2 pt-0 pb-2 -mt-2 border-b bg-white">
           <form onSubmit={handleTrackSubmit} className="relative flex items-center gap-1.5">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -251,7 +251,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
             <Button
               type="submit"
               size="sm"
-              className="h-4 px-2.5 text-xs font-semibold bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white rounded-lg shadow-xs shrink-0"
+              className="h-8! min-h-0! py-0 px-2.5 text-xs font-semibold bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-md shadow-xs shrink-0"
             >
               Track Order
             </Button>
@@ -272,16 +272,16 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                       <CollapsibleTrigger asChild>
                         <Button
                           variant="ghost"
-                          className="w-full justify-between h-12 px-3 text-left font-medium hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 hover:text-red-600 transition-all duration-200 rounded-xl group"
+                          className="w-full justify-between h-12 px-3 text-left font-medium hover:bg-emerald-50 hover:text-emerald-700 transition-all duration-200 rounded-xl group"
                         >
                           <div className="flex items-center space-x-3">
-                            <div className="p-1.5 rounded-lg bg-gray-100 group-hover:bg-red-100 transition-colors duration-200 text-gray-700 group-hover:text-red-600">
+                            <div className="p-1.5 rounded-lg bg-gray-100 group-hover:bg-emerald-100 transition-colors duration-200 text-emerald-700 group-hover:text-emerald-800">
                               {item.icon}
                             </div>
                             <div className="flex flex-col items-start">
                               <span className="text-sm font-semibold">{item.label}</span>
                               {item.description && (
-                                <span className="text-[11px] text-gray-500 group-hover:text-red-500">
+                                <span className="text-[11px] text-gray-500 group-hover:text-emerald-600">
                                   {item.description}
                                 </span>
                               )}
@@ -289,14 +289,14 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                           </div>
                           <div className="flex items-center space-x-1.5">
                             {item.badge && (
-                              <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-red-100 text-red-700">
+                              <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-emerald-100 text-emerald-800">
                                 {item.badge}
                               </Badge>
                             )}
                             <ChevronRight
                               className={cn(
                                 "h-4 w-4 text-gray-400 transition-transform duration-200",
-                                openSubmenu === item.key && "rotate-90 text-red-600"
+                                openSubmenu === item.key && "rotate-90 text-emerald-700"
                               )}
                             />
                           </div>
@@ -313,28 +313,18 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                               variant="ghost"
                               className={cn(
                                 "w-full justify-start h-11 px-3 text-xs rounded-xl transition-all duration-200 group",
-                                "hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50",
-                                active ? "bg-red-50/80 text-red-700" : "text-gray-700"
+                                "hover:bg-linear-to-r hover:from-emerald-50 hover:to-teal-50",
+                                active ? "bg-emerald-50 text-emerald-800 font-semibold" : "text-gray-700"
                               )}
                               onClick={() => handleNavigation(child.href!)}
                             >
                               <div className="flex items-center gap-2.5 w-full">
-                                {/* <div
-                                  className={cn(
-                                    "h-7 w-7 rounded-lg grid place-items-center border shrink-0 transition-colors duration-200",
-                                    active
-                                      ? "bg-red-100 border-red-200 text-red-700"
-                                      : "bg-white border-gray-200 text-gray-600 group-hover:bg-red-100 group-hover:border-red-200 group-hover:text-red-700"
-                                  )}
-                                >
-                                  {icon}
-                                </div> */}
                                 <div className="flex flex-col items-start leading-tight">
-                                  <span className={cn("font-semibold text-xs", active ? "text-red-700" : "text-gray-800")}>
+                                  <span className={cn("font-semibold text-xs", active ? "text-emerald-800" : "text-gray-800")}>
                                     {child.label}
                                   </span>
                                   {child.description && (
-                                    <span className={cn("text-[10px]", active ? "text-red-600" : "text-gray-500 group-hover:text-red-600")}>
+                                    <span className={cn("text-[10px]", active ? "text-emerald-700" : "text-gray-500 group-hover:text-emerald-700")}>
                                       {child.description}
                                     </span>
                                   )}
@@ -343,8 +333,8 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                                   className={cn(
                                     "ml-auto h-3.5 w-3.5 transition-all duration-200",
                                     active
-                                      ? "text-red-600 translate-x-0.5"
-                                      : "text-gray-300 group-hover:text-red-400 group-hover:translate-x-0.5"
+                                      ? "text-emerald-700 translate-x-0.5"
+                                      : "text-gray-300 group-hover:text-emerald-600 group-hover:translate-x-0.5"
                                   )}
                                 />
                               </div>
@@ -356,24 +346,33 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                   ) : (
                     <Button
                       variant="ghost"
-                      className="w-full justify-start h-12 px-3 font-medium hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 hover:text-red-600 transition-all duration-200 rounded-xl group"
+                      className={cn(
+                        "w-full justify-start h-12 px-3 font-medium transition-all duration-200 rounded-xl group",
+                        "hover:bg-linear-to-r hover:from-emerald-50 hover:to-teal-50 hover:text-emerald-700",
+                        isActive(item.href) ? "bg-emerald-50 text-emerald-800 font-semibold" : "text-gray-800"
+                      )}
                       onClick={() => handleNavigation(item.href!)}
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="p-1.5 rounded-lg bg-gray-100 group-hover:bg-red-100 transition-colors duration-200 text-gray-700 group-hover:text-red-600">
+                        <div className={cn(
+                          "p-1.5 rounded-lg transition-colors duration-200",
+                          isActive(item.href)
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-gray-100 group-hover:bg-emerald-100 text-gray-700 group-hover:text-emerald-700"
+                        )}>
                           {item.icon}
                         </div>
                         <div className="flex flex-col items-start">
                           <div className="flex items-center space-x-2">
                             <span className="text-sm font-semibold">{item.label}</span>
                             {item.badge && (
-                              <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-red-100 text-red-700">
+                              <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-emerald-100 text-emerald-800">
                                 {item.badge}
                               </Badge>
                             )}
                           </div>
                           {item.description && (
-                            <span className="text-[11px] text-gray-500 group-hover:text-red-500">
+                            <span className="text-[11px] text-gray-500 group-hover:text-gray-600">
                               {item.description}
                             </span>
                           )}
@@ -456,7 +455,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
           </div>
 
           <div className="pt-2 text-center text-[10px] text-gray-400">
-            © {new Date().getFullYear()} KhushbuWaala. All rights reserved.
+            © {new Date().getFullYear()} Khushbuwaala. All rights reserved.
           </div>
         </div>
       </SheetContent>

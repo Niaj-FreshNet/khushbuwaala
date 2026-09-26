@@ -176,7 +176,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                 (product as any).id || (product as any).slug || product.name
                             ),
                             item_name: product.name,
-                            item_brand: (product as any).brand || "KhushbuWaala",
+                            item_brand: (product as any).brand || "Khushbuwaala",
                             item_category:
                                 (product as any).categoryId ||
                                 (product as any).category?.categoryName ||
@@ -220,7 +220,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                             (product as any).id || (product as any).slug || product.name
                         ),
                         item_name: product.name,
-                        item_brand: (product as any).brand || "KhushbuWaala",
+                        item_brand: (product as any).brand || "Khushbuwaala",
                         item_category:
                             (product as any).categoryId ||
                             (product as any).category?.categoryName ||

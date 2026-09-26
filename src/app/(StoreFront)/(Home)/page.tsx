@@ -14,14 +14,14 @@ import BannerSection from "@/components/Modules/Home/BannerSection.client"
 export const metadata: Metadata = {
   title: "Home", // This will be combined with the template from root layout
   description:
-    "Discover KhushbuWaala's exquisite collection of premium perfumes, oriental attars, and natural fragrances. Shop best sellers, new arrivals, and more.",
+    "Discover Khushbuwaala's exquisite collection of premium perfumes, oriental attars, and natural fragrances. Shop best sellers, new arrivals, and more.",
   keywords:
-    "perfume, attar, fragrance, KhushbuWaala, homepage, best sellers, new arrivals, inspired perfume, oriental attar, artificial oud, natural collection",
+    "perfume, attar, fragrance, Khushbuwaala, homepage, best sellers, new arrivals, inspired perfume, oriental attar, artificial oud, natural collection",
   alternates: {
     canonical: "https://khushbuwaala.com/", // Canonical URL for the homepage
   },
   openGraph: {
-    title: "KhushbuWaala - Premium Perfumes & Attars | Authentic Fragrances",
+    title: "Khushbuwaala - Premium Perfumes & Attars | Authentic Fragrances",
     description:
       "Your ultimate destination for premium perfumes and attars. Explore our best sellers, new collections, and exclusive offers.",
     url: "https://khushbuwaala.com/",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
         url: "/images/og-image-homepage.jpg", // Specific OG image for homepage
         width: 1200,
         height: 630,
-        alt: "KhushbuWaala Homepage - Premium Perfumes",
+        alt: "Khushbuwaala Homepage - Premium Perfumes",
       },
     ],
   },
@@ -125,6 +125,7 @@ export default function HomePage() {
           <ProductCarouselSection
             title="Inspired Perfume Oils"
             category="6904ac7b7a035c41185d272a"
+            linkPath="/inspired-perfume-oud"
             titleVariant="premium"
           />
         </MountOnView>
@@ -133,7 +134,7 @@ export default function HomePage() {
         <ServicesSection />
 
         {/* Reviews Section */}
-        <ReviewsSection />
+        {/* <ReviewsSection /> */}
 
         {/* Subscribe Section */}
         <SubscribeSection />

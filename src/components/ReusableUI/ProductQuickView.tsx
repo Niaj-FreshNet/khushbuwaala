@@ -227,7 +227,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
           {
             item_id: String((product as any).id || (product as any).slug || product.name),
             item_name: product.name,
-            item_brand: (product as any).brand || "KhushbuWaala",
+            item_brand: (product as any).brand || "Khushbuwaala",
             item_category: (product as any).categoryId || (product as any).category?.categoryName || "product",
             item_variant: selectedSize || "3 ml",
             price: discountedPrice,
@@ -261,7 +261,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
           {
             item_id: String((product as any).id || (product as any).slug || product.name),
             item_name: product.name,
-            item_brand: (product as any).brand || "KhushbuWaala",
+            item_brand: (product as any).brand || "Khushbuwaala",
             item_category: (product as any).categoryId || (product as any).category?.categoryName || "product",
             item_variant: selectedSize || "3 ml",
             price: discountedPrice,

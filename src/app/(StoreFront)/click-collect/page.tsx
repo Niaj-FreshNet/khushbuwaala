@@ -4,8 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Clock, ShoppingBag, CheckCircle } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Click & Collect | KhushbuWaala Perfumes",
-  description: "Order online and pick up your favorite perfumes in-store. Fast, free, and convenient at KhushbuWaala Perfumes.",
+  title: "Click & Collect | Khushbuwaala Perfumes",
+  description: "Order online and pick up your favorite perfumes in-store. Fast, free, and convenient at Khushbuwaala Perfumes.",
   openGraph: {
     title: "Click & Collect – Order Online, Pick Up In-Store",
     description: "Skip shipping. Pick up your order same day or next day.",
@@ -108,7 +108,7 @@ export default function ClickAndCollect() {
               </h3>
               <div className="space-y-2 text-gray-700">
                 <p>
-                  <strong>KhushbuWaala Perfumes – Flagship Store</strong><br />
+                  <strong>Khushbuwaala Perfumes – Flagship Store</strong><br />
                   House 12, Road 5, Block C, Banani, Dhaka 1213
                 </p>
                 <p className="flex items-center gap-2 text-sm">

@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const metadata: Metadata = {
-  title: "Shipping Policy | KhushbuWaala Perfumes",
-  description: "Nationwide & international shipping from KhushbuWaala Perfumes. Delivery in 2-5 days inside Bangladesh.",
+  title: "Shipping Policy | Khushbuwaala Perfumes",
+  description: "Nationwide & international shipping from Khushbuwaala Perfumes. Delivery in 2-5 days inside Bangladesh.",
 };
 
 export default function ShippingPolicy() {

@@ -22,7 +22,7 @@ export function NoticeBar({ heading, notices = [], interval = 3000 }: NoticeBarP
   }, [notices, interval])
 
   return (
-    <div className="bg-gradient-to-r from-red-50 to-pink-50 pt-6 pb-2 px-4 text-center overflow-hidden">
+    <div className="bg-linear-to-r from-red-50 to-pink-50 pt-6 pb-2 px-4 text-center overflow-hidden">
       <div className="max-w-4xl mx-auto">
         <h2 className="text-xl md:text-3xl font-extrabold text-gray-900 mb-0.5 flex items-center justify-center gap-3">
           {heading}

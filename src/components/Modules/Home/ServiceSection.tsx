@@ -36,7 +36,7 @@ export function ServicesSection() {
       aria-labelledby="services-heading"
     >
       <SectionTitle
-        title="Why Choose KhushbuWaala"
+        title="Why Choose Khushbuwaala"
         className="mt-6 sm:mt-8 lg:mt-10 mb-2 sm:mb-4"
       />
 

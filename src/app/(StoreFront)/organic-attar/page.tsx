@@ -11,14 +11,14 @@ import { ShopShell } from "@/components/Modules/Shop/ShopShell";
 
 // Metadata
 export const metadata: Metadata = {
-  title: "Organic Attar Collection | KhushbuWaala",
+  title: "Organic Attar Collection | Khushbuwaala",
   description:
-    "Explore KhushbuWaala's Organic and Authentic Attar collection. Premium fragrances with free nationwide shipping on orders over ৳1000.",
+    "Explore Khushbuwaala's Organic and Authentic Attar collection. Premium fragrances with free nationwide shipping on orders over ৳1000.",
   keywords: [
     "organic attar",
     "authentic attar",
     "premium fragrance",
-    "KhushbuWaala shop",
+    "Khushbuwaala shop",
     "Bangladesh perfume",
   ].join(", "),
   alternates: { canonical: "https://khushbuwaala.com/organic-attar" },
@@ -30,7 +30,7 @@ const shopStructuredData = {
   "@type": "CollectionPage",
   name: "Organic Attar Collection",
   description:
-    "Explore KhushbuWaala's curated collection of organic and authentic attars",
+    "Explore Khushbuwaala's curated collection of organic and authentic attars",
   url: "https://khushbuwaala.com/organic-attar",
   mainEntity: {
     "@type": "ItemList",

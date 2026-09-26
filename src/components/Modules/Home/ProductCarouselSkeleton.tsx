@@ -32,7 +32,7 @@ export function ProductCarouselSkeleton({
       initial={{ opacity: reduce ? 1 : 0 }}
       animate={{ opacity: 1 }}
       transition={reduce ? undefined : { duration: 0.25 }}
-      className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-1 sm:px-2 lg:px-3 mb-2 sm:mb-3 lg:mb-4 overflow-hidden"
+      className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-1 sm:px-2 lg:px-3 mb-8 sm:mb-10 lg:mb-12 overflow-hidden"
     >
       <SectionTitle
         title={title}

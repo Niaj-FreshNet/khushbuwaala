@@ -386,7 +386,7 @@ export default function CheckoutPage() {
           product?.product?.productId;
 
         const productName = p?.name || product?.name || "Product";
-        const brand = p?.brand || "KhushbuWaala";
+        const brand = p?.brand || "Khushbuwaala";
         const category = p?.categoryId || undefined;
         const variant = product?.selectedSize
           ? String(product.selectedSize).trim().toUpperCase()
@@ -838,10 +838,10 @@ export default function CheckoutPage() {
             <div>
               <h1 className="text-xl sm:text-2xl font-black tracking-tight text-gray-900">Complete Your Order</h1>
             </div>
-            <div className="flex items-center gap-4 text-xs font-semibold text-gray-600">
+            {/* <div className="flex items-center gap-4 text-xs font-semibold text-gray-600">
               <span className="flex items-center gap-1"><Truck className="h-4 w-4 text-green-600" /> Nationwide Delivery</span>
               <span className="flex items-center gap-1"><ShieldCheck className="h-4 w-4 text-emerald-600" /> Cash on Delivery</span>
-            </div>
+            </div> */}
           </div>
 
           {/* Mobile Accordion Summary */}

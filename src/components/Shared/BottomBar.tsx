@@ -129,7 +129,7 @@ export default function BottomBar() {
       <div
         className={cn(
           "fixed lg:hidden left-0 right-0 bottom-0 z-40 pointer-events-none",
-          "h-16 bg-linear-to-t from-white/75 via-white/25 to-transparent backdrop-blur-[2px] transition-opacity duration-200",
+          "h-11.5 bg-linear-to-t from-white/75 via-white/25 to-transparent backdrop-blur-[2px] transition-opacity duration-200",
           isVisible ? "opacity-100" : "opacity-0"
         )}
       />

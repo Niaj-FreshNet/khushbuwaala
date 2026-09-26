@@ -15,7 +15,7 @@ export function SubscribeSection() {
         <div className="max-w-xl mx-auto">
           <NewsletterForm />
           <p className="text-xs text-gray-500 text-center">
-            By subscribing, you agree to receive emails from KhushbuWaala. Unsubscribe anytime.
+            By subscribing, you agree to receive emails from Khushbuwaala. Unsubscribe anytime.
           </p>
         </div>
       </div>

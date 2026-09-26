@@ -178,7 +178,7 @@ export default function RelatedProducts({ product }: RelatedProductsProps) {
                 {/* Meta line */}
                 <div className="mt-1 flex items-center justify-between gap-3">
                   <span className="text-xs text-gray-500 line-clamp-1">
-                    KhushbuWaala
+                    Khushbuwaala
                   </span>
                   {/* <span className="text-[11px] font-semibold text-gray-600">
                     {unit ? `${sizeCount}+ sizes • ${unit}` : "Standard size"}
