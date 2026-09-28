@@ -63,8 +63,8 @@ export default function ExchangePolicy() {
                   +8801777152588
                 </a>
                 ,{" "}
-                <a href="tel:+8801566395807" className="text-blue-600 hover:underline">
-                  +8801566395807
+                <a href="tel:+8801777152588" className="text-blue-600 hover:underline">
+                  +8801777152588
                 </a>
                 <br />
                 <strong>Email:</strong>{" "}

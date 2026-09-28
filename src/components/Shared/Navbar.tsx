@@ -9,19 +9,12 @@ import {
   ShoppingCart,
   Menu,
   ChevronDown,
-  ArrowRight,
   Navigation,
   User,
   LogIn,
   Star,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import { NavbarClientWrapper } from "./NavbarClientWrapper"
 import { cn } from "@/lib/utils"
@@ -73,8 +66,18 @@ interface NavbarProps {
 
 const defaultNotices = [
   "Free shipping on orders over ৳1000",
-  "100% Authentic & Long-lasting Fragrances",
-  "Cash on Delivery Available Island-wide",
+  "Premium Quality, Authentic Products",
+  "Cash on Delivery Available",
+]
+
+const categories = [
+  { label: "Organic Attar", href: "/organic-attar" },
+  { label: "Artificial Oud", href: "/artificial-oud" },
+  { label: "Oriental & Arabian Attar", href: "/oriental-attar" },
+  { label: "Inspired Perfume Oil", href: "/inspired-perfume-oil" },
+  { label: "Brand Perfumes", href: "/brand-perfumes" },
+  { label: "Niche Perfumes", href: "/niche-perfumes" },
+  { label: "Accessories", href: "/accessories" },
 ]
 
 export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: NavbarProps) {
@@ -94,44 +97,6 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
     }
   }, [notices, noticeInterval])
 
-  const menuItems = [
-    {
-      label: "Organic Attar",
-      href: "/organic-attar",
-      description: "Pure natural attar and organic fragrance collections",
-    },
-    {
-      label: "Artificial Oud",
-      href: "/artificial-oud",
-      description: "Premium artificial oud fragrances and blends",
-    },
-    {
-      label: "Oriental & Arabian Attar",
-      href: "/oriental-attar",
-      description: "Authentic oriental and Arabian attar collection",
-    },
-    {
-      label: "Inspired Perfume Oil",
-      href: "/inspired-perfume-oil",
-      description: "High-quality inspired perfume oils with long-lasting fragrance",
-    },
-    {
-      label: "Brand Perfumes",
-      href: "/brand-perfumes",
-      description: "Popular Brand Perfumes",
-    },
-    {
-      label: "Niche Perfumes",
-      href: "/niche-perfumes",
-      description: "Our In-house Creations",
-    },
-    {
-      label: "Accessories",
-      href: "/accessories",
-      description: "Perfume-related accessories and gifts",
-    },
-  ]
-
   return (
     <>
       <script
@@ -145,19 +110,17 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
             className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur-xl shadow-xs transition-all duration-300"
             role="banner"
           >
-            {/* Announcement Bar with Notice Rotation */}
-            <div className="relative overflow-hidden bg-linear-to-r from-emerald-800 via-emerald-600 to-emerald-700 px-3 py-0 text-white sm:px-4">
-              <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+            {/* Announcement Bar */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-emerald-800 via-emerald-600 to-emerald-700 px-3 py-0 text-white sm:px-4">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
               <div className="relative flex items-center justify-center gap-2 text-[11px] sm:text-xs min-h-5 sm:min-h-6">
                 <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 animate-pulse text-amber-300" />
-
                 <span
                   key={currentNoticeIndex}
                   className="animate-fade-in truncate tracking-wide text-center"
                 >
                   {notices[currentNoticeIndex]}
                 </span>
-
                 <Star
                   className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 animate-pulse text-amber-300"
                   style={{ animationDelay: "0.5s" }}
@@ -167,12 +130,11 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
 
             {/* NAV: Responsive width system */}
             <nav
-              className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8"
+              className="mx-auto w-full max-w-7xl 2xl:max-w-[1536px] 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8"
               aria-label="Main navigation"
             >
               {/* Mobile / Tablet (< lg) */}
               <div className="lg:hidden grid grid-cols-[auto_1fr_auto] items-center gap-2 h-12 sm:h-13">
-                {/* Left: Menu */}
                 <div className="flex items-center">
                   <Button
                     variant="ghost"
@@ -188,7 +150,6 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
                   </Button>
                 </div>
 
-                {/* Center: Logo */}
                 <div className="flex justify-center">
                   <Link
                     href="/"
@@ -207,7 +168,6 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
                   </Link>
                 </div>
 
-                {/* Right: Search & Cart */}
                 <div className="flex items-center justify-end gap-0.5 sm:gap-1">
                   <Button
                     variant="ghost"
@@ -293,39 +253,34 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
                       </Link>
                     </li>
 
-                    <li role="none">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="px-2.5 xl:px-3.5 py-1.5 h-auto text-xs xl:text-sm font-semibold rounded-lg hover:text-emerald-700 hover:bg-gray-50 data-[state=open]:text-emerald-700"
-                          >
-                            <span className="flex items-center gap-1.5">
-                              CATEGORIES
-                              <ChevronDown className="h-3.5 w-3.5 transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                            </span>
-                          </Button>
-                        </DropdownMenuTrigger>
+                    {/* Smooth Hover & Focus-Accessible Dropdown */}
+                    <li role="none" className="relative group">
+                      <button
+                        type="button"
+                        className="flex items-center gap-1 px-2.5 xl:px-3.5 py-1.5 text-xs xl:text-sm font-semibold rounded-lg text-gray-800 hover:text-emerald-700 focus-visible:text-emerald-700 focus-visible:outline-none group-hover:text-emerald-700 group-hover:bg-emerald-50/50 transition-colors duration-200"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                      >
+                        CATEGORIES
+                        <ChevronDown className="h-3.5 w-3.5 transition-transform duration-300 ease-out group-hover:rotate-180 group-focus-within:rotate-180 text-gray-500 group-hover:text-emerald-700" />
+                      </button>
 
-                        <DropdownMenuContent className="w-72 bg-white/95 backdrop-blur-xl border border-gray-100 shadow-xl rounded-xl p-2 animate-scale-in">
-                          {menuItems.map((item) => (
-                            <DropdownMenuItem key={item.href} asChild>
-                              <Link
-                                href={item.href}
-                                className="block px-3 py-2 text-gray-700 font-medium hover:bg-emerald-50 hover:text-emerald-800 rounded-lg transition-colors cursor-pointer"
-                              >
-                                <div className="flex items-center justify-between text-xs font-semibold">
-                                  <span>{item.label}</span>
-                                  <ArrowRight className="h-3 w-3 opacity-60" />
-                                </div>
-                                <span className="text-[11px] text-gray-400 block mt-0.5 line-clamp-1">
-                                  {item.description}
-                                </span>
-                              </Link>
-                            </DropdownMenuItem>
+                      {/* Dropdown Container */}
+                      <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 opacity-0 translate-y-1.5 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:translate-y-0 group-focus-within:pointer-events-auto transition-all duration-200 ease-out z-50">
+                        <div className="w-56 rounded-xl border border-gray-100 bg-white/95 backdrop-blur-md p-1.5 shadow-[0_12px_30px_-8px_rgba(0,0,0,0.12)] ring-1 ring-black/5">
+                          {categories.map((item) => (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              role="menuitem"
+                              className="group/item flex items-center justify-between rounded-lg px-3 py-2 text-[13px] font-medium text-gray-700 transition-all duration-150 hover:bg-emerald-50 hover:text-emerald-800 focus-visible:bg-emerald-50 focus-visible:text-emerald-800 focus-visible:outline-none"
+                            >
+                              <span>{item.label}</span>
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 opacity-0 -translate-x-1 transition-all duration-150 group-hover/item:opacity-100 group-hover/item:translate-x-0" />
+                            </Link>
                           ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                        </div>
+                      </div>
                     </li>
 
                     <li role="none">

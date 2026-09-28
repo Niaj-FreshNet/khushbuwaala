@@ -26,15 +26,18 @@ import {
     ChevronLeft,
     ChevronRight,
     LogOut,
-    FileText,
 } from "lucide-react";
+import Cookies from "js-cookie";
 import { useAuth } from "@/redux/store/hooks/useAuth";
 import { useAppDispatch } from "@/redux/store/hooks";
+import { logout } from "@/redux/store/features/auth/authSlice";
+import baseApi from "@/redux/store/api/baseApi";
 import {
     useGetUserProfileQuery,
     useUpdateUserProfileMutation,
     useChangePasswordMutation,
 } from "@/redux/store/api/user/userApi";
+import { useGetMyOrdersQuery } from "@/redux/store/api/order/ordersApi";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,10 +46,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { useGetMyOrdersQuery } from "@/redux/store/api/order/ordersApi";
 import StoreContainer from "@/components/Layout/StoreContainer";
 import { districtAliases, districts } from "../checkout/_components/districts";
-import { logout } from "@/redux/store/features/auth/authSlice";
 import { useLogoutMutation } from "@/redux/store/api/auth/authApi";
 
 type TabType = "current-orders" | "purchase-history" | "edit";
@@ -67,110 +68,17 @@ function detectDistrictEnFromText(text: string): string | null {
 }
 
 export default function ProfileClient() {
+    // -----------------------------------------------------------
+    // 1. ALL HOOKS DECLARED FIRST — NO CONDITIONS OR EARLY RETURNS
+    // -----------------------------------------------------------
     const router = useRouter();
     const dispatch = useAppDispatch();
-    const { user: authUser } = useAuth();
-    const [logoutApi, { isLoading: isLoggingOut }] = useLogoutMutation();
+    const { user: authUser, isLoading: authLoading } = useAuth();
 
     const [activeTab, setActiveTab] = useState<TabType>("current-orders");
     const [showPointsInfo, setShowPointsInfo] = useState(false);
-
-    // Independent pagination states for each tab
     const [pageCurrent, setPageCurrent] = useState(1);
     const [pageHistory, setPageHistory] = useState(1);
-
-    // 1. Sync activeTab from URL hash
-    useEffect(() => {
-        const handleHashChange = () => {
-            const hash = window.location.hash.replace("#", "");
-            if (hash === "current-orders" || hash === "purchase-history" || hash === "edit") {
-                setActiveTab(hash as TabType);
-            } else if (!hash) {
-                setActiveTab("current-orders");
-            }
-        };
-
-        handleHashChange();
-        window.addEventListener("hashchange", handleHashChange);
-        return () => window.removeEventListener("hashchange", handleHashChange);
-    }, []);
-
-    const switchTab = (tab: TabType) => {
-        setActiveTab(tab);
-        window.location.hash = tab;
-    };
-
-    // 2. Conditional data fetching
-    const {
-        data: profileData,
-        isLoading: loadingProfile,
-        isFetching: fetchingProfile,
-        refetch: refetchProfile,
-    } = useGetUserProfileQuery(undefined, {
-        skip: !authUser || activeTab !== "edit",
-    });
-
-    const isOrdersTab = activeTab === "current-orders" || activeTab === "purchase-history";
-    const {
-        data: myOrdersResponse,
-        isLoading: loadingOrders,
-        isFetching: fetchingOrders,
-        refetch: refetchOrders,
-    } = useGetMyOrdersQuery(undefined, {
-        skip: !authUser || !isOrdersTab,
-    });
-
-    const [updateUserProfile, { isLoading: updatingProfile }] = useUpdateUserProfileMutation();
-    const [changePassword, { isLoading: changingPassword }] = useChangePasswordMutation();
-
-    const currentUser = (profileData as any)?.data || profileData || authUser;
-
-    const orderPayload = (myOrdersResponse as any)?.data;
-    const orders: any[] = Array.isArray(orderPayload?.data)
-        ? orderPayload.data
-        : Array.isArray((myOrdersResponse as any)?.data)
-            ? (myOrdersResponse as any).data
-            : Array.isArray(myOrdersResponse)
-                ? (myOrdersResponse as any)
-                : [];
-
-    const totalOrders = orderPayload?.totalOrders ?? (myOrdersResponse as any)?.totalOrders ?? orders.length;
-
-    // Filter current vs past orders & calculate points
-    const { currentOrders, purchaseHistory, totalRewardPoints } = useMemo(() => {
-        const current: any[] = [];
-        const history: any[] = [];
-        let completedSpend = 0;
-
-        orders.forEach((order) => {
-            const status = String(order?.status || "").toUpperCase();
-            if (status === "PENDING" || status === "PROCESSING" || status === "CONFIRMED" || status === "SHIPPED") {
-                current.push(order);
-            } else {
-                history.push(order);
-                if (status === "DELIVERED" || status === "COMPLETED") {
-                    completedSpend += Number(order?.amount || 0);
-                }
-            }
-        });
-
-        const points = Math.floor(completedSpend / 100);
-        return { currentOrders: current, purchaseHistory: history, totalRewardPoints: points };
-    }, [orders]);
-
-    // Paginated Slices
-    const paginatedCurrentOrders = useMemo(() => {
-        const start = (pageCurrent - 1) * ORDERS_PER_PAGE;
-        return currentOrders.slice(start, start + ORDERS_PER_PAGE);
-    }, [currentOrders, pageCurrent]);
-
-    const paginatedPurchaseHistory = useMemo(() => {
-        const start = (pageHistory - 1) * ORDERS_PER_PAGE;
-        return purchaseHistory.slice(start, start + ORDERS_PER_PAGE);
-    }, [purchaseHistory, pageHistory]);
-
-    const totalPagesCurrent = Math.ceil(currentOrders.length / ORDERS_PER_PAGE) || 1;
-    const totalPagesHistory = Math.ceil(purchaseHistory.length / ORDERS_PER_PAGE) || 1;
 
     const [profileForm, setProfileForm] = useState({
         name: "",
@@ -202,6 +110,101 @@ export default function ProfileClient() {
     const [showNewPass, setShowNewPass] = useState(false);
     const [showConfirmPass, setShowConfirmPass] = useState(false);
 
+    // Mutations & Queries
+    const [logoutApi, { isLoading: isLoggingOut }] = useLogoutMutation();
+    const [updateUserProfile, { isLoading: updatingProfile }] = useUpdateUserProfileMutation();
+    const [changePassword, { isLoading: changingPassword }] = useChangePasswordMutation();
+
+    const {
+        data: profileData,
+        isLoading: loadingProfile,
+        isFetching: fetchingProfile,
+        refetch: refetchProfile,
+    } = useGetUserProfileQuery(undefined, {
+        skip: !authUser,
+    });
+
+    const isOrdersTab = activeTab === "current-orders" || activeTab === "purchase-history";
+    const {
+        data: myOrdersResponse,
+        isLoading: loadingOrders,
+        isFetching: fetchingOrders,
+        refetch: refetchOrders,
+    } = useGetMyOrdersQuery(undefined, {
+        skip: !authUser || !isOrdersTab,
+    });
+
+    // Hash sync
+    useEffect(() => {
+        const handleHashChange = () => {
+            const hash = window.location.hash.replace("#", "");
+            if (hash === "current-orders" || hash === "purchase-history" || hash === "edit") {
+                setActiveTab(hash as TabType);
+            } else if (!hash) {
+                setActiveTab("current-orders");
+            }
+        };
+
+        handleHashChange();
+        window.addEventListener("hashchange", handleHashChange);
+        return () => window.removeEventListener("hashchange", handleHashChange);
+    }, []);
+
+    // Redirect unauthenticated user to login
+    useEffect(() => {
+        if (!authLoading && !authUser) {
+            router.replace("/login");
+        }
+    }, [authUser, authLoading, router]);
+
+    const currentUser = (profileData as any)?.data || profileData || authUser;
+
+    const orderPayload = (myOrdersResponse as any)?.data;
+    const orders: any[] = Array.isArray(orderPayload?.data)
+        ? orderPayload.data
+        : Array.isArray((myOrdersResponse as any)?.data)
+            ? (myOrdersResponse as any).data
+            : Array.isArray(myOrdersResponse)
+                ? (myOrdersResponse as any)
+                : [];
+
+    const totalOrders = orderPayload?.totalOrders ?? (myOrdersResponse as any)?.totalOrders ?? orders.length;
+
+    // Filter orders & points calculation
+    const { currentOrders, purchaseHistory, totalRewardPoints } = useMemo(() => {
+        const current: any[] = [];
+        const history: any[] = [];
+        let completedSpend = 0;
+
+        orders.forEach((order) => {
+            const status = String(order?.status || "").toUpperCase();
+            if (status === "PENDING" || status === "PROCESSING" || status === "CONFIRMED" || status === "SHIPPED") {
+                current.push(order);
+            } else {
+                history.push(order);
+                if (status === "DELIVERED" || status === "COMPLETED") {
+                    completedSpend += Number(order?.amount || 0);
+                }
+            }
+        });
+
+        const points = Math.floor(completedSpend / 100);
+        return { currentOrders: current, purchaseHistory: history, totalRewardPoints: points };
+    }, [orders]);
+
+    const paginatedCurrentOrders = useMemo(() => {
+        const start = (pageCurrent - 1) * ORDERS_PER_PAGE;
+        return currentOrders.slice(start, start + ORDERS_PER_PAGE);
+    }, [currentOrders, pageCurrent]);
+
+    const paginatedPurchaseHistory = useMemo(() => {
+        const start = (pageHistory - 1) * ORDERS_PER_PAGE;
+        return purchaseHistory.slice(start, start + ORDERS_PER_PAGE);
+    }, [purchaseHistory, pageHistory]);
+
+    const totalPagesCurrent = Math.ceil(currentOrders.length / ORDERS_PER_PAGE) || 1;
+    const totalPagesHistory = Math.ceil(purchaseHistory.length / ORDERS_PER_PAGE) || 1;
+
     useEffect(() => {
         if (currentUser) {
             setProfileForm({
@@ -231,15 +234,32 @@ export default function ProfileClient() {
         }
     }, [profileForm.address, districtSource, profileForm.district]);
 
+    // -----------------------------------------------------------
+    // 2. HANDLER FUNCTIONS
+    // -----------------------------------------------------------
+    const switchTab = (tab: TabType) => {
+        setActiveTab(tab);
+        window.location.hash = tab;
+    };
+
     const handleLogout = async () => {
         try {
             await logoutApi({}).unwrap();
-            dispatch(logout());
-            toast.success("Logged out successfully!", { duration: 1000 });
-            router.push("/login");
         } catch (error) {
             console.error("Logout API failed:", error);
-            toast.error("Failed to log out. Please try again.");
+        } finally {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            Cookies.remove("accessToken", { path: "/" });
+            Cookies.remove("refreshToken", { path: "/" });
+
+            dispatch(logout());
+            dispatch(baseApi.util.resetApiState());
+
+            toast.success("Logged out successfully!", { duration: 1500 });
+
+            router.replace("/login");
+            router.refresh();
         }
     };
 
@@ -402,7 +422,6 @@ export default function ProfileClient() {
         }
     };
 
-    // Reusable Order List Renderer with Pagination Controls
     const renderOrderList = (
         orderList: any[],
         emptyTitle: string,
@@ -445,7 +464,7 @@ export default function ProfileClient() {
                             <div className="flex flex-wrap items-center justify-between gap-1.5 border-b border-gray-100 pb-2">
                                 <div className="flex items-center gap-1.5 flex-wrap">
                                     <span className="text-xs font-bold text-gray-900">
-                                        #{order.invoice || String(order.id || "").slice(-8).toUpperCase()}
+                                        #{order.invoice || order.id.slice(-8).toUpperCase()}
                                     </span>
                                     {getStatusBadge(order.status)}
                                     <Badge
@@ -457,12 +476,12 @@ export default function ProfileClient() {
                                                 : "bg-amber-50 text-amber-700 border-amber-200"
                                         )}
                                     >
-                                        {order.isPaid ? "Paid" : "Cash On Delivery"}
+                                        {order.isPaid ? "Paid" : "COD"}
                                     </Badge>
                                 </div>
 
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-[10px] text-gray-400 flex items-center gap-1 mr-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] text-gray-400 flex items-center gap-1">
                                         <Calendar className="w-3 h-3" />
                                         {new Date(order.orderTime || order.createdAt).toLocaleDateString("en-GB", {
                                             day: "numeric",
@@ -471,20 +490,6 @@ export default function ProfileClient() {
                                         })}
                                     </span>
 
-                                    {/* Invoice Button */}
-                                    <Button
-                                        asChild
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-6 text-[11px] px-2 border-blue-200 bg-blue-50/80 text-blue-700 hover:bg-blue-100 hover:text-blue-900 gap-1 rounded-md"
-                                        title="View Official Invoice"
-                                    >
-                                        <Link href={`/orders/invoice/${order.id}`} target="_blank">
-                                            <FileText className="w-2.5 h-2.5 text-blue-500" /> Invoice
-                                        </Link>
-                                    </Button>
-
-                                    {/* Track Button */}
                                     <Button
                                         asChild
                                         variant="outline"
@@ -544,7 +549,6 @@ export default function ProfileClient() {
                     );
                 })}
 
-                {/* Pagination Controls */}
                 {totalPages > 1 && (
                     <div className="flex items-center justify-between pt-2 px-1">
                         <Button
@@ -576,60 +580,56 @@ export default function ProfileClient() {
         );
     };
 
+    // -----------------------------------------------------------
+    // 3. SAFE RETURN GUARD (After all hooks have evaluated)
+    // -----------------------------------------------------------
+    if (!authLoading && !authUser) {
+        return null;
+    }
+
+    // -----------------------------------------------------------
+    // 4. MAIN JSX
+    // -----------------------------------------------------------
     return (
         <StoreContainer>
             <div className="pt-6 sm:pt-12 pb-4 sm:pb-6 px-3 sm:px-6 lg:px-8 space-y-4 max-w-6xl mx-auto">
                 {/* 1. Header Identity & Points Card */}
                 <div className="rounded-xl border border-gray-200/80 bg-white p-3.5 sm:p-4 shadow-2xs">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-                        <div className="flex items-center sm:items-start justify-between gap-3 w-full sm:w-auto">
-                            <div className="flex items-center gap-3 w-full sm:w-auto">
-                                {currentUser?.imageUrl ? (
-                                    <img
-                                        src={currentUser.imageUrl}
-                                        alt={currentUser?.name || "Customer"}
-                                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover border border-emerald-200 shadow-2xs shrink-0"
-                                    />
-                                ) : (
-                                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xl flex items-center justify-center border border-emerald-200 shrink-0">
-                                        {currentUser?.name?.charAt(0).toUpperCase() || "U"}
-                                    </div>
-                                )}
-
-                                <div className="min-w-0">
-                                    <div className="flex items-center gap-1.5">
-                                        <h1 className="text-sm sm:text-base font-bold text-gray-900 truncate">
-                                            {currentUser?.name || "Customer"}
-                                        </h1>
-                                        <span title="Verified Customer" className="text-emerald-600 shrink-0">
-                                            <ShieldCheck className="w-3.5 h-3.5" />
-                                        </span>
-                                    </div>
-                                    <p className="text-[11px] text-gray-500 truncate flex items-center gap-1">
-                                        <Mail className="w-3 h-3 text-gray-400 shrink-0" /> {currentUser?.email || "No email"}
-                                    </p>
-                                    {(currentUser?.phone || currentUser?.contact) && (
-                                        <p className="text-[11px] text-gray-500 truncate flex items-center gap-1">
-                                            <Phone className="w-3 h-3 text-gray-400 shrink-0" /> {currentUser.phone || currentUser.contact}
-                                        </p>
-                                    )}
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                            {currentUser?.imageUrl ? (
+                                <img
+                                    src={currentUser.imageUrl}
+                                    alt={currentUser?.name || "Customer"}
+                                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover border border-emerald-200 shadow-2xs shrink-0"
+                                />
+                            ) : (
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xl flex items-center justify-center border border-emerald-200 shrink-0">
+                                    {currentUser?.name?.charAt(0).toUpperCase() || "U"}
                                 </div>
-                            </div>
+                            )}
 
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleLogout}
-                                disabled={isLoggingOut}
-                                className="h-8 px-3 rounded-lg border-rose-200 bg-rose-50/50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 transition-colors gap-1.5 text-xs font-semibold shrink-0"
-                                title="Log out from account"
-                            >
-                                <LogOut className={cn("w-3.5 h-3.5", isLoggingOut && "animate-spin")} />
-                                <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Logout"}</span>
-                            </Button>
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                    <h1 className="text-sm sm:text-base font-bold text-gray-900 truncate">
+                                        {currentUser?.name || "Customer"}
+                                    </h1>
+                                    <span title="Verified Customer" className="text-emerald-600 shrink-0">
+                                        <ShieldCheck className="w-3.5 h-3.5" />
+                                    </span>
+                                </div>
+                                <p className="text-[11px] text-gray-500 truncate flex items-center gap-1">
+                                    <Mail className="w-3 h-3 text-gray-400 shrink-0" /> {currentUser?.email || "No email"}
+                                </p>
+                                {(currentUser?.phone || currentUser?.contact) && (
+                                    <p className="text-[11px] text-gray-500 truncate flex items-center gap-1">
+                                        <Phone className="w-3 h-3 text-gray-400 shrink-0" /> {currentUser.phone || currentUser.contact}
+                                    </p>
+                                )}
+                            </div>
                         </div>
 
-                        {/* Quick Metrics: Orders & Reward Points */}
+                        {/* Quick Metrics: Orders & Reward Points & Logout */}
                         <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                             <div className="flex items-center gap-4 bg-gray-50/90 px-4 py-2 rounded-lg border border-gray-100 flex-1 sm:flex-initial justify-around shrink-0">
                                 <div className="text-center">
@@ -676,6 +676,18 @@ export default function ProfileClient() {
                                     )}
                                 </div>
                             </div>
+
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleLogout}
+                                disabled={isLoggingOut}
+                                className="h-10 px-3 rounded-lg border-rose-200 bg-rose-50/50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 transition-colors gap-1.5 text-xs font-semibold shrink-0"
+                                title="Log out from account"
+                            >
+                                <LogOut className={cn("w-3.5 h-3.5", isLoggingOut && "animate-spin")} />
+                                <span className="hidden sm:inline">{isLoggingOut ? "Logging out..." : "Logout"}</span>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -906,7 +918,7 @@ export default function ProfileClient() {
                                                 value={profileForm.address}
                                                 onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
                                                 placeholder="House, Road, Area details"
-                                                className="text-xs min-h-14 py-1.5 bg-white resize-none"
+                                                className="text-xs min-h-[56px] py-1.5 bg-white resize-none"
                                             />
                                         </div>
 

@@ -74,7 +74,7 @@ const organizationStructuredData = {
     "Premium perfumes, oriental attars, and natural fragrances with authentic quality",
   contactPoint: {
     "@type": "ContactPoint",
-    telephone: "+8801566395807",
+    telephone: "+8801777152588",
     contactType: "customer service",
     email: "khushbuwaala@gmail.com",
     availableLanguage: ["English", "Bengali"],

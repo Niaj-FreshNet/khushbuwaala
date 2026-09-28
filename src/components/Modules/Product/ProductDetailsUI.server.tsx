@@ -80,7 +80,7 @@ export default function ProductDetailsUI({
 
   // WhatsApp message generation
   const handleWhatsAppOrder = () => {
-    const phoneNumber = "8801566395807";
+    const phoneNumber = "8801777152588";
     const shareUrl = currentUrl || (typeof window !== "undefined" ? window.location.href : "");
     const effectivePrice = discount ? discountedPrice : currentPrice;
     const totalPrice = effectivePrice * quantity;
@@ -102,7 +102,7 @@ export default function ProductDetailsUI({
   };
 
   const handleCallOrder = () => {
-    window.location.href = "tel:+8801566395807";
+    window.location.href = "tel:+8801777152588";
   };
 
   const handleShareClick = async (platform: "native" | "facebook" | "instagram" | "whatsapp") => {

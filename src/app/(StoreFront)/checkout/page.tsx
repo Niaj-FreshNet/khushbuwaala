@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { useCart } from "@/redux/store/hooks/useCart";
 import { useOrder } from "@/redux/store/hooks/useOrder";
 import StoreContainer from "@/components/Layout/StoreContainer";
-import { useCreateBkashPaymentMutation } from "@/redux/store/api/payment/paymentApi";
+import { useCreateDgepayPaymentMutation } from "@/redux/store/api/payment/paymentApi";
 import { cn } from "@/lib/utils";
 import { useApplyDiscountMutation } from "@/redux/store/api/discount/discountApi";
 import { kwPushAddPaymentInfo, kwPushAddShippingInfo } from "@/lib/Analytics/kwEcom";
@@ -46,7 +46,7 @@ import { MdArrowOutward } from "react-icons/md";
 
 // --- Types ---
 type ShippingMethod = "insideDhaka" | "outsideDhaka";
-type PaymentMethod = "bkash" | "cashOnDelivery";
+type PaymentMethod = "online" | "bkash" | "cashOnDelivery";
 type DiscountLabel =
   | { type: "percentage"; value: number }
   | { type: "fixed"; value: number }
@@ -151,8 +151,7 @@ export default function CheckoutPage() {
   } = useCart();
 
   const { handleCreateOrder, loading: isPlacingOrder } = useOrder();
-  const [createBkashPayment, { isLoading: isBkashRedirecting }] =
-    useCreateBkashPaymentMutation();
+  const [createDgepayPayment, { isLoading: isPaymentRedirecting }] = useCreateDgepayPaymentMutation();
 
   // --- UI States ---
   const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false);
@@ -261,8 +260,7 @@ export default function CheckoutPage() {
     idle: "",
     validating: "Validating your information…",
     creating_order: "Placing your order…",
-    redirecting: paymentMethod === "bkash" ? "Redirecting to bKash…" : "Finishing…",
-    done: "Completed!",
+    redirecting: paymentMethod === "online" ? "Redirecting to payment gateway…" : "Finishing…", done: "Completed!",
     error: "Something went wrong. Please try again.",
   };
 
@@ -284,19 +282,20 @@ export default function CheckoutPage() {
 
   const itemsToDisplay = useMemo(() => {
     if (checkoutMode && checkoutItem) {
+      const item = checkoutItem as any;
       return [
         {
-          ...checkoutItem,
-          cartItemId: checkoutItem.cartItemId ?? checkoutItem.id,
+          ...item,
+          cartItemId: item.cartItemId ?? item.id ?? item._id ?? item.productId,
         },
       ];
     }
     return (Array.isArray(cartItems) ? cartItems : []).map((it: any) => ({
       ...it,
-      cartItemId: it.cartItemId ?? it.id,
+      cartItemId: it.cartItemId ?? it.id ?? it._id ?? it.productId,
     }));
   }, [checkoutMode, checkoutItem, cartItems]);
-
+  
   useEffect(() => {
     if (districtSource === "manual") return;
 
@@ -423,6 +422,7 @@ export default function CheckoutPage() {
 
   const shippingDedupeRef = useRef<string>("");
   const paymentDedupeRef = useRef<string>("");
+  const isNavigatingAwayRef = useRef(false);
 
   useEffect(() => {
     if (!analyticsItems.length) return;
@@ -628,7 +628,7 @@ export default function CheckoutPage() {
 
   const handleSubmit = async () => {
     if (isSubmittingRef.current) return;
-    if (isPlacingOrder || isBkashRedirecting) return;
+    if (isPlacingOrder || isPaymentRedirecting) return;
 
     isSubmittingRef.current = true;
     setSubmitStep("validating");
@@ -679,7 +679,7 @@ export default function CheckoutPage() {
         items,
         amount: total,
         isPaid: false,
-        method: paymentMethod,
+        method: paymentMethod, // "online" | "cashOnDelivery"
         orderSource: "WEBSITE",
         saleType: "SINGLE",
         shippingCost: Number(shippingCost),
@@ -713,13 +713,16 @@ export default function CheckoutPage() {
 
       setSubmitStep("redirecting");
 
+      // 1. Cash on Delivery Flow -> Show Toast & Redirect to Thank-you page
       if (paymentMethod === "cashOnDelivery") {
         clearCart();
         setSubmitStep("done");
+        toast.success("Order placed successfully!"); // 👈 Fired only when order is truly complete!
         router.push(`/thank-you?order=${encodeURIComponent(orderId)}`);
         return;
       }
 
+      // Guard check for payment token
       if (!payToken) {
         clearCart();
         setSubmitStep("done");
@@ -728,20 +731,28 @@ export default function CheckoutPage() {
         return;
       }
 
-      const bkashRes = await createBkashPayment({ orderId, payToken }).unwrap();
+      // 2. DGePay Payment Gateway Flow -> No success toast yet! User must pay on DGePay first
+      if (paymentMethod === "online") {
+        const paymentRes = await createDgepayPayment({ orderId, payToken }).unwrap();
 
-      if (typeof window !== "undefined") {
-        localStorage.setItem("lastBkashOrderId", orderId);
-        localStorage.setItem("lastBkashPaymentID", bkashRes.paymentID);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("lastOrderId", orderId);
+          if (paymentRes.transactionId) {
+            localStorage.setItem("lastTransactionId", paymentRes.transactionId);
+          }
+        }
+
+        clearCart();
+
+        // Flag intentional departure so beforeunload does not pop up
+        isNavigatingAwayRef.current = true;
+        window.location.href = paymentRes.paymentUrl;
+        return;
       }
-
-      clearCart();
-      setSubmitStep("done");
-      window.location.href = bkashRes.bkashURL;
     } catch (err: any) {
-      console.error(err);
+      console.error("Order Submission Error:", err);
       setSubmitStep("error");
-      toast.error(err?.data?.message || "Failed to place order. Please try again.");
+      toast.error(err?.data?.message || err?.message || "Failed to place order. Please try again.");
     } finally {
       isSubmittingRef.current = false;
       if (submitStepRef.current !== "redirecting" && submitStepRef.current !== "done") {
@@ -752,7 +763,8 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
-      if (!isBlockingUI) return;
+      // Only intercept if blocking UI AND not intentionally leaving to the gateway
+      if (!isBlockingUI || isNavigatingAwayRef.current) return;
       e.preventDefault();
       e.returnValue = "";
     };
@@ -1262,21 +1274,21 @@ export default function CheckoutPage() {
                   <label
                     className={cn(
                       "flex items-center gap-3 px-3 py-2 rounded-xl border transition-all cursor-pointer",
-                      paymentMethod === "bkash"
+                      paymentMethod === "online"
                         ? "border-green-700 bg-amber-50/30 ring-0.5 ring-emerald-700"
                         : "border-gray-200 hover:bg-gray-50"
                     )}
                   >
                     <div className="w-4 h-4 min-w-4 min-h-4 shrink-0 flex items-center justify-center">
                       <RadioGroupItem
-                        value="bkash"
+                        value="online"
                         style={{ width: "12px", height: "12px", minWidth: "12px", minHeight: "12px" }}
                         className="rounded-full border-emerald-700 text-emerald-700 data-[state=checked]:border-emerald-700 data-[state=checked]:bg-transparent m-0 [&_svg]:fill-emerald-700 [&_svg]:text-emerald-700"
                       />
                     </div>
                     <div>
-                      <span className="text-xs sm:text-sm font-bold text-gray-900 block">bKash Online Payment</span>
-                      <span className="text-[11px] text-gray-500">Instant direct bKash checkout</span>
+                      <span className="text-xs sm:text-sm font-bold text-gray-900 block">Online Payment</span>
+                      <span className="text-[11px] text-gray-500">Pay with Bkash, Nagad, Rocket, Cards</span>
                     </div>
                   </label>
                 </RadioGroup>

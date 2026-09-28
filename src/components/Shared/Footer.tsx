@@ -20,7 +20,7 @@ const footerStructuredData = {
   description: "Premium perfumes, oriental attars, and natural fragrances with authentic quality",
   contactPoint: {
     "@type": "ContactPoint",
-    telephone: "+8801566395807",
+    telephone: "+8801777152588",
     contactType: "customer service",
     email: "khushbuwaala@gmail.com",
     availableLanguage: ["English", "Bengali"],
@@ -81,8 +81,8 @@ export const Footer = () => {
           external: true,
         },
         {
-          label: "+8801566-395807",
-          href: "tel:+8801566395807",
+          label: "+8801777-152588",
+          href: "tel:+8801777152588",
           icon: <Phone className="h-3.5 w-3.5" />,
           external: true,
         },

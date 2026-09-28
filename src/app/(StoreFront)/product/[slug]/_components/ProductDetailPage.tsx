@@ -81,7 +81,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
 
             {/* Breadcrumbs */}
             <div className="bg-white">
-                <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+                <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 pt-1.5 sm:pt-2.5 pb-0.5 sm:pb-1.5">
                     <Breadcrumbs items={breadcrumbItems} />
                 </div>
             </div>

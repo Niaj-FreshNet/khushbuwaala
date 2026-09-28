@@ -9,6 +9,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { jwtDecode } from 'jwt-decode';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
+import Cookies from 'js-cookie';
 
 import { loginSchema } from '@/schemas/auth.schema';
 import { TUser } from '@/types/auth.types';
@@ -45,11 +46,18 @@ export default function Login() {
 
       const decoded = jwtDecode<TUser>(accessToken);
 
-      // Dispatch before navigating
+      // Save tokens
+      localStorage.setItem('accessToken', accessToken);
+      Cookies.set('accessToken', accessToken);
+
+      // Dispatch immediately to Redux
       dispatch(setUser({ user: decoded, accessToken }));
 
       toast.success('Welcome back!', { duration: 1000 });
-      router.push(redirect || '/');
+
+      // Clear route cache and navigate
+      router.refresh();
+      router.push(redirect || '/my-account');
     } catch (error: any) {
       toast.error(
         error?.data?.message ||
