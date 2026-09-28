@@ -174,7 +174,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${notoSerifBengali.variable}`}
     >
-      {/* <head>
+      <head>
         <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
 
@@ -189,7 +189,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','${GTM_ID}');`,
           }}
         />
-      </head> */}
+      </head>
 
       <body
         className={`min-h-screen text-foreground bg-background font-sans antialiased`}      >
