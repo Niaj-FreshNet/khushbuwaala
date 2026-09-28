@@ -489,7 +489,7 @@ export default function CartPage() {
                     ) : (
                       <div className="flex gap-1.5">
                         <div className="relative flex-1">
-                          <Tag className="absolute left-2.5 top-2/5 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                          <Tag className="absolute left-2.5 top-2/5 sm:top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                           <Input
                             placeholder="Coupon code"
                             value={couponCode}

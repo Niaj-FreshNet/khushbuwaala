@@ -564,10 +564,10 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
               {/* Trust Badges */}
               <div className="flex items-center justify-around pt-0.5 text-[10px] font-semibold text-gray-500">
                 <span className="flex items-center gap-1">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> Genuine Perfumes
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> Genuine Products
                 </span>
                 <span className="flex items-center gap-1">
-                  <Truck className="h-3.5 w-3.5 text-green-600" /> Cash on Delivery
+                  <Truck className="h-3.5 w-3.5 text-green-600" /> Fast Delivery
                 </span>
               </div>
             </div>

@@ -148,7 +148,7 @@ export default async function NewArrivalsPage({
         bannerText="Choose Your Desired Perfume Oil from Our New Arrivals"
         bannerImages={{ desktop: "/images/n111.png", mobile: "/images/n1.webp" }}
         bannerAlt="Banner displaying the newest perfume oil arrivals"
-        noticesHeading="New Arrival Perfume Oils"
+        noticesHeading="New Arrivals"
         initialPage={page}
         categoryName={categoryName}
         specification={specification}

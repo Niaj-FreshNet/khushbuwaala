@@ -338,9 +338,9 @@ export function ShopProducts(props: ShopProductProps) {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1280) {
-        setColumns(4);
+        setColumns(5);
       } else if (window.innerWidth >= 768) {
-        setColumns(3);
+        setColumns(4);
       } else {
         setColumns(2);
       }
@@ -420,7 +420,7 @@ export function ShopProducts(props: ShopProductProps) {
         {isBusy && products.length > 0 && (
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute inset-0 bg-white/35 backdrop-blur-[1px]" />
-            <div className="absolute left-0 right-0 top-0 h-[3px] overflow-hidden rounded-t-xl">
+            <div className="absolute left-0 right-0 top-0 h-0.75 overflow-hidden rounded-t-xl">
               <div className="h-full w-1/2 animate-[loadingbar_1.1s_ease-in-out_infinite] bg-green-700/80" />
             </div>
             <div className="absolute top-4 left-1/2 -translate-x-1/2">
@@ -512,7 +512,7 @@ export function ShopProducts(props: ShopProductProps) {
         </div>
 
         {/* Desktop Columns Toggles */}
-        <div className="hidden md:flex gap-1 bg-gray-50 p-1 rounded-lg shrink-0 border border-gray-100">
+        <div className="hidden lg:flex gap-1 bg-gray-50 p-1 rounded-lg shrink-0 border border-gray-100">
           <Button
             variant="outline"
             size="icon"

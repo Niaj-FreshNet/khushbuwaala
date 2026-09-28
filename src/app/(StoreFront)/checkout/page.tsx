@@ -661,11 +661,16 @@ export default function CheckoutPage() {
             String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
         );
 
+        const originalPrice = Number(matchedVariant?.price ?? productDoc?.price ?? item?.price ?? 0);
+        const selectedPrice = Number(item?.selectedPrice ?? originalPrice);
+
         return {
           cartItemId: item?.cartItemId || item?.id || undefined,
           productId: productDoc?.id || productDoc?._id || item?.productId,
           variantId: item?.variantId || matchedVariant?.id || undefined,
           quantity: Math.max(1, Number(item?.quantity || 1)),
+          price: selectedPrice,
+          originalPrice: originalPrice,
         };
       });
 
@@ -1288,9 +1293,9 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                  <label htmlFor="terms" className="select-none">
+                  <div className="select-none">
                     I agree to the Terms &amp; Conditions and Return Policy
-                  </label>
+                  </div>
 
                   <Link
                     href="/terms-conditions"
@@ -1366,10 +1371,10 @@ export default function CheckoutPage() {
                     <div className="relative flex-1 h-full">
                       <Tag className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                       <Input
-                        placeholder="Discount / Promo code"
+                        placeholder="Coupon code"
                         value={promoCode}
                         onChange={(e) => setPromoCode(e.target.value)}
-                        className="h-full pl-8 text-xs bg-gray-50/60 uppercase placeholder:normal-case placeholder:text-gray-400 border-gray-200"
+                        className="h-full pl-8 text-xs bg-gray-50/60 uppercase placeholder:text-gray-400 border-gray-200"
                       />
                     </div>
                     <Button
@@ -1439,9 +1444,9 @@ export default function CheckoutPage() {
                       />
                     </div>
                     <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                      <label htmlFor="terms" className="select-none">
+                      <div className="select-none">
                         I agree to the Terms &amp; Conditions and Return Policy
-                      </label>
+                      </div>
 
                       <Link
                         href="/terms-conditions"

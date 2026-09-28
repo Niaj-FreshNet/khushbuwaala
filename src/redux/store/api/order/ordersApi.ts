@@ -219,6 +219,14 @@ export const orderApi = baseApi.injectEndpoints({
       query: (query) => `/order/track/${encodeURIComponent(query)}`,
       providesTags: ["Order"],
     }),
+
+    deleteOrder: builder.mutation<ApiResponse<any>, string>({
+      query: (id) => ({
+        url: `/order/delete-order/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Order'],
+    }),
   }),
   overrideExisting: true,
 });
@@ -238,4 +246,5 @@ export const {
   useGetDashboardMetricsQuery,
   useGetWeeklySalesOverviewQuery,
   useLazyTrackOrdersQuery,
+  useDeleteOrderMutation,
 } = orderApi

@@ -26,6 +26,7 @@ import {
     ChevronLeft,
     ChevronRight,
     LogOut,
+    FileText,
 } from "lucide-react";
 import { useAuth } from "@/redux/store/hooks/useAuth";
 import { useAppDispatch } from "@/redux/store/hooks";
@@ -444,7 +445,7 @@ export default function ProfileClient() {
                             <div className="flex flex-wrap items-center justify-between gap-1.5 border-b border-gray-100 pb-2">
                                 <div className="flex items-center gap-1.5 flex-wrap">
                                     <span className="text-xs font-bold text-gray-900">
-                                        #{order.invoice || order.id.slice(-8).toUpperCase()}
+                                        #{order.invoice || String(order.id || "").slice(-8).toUpperCase()}
                                     </span>
                                     {getStatusBadge(order.status)}
                                     <Badge
@@ -456,12 +457,12 @@ export default function ProfileClient() {
                                                 : "bg-amber-50 text-amber-700 border-amber-200"
                                         )}
                                     >
-                                        {order.isPaid ? "Paid" : "COD"}
+                                        {order.isPaid ? "Paid" : "Cash On Delivery"}
                                     </Badge>
                                 </div>
 
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-[10px] text-gray-400 flex items-center gap-1 mr-1">
                                         <Calendar className="w-3 h-3" />
                                         {new Date(order.orderTime || order.createdAt).toLocaleDateString("en-GB", {
                                             day: "numeric",
@@ -470,6 +471,20 @@ export default function ProfileClient() {
                                         })}
                                     </span>
 
+                                    {/* Invoice Button */}
+                                    <Button
+                                        asChild
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-6 text-[11px] px-2 border-blue-200 bg-blue-50/80 text-blue-700 hover:bg-blue-100 hover:text-blue-900 gap-1 rounded-md"
+                                        title="View Official Invoice"
+                                    >
+                                        <Link href={`/orders/invoice/${order.id}`} target="_blank">
+                                            <FileText className="w-2.5 h-2.5 text-blue-500" /> Invoice
+                                        </Link>
+                                    </Button>
+
+                                    {/* Track Button */}
                                     <Button
                                         asChild
                                         variant="outline"
@@ -567,7 +582,7 @@ export default function ProfileClient() {
                 {/* 1. Header Identity & Points Card */}
                 <div className="rounded-xl border border-gray-200/80 bg-white p-3.5 sm:p-4 shadow-2xs">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-                        <div className="flex items-center justify-between gap-3 w-full sm:w-auto">
+                        <div className="flex items-center sm:items-start justify-between gap-3 w-full sm:w-auto">
                             <div className="flex items-center gap-3 w-full sm:w-auto">
                                 {currentUser?.imageUrl ? (
                                     <img
@@ -606,7 +621,7 @@ export default function ProfileClient() {
                                 size="sm"
                                 onClick={handleLogout}
                                 disabled={isLoggingOut}
-                                className="h-10 px-3 rounded-lg border-rose-200 bg-rose-50/50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 transition-colors gap-1.5 text-xs font-semibold shrink-0"
+                                className="h-8 px-3 rounded-lg border-rose-200 bg-rose-50/50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 transition-colors gap-1.5 text-xs font-semibold shrink-0"
                                 title="Log out from account"
                             >
                                 <LogOut className={cn("w-3.5 h-3.5", isLoggingOut && "animate-spin")} />

@@ -27,6 +27,7 @@ import {
   Filter,
   X,
   Calendar,
+  Trash2,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
@@ -40,6 +41,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import OrderDetailsModal from "./_components/OrderDetailsModal";
 import OrderInvoice from "./_components/OrderInvoice";
 import {
@@ -47,13 +58,14 @@ import {
   useUpdateOrderStatusMutation,
   useGetOrderByIdQuery,
   useUpdatePaymentStatusMutation,
+  useDeleteOrderMutation,
 } from "@/redux/store/api/order/ordersApi";
 
 interface Order {
   id: string;
   orderTime: string;
   invoice: string;
-  customer: { name: string } | null;
+  customer: { name: string; phone?: string } | null;
   method: string;
   amount: number;
   status: string;
@@ -98,22 +110,19 @@ function ProductPicker({
   searchValue,
   onSearchChange,
 }: {
-  value: string; // productId
-  onPick: (product: { id: string; name: string } | null) => void; // null = all
+  value: string;
+  onPick: (product: { id: string; name: string } | null) => void;
   searchValue: string;
   onSearchChange: (v: string) => void;
 }) {
   const [open, setOpen] = useState(false);
 
-  // ✅ Use your admin products endpoint, lightweight fields only
   const { data, isLoading } = useGetAllProductsAdminQuery(
     { page: 1, limit: 20, searchTerm: searchValue } as any,
-    { skip: !open } // fetch only when popover opens
+    { skip: !open }
   );
 
-  // your endpoint returns: { data: IProductResponse[]; meta: {...} }
   const products = (data as any)?.data || [];
-
   const selected = products.find((p: any) => p.id === value);
 
   return (
@@ -144,7 +153,6 @@ function ProductPicker({
           </CommandEmpty>
 
           <CommandGroup>
-            {/* ALL */}
             <CommandItem
               onSelect={() => {
                 onPick(null);
@@ -175,64 +183,53 @@ function ProductPicker({
 }
 
 const OrderList = () => {
-  // Global search
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearch = useDebouncedValue(searchTerm, 350);
 
-  // Pagination
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
 
-  // Advanced filters
   const [showFilters, setShowFilters] = useState(false);
   const [status, setStatus] = useState<"ALL" | (typeof STATUS_OPTIONS)[number]>("ALL");
   const [payment, setPayment] = useState<(typeof PAYMENT_OPTIONS)[number]>("ALL");
   const [method, setMethod] = useState<(typeof METHOD_OPTIONS)[number]["value"]>("ALL");
 
-  // Date range (YYYY-MM-DD)
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
 
-  // Details modal
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // Invoice modal
   const [invoiceOrderId, setInvoiceOrderId] = useState<string | null>(null);
   const [isInvoiceVisible, setIsInvoiceVisible] = useState(false);
 
-  // Sorting
+  // Delete state
+  const [orderToDelete, setOrderToDelete] = useState<{ id: string; invoice: string } | null>(null);
+
   const [sortField, setSortField] = useState<SortField>("orderTime");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
 
-  // Product filter
-  const [productId, setProductId] = useState<string>(""); // "" = ALL
-  const [productQ, setProductQ] = useState<string>("");   // search inside picker
-  const debouncedProductQ = useDebouncedValue(productQ, 250);
+  const [productId, setProductId] = useState<string>("");
+  const [productQ, setProductQ] = useState<string>("");
   const [selectedProductName, setSelectedProductName] = useState<string>("");
 
-  // Build query params for API (only send filters when needed)
   const queryArgs = useMemo(() => {
     const args: any = {
       searchTerm: debouncedSearch?.trim() || undefined,
       page,
       limit,
-
-      // ✅ ALWAYS show only Website orders in this page
       orderSource: "WEBSITE",
     };
 
     if (status !== "ALL") args.status = status;
-    if (payment !== "ALL") args.payment = payment; // backend supports payment=PAID|DUE
+    if (payment !== "ALL") args.payment = payment;
     if (method !== "ALL") args.method = method;
-
-    if (dateFrom) args.dateFrom = dateFrom; // "YYYY-MM-DD"
+    if (dateFrom) args.dateFrom = dateFrom;
     if (dateTo) args.dateTo = dateTo;
-
     if (productId) args.productId = productId;
 
     return args;
-  }, [debouncedSearch, page, limit, status, payment, method, dateFrom, dateTo]);
+  }, [debouncedSearch, page, limit, status, payment, method, dateFrom, dateTo, productId]);
 
   const { data, isLoading } = useGetAllOrdersQuery(queryArgs);
 
@@ -241,15 +238,14 @@ const OrderList = () => {
 
   const [updateOrderStatus] = useUpdateOrderStatusMutation();
   const [updatePaymentStatus] = useUpdatePaymentStatusMutation();
+  const [deleteOrder, { isLoading: isDeleting }] = useDeleteOrderMutation();
 
-  // Fetch order for invoice modal
   const { data: invoiceData } = useGetOrderByIdQuery(invoiceOrderId || "", { skip: !invoiceOrderId });
   const invoiceOrder: Order | undefined = invoiceData?.data;
 
   const allOrders: Order[] = useMemo(() => data?.data?.data || [], [data]);
   const meta = data?.data?.meta;
 
-  // local sorting (UI only)
   const sortedOrders = useMemo(() => {
     const sorted = [...allOrders];
 
@@ -315,6 +311,24 @@ const OrderList = () => {
     }
   };
 
+  const handleDeleteConfirm = async () => {
+    if (!orderToDelete) return;
+
+    try {
+      const res = await deleteOrder(orderToDelete.id).unwrap();
+      if (res?.success) {
+        toast.success(`Order #${orderToDelete.invoice} deleted successfully`);
+      } else {
+        toast.error("Failed to delete order");
+      }
+    } catch (e: any) {
+      toast.error(e?.data?.message || "Error deleting order");
+      console.error(e);
+    } finally {
+      setOrderToDelete(null);
+    }
+  };
+
   const handleViewDetails = (orderId: string) => {
     setSelectedOrderId(orderId);
     setIsModalVisible(true);
@@ -344,7 +358,6 @@ const OrderList = () => {
             : "bg-orange-500 hover:bg-orange-600 text-white";
   };
 
-  // active filter chips
   const activeChips = useMemo(() => {
     const chips: { key: string; label: string; onRemove: () => void }[] = [];
 
@@ -418,7 +431,7 @@ const OrderList = () => {
     }
 
     return chips;
-  }, [debouncedSearch, status, payment, method, dateFrom, dateTo]);
+  }, [debouncedSearch, status, payment, method, dateFrom, dateTo, productId, selectedProductName]);
 
   const clearAll = () => {
     setSearchTerm("");
@@ -438,7 +451,6 @@ const OrderList = () => {
         {/* Top bar */}
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-            {/* Search */}
             <div className="relative w-full sm:w-[360px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
               <Input
@@ -452,7 +464,6 @@ const OrderList = () => {
               />
             </div>
 
-            {/* Filter toggle */}
             <Button
               variant="outline"
               onClick={() => setShowFilters((p) => !p)}
@@ -505,7 +516,6 @@ const OrderList = () => {
         {showFilters && (
           <div className="bg-white border rounded-lg p-4">
             <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-              {/* Status */}
               <div className="space-y-2">
                 <p className="text-sm text-gray-500">Status</p>
                 <Select
@@ -529,7 +539,6 @@ const OrderList = () => {
                 </Select>
               </div>
 
-              {/* Payment */}
               <div className="space-y-2">
                 <p className="text-sm text-gray-500">Payment</p>
                 <Select
@@ -543,6 +552,7 @@ const OrderList = () => {
                     <SelectValue placeholder="All" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="ALL">All</SelectItem>
                     {PAYMENT_OPTIONS.map((p) => (
                       <SelectItem key={p} value={p}>
                         {p}
@@ -552,7 +562,6 @@ const OrderList = () => {
                 </Select>
               </div>
 
-              {/* Method */}
               <div className="space-y-2">
                 <p className="text-sm text-gray-500">Method</p>
                 <Select
@@ -575,17 +584,12 @@ const OrderList = () => {
                 </Select>
               </div>
 
-              {/* Product */}
               <div className="space-y-2">
                 <p className="text-sm text-gray-500">Ordered Product</p>
-
                 <ProductPicker
                   value={productId}
                   searchValue={productQ}
-                  onSearchChange={(v) => {
-                    setProductQ(v);
-                    // page doesn't need reset while typing
-                  }}
+                  onSearchChange={(v) => setProductQ(v)}
                   onPick={(p) => {
                     setProductId(p?.id ?? "");
                     setSelectedProductName(p?.name ?? "");
@@ -594,7 +598,6 @@ const OrderList = () => {
                 />
               </div>
 
-              {/* Date from */}
               <div className="space-y-2">
                 <p className="text-sm text-gray-500 flex items-center gap-2">
                   <Calendar className="w-4 h-4" /> From
@@ -609,7 +612,6 @@ const OrderList = () => {
                 />
               </div>
 
-              {/* Date to */}
               <div className="space-y-2">
                 <p className="text-sm text-gray-500 flex items-center gap-2">
                   <Calendar className="w-4 h-4" /> To
@@ -633,24 +635,20 @@ const OrderList = () => {
             <TableRow>
               <TableHead>Sr.</TableHead>
               <TableHead>Invoice</TableHead>
-
               <TableHead onClick={() => toggleSort("orderTime")} className="cursor-pointer select-none">
                 Order Time {renderSortIcon("orderTime")}
               </TableHead>
-
               <TableHead>Customer</TableHead>
+              <TableHead>Contact no.</TableHead>
               <TableHead>Method</TableHead>
-
               <TableHead onClick={() => toggleSort("amount")} className="cursor-pointer select-none">
                 Amount {renderSortIcon("amount")}
               </TableHead>
-
               <TableHead onClick={() => toggleSort("status")} className="cursor-pointer select-none">
                 Status {renderSortIcon("status")}
               </TableHead>
-
               <TableHead>Payment</TableHead>
-              <TableHead>Action</TableHead>
+              <TableHead className="text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -658,14 +656,14 @@ const OrderList = () => {
             {isLoading ? (
               [...Array(6)].map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell colSpan={9}>
+                  <TableCell colSpan={10}>
                     <Skeleton className="w-full h-6 my-2" />
                   </TableCell>
                 </TableRow>
               ))
             ) : sortedOrders.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-6 text-gray-500">
+                <TableCell colSpan={10} className="text-center py-6 text-gray-500">
                   No orders found.
                 </TableCell>
               </TableRow>
@@ -698,6 +696,7 @@ const OrderList = () => {
                   </TableCell>
 
                   <TableCell>{order.customer?.name || "N/A"}</TableCell>
+                  <TableCell>{order.customer?.phone || "N/A"}</TableCell>
                   <TableCell>{methodLabel(order.method)}</TableCell>
                   <TableCell>{order.amount} BDT</TableCell>
 
@@ -756,8 +755,8 @@ const OrderList = () => {
                     </Badge>
                   </TableCell>
 
-                  <TableCell>
-                    <div className="flex gap-2">
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
                       <Button
                         className="cursor-pointer bg-gray-100 hover:bg-gray-200"
                         variant="ghost"
@@ -776,6 +775,16 @@ const OrderList = () => {
                         title="View Invoice"
                       >
                         <Download className="w-4 h-4" />
+                      </Button>
+
+                      <Button
+                        className="cursor-pointer bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setOrderToDelete({ id: order.id, invoice: order.invoice })}
+                        title="Delete Order"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </TableCell>
@@ -811,6 +820,44 @@ const OrderList = () => {
             </div>
           </div>
         )}
+
+        {/* Delete Confirmation Alert Dialog */}
+        <AlertDialog
+          open={!!orderToDelete}
+          onOpenChange={(open) => {
+            if (!open && !isDeleting) setOrderToDelete(null);
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete order{" "}
+                <span className="font-semibold text-black">#{orderToDelete?.invoice}</span> and any associated cart
+                records. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDeleteConfirm();
+                }}
+                disabled={isDeleting}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {isDeleting ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Deleting...
+                  </span>
+                ) : (
+                  "Delete"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Details Modal */}
         <OrderDetailsModal
