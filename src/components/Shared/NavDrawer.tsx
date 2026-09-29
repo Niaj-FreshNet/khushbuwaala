@@ -203,14 +203,15 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent
         side="left"
-        className="w-80 p-0 flex flex-col h-full bg-gradient-to-b from-white via-white to-gray-50 [&>button]:hidden"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className="w-80 p-0 flex flex-col h-full bg-linear-to-b from-white via-white to-gray-50 [&>button]:hidden"
       >
         {/* Custom Close Button */}
         <SheetClose asChild>
           <button
             onClick={onClose}
             className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full 
-              bg-gradient-to-r from-red-100 to-pink-100 text-red-600 
+              bg-linear-to-r from-red-100 to-pink-100 text-red-600 
               hover:from-red-200 hover:to-pink-200 hover:text-red-700
               shadow-xs transition-all duration-300 focus:outline-none z-10"
             aria-label="Close menu"
@@ -220,7 +221,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
         </SheetClose>
 
         {/* Brand Header */}
-        <div className="pt-3 pb-3 px-5 border-b bg-gradient-to-r from-red-50 to-pink-50">
+        <div className="pt-3 pb-3 px-5 border-b bg-linear-to-r from-red-50 to-pink-50">
           <Link href="/" onClick={onClose} className="flex items-center group">
             <div className="relative">
               <Image
