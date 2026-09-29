@@ -255,6 +255,7 @@ export default function CheckoutPage() {
   }, [submitStep]);
 
   const isSubmittingRef = useRef(false);
+  const isNavigatingAwayRef = useRef(false);
 
   const stepText: Record<SubmitStep, string> = {
     idle: "",
@@ -295,7 +296,7 @@ export default function CheckoutPage() {
       cartItemId: it.cartItemId ?? it.id ?? it._id ?? it.productId,
     }));
   }, [checkoutMode, checkoutItem, cartItems]);
-  
+
   useEffect(() => {
     if (districtSource === "manual") return;
 
@@ -364,6 +365,16 @@ export default function CheckoutPage() {
 
   const total = Math.max(0, Math.round(discountedSubtotal + estimatedTaxes + shippingCost));
 
+  // ========================================================
+  // ✅ Declare pendingOrderRef & useEffect AFTER 'total'
+  // ========================================================
+  const pendingOrderRef = useRef<{ orderId: string; payToken: string } | null>(null);
+
+  // Reset cached order if customer modifies payment/totals
+  useEffect(() => {
+    pendingOrderRef.current = null;
+  }, [paymentMethod, appliedPromoCode, shippingMethod, total]);
+
   const userData = useMemo(() => {
     return {
       em: email || undefined,
@@ -422,7 +433,6 @@ export default function CheckoutPage() {
 
   const shippingDedupeRef = useRef<string>("");
   const paymentDedupeRef = useRef<string>("");
-  const isNavigatingAwayRef = useRef(false);
 
   useEffect(() => {
     if (!analyticsItems.length) return;
@@ -647,63 +657,73 @@ export default function CheckoutPage() {
 
       setSubmitStep("creating_order");
 
-      const cartItemIds = itemsToDisplay
-        .map((item: any) => item.cartItemId)
-        .filter(Boolean) as string[];
+      let orderId = pendingOrderRef.current?.orderId;
+      let payToken = pendingOrderRef.current?.payToken;
 
-      const items = itemsToDisplay.map((item: any) => {
-        const productDoc = item?.product || item;
-        const [sizeValue, sizeUnit] = String(item?.selectedSize || "").split(" ");
+      // Only create in DB if this order was not already created in this session
+      if (!orderId || !payToken) {
+        const cartItemIds = itemsToDisplay
+          .map((item: any) => item.cartItemId)
+          .filter(Boolean) as string[];
 
-        const matchedVariant = productDoc?.variants?.find(
-          (v: any) =>
-            Number(v.size) === Number(sizeValue) &&
-            String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
-        );
+        const items = itemsToDisplay.map((item: any) => {
+          const productDoc = item?.product || item;
+          const [sizeValue, sizeUnit] = String(item?.selectedSize || "").split(" ");
 
-        const originalPrice = Number(matchedVariant?.price ?? productDoc?.price ?? item?.price ?? 0);
-        const selectedPrice = Number(item?.selectedPrice ?? originalPrice);
+          const matchedVariant = productDoc?.variants?.find(
+            (v: any) =>
+              Number(v.size) === Number(sizeValue) &&
+              String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
+          );
 
-        return {
-          cartItemId: item?.cartItemId || item?.id || undefined,
-          productId: productDoc?.id || productDoc?._id || item?.productId,
-          variantId: item?.variantId || matchedVariant?.id || undefined,
-          quantity: Math.max(1, Number(item?.quantity || 1)),
-          price: selectedPrice,
-          originalPrice: originalPrice,
+          const originalPrice = Number(matchedVariant?.price ?? productDoc?.price ?? item?.price ?? 0);
+          const selectedPrice = Number(item?.selectedPrice ?? originalPrice);
+
+          return {
+            cartItemId: item?.cartItemId || item?.id || undefined,
+            productId: productDoc?.id || productDoc?._id || item?.productId,
+            variantId: item?.variantId || matchedVariant?.id || undefined,
+            quantity: Math.max(1, Number(item?.quantity || 1)),
+            price: selectedPrice,
+            originalPrice: originalPrice,
+          };
+        });
+
+        const payload: any = {
+          cartItemIds,
+          items,
+          amount: total,
+          isPaid: false,
+          method: paymentMethod,
+          orderSource: "WEBSITE",
+          saleType: "SINGLE",
+          shippingCost: Number(shippingCost),
+          additionalNotes,
+          coupon: appliedPromoCode ?? null,
+          discountAmount: Number(displayedDiscount || 0),
+
+          customerInfo: { name, phone: contactNumber, email, address, district: selectedDistrictEn },
+          shippingAddress: { name, phone: contactNumber, email, address, district: selectedDistrictEn },
+          billingAddress: !hasDifferentBillingAddress
+            ? { name, phone: contactNumber, email, address, district: selectedDistrictEn }
+            : {
+              name: billingName || name,
+              phone: billingContactNumber || contactNumber,
+              address: billingAddress || address,
+              district: billingDistrictEn || selectedDistrictEn,
+            },
         };
-      });
 
-      const payload: any = {
-        cartItemIds,
-        items,
-        amount: total,
-        isPaid: false,
-        method: paymentMethod, // "online" | "cashOnDelivery"
-        orderSource: "WEBSITE",
-        saleType: "SINGLE",
-        shippingCost: Number(shippingCost),
-        additionalNotes,
-        coupon: appliedPromoCode ?? null,
-        discountAmount: Number(displayedDiscount || 0),
+        const res: any = await handleCreateOrder(payload);
+        proceedToCartCheckout();
 
-        customerInfo: { name, phone: contactNumber, email, address, district: selectedDistrictEn },
-        shippingAddress: { name, phone: contactNumber, email, address, district: selectedDistrictEn },
-        billingAddress: !hasDifferentBillingAddress
-          ? { name, phone: contactNumber, email, address, district: selectedDistrictEn }
-          : {
-            name: billingName || name,
-            phone: billingContactNumber || contactNumber,
-            address: billingAddress || address,
-            district: billingDistrictEn || selectedDistrictEn,
-          },
-      };
+        orderId = res?.data?.id || res?.id;
+        payToken = res?.data?.payToken || res?.payToken;
 
-      const res: any = await handleCreateOrder(payload);
-      proceedToCartCheckout();
-
-      const orderId = res?.data?.id || res?.id;
-      const payToken = res?.data?.payToken || res?.payToken;
+        if (orderId && payToken && paymentMethod === "online") {
+          pendingOrderRef.current = { orderId, payToken };
+        }
+      }
 
       if (!orderId) {
         setSubmitStep("error");
@@ -713,11 +733,12 @@ export default function CheckoutPage() {
 
       setSubmitStep("redirecting");
 
-      // 1. Cash on Delivery Flow -> Show Toast & Redirect to Thank-you page
+      // 1. Cash on Delivery Flow
       if (paymentMethod === "cashOnDelivery") {
         clearCart();
+        pendingOrderRef.current = null;
         setSubmitStep("done");
-        toast.success("Order placed successfully!"); // 👈 Fired only when order is truly complete!
+        toast.success("Order placed successfully!");
         router.push(`/thank-you?order=${encodeURIComponent(orderId)}`);
         return;
       }
@@ -731,7 +752,7 @@ export default function CheckoutPage() {
         return;
       }
 
-      // 2. DGePay Payment Gateway Flow -> No success toast yet! User must pay on DGePay first
+      // 2. DGePay Payment Gateway Flow
       if (paymentMethod === "online") {
         const paymentRes = await createDgepayPayment({ orderId, payToken }).unwrap();
 
@@ -743,6 +764,7 @@ export default function CheckoutPage() {
         }
 
         clearCart();
+        pendingOrderRef.current = null;
 
         // Flag intentional departure so beforeunload does not pop up
         isNavigatingAwayRef.current = true;
