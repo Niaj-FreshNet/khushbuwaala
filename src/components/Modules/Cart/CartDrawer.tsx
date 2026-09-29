@@ -79,7 +79,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
   const checkoutBtnRef = useRef<HTMLButtonElement | null>(null);
   const [checkoutNudge, setCheckoutNudge] = useState(false);
 
-  // Original curved arrow & traveling spark animation
+  // Red curved arrow & traveling spark animation for clear direction
   const drawCheckoutGuide = () => {
     if (typeof window === "undefined") return;
 
@@ -122,7 +122,8 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
 
     const arrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
     arrowPath.setAttribute("d", "M0,0 L12,4 L0,8 Z");
-    arrowPath.setAttribute("fill", "rgba(22, 163, 74, 0.95)");
+    // Red arrowhead (Tailwind red-600)
+    arrowPath.setAttribute("fill", "rgba(220, 38, 38, 0.95)");
     marker.appendChild(arrowPath);
     defs.appendChild(marker);
 
@@ -133,13 +134,14 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
     grad.setAttribute("x2", "100%");
     grad.setAttribute("y2", "0%");
 
+    // Gradient transition: Red-500 -> Red-600
     const stop1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
     stop1.setAttribute("offset", "0%");
-    stop1.setAttribute("stop-color", "rgba(34, 197, 94, 0.95)");
+    stop1.setAttribute("stop-color", "rgba(239, 68, 68, 0.95)");
 
     const stop2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
     stop2.setAttribute("offset", "100%");
-    stop2.setAttribute("stop-color", "rgba(22, 163, 74, 0.95)");
+    stop2.setAttribute("stop-color", "rgba(220, 38, 38, 0.95)");
     grad.appendChild(stop1);
     grad.appendChild(stop2);
     defs.appendChild(grad);
@@ -167,14 +169,15 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
     path.setAttribute("marker-end", "url(#kw-checkout-arrow)");
     svg.appendChild(path);
 
+    // Traveling spark dot & outer halo in red
     const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     dot.setAttribute("r", "6");
-    dot.setAttribute("fill", "rgba(22, 163, 74, 0.98)");
+    dot.setAttribute("fill", "rgba(220, 38, 38, 0.98)");
     dot.setAttribute("opacity", "0.95");
 
     const dotGlow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     dotGlow.setAttribute("r", "12");
-    dotGlow.setAttribute("fill", "rgba(34, 197, 94, 0.25)");
+    dotGlow.setAttribute("fill", "rgba(239, 68, 68, 0.3)");
 
     svg.appendChild(dotGlow);
     svg.appendChild(dot);
@@ -197,7 +200,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
       { duration: 520, easing: "ease-out", fill: "forwards" }
     );
 
-    const strokeAnim = path.animate(
+    path.animate(
       [{ strokeDashoffset: totalLen }, { strokeDashoffset: 0 }],
       { duration: 520, easing: "ease-out", fill: "forwards" }
     );
@@ -220,11 +223,12 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
 
     raf = requestAnimationFrame(tick);
 
-    const ringAnim = toEl.animate(
+    // Button pulse ring animation using red hue to catch user's eye
+    toEl.animate(
       [
-        { boxShadow: "0 0 0 0 rgba(22,163,74,0)", transform: "scale(1)" },
-        { boxShadow: "0 0 0 8px rgba(22,163,74,0.18)", transform: "scale(1.02)" },
-        { boxShadow: "0 0 0 0 rgba(22,163,74,0)", transform: "scale(1)" },
+        { boxShadow: "0 0 0 0 rgba(220,38,38,0)", transform: "scale(1)" },
+        { boxShadow: "0 0 0 8px rgba(220,38,38,0.22)", transform: "scale(1.02)" },
+        { boxShadow: "0 0 0 0 rgba(220,38,38,0)", transform: "scale(1)" },
       ],
       { duration: 900, easing: "cubic-bezier(.2,.8,.2,1)" }
     );
