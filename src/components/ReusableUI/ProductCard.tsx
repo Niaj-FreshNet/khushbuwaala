@@ -377,11 +377,11 @@ export function ProductCard({
           </div>
 
           {accords.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-1 mt-1">
+            <div className="flex flex-nowrap justify-center items-center gap-1 mt-1 w-full max-w-full overflow-hidden">
               {accords.slice(0, 3).map((accord: string, idx: number) => (
                 <span
                   key={idx}
-                  className="px-1.5 py-0.5 bg-gray-50 text-gray-500 text-[11px] sm:text-xs rounded-md border border-gray-100 leading-none"
+                  className="px-1.5 py-0.5 bg-gray-50 text-gray-500 text-[10px] sm:text-[11px] rounded-md border border-gray-100 leading-none whitespace-nowrap truncate shrink-0 max-w-[45%]"
                 >
                   {accord}
                 </span>
