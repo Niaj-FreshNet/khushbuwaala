@@ -104,7 +104,7 @@ export default function BottomBar() {
   // Determine path, icon, and label based on authentication status
   const profilePath = user ? "/my-account" : "/login"
   const profileLabel = user ? "Profile" : "Login"
-  const profileIcon = user ? <User className="h-5 w-5" /> : <LogIn className="h-5 w-5" />
+  const profileIcon = user ? <User className="h-5 w-5" /> : <User className="h-5 w-5" />
 
   const navItems: NavItem[] = useMemo(
     () => [
