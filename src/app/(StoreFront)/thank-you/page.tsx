@@ -253,10 +253,11 @@ export default function ThankYouPage() {
     if (purchaseSentRef.current === transactionId) return;
     purchaseSentRef.current = transactionId;
 
+    // ✅ Force the exact database-backed event ID matching your backend (kw_[orderId])
     const eventId = `kw_${transactionId}`;
 
     kwPushPurchase({
-      event_id: eventId,
+      event_id: eventId, // 👈 Passed explicitly here so browser matches server!
       transaction_id: transactionId,
       currency: "BDT",
       value: Number(order.amount ?? 0),
