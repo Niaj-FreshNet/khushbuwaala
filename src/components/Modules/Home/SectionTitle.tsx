@@ -53,7 +53,7 @@ export function SectionTitle({
       // ✅ Soft, premium whitish aesthetic with clean dark text
       base.title = "text-gray-900 font-extrabold tracking-tight";
       base.container =
-        "rounded-none bg-gradient-to-r from-rose-50/40 via-white to-pink-50/40 border-y border-gray-100/80 py-2";
+        "rounded-none bg-gradient-to-r from-rose-50/40 via-red-50 to-pink-50/40 border-y border-gray-100/80 py-2";
     }
 
     return base;

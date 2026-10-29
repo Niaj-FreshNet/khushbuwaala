@@ -119,8 +119,8 @@ export default function ClickAndCollect() {
                 </p>
                 <p className="text-sm">
                   <strong>Phone:</strong>{" "}
-                  <a href="tel:+8801566395807" className="text-amber-700 hover:underline">
-                    +8801566395807
+                  <a href="tel:+8801777152588" className="text-amber-700 hover:underline">
+                    +8801777152588
                   </a>
                 </p>
               </div>
@@ -144,8 +144,8 @@ export default function ClickAndCollect() {
             <div className="border-t pt-6 text-center text-sm text-gray-600">
               <p>
                 Need help? Call us at{" "}
-                <a href="tel:+8801566395807" className="font-medium text-amber-700 hover:underline">
-                  +8801566395807
+                <a href="tel:+8801777152588" className="font-medium text-amber-700 hover:underline">
+                  +8801777152588
                 </a>{" "}
                 or email{" "}
                 <a href="mailto:khushbuwaala@gmail.com" className="font-medium text-amber-700 hover:underline">

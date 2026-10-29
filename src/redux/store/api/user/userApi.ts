@@ -1,14 +1,55 @@
 import { TUser } from "@/types/auth.types";
-import baseApi from "../baseApi";
+import baseApi from "../baseApi";;
+
+export interface TMeta {
+    page: number;
+    limit: number;
+    total: number;
+    totalPage: number;
+}
+
+export interface TUserResponse {
+    data: TUser[];
+    meta: TMeta;
+}
 
 const userApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
-        getAllUsers: builder.query<TUser[], void>({
-            query: () => ({
+        getAllUsers: builder.query<TUserResponse, Record<string, any> | void>({
+            query: (params) => ({
                 url: '/user/get-all-users',
                 method: 'GET',
+                params: params || undefined,
             }),
-            transformResponse: (response: { success: boolean; data: TUser[] }) => response.data,
+            transformResponse: (response: any) => {
+                // Case 1: Backend returns { meta, data: [...] } at the root of response
+                if (response?.meta && Array.isArray(response?.data)) {
+                    return {
+                        data: response.data,
+                        meta: response.meta,
+                    };
+                }
+
+                // Case 2: Backend returns { data: { data: [...], meta: {...} } }
+                if (response?.data?.meta && Array.isArray(response?.data?.data)) {
+                    return {
+                        data: response.data.data,
+                        meta: response.data.meta,
+                    };
+                }
+
+                // Fallback for direct array responses
+                const data = Array.isArray(response?.data) ? response.data : [];
+                return {
+                    data,
+                    meta: {
+                        page: 1,
+                        limit: data.length,
+                        total: data.length,
+                        totalPage: 1,
+                    },
+                };
+            },
             providesTags: ['User'],
         }),
 
@@ -21,12 +62,12 @@ const userApi = baseApi.injectEndpoints({
             providesTags: ['User'],
         }),
 
-        getUserById: builder.query({
+        getUserById: builder.query<any, string>({
             query: (id) => ({
                 url: `/user/get-user-by-id/${id}`,
-                transformResponse: (response: { success: boolean; data: TUser[] }) => response.data,
-                method: 'GET'
+                method: 'GET',
             }),
+            transformResponse: (response: any) => response?.data,
             providesTags: ['User'],
         }),
 

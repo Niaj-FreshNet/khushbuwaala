@@ -102,10 +102,10 @@ export default function RefundPolicy() {
                 </a>
                 ,{" "}
                 <a
-                  href="tel:+8801566395807"
+                  href="tel:+8801777152588"
                   className="text-blue-600 hover:underline"
                 >
-                  +8801566395807
+                  +8801777152588
                 </a>
                 <br />
                 <strong>Email:</strong>{" "}

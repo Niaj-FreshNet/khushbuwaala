@@ -21,7 +21,7 @@ export default function StoresPage() {
     {
       name: "Flagship Showroom",
       address: "Shop-G/138, Eastern Banabithi Shopping Complex, South Banasree, Khilgaon, Dhaka-1219",
-      phone: "+8801566395807",
+      phone: "+8801777152588",
       hours: "10:00 AM – 10:00 PM (Daily)",
       mapLink: "https://maps.app.goo.gl/kEXvaRHQ46CbRh7f7", // Replace with real Google Maps link
     },
@@ -43,7 +43,7 @@ export default function StoresPage() {
             postalCode: "1219",
             addressCountry: "BD",
           },
-          telephone: "+8801566395807",
+          telephone: "+8801777152588",
           openingHours: "Mo-Su 10:00-22:00",
         }) }} />
       </Head>
