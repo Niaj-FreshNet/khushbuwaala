@@ -674,6 +674,14 @@ export default function CheckoutPage() {
         };
       });
 
+      // Helper to grab cookies on client side
+      const getCookie = (name: string) => {
+        if (typeof document === "undefined") return undefined;
+        const m = document.cookie.match(new RegExp(`(?:^|; )${name.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")}=([^;]*)`));
+        return m ? decodeURIComponent(m[1]) : undefined;
+      };
+
+      // Inside payload object definition:
       const payload: any = {
         cartItemIds,
         items,
@@ -686,6 +694,10 @@ export default function CheckoutPage() {
         additionalNotes,
         coupon: appliedPromoCode ?? null,
         discountAmount: Number(displayedDiscount || 0),
+
+        // ✅ Pass Meta Browser Cookies for High Event Match Quality (EMQ)
+        fbp: getCookie("_fbp") || null,
+        fbc: getCookie("_fbc") || null,
 
         customerInfo: { name, phone: contactNumber, email, address, district: selectedDistrictEn },
         shippingAddress: { name, phone: contactNumber, email, address, district: selectedDistrictEn },
@@ -1038,7 +1050,7 @@ export default function CheckoutPage() {
                             <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0" />
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                        <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
                           <Command shouldFilter>
                             <CommandInput
                               placeholder="Search district (e.g. Dhaka, Rangpur, চট্টগ্রাম)..."
@@ -1162,7 +1174,7 @@ export default function CheckoutPage() {
                             <ChevronsUpDown className="h-3.5 w-3.5 opacity-50" />
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                        <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
                           <Command shouldFilter>
                             <CommandInput placeholder="Search district..." value={billingDistrictQuery} onValueChange={(val) => setBillingDistrictQuery(val)} />
                             <CommandList>
