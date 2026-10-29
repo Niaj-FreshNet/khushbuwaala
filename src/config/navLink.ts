@@ -20,6 +20,7 @@ import {
   Boxes,
   TrendingUp,
   ClipboardList,
+  CreditCard,
 } from "lucide-react";
 
 import { MdCategory } from "react-icons/md";
@@ -287,6 +288,13 @@ export const navLinks: NavLink[] = [
     name: "Carts",
     href: "/dashboard/carts",
     icon: ShoppingCart,
+    roles: ["ADMIN", "SUPER_ADMIN"],
+  },
+
+  {
+    name: "Payments",
+    href: "/dashboard/payments",
+    icon: CreditCard,
     roles: ["ADMIN", "SUPER_ADMIN"],
   },
 

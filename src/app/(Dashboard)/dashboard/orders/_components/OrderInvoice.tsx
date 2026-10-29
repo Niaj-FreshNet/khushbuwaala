@@ -62,6 +62,20 @@ export default function OrderInvoice({ order, visible, onClose }: OrderInvoicePr
     const invoiceRef = useRef<HTMLDivElement>(null);
     const [isDownloading, setIsDownloading] = useState(false);
 
+    // If order is not loaded yet or doesn't match, we can show a clean mini loader inside the dialog
+    if (!order && visible) {
+        return (
+            <Dialog open={visible} onOpenChange={onClose}>
+                <DialogContent className="max-w-md w-[90vw] p-8 flex flex-col items-center justify-center bg-white rounded-2xl">
+                    <Loader2 className="w-8 h-8 animate-spin text-[#FB923C] mb-2" />
+                    <p className="text-sm text-gray-500 font-medium">Loading invoice details...</p>
+                </DialogContent>
+            </Dialog>
+        );
+    }
+
+    if (!order) return null;
+
     const invoiceNo = order?.invoice
         ? String(order.invoice)
         : `ORD-${String(order?.id || "").slice(-6).toUpperCase()}`;

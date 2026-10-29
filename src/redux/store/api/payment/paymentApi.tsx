@@ -14,9 +14,20 @@ export const paymentApi = baseApi.injectEndpoints({
                 body,
             }),
         }),
+
+        // ✅ Add this endpoint to fetch payment history for the admin dashboard
+        getAllPaymentHistory: builder.query<any, Record<string, any> | void>({
+            query: (params) => ({
+                url: "/payment/get-all-payment-history",
+                method: "GET",
+                params: params ?? undefined,
+            }),
+            providesTags: ["Order"],
+        }),
     }),
 });
 
 export const {
     useCreateDgepayPaymentMutation,
+    useGetAllPaymentHistoryQuery,
 } = paymentApi;
