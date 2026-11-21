@@ -542,6 +542,11 @@ export default function CheckoutPage() {
 
   const pickDiscountAmount = (res: any) => {
     const root = res?.data ?? res;
+    // Coupon part only: item prices here already include automatic sale discounts, so using the
+    // combined `discountAmount` subtracted the sale twice. (Older API: fall back below.)
+    if (root?.couponDiscountAmount !== undefined && root?.couponDiscountAmount !== null) {
+      return Math.max(0, Number(root.couponDiscountAmount) || 0);
+    }
     const total = Number(root?.discountAmount ?? 0);
     const orderPart = Number(root?.orderDiscountAmount ?? 0);
     if (total > 0 && orderPart > 0) return total;
