@@ -147,7 +147,9 @@ export default function CartPage() {
           String(v?.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
       );
 
-      const price = Number(item?.selectedPrice ?? matchedVariant?.price ?? 0);
+      // Regular size price: the coupon check applies the automatic sale itself (selectedPrice is
+      // already the sale price, so sending it took the sale off twice).
+      const price = Number(matchedVariant?.price ?? item?.selectedPrice ?? 0);
       const qty = Number(item?.quantity || 1);
       const productId = item?.product?.id || item?.product?._id || item?.productId;
       const variantId =
@@ -160,8 +162,14 @@ export default function CartPage() {
     });
   };
 
-  const pickDiscountAmount = (res: any) =>
-    Number(res?.data?.discountAmount ?? res?.discountAmount ?? 0);
+  // Coupon part only: the subtotal already uses sale prices. (Older API: total discount.)
+  const pickDiscountAmount = (res: any) => {
+    const root = res?.data ?? res;
+    if (root?.couponDiscountAmount !== undefined && root?.couponDiscountAmount !== null) {
+      return Math.max(0, Number(root.couponDiscountAmount) || 0);
+    }
+    return Number(root?.discountAmount ?? 0);
+  };
 
   const pickDiscountInfo = (res: any): DiscountLabel => {
     const items = res?.data?.items ?? res?.items ?? [];

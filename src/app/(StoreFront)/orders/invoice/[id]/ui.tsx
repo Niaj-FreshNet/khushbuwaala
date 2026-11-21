@@ -46,7 +46,8 @@ export default function InvoicePageClient({ orderId }: { orderId: string }) {
             const items = order.orderItems.map((it: any) => ({
                 productId: it.productId || it.product?.id,
                 variantId: it.variantId || it.variant?.id,
-                price: Number(it.price ?? it.variant?.price ?? 0),
+                // Regular size price: the discount check applies the sale itself (it.price already has it).
+                price: Number(it.variant?.price ?? it.price ?? 0),
                 qty: Math.max(1, Number(it.quantity || 1)),
             }));
 

@@ -83,7 +83,8 @@ export default function ThankYouPage() {
         .map((it: any) => ({
           productId: it.productId || it.product?.id,
           variantId: it.variantId || it.variant?.id,
-          price: Number(it.price ?? it.variant?.price ?? 0),
+          // Regular size price: the discount check applies the sale itself (it.price already has it).
+          price: Number(it.variant?.price ?? it.price ?? 0),
           qty: Math.max(1, Number(it.quantity || 1)),
         }))
         .filter((x: any) => x.productId && x.price > 0 && x.qty > 0);
