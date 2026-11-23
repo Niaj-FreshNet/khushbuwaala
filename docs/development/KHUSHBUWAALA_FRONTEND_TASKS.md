@@ -176,3 +176,13 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 - [ ] Merchant Center: it holds 30 old products (28 not approved) and targets UK / India / US. Add the shop feed (`https://api.khushbuwaala.com/api/products/google-shopping-feed.xml` or the address the backend is served on, 993 items) as the data source, set the country to Bangladesh and the shipping rates. Needs the owner's yes because it changes what Google shows
 - [ ] Open "Fragrance data check" on the live admin and read the real numbers
 - [ ] Product pages prefetch about 40 pages on load: decide whether to cut it
+
+## Update 2026-11-23, session 6
+
+- [x] Merchant Center: shop feed added as a product source for Bangladesh (941 products taken in)
+- [x] Owner paid the Google Cloud balance
+- [ ] Tagging server still reports "billing is disabled" after the payment. Recheck `/healthy`; if still down, re-select the billing account on the project (steps in PROGRESS, session 6)
+- [ ] Merchant Center in 2–3 days: read approved / not approved counts and the top issues; find why 52 feed items were not taken in
+- [ ] **Owner decision:** Merchant Center delivery charge. It says ৳50 flat and 0–1 days; the shop charges ৳60 (Dhaka) / ৳120 (outside). Suggested: ৳120 flat, free over ৳1,000, 1–5 days
+- [ ] Feed descriptions contain leftover `&nbsp;` codes; clean them in the feed builder
+- [ ] Owner: free space on drive C: of the work computer (it is full)

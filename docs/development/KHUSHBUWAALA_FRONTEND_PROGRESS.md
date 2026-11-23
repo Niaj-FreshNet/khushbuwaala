@@ -1,12 +1,30 @@
 # Khushbuwaala Storefront — Progress
 
-**Last updated:** 2026-11-23 (session 5)
+**Last updated:** 2026-11-23 (session 6)
 **Spec:** `Khusbuwaala_Storefront_Master_Development_Prompt.md` (same folder)
 **Related:** [TASKS](KHUSHBUWAALA_FRONTEND_TASKS.md) · [DECISIONS](KHUSHBUWAALA_FRONTEND_DECISIONS.md) · admin/backend history: `D:\Projects\khushbuwaala\KHUSHBUWAALA_*.md`
 
 ## Overall status
 
 Phase 0 (audit) done. Phase 1 (product discovery, header search, wishlist, SEO foundations) is **live since 2026-11-23 ~15:30 Dhaka** (owner approved the deploy).
+
+## Session 6 — 2026-11-23 night (after the owner paid Google Cloud and Meta)
+
+### Tagging server: paid, still down at 20:30 Dhaka
+- Billing page: last payment $9.48 on Nov 23, balance $0.83, no overdue warning, card no longer shows "declined".
+- The service still answers 500/503 and the newest log line (20:09 Dhaka) still says "The request failed because billing is disabled for this project." Google has not switched the project back on yet.
+- If it is still down the next morning: Google Cloud → Billing → Your projects → the three dots beside `khushbuwaala-sgtm` → Change billing → choose "Khushbuwaala SGTM Billing A/C" again. Then check `https://sgtm.khushbuwaala.com/healthy` answers `ok`. GA4 was not checked because nothing reaches it until then.
+
+### Merchant Center (account 5532933892): shop feed added
+- New product source "PRODUCTS SOURCE 2": `https://api.khushbuwaala.com/api/products/google-shopping-feed.xml`, country **Bangladesh only**, English, feed label `BD`, fetched every 24 hours at midnight. Source id 10800026629.
+- Feed checked before adding: 993 items, all with price in BDT, image, brand, condition, availability (925 in stock, 68 out).
+- First fetch: file accepted with no file issues, **941 products** taken in. Why 52 were not taken in is not known yet.
+- Right after the fetch the "Needs attention" list shows 980 products; the rows on screen were the old Google-found products with "Missing product price". New products take Google up to about 3 working days to review, so the real approved count is **not known yet**.
+- The old source "Found by Google" (30 products, mixed countries) was left as it is.
+- Shipping policy already there for Bangladesh, left unchanged: flat ৳50, free over ৳1,000, delivery 0–1 working days. The shop really charges ৳60 inside Dhaka and ৳120 outside (free over ৳1,000). Google does not allow showing a lower delivery charge than the real one, so this needs the owner's decision (see TASKS).
+
+### This computer
+- Drive C: is full (0 MB free of 200 GB). A download was cut short because of it; work files now go to `D:\Projects\khushbuwaala\_dev\tmp`. The owner needs to free space on C:.
 
 ## Session 5 — 2026-11-23 evening (tracking accounts: Google Cloud, Tag Manager, Meta) — DEPLOYED
 
