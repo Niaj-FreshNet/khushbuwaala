@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   countActiveFilters,
   fetchDiscovery,
+  slimItem,
   parseShopState,
   shopHref,
   type FacetGroup,
@@ -150,7 +151,7 @@ export async function ShopListing({ config, searchParams }: { config: ShopListin
           listName={config.heading}
           state={linkState}
           locked={config.locked}
-          result={result}
+          result={result && { ...result, data: result.data.map(slimItem) }}
         />
       )}
     </div>

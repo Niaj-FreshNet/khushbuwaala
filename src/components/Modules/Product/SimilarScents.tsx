@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { fetchSimilar } from "@/lib/discovery";
+import { fetchSimilar, slimItem } from "@/lib/discovery";
 import { ProductCard } from "@/components/ReusableUI/ProductCard";
 import type { IProductResponse } from "@/types/product.types";
 
 // Perfumes that smell alike (shared notes and scent families, in stock), from the discovery API.
 // Rendered on the server so the links are part of the page. Shows nothing if there are none.
 export default async function SimilarScents({ slug, name, familyId }: { slug: string; name: string; familyId?: string }) {
-  const items = await fetchSimilar(slug, 8);
+  const items = (await fetchSimilar(slug, 8)).map(slimItem);
   if (!items.length) return null;
 
   return (

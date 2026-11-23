@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { fetchDiscovery, parseShopState } from "@/lib/discovery"
+import { fetchDiscovery, parseShopState, slimItem } from "@/lib/discovery"
 import type { IProductResponse } from "@/types/product.types"
 import { ProductCarouselClient } from "./ProductCarouselClient"
 
@@ -22,7 +22,7 @@ export async function HomeProductRow({
   const params = Object.fromEntries(new URLSearchParams(query))
   const result = await fetchDiscovery(parseShopState(params), limit)
   // in stock first is already the default order; a row with nothing to show is left out
-  const products = (result?.data ?? []).filter((p) => p.inStock)
+  const products = (result?.data ?? []).filter((p) => p.inStock).map(slimItem)
   if (products.length < 2) return null
 
   return (

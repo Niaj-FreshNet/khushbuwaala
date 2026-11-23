@@ -2,10 +2,8 @@
 
 import { Package, LifeBuoy, RefreshCcw, Lock } from "lucide-react"
 import { SectionTitle } from "./SectionTitle"
-import { motion, useReducedMotion } from "framer-motion"
 
 export function ServicesSection() {
-  const reduce = useReducedMotion()
 
   const services = [
     {
@@ -42,14 +40,9 @@ export function ServicesSection() {
 
       <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
         {services.map((service, index) => (
-          <motion.div
+          <div
             key={index}
-            initial={reduce ? { opacity: 1 } : { opacity: 0, y: 14 }}
-            whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={reduce ? undefined : { duration: 0.4, ease: "easeOut", delay: index * 0.05 }}
-            whileHover={reduce ? undefined : { y: -3 }}
-            className="group rounded-xl border border-emerald-200/80 bg-white shadow-2xs hover:shadow-md transition-all"
+            className="group rounded-xl border border-emerald-200/80 bg-white shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all"
           >
             <div className="p-3 sm:p-4 flex flex-col items-center sm:items-start text-center sm:text-left h-full">
               {/* Icon badge */}
@@ -66,7 +59,7 @@ export function ServicesSection() {
                 </p>
               </div>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
     </section>

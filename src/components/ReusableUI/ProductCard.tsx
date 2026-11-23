@@ -108,6 +108,10 @@ export function ProductCard({
   const [isBuyingNow, setIsBuyingNow] = useState(false);
 
   const [touchHover, setTouchHover] = useState(false);
+  // The second photo is only fetched once the shopper shows interest (mouse over, or a swipe on the
+  // card). It used to be in every card from the start: invisible, but downloaded as soon as the
+  // card scrolled into view, which doubled the picture data on phones.
+  const [wantAlt, setWantAlt] = useState(false);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   const onTouchStartCard = (e: React.TouchEvent) => {
@@ -120,7 +124,10 @@ export function ProductCard({
     if (!touchStart.current) return;
     const dx = Math.abs(e.touches[0].clientX - touchStart.current.x);
     const dy = Math.abs(e.touches[0].clientY - touchStart.current.y);
-    if (dx > 8 || dy > 8) setTouchHover(true);
+    if (dx > 8 || dy > 8) {
+      setTouchHover(true);
+      setWantAlt(true);
+    }
   };
 
   const onTouchEndCard = () => {
@@ -269,6 +276,7 @@ export function ProductCard({
   return (
     <Link href={productLink} aria-label={`View ${product.name}`} className="block w-full select-none group">
       <Card
+        onMouseEnter={() => setWantAlt(true)}
         onTouchStart={onTouchStartCard}
         onTouchMove={onTouchMoveCard}
         onTouchEnd={onTouchEndCard}
@@ -286,7 +294,7 @@ export function ProductCard({
             sizes="(max-width:640px) 50vw, (max-width:1200px) 33vw, 20vw"
             className={cn(
               "object-cover object-[center_20%] transition-all duration-700 ease-out",
-              touchHover || (product.otherImages && product.otherImages.length > 0)
+              wantAlt && product.otherImages && product.otherImages.length > 0
                 ? "group-hover:opacity-0 group-hover:scale-105"
                 : "group-hover:scale-105"
             )}
@@ -294,7 +302,7 @@ export function ProductCard({
             onError={() => setImageError(true)}
           />
 
-          {product.otherImages && product.otherImages.length > 0 && !imageError && (
+          {wantAlt && product.otherImages && product.otherImages.length > 0 && !imageError && (
             <Image
               src={product.otherImages[0]}
               alt={`${product.name} alternate view`}

@@ -123,7 +123,7 @@ export function SectionTitle({
             animated && !reduce
               ? cn(
                   "transition-all duration-700 ease-out",
-                  inView ? "opacity-100 translate-y-0 blur-0" : "opacity-0 translate-y-3 blur-[6px]"
+                  "opacity-100 translate-y-0 blur-0" /* always visible: it used to wait for a script before showing */
                 )
               : "opacity-100"
           )}
@@ -152,7 +152,7 @@ export function SectionTitle({
               animated && !reduce
                 ? cn(
                     "transition-all duration-700 ease-out delay-75",
-                    inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+                    "opacity-100 translate-y-0"
                   )
                 : "opacity-100"
             )}

@@ -1,12 +1,10 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 import { CarouselSlider } from "@/components/Modules/Home/CaoruselSlider"
 import { CategoryBanner } from "@/components/Modules/Home/CategoryBanner"
 import { ServicesSection } from "@/components/Modules/Home/ServiceSection"
 import { HomeProductRow } from "@/components/Modules/Home/HomeProductRow"
 import { HomeDiscovery } from "@/components/Modules/Home/HomeDiscovery"
 import { BrandStory } from "@/components/Modules/Home/BrandStory"
-import { ProductCarouselSkeleton } from "@/components/Modules/Home/ProductCarouselSkeleton"
 import { homeRows } from "@/config/home"
 import { siteConfig } from "@/config/site"
 
@@ -34,20 +32,16 @@ export default function HomePage() {
 
       <CarouselSlider />
 
-      {firstRow && (
-        <Suspense fallback={<ProductCarouselSkeleton title={firstRow.title} titleVariant="premium" />}>
-          <HomeProductRow {...firstRow} />
-        </Suspense>
-      )}
+      {/* No loading placeholders here on purpose: the page is built ahead of time and refreshed
+          every minute, so a placeholder would only add markup that no visitor ever sees. */}
+      {firstRow && <HomeProductRow {...firstRow} />}
 
       <HomeDiscovery />
 
       <CategoryBanner />
 
       {otherRows.map((row) => (
-        <Suspense key={row.title} fallback={<ProductCarouselSkeleton title={row.title} titleVariant="premium" />}>
-          <HomeProductRow {...row} />
-        </Suspense>
+        <HomeProductRow key={row.title} {...row} />
       ))}
 
       <BrandStory />

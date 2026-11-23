@@ -208,3 +208,32 @@ export async function fetchSimilar(slug: string, limit = 8): Promise<DiscoveryIt
 }
 
 export const formatTaka = (n: number): string => `৳${Math.round(n).toLocaleString("en-US")}`;
+
+/**
+ * The part of a product a card needs. Listings send the whole record (every size, both prices,
+ * timestamps…) and whatever is handed to a card is written into the page twice, so trimming here
+ * cuts the HTML of a listing page by more than half on phones.
+ */
+export function slimItem(item: DiscoveryItem): DiscoveryItem {
+  return {
+    id: item.id,
+    name: item.name,
+    slug: item.slug,
+    primaryImage: item.primaryImage,
+    otherImages: item.otherImages.slice(0, 1),
+    accords: item.accords.slice(0, 6), // shown in the desktop quick view
+    variants: item.variants.map((v) => ({ id: v.id, unit: v.unit, size: v.size, price: v.price })),
+    minPrice: item.minPrice,
+    maxPrice: item.maxPrice,
+    inStock: item.inStock,
+    averageRating: item.averageRating,
+    reviewCount: item.reviewCount,
+    discount: item.discount ?? null,
+    brand: item.brand,
+    gender: item.gender,
+    category: item.category,
+    families: item.families,
+    longevity: item.longevity,
+    projection: item.projection,
+  };
+}
