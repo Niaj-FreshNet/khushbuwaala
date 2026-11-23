@@ -29,6 +29,13 @@ Phase 0 (audit) done. Phase 1 (product discovery, header search, wishlist, SEO f
 - Dhaka buyers therefore see ৳120 on Google but pay ৳60 at checkout. That is allowed (showing more than the real charge is fine, showing less is not).
 - Tagging server rechecked at about 21:00 Dhaka: still 503.
 
+### Tagging server after the owner reopened the billing account (about 23:45–00:25 Dhaka)
+- Billing → Your projects shows `khushbuwaala-sgtm` linked to "Khushbuwaala SGTM Billing A/C"; the account shows "Paid account", no warning.
+- The error changed from "billing is disabled for this project" to "the instance could not start successfully", then the server started: `/healthy` answered 200.
+- **GA4 confirmed receiving** (Realtime, property KhushbuWaala): my own visits from Dhaka showed `page_view` (2) and `view_item` (1). In the browser the requests to the tagging server returned 200.
+- **Not stable yet:** it answered for 2–3 minutes, then about 10 minutes of 503 ("The service you requested is not available yet. Please try again in 30 seconds."), then up again, then down again. During the down periods the container log shows the server still running and no failed requests reaching it, so the refusals come from Google's front door, not from our server. This looks like Google still switching the project back on. Nothing in our set-up was changed.
+- Not tested yet in GA4: add_to_cart and the seven new shop events.
+
 ### This computer
 - Drive C: is full (0 MB free of 200 GB). A download was cut short because of it; work files now go to `D:\Projects\khushbuwaala\_dev\tmp`. The owner needs to free space on C:.
 
