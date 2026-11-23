@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { kwDataLayerPush } from "./dataLayerGate";
+
 export type KwEcomItem = {
     item_id: string;
     item_name: string;
@@ -29,10 +31,9 @@ export function kwPushAddToCart(params: {
     const currency = params.currency ?? "BDT";
     const value = params.value;
 
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({ ecommerce: null });
+    kwDataLayerPush({ ecommerce: null });
 
-    window.dataLayer.push({
+    kwDataLayerPush({
         event: "add_to_cart",
         event_id: kwEventId(), // ✅ used for Meta dedup (browser + server)
         ecommerce: {
@@ -188,10 +189,9 @@ export function kwPushBeginCheckout(payload: KWBeginCheckoutPayload) {
 
     const meta = buildMetaBlock(payload.user_data)
 
-        ; (window as any).dataLayer = (window as any).dataLayer || []
-        ; (window as any).dataLayer.push({ ecommerce: null })
+    kwDataLayerPush({ ecommerce: null })
 
-        ; (window as any).dataLayer.push({
+    kwDataLayerPush({
             event: "begin_checkout",
             event_id,
             event_time: Math.floor(Date.now() / 1000),
@@ -240,9 +240,7 @@ const metaContents = (items: ReturnType<typeof normalizeItems>) => ({
 })
 
 const dlPush = (obj: any) => {
-    if (typeof window === "undefined") return
-        ; (window as any).dataLayer = (window as any).dataLayer || []
-        ; (window as any).dataLayer.push(obj)
+    kwDataLayerPush(obj)
 }
 
 const buildMetaBlock = (user_data?: KWUserData) => {

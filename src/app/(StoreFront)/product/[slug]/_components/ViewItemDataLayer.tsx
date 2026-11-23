@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useProductSelection } from "@/context/ProductSelectionContext";
 import type { IProduct } from "@/types/product.types";
+import { kwDataLayerPush } from "@/lib/Analytics/dataLayerGate";
 
 declare global {
     interface Window {
@@ -61,12 +62,10 @@ export default function ViewItemDataLayer({
 
         const eid = `${eventId()}.${product.slug}`;
 
-        window.dataLayer = window.dataLayer || [];
-
         // Important: clear ecommerce so GA4 doesn't merge items across events
-        window.dataLayer.push({ ecommerce: null });
+        kwDataLayerPush({ ecommerce: null });
 
-        window.dataLayer.push({
+        kwDataLayerPush({
             event: "view_item",
             event_id: eid, // <-- keep for Meta dedup later
             ecommerce: {
