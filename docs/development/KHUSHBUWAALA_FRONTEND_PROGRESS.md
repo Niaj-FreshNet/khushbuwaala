@@ -1,12 +1,34 @@
 # Khushbuwaala Storefront — Progress
 
-**Last updated:** 2026-11-23 (session 2)
+**Last updated:** 2026-11-23 (session 3)
 **Spec:** `Khusbuwaala_Storefront_Master_Development_Prompt.md` (same folder)
 **Related:** [TASKS](KHUSHBUWAALA_FRONTEND_TASKS.md) · [DECISIONS](KHUSHBUWAALA_FRONTEND_DECISIONS.md) · admin/backend history: `D:\Projects\khushbuwaala\KHUSHBUWAALA_*.md`
 
 ## Overall status
 
 Phase 0 (audit) done. Phase 1 (product discovery, header search, wishlist, SEO foundations) is **live since 2026-11-23 ~15:30 Dhaka** (owner approved the deploy).
+
+## Session 3 — 2026-11-23 (test order, guest-cart bug, checkout tracking) — DEPLOYED
+
+**Live now:** backend `aa8c3ab`, storefront `9feb34d`. Rollback copies: `backend-dist-20261123-105720`, `storefront-next-20261123-105656` and `-110046`.
+
+**P0 bug found and fixed: every guest shared one cart row per product**
+- How it showed: one tap on "Add to Cart" as a guest put **quantity 3** in the cart. The server looked up a guest's cart row by "no user", so all visitors without an account hit the same row; it added 1 to the running total of every earlier guest and sent that total back, and the storefront displayed it. 144 such shared rows existed on live.
+- Also wrong: `GET /cart` without login returned every visitor's open cart rows; anyone could change or delete any cart row by id, including a signed-in customer's.
+- Fix (backend `aa8c3ab`): a guest is matched only to the row that visitor created earlier (its id is kept on the device and sent back); a guest `GET /cart` returns nothing; a customer's row can only be changed by that customer or staff; rows that became order lines can never be changed through the cart; quantity must be 1–999.
+- Fix (storefront `0ec7874`): for a guest the server's quantity never overwrites what the visitor chose; only the row id is remembered.
+- Verified live: first guest add → quantity 1; a second "visitor" gets a separate row; the same visitor adding 2 more → 3 on their own row; quantity 0 or −4 refused; deleted rows 404. In the browser: one tap → quantity 1.
+- Not cleaned: the 144 old shared rows are still in the database (they only appear on the admin Carts page). Left in place; see TASKS.
+
+**Test order (owner approved) — #766624, cash on delivery, ৳210 (Axe Signature 3 ml ৳150 + ৳60 Inside Dhaka)**
+- Placed on the live site from a phone-sized browser as `[TEST-CLAUDE] Test Order`, phone = the shop's own number, no email.
+- Events seen in the browser, each once and with an event id: view_item (280) → select_item (150) → add_to_cart (150) → view_cart (150) → begin_checkout (150) → add_shipping_info (210, "Inside Dhaka") → add_payment_info (210, cod) → purchase (210, shipping 60, transaction id = order id, event id `kw_<orderId>`).
+- **Refreshing the thank-you page did not fire purchase again.**
+- **Meta server event: accepted.** Backend log: `[meta capi] Purchase kw_6b041c66… accepted` (HTTP 200 from Meta), same event id as the browser event. Whether Meta shows the pair as one de-duplicated purchase can only be seen in Events Manager (no access).
+- Stock 68 → 65 ml on order; cancelled through the normal admin route → status CANCELED, `stockReturned` true, stock back to **68**.
+- What the test left behind: one cancelled order #766624 with its guest customer record; one order-notification email to the shop's admin address; one ৳210 Purchase counted by Meta (browser + server) and attempted to GA4 (lost: tagging server down).
+- Two tracking faults found by the test and fixed (storefront `9feb34d`): add_shipping_info fired twice (once on page load with a guessed district, again when the district was chosen) → now once, after a district is chosen; add_payment_info fired on page load → now after the delivery details; **online payments were reported as "cod"** (the code compared against a value that is never used) → now "online".
+- Observed, not changed: after a refresh the thank-you page no longer shows the order details to a guest (by design the order lookup is owner/staff only); purchase items carry no item_category.
 
 ## Session 2 — 2026-11-23 (owner decisions, product page, tracking audit) — DEPLOYED
 

@@ -74,3 +74,10 @@ The cart still loads from the browser when the app starts (checkout relies on it
 
 ## SF-018 — Deploys are run in separate steps (2026-11-23)
 Save a copy → pull → build → restart, each as its own command, with no automatic delete/reset on failure. If a build fails the previous build is restored by hand from `~/deploy-backups`.
+
+## SF-019 — A guest's cart belongs to the device; the server never dictates its quantity (2026-11-23)
+**Decision:** For visitors without an account the cart on the device is the truth. The server keeps a row per visitor line only so staff can see open carts and so the order can link to it; the row is found by its id, which only that visitor's device holds. For signed-in customers the account's cart is the truth, as before.
+**Why:** Guests have no identity the server can look them up by. Looking them up by "no user" made all guests one customer.
+
+## SF-020 — Test orders on live (2026-11-23)
+One marked order (`[TEST-CLAUDE]`, shop's own phone, no email, cash on delivery, cheapest in-stock size), placed only with the owner's explicit yes, cancelled through the normal admin route right after, stock checked before and after. It does count as one real Purchase at Meta; that is the point of the test and is recorded in PROGRESS.

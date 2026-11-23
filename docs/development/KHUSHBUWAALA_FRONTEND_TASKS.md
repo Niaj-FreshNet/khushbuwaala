@@ -116,3 +116,20 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 - [ ] Feed: 500 ml / 1000 ml wholesale sizes are in the Shopping feed; decide whether to keep them
 - [ ] Two product images return 404 from Cloudinary (seen in the storefront error log): re-upload in the admin
 - [ ] `organizationStructuredData` in `app/layout.tsx`: opening hours and social links are unverified
+
+---
+
+## Update 2026-11-23, session 3
+
+**Done and live**
+- [x] **P0** Guest carts shared between all visitors (wrong quantities) — fixed in backend + storefront, verified live
+- [x] **P0** Cart rows could be read/changed/deleted by anyone — ownership rules added
+- [x] Test order #766624: checkout + purchase events verified in the browser; purchase fires once; Meta accepted the server event; order cancelled, stock restored
+- [x] Checkout tracking: shipping/payment events once and at the right moment; online payment type reported correctly
+
+**New follow-ups**
+- [ ] 144 old shared guest cart rows (`cart_items`, status IN_CART, no user): harmless now; remove with a backed-up script if the owner wants a clean admin Carts page
+- [ ] Price typos in the catalogue (found while choosing the test product), to fix in the admin: **Black Afgano** 500 ml = ৳900 and 100 ml = ৳18,000 look swapped/mistyped; several products list 50 ml cheaper than 25 ml (e.g. Axe Signature 25 ml ৳1,080 vs 50 ml ৳800)
+- [ ] Thank-you page after a refresh shows no order details to a guest; consider a short-lived view token
+- [ ] purchase event items: add item_category (order lines do not carry the category today)
+- [!] Meta Events Manager: confirm #766624's browser + server Purchase appear as one event (needs access)
