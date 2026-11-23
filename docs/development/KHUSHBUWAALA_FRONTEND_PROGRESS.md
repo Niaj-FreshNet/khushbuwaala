@@ -6,16 +6,35 @@
 
 ## Overall status
 
-Phase 0 (audit) done. Phase 1 (product discovery, wishlist, SEO foundations) **built and verified locally, not deployed**.
-Nothing on the live site, live API or live database was changed in this session (only public GET requests were made to read the catalogue).
+Phase 0 (audit) done. Phase 1 (product discovery, header search, wishlist, SEO foundations) is **live since 2026-11-23 ~15:30 Dhaka** (owner approved the deploy).
+
+## Deploy 2026-11-23 (09:27–09:30 UTC)
+
+- **Backend** `15d3e8b` (previous `06e1d83`; rollback copy `~/deploy-backups/backend-dist-20261123-092732`). Pull, `prisma generate`, build, `pm2 restart`. No dependency change.
+- **Database:** one unique index created on `wishlist_items` (`userId` + `productId`, name `wishlist_items_userId_productId_key`). The collection was empty (0 documents, 0 duplicates). No other write.
+- **Storefront** `49bd812` (previous `722a495`; rollback copy `~/deploy-backups/storefront-next-20261123-092852`). Build OK on the server, restart ~2 s.
+- **Verified live:**
+  - 23 key pages return 200; **135/135 product pages 200**.
+  - `/shop` HTML has 24 product links; the sitemap lists 155 URLs incl. 135 products.
+  - Product title, description and Product structured data are correct; a filtered page is noindex.
+  - Discovery on the real database gives the same answers as the local tests (Woody + Oud + long-lasting under ৳500 = 24; "savage" → Dior Sauvage; "গোলাপ" → 67; "golap" suggests Rose / Floral).
+  - Wishlist returns 401 without login.
+  - Supplier is `null` in public product responses.
+  - Phone browser check of a filtered shop page and a product page: 0 px overflow, no broken images, breadcrumb shows the real collection.
+  - No new backend errors after the restart.
+- **Not verified live:** wishlist writes for a signed-in customer. The check needs a temporary test account in the live database and that step was blocked by the session's safety rules; it needs the owner's explicit OK (or the owner can simply sign in on the site, tap a heart, and open /wishlist on a second device).
+
+## Found during the deploy check: server-side tracking is DOWN (not caused by the deploy)
+
+`sgtm.khushbuwaala.com` (nginx → Google Cloud Run `sgtm-865653302372.us-central1.run.app`) answers **503 "The service you requested is not available yet"** for every request, including when the Cloud Run address is called directly. The web GTM container sends GA4 (`G-TLLSPJHM9W`) through that address, so **GA4 hits are currently failing in the browser**, and anything the server container forwards (Meta Conversions API) is not being sent either. The Meta browser Pixel script loads directly from Facebook and is not affected by this. Since when is unknown. Fix needs the owner's Google Cloud account (check the Cloud Run service: billing, crashed revision, or deleted container config). See TASKS.
 
 | Repo | Branch | State |
 |---|---|---|
-| backend | `main` | 2 local commits ahead of `origin/main` (`eea04eb` + ids lookup), not pushed |
-| storefront | `main` | 2 local commits ahead of `origin/main`, not pushed |
+| backend | `main` | `15d3e8b` pushed and live |
+| storefront | `main` | `49bd812` pushed and live |
 | admin | `main` | untouched |
 
-## Deploy order (needs the owner's go-ahead; nothing here is live yet)
+## Deploy order used (kept for the next deploy)
 
 1. **Backend first.** `git pull`, build, `pm2 restart` as usual (memory: deployment flow). New routes `/api/discover*` and `/api/wishlist*` are additive; the only change to an existing response is that `supplier` is now `null` in public product responses and a `profile` field is added.
 2. On the server, create the wishlist unique index once: `npx prisma db push` **is not safe to run blindly** on this database (it would try to sync every index). Instead create just this one index with a small script: `db.wishlist_items.createIndex({ userId: 1, productId: 1 }, { unique: true })`. First check the collection has no repeats (it has never been written by any API, so it should be empty). The code works without the index; the index only closes a double-tap race.
@@ -82,5 +101,5 @@ How the new backend code was exercised without the database (the live database i
 
 ## Next exact action
 
-1. Owner: review and approve deploy (order above), answer the questions in TASKS ("Owner questions").
+1. Owner: restore the server-side tagging service on Google Cloud (tracking is down), answer the questions in TASKS ("Owner questions"), and say whether a temporary test account may be used for the live wishlist write check.
 2. Then continue with TASKS P1: product page "similar scents" + profile block + heart → cart tracking calls → home page product sections server-rendered → cart hydration fix.

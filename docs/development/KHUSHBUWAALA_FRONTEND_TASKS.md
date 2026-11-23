@@ -3,9 +3,13 @@
 Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[ ]` not started · `[!]` blocked · `[?]` needs the owner
 **Last updated:** 2026-11-23 (session 1). "Verified" means locally (build + browser + tests); nothing is deployed yet.
 
-## Deploy (blocked on owner approval)
-- [!] **P0** Deploy backend, create the wishlist unique index, then deploy storefront (steps in PROGRESS). Depends on: owner go-ahead.
-- [ ] **P0** After deploy: verify discovery and wishlist against the real database; run the smoke script; check sitemap in the browser.
+## Deploy
+- [x] **P0** Backend `15d3e8b`, wishlist unique index, storefront `49bd812` deployed 2026-11-23; smoke 23 pages + 135/135 products; discovery verified on the real database
+- [!] **P0** Wishlist write check for a signed-in customer on live (needs a temporary test account in the live database: blocked until the owner says yes, or the owner tests by hand)
+
+## P0 — Tracking outage (found 2026-11-23, not caused by the deploy)
+- [!] **P0** `sgtm.khushbuwaala.com` returns 503 from its Google Cloud Run service (`sgtm-865653302372.us-central1.run.app`). GA4 hits fail; server-forwarded events (Meta CAPI) are not sent. Needs the owner's Google Cloud access: open Cloud Run → service `sgtm` → check billing, the latest revision's logs, and the CONTAINER_CONFIG variable. Blocked: no access.
+- [ ] After it is back: confirm a GA4 hit returns 200 and a test Purchase shows in Meta Events Manager with browser + server de-duplicated
 
 ## Owner questions
 - [?] **How long has Khushbuwaala been in business?** The site says "Since 2020 / 6+ years of trust" (`components/Modules/Product/TrustSignals.tsx`); the brief says about 8 years in the fragrance trade. Tell me the wording you want and I will make it consistent everywhere.
@@ -57,7 +61,7 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 - [x] item_category on view_item is now the category name
 - [ ] Call `kwPushRemoveFromCart` / `kwPushViewCart` from the cart drawer and cart page
 - [ ] `item_category` in add_to_cart on cards still falls back to an id for old list shapes
-- [!] GTM: add triggers/tags for the new events (GA4 + Meta Search / AddToWishlist). Blocked: no GTM access
+- [!] GTM: add triggers/tags for the new events (GA4 + Meta Search / AddToWishlist). The public web container currently has GA4 tags for page_view, view_item, select_item, add_to_cart, begin_checkout, purchase only: **no** view_item_list, search, add_to_wishlist, add_shipping_info, add_payment_info, view_cart, remove_from_cart. Blocked: no GTM access
 - [!] Verify Pixel + CAPI de-duplication and purchase-once in Events Manager. Blocked: no access
 
 ## P1 — Checkout / cart (not touched yet)
