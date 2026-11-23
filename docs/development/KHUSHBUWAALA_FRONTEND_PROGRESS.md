@@ -12,7 +12,7 @@ Nothing on the live site, live API or live database was changed in this session 
 | Repo | Branch | State |
 |---|---|---|
 | backend | `main` | 2 local commits ahead of `origin/main` (`eea04eb` + ids lookup), not pushed |
-| storefront | `main` | 1 local commit ahead of `origin/main`, not pushed |
+| storefront | `main` | 2 local commits ahead of `origin/main`, not pushed |
 | admin | `main` | untouched |
 
 ## Deploy order (needs the owner's go-ahead; nothing here is live yet)
@@ -49,6 +49,7 @@ Live-site facts measured this session:
 ### Storefront (`khushbuwaala-frontend`)
 - **Shop + all 10 collection pages** are now server-rendered from one component (`components/Modules/Shop/ShopListing.tsx` + `ShopView.tsx` + `FilterPanel.tsx`), configured in `src/config/collections.ts`. The address bar holds the whole filter state (shareable, back button works). Phone: bottom sheet with live counts and a "Show N perfumes" button; desktop: sidebar. Applied-filter chips, clear all, result count, typo/“closest match” notice, helpful empty state, real page links.
 - Product card: heart always visible (bigger tap target), shows the product's main scent families.
+- **Header search** (magnifier icon): suggestions while typing (scent families, notes, collections, products with price), starting points for people who do not know a name, the customer's own recent searches. The old drawer showed two hard-coded "recent searches" to everyone.
 - **Wishlist**: works for guests (device), syncs to the account after login (`components/Shared/WishlistSync.tsx`), new wishlist page with fresh prices/stock and a "No longer available" section. Fixed a hydration error it caused in the header.
 - **Product page**: honest longevity/projection wording (no hours/feet), empty note rows hidden, no default 5.0 rating, no "99% / 4.8" tiles, HTML descriptions shown as clean text, breadcrumb now links to the real collection.
 - **SEO**: sitemap with every product and stocked collection; correct titles; clean meta descriptions; Product structured data (price range, availability, rating only when real reviews exist); canonical URLs; filtered/search/empty pages are `noindex`; robots.txt keeps private pages out; link-preview image fixed; pinch-zoom restored.
@@ -82,4 +83,4 @@ How the new backend code was exercised without the database (the live database i
 ## Next exact action
 
 1. Owner: review and approve deploy (order above), answer the questions in TASKS ("Owner questions").
-2. Then continue with TASKS P1: search drawer on the new suggest API → product page "similar scents" + profile block → home page product sections server-rendered → cart hydration fix.
+2. Then continue with TASKS P1: product page "similar scents" + profile block + heart → cart tracking calls → home page product sections server-rendered → cart hydration fix.

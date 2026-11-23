@@ -22,7 +22,7 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 - [x] Combined filters with live counts, correct sorting, pagination — tests + browser (phone + desktop)
 - [x] Shop + collection pages rebuilt, URL-driven, server-rendered — `components/Modules/Shop/*`, `config/collections.ts`
 - [x] Empty and "closest match" states
-- [~] Suggestions API (`/discover/suggest`) — built and tested by request; **not yet used by the search drawer** (`components/Modules/Search/SearchDrawer.tsx` still calls the old search)
+- [x] Header search rebuilt on the suggestions API (`components/Modules/Search/SearchDrawer.tsx`): scent/note/collection shortcuts, product rows, the customer's own recent searches, English/Banglish/Bangla. Removed hard-coded fake "recent searches" and misspelt smell tags — browser-checked on phone ("golap" → Rose, Floral, 67 results)
 - [~] Similar products API (`/discover/similar/:slug`) — built + unit-tested; product page still uses the old "related" list
 - [ ] Use `profile` on the product page: a "Scent at a glance" block (main families with plain hints, occasions) linking to the matching shop filters
 - [ ] Discovery landing pages for strong intents (e.g. /shop?families=…) with their own indexable URLs and copy: only where enough products exist
