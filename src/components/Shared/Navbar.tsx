@@ -112,7 +112,8 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
             role="banner"
           >
             {/* Announcement Bar */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-emerald-800 via-emerald-600 to-emerald-700 px-3 py-0 text-white sm:px-4">
+            {/* hidden when the owner has cleared every message in the admin panel */}
+            <div className={`relative overflow-hidden bg-gradient-to-r from-emerald-800 via-emerald-600 to-emerald-700 px-3 py-0 text-white sm:px-4${notices.length === 0 ? " hidden" : ""}`}>
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
               <div className="relative flex items-center justify-center gap-2 text-[11px] sm:text-xs min-h-5 sm:min-h-6">
                 <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 animate-pulse text-amber-300" />
@@ -120,7 +121,7 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
                   key={currentNoticeIndex}
                   className="animate-fade-in truncate tracking-wide text-center"
                 >
-                  {notices[currentNoticeIndex]}
+                  {notices[currentNoticeIndex % Math.max(1, notices.length)]}
                 </span>
                 <Star
                   className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 animate-pulse text-amber-300"

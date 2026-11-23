@@ -14,12 +14,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 
-const home1 = "/hero1desktop11.webp"
-const home2 = "/hero2desktop22.webp"
-const home3 = "/hero3desktop33.webp"
-const homeMobile1 = "/hero1mobile11.webp"
-const homeMobile2 = "/hero2mobile22.webp"
-const homeMobile3 = "/hero3mobile33.webp"
+import type { HeroSlide } from "@/lib/storefrontSettings"
 
 type Slide = {
   src: string              // desktop
@@ -31,40 +26,19 @@ type Slide = {
   secondaryLink?: string
 }
 
-export function CarouselSlider() {
+export function CarouselSlider({ slides: heroSlides }: { slides: HeroSlide[] }) {
   const plugin = React.useRef(
     Autoplay({ delay: 4500, stopOnInteraction: false, stopOnMouseEnter: true })
   )
 
-  const slides: Slide[] = [
-    {
-      src: home1,
-      mobileSrc: homeMobile1,
-      alt: "Khushbuwaala Premium Perfumes",
-      primaryText: "Shop Now",
-      primaryLink: "/shop",
-      secondaryText: "Explore Collections",
-      secondaryLink: "/shop",
-    },
-    {
-      src: home2,
-      mobileSrc: homeMobile2,
-      alt: "Khushbuwaala Attars & Oud",
-      primaryText: "Explore Collections",
-      primaryLink: "/shop",
-      secondaryText: "Best Sellers",
-      secondaryLink: "/shop",
-    },
-    {
-      src: home3,
-      mobileSrc: homeMobile3,
-      alt: "Khushbuwaala Attars & Oud",
-      primaryText: "Best Sellers",
-      primaryLink: "/shop",
-      secondaryText: "Best Sellers",
-      secondaryLink: "/shop",
-    },
-  ]
+  // banners come from the admin panel; the slider keeps its own field names
+  const slides: Slide[] = heroSlides.map((s) => ({
+    src: s.image,
+    mobileSrc: s.mobileImage,
+    alt: s.alt,
+    primaryText: s.buttonText,
+    primaryLink: s.link,
+  }))
 
   const [api, setApi] = React.useState<any>(null)
   const [active, setActive] = React.useState(0)

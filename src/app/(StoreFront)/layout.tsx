@@ -2,16 +2,20 @@ import BottomBar from "@/components/Shared/BottomBar"
 import { Footer } from "@/components/Shared/Footer"
 import { Navbar } from "@/components/Shared/Navbar"
 import { ReactNode } from "react"
+import { getStorefrontSettings } from "@/lib/storefrontSettings"
 
-export default function Layout({
+export default async function Layout({
   children,
 }: {
   children: ReactNode
 }) {
+  // announcement bar text comes from the admin panel (falls back to built-in text)
+  const { notices } = await getStorefrontSettings()
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Main Navigation (fixed at top) */}
-      <Navbar />
+      <Navbar notices={notices} />
 
       {/* Main content area */}
       {/* pt-16 to account for fixed navbar height (h-16) */}

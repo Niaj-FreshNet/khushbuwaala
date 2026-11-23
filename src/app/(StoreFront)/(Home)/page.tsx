@@ -5,7 +5,7 @@ import { ServicesSection } from "@/components/Modules/Home/ServiceSection"
 import { HomeProductRow } from "@/components/Modules/Home/HomeProductRow"
 import { HomeDiscovery } from "@/components/Modules/Home/HomeDiscovery"
 import { BrandStory } from "@/components/Modules/Home/BrandStory"
-import { homeRows } from "@/config/home"
+import { getStorefrontSettings } from "@/lib/storefrontSettings"
 import { siteConfig } from "@/config/site"
 
 export const metadata: Metadata = {
@@ -23,14 +23,16 @@ export const metadata: Metadata = {
 
 // Product rows are fetched on the server and refreshed every minute (see lib/discovery), so the
 // page is ready-made HTML: nothing waits for JavaScript before products appear.
-export default function HomePage() {
-  const [firstRow, ...otherRows] = homeRows
+export default async function HomePage() {
+  // banners and product rows are edited in the admin panel (Storefront → Home page content)
+  const settings = await getStorefrontSettings()
+  const [firstRow, ...otherRows] = settings.homeRows.filter((row) => row.enabled)
 
   return (
     <div className="w-full mx-auto">
       <h1 className="sr-only">Khushbuwaala: perfume oils, attar and oud in Bangladesh</h1>
 
-      <CarouselSlider />
+      <CarouselSlider slides={settings.hero} />
 
       {/* No loading placeholders here on purpose: the page is built ahead of time and refreshed
           every minute, so a placeholder would only add markup that no visitor ever sees. */}
