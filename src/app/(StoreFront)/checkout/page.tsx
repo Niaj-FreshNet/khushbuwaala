@@ -438,6 +438,10 @@ export default function CheckoutPage() {
     if (!analyticsItems.length) return;
     if (analyticsItems.some((i) => !i.price || i.price <= 0)) return;
 
+    // Only once the customer has picked a district: before that the page was reporting a guessed
+    // "Inside Dhaka", and then a second event when the real district was chosen.
+    if (!selectedDistrictEn) return;
+
     const shippingTier = isFreeShipping
       ? "Free Shipping"
       : shippingMethod === "insideDhaka"
@@ -472,7 +476,10 @@ export default function CheckoutPage() {
     if (!analyticsItems.length) return;
     if (analyticsItems.some((i) => !i.price || i.price <= 0)) return;
 
-    const paymentType = paymentMethod === "bkash" ? "bkash" : "cod";
+    // Reported after the delivery details, not on page load with the pre-selected option.
+    if (!selectedDistrictEn) return;
+    // (online payments were being reported as "cod": the check compared against a value that is never used)
+    const paymentType = paymentMethod === "online" ? "online" : "cod";
     const fp = [
       "pay",
       paymentType,
@@ -494,7 +501,7 @@ export default function CheckoutPage() {
       coupon: appliedPromoCode ?? undefined,
       user_data: userData,
     });
-  }, [paymentMethod, total, analyticsItems, appliedPromoCode, userData]);
+  }, [paymentMethod, total, analyticsItems, appliedPromoCode, userData, selectedDistrictEn]);
 
   const validateForm = () => {
     const nextErrors: Record<string, string> = {};
