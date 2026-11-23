@@ -22,7 +22,7 @@ Phase 0 (audit) done. Phase 1 (product discovery, header search, wishlist, SEO f
   - Supplier is `null` in public product responses.
   - Phone browser check of a filtered shop page and a product page: 0 px overflow, no broken images, breadcrumb shows the real collection.
   - No new backend errors after the restart.
-- **Not verified live:** wishlist writes for a signed-in customer. The check needs a temporary test account in the live database and that step was blocked by the session's safety rules; it needs the owner's explicit OK (or the owner can simply sign in on the site, tap a heart, and open /wishlist on a second device).
+- **Wishlist writes verified live** (owner approved a temporary `[TEST-CLAUDE]` customer): 13/13 checks pass against the real database: add, repeat add harmless, bad id 400, unknown and hidden product 404, merge adds only real new products, items carry name and price, the unique index refuses a duplicate, remove, clear, 401 without login. The test customer and its rows were removed (0 test users, 0 wishlist rows left). Script: `D:Projectskhushbuwaala_devwl-live-test.js`. Not checked: the same flow through the site's own login screen in a browser.
 
 ## Found during the deploy check: server-side tracking is DOWN (not caused by the deploy)
 
@@ -101,5 +101,5 @@ How the new backend code was exercised without the database (the live database i
 
 ## Next exact action
 
-1. Owner: restore the server-side tagging service on Google Cloud (tracking is down), answer the questions in TASKS ("Owner questions"), and say whether a temporary test account may be used for the live wishlist write check.
+1. Owner: restore the server-side tagging service on Google Cloud (tracking is down), answer the questions in TASKS ("Owner questions"), and give access to GTM / GA4 / Meta Events Manager / Search Console.
 2. Then continue with TASKS P1: product page "similar scents" + profile block + heart → cart tracking calls → home page product sections server-rendered → cart hydration fix.

@@ -5,7 +5,7 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 
 ## Deploy
 - [x] **P0** Backend `15d3e8b`, wishlist unique index, storefront `49bd812` deployed 2026-11-23; smoke 23 pages + 135/135 products; discovery verified on the real database
-- [!] **P0** Wishlist write check for a signed-in customer on live (needs a temporary test account in the live database: blocked until the owner says yes, or the owner tests by hand)
+- [x] **P0** Wishlist writes for a signed-in customer verified on live, 13/13 (temporary test customer, removed afterwards)
 
 ## P0 — Tracking outage (found 2026-11-23, not caused by the deploy)
 - [!] **P0** `sgtm.khushbuwaala.com` returns 503 from its Google Cloud Run service (`sgtm-865653302372.us-central1.run.app`). GA4 hits fail; server-forwarded events (Meta CAPI) are not sent. Needs the owner's Google Cloud access: open Cloud Run → service `sgtm` → check billing, the latest revision's logs, and the CONTAINER_CONFIG variable. Blocked: no access.
@@ -40,7 +40,7 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 - [x] Card + quick view hearts; wishlist page with fresh data, unavailable items, empty/loading/error states
 - [x] add_to_wishlist tracking
 - [ ] Heart on the product detail page itself (only cards / quick view have it)
-- [ ] Verify against the real database after deploy
+- [x] Verified against the real database after deploy (API level). Still to do: sign in through the site in a browser and watch a guest list merge
 
 ## P1 — Product detail page
 - [x] No invented hours/feet/ratings; clean descriptions; empty notes hidden; breadcrumb fixed
