@@ -55,3 +55,22 @@ The public product API returned each product's supplier. It is now `null` for th
 
 ## SF-014 — AI assistant: foundation only (2026-11-23)
 No AI code, keys or chat UI were added. What exists for it later: structured families/notes/occasions/strength per product (`profile`), one query endpoint that accepts those as parameters, a similarity function, and a synonym table for how customers actually describe scents.
+
+## SF-015 — Owner decisions of 2026-11-23 (final)
+1. Brand since 2020; fragrance experience 8+ years. Never "8 years in business".
+2. No customer, brand, team or follower counts unless independently verified. Trust comes from content and service, not badges.
+3. `/accessories` and `/niche-perfumes` stay as routes for later, out of navigation, friendly when empty, never indexed while empty.
+4. Storefront "Organic Attar" = admin category NATURAL ATTAR OIL. Customer-facing name is "Natural Attar"; no organic certification claims.
+5. Placeholder blog post unpublished, not deleted.
+6. Tracking is reported in four separate columns: in code / in the browser / in the vendor dashboard / cannot verify.
+7. No placeholder verification codes; Search Console by DNS Domain property.
+The owner also gave standing approval to implement, deploy and make reasonable non-destructive decisions without asking.
+
+## SF-016 — Inspired oils carry our own brand in the Google feed (2026-11-23)
+The product's `brand` field holds the house that inspired an oil. In the Shopping feed that would present our oil as that house's product, so products in an "inspired" category are sent with brand Khushbuwaala. Brand perfumes keep their real brand. The storefront was not changed.
+
+## SF-017 — Cart count fix without touching cart storage (2026-11-23)
+The cart still loads from the browser when the app starts (checkout relies on it being there on first render; moving it risked an effect saving an empty cart over a full one). Only the header badge waits for the page to become interactive, which removes the full-page rebuild for visitors with items in the cart.
+
+## SF-018 — Deploys are run in separate steps (2026-11-23)
+Save a copy → pull → build → restart, each as its own command, with no automatic delete/reset on failure. If a build fails the previous build is restored by hand from `~/deploy-backups`.

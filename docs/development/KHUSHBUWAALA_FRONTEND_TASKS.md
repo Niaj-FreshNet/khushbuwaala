@@ -86,3 +86,33 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 ## Housekeeping
 - [ ] Storefront lint script (`next lint` no longer exists in Next 16) → `eslint src`
 - [ ] 51 pre-existing type errors; `ignoreBuildErrors: true` hides them at build
+
+---
+
+## Update 2026-11-23, session 2
+
+**Done and live**
+- [x] All 7 owner decisions applied (wording, counts removed, empty collections out of menus, Natural Attar naming, blog post unpublished, tracking audit, Search Console check) — see PROGRESS
+- [x] Product page: scent summary, similar scents (server-rendered), wishlist heart
+- [x] view_cart / remove_from_cart; category names in every event
+- [x] Header cart count hydration fix (the cart data itself still loads at start-up; other cart-dependent text, e.g. "1 item in your cart" on /cart, still re-renders on that page only)
+- [x] Meta server Purchase: phone format, name split, refusals logged, tests
+- [x] Google Shopping feed corrected (age group, links, hidden sizes, brand, identifier_exists)
+- [x] Live wishlist write check 13/13
+
+**Blocked on the owner (exact requirement)**
+- [!] **P0 sGTM down** — fix in Google Cloud Run (steps in PROGRESS). Until then GA4 receives nothing from the site.
+- [!] GTM access (GTM-KDFMX5QL web + GTM-T8D4V2D7 server): add GA4 tags for view_item_list, view_cart, remove_from_cart, add_shipping_info, add_payment_info, search, add_to_wishlist and Meta tags for Search, AddToWishlist, AddPaymentInfo. The site already sends all of them to the dataLayer.
+- [!] Meta Events Manager access: confirm the server Purchase is accepted and de-duplicated with the browser Purchase (needs one real or test order).
+- [!] Search Console access: confirm the Domain property is verified (DNS record exists) and submit `https://khushbuwaala.com/sitemap.xml`.
+- [!] Merchant Center access: confirm the feed is fetched and items approved; shipping must be set there (the feed has no shipping block).
+
+**Next (no blocker)**
+- [ ] Checkout + thank-you audit on a phone, including a controlled test order to exercise begin_checkout → purchase (needs the owner's OK for one `[TEST-CLAUDE]` cash-on-delivery order that is cancelled afterwards)
+- [ ] Home page: server-render the first product row; brand story strip using the agreed wording
+- [ ] Cart page text hydration (count/total lines) without changing how the cart is stored
+- [ ] Performance baseline (Lighthouse on phone), image sizes, unused packages
+- [ ] Admin: homepage content, collections and scent synonyms editable without code
+- [ ] Feed: 500 ml / 1000 ml wholesale sizes are in the Shopping feed; decide whether to keep them
+- [ ] Two product images return 404 from Cloudinary (seen in the storefront error log): re-upload in the admin
+- [ ] `organizationStructuredData` in `app/layout.tsx`: opening hours and social links are unverified

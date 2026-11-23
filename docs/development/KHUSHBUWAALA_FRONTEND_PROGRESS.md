@@ -1,12 +1,70 @@
 # Khushbuwaala Storefront — Progress
 
-**Last updated:** 2026-11-23 (session 1)
+**Last updated:** 2026-11-23 (session 2)
 **Spec:** `Khusbuwaala_Storefront_Master_Development_Prompt.md` (same folder)
 **Related:** [TASKS](KHUSHBUWAALA_FRONTEND_TASKS.md) · [DECISIONS](KHUSHBUWAALA_FRONTEND_DECISIONS.md) · admin/backend history: `D:\Projects\khushbuwaala\KHUSHBUWAALA_*.md`
 
 ## Overall status
 
 Phase 0 (audit) done. Phase 1 (product discovery, header search, wishlist, SEO foundations) is **live since 2026-11-23 ~15:30 Dhaka** (owner approved the deploy).
+
+## Session 2 — 2026-11-23 (owner decisions, product page, tracking audit) — DEPLOYED
+
+**Live now:** backend `387aa8f`, storefront `e4036bb`. Rollback copies in `~/deploy-backups`: `backend-dist-20261123-103700` and `-103827`, `storefront-next-20261123-103237`.
+
+**Owner decisions applied**
+- Wording: "Khushbuwaala since 2020" and "8+ years in fragrance", never "8 years in business". About page rewritten around it (no counts, no awards, no certifications).
+- Removed: 10K+ customers, 50+ brands, 20+ team, Facebook/Instagram/YouTube follower counts.
+- Niche Perfumes and Accessories: out of the desktop menu, phone menu and home category grid; pages kept, friendly empty state, `noindex`, not in the sitemap.
+- "Organic Attar" is shown as **Natural Attar** (same address `/organic-attar`, admin category NATURAL ATTAR OIL): no organic certification is claimed anywhere.
+- Placeholder blog post unpublished in the live database (not deleted; copy at `~/deploy-backups/blog-before-unpublish-1795429540854.json`). The public blog API returns 0 posts; `/blog` is `noindex` and out of the sitemap while it has no articles; a missing/unpublished article page is `noindex`.
+- Search Console: the domain already has a DNS record `google-site-verification=IdRaZ…`, so a Domain property can be (or already is) verified by DNS. No verification tag was added to the pages. Whether the property is verified inside Search Console could not be checked (no account access).
+
+**Product page**
+- "<name> at a glance": main scent families with plain-word hints, notes, strength, occasions; every item links into the matching shop filter. Server-rendered.
+- "If you like <name>": 8 perfumes that share notes and families, from the discovery API, server-rendered (the old block was browser-only and showed a random mix).
+- Wishlist heart on the product photo.
+
+**Tracking (code)**
+- New events wired: `view_cart` (cart page and cart drawer), `remove_from_cart`.
+- Every event now sends the category **name** ("Inspired Perfume Oil") instead of a database id; one helper builds cart items for all cart events.
+- Server-side Meta Purchase (backend → Meta directly): phone now sent with country code (8801…), first/last name split, country hashed, and a refusal from Meta is logged (it used to fail silently). Covered by 4 unit tests.
+- Header cart count no longer makes React rebuild the page for visitors with items in the cart.
+
+**Google Shopping feed** (`/api/products/google-shopping-feed.xml`, 993 items) — fixed and verified live:
+- `age_group` was the "best for" list ("Office, Party…"), which Google rejects → `adult`.
+- Links pointed at `/products/…` (a redirect) → `/product/…`.
+- Hidden sizes were included → only sizes on sale.
+- Inspired oils were listed under the designer's brand (e.g. Tom Ford) → Khushbuwaala; real brand kept for brand perfumes.
+- `identifier_exists=no` added where there is no barcode.
+
+**Tests / checks this session**
+- Backend: tsc 0 errors, lint 0, **62/62** tests. Storefront: build OK; type errors 51 → 41 (all pre-existing).
+- Live after deploy: 12 key pages 200; **135/135 product pages 200**; sitemap 153 URLs (135 products, 0 blog, 0 empty collections); product page has 8 similar-product links and filter links in its HTML; feed re-read: 993/993 items with valid age group, final links, identifier flag.
+- Browser (local build against a write-blocked stand-in API): view_item → add_to_cart → view_cart → remove_from_cart each fired once with event id, value 450 and category name; no hydration error with an item in the cart.
+- Live wishlist write test (owner approved): 13/13, test customer removed.
+
+## Tracking audit — what is and is not verified (2026-11-23)
+
+| Item | Verified in code | Verified in the browser | Verified in the vendor's dashboard |
+|---|---|---|---|
+| GTM web container `GTM-KDFMX5QL` loads | yes (`app/layout.tsx`) | yes | no access |
+| dataLayer events: view_item_list, select_item, view_item, add_to_cart, view_cart, remove_from_cart, begin_checkout, add_shipping_info, add_payment_info, purchase, search, add_to_wishlist | yes | view_item_list, search, add_to_wishlist, view_item, add_to_cart, view_cart, remove_from_cart seen with ids and values; **checkout and purchase events not exercised** (no test order was placed) | no access |
+| GA4 `G-TLLSPJHM9W` tags in the public container | — | container has GA4 event tags for page_view, view_item, select_item, add_to_cart, begin_checkout, purchase only | no access |
+| GA4 delivery | — | **failing**: hits go to `sgtm.khushbuwaala.com`, which returns 503 | no access |
+| Meta Pixel (browser) tags in the container | — | PageView, ViewContent, AddToCart, InitiateCheckout, Purchase, CustomizeProduct. No Search, AddToWishlist, AddPaymentInfo | no access |
+| Meta Conversions API Purchase | yes: backend sends it straight to Meta with `event_id = kw_<orderId>`; pixel id and token are set on the server; no test-event code set | not exercised (needs a real order) | no access: acceptance and de-duplication **not verified** |
+| Purchase fires once | yes: browser guard per order id (sessionStorage) + same event id as the server | not exercised | no access |
+| Server-side GTM (Cloud Run `sgtm`, container `GTM-T8D4V2D7`) | n/a | **down**: `/healthy` 500, everything else 503, also on the Cloud Run address directly | owner's screenshot shows min instances 1, image pinned by digest |
+| Search Console | DNS TXT verification record exists | — | no access |
+| Merchant Center | feed corrected and valid XML | feed fetched and checked | no access: approval status unknown |
+
+**Server-side GTM outage: what to do (owner, Google Cloud console)**
+1. Cloud Run → service `sgtm` → **Logs**. The startup lines say exactly why it will not serve (the usual causes: the image is too old, or the server container `GTM-T8D4V2D7` / its config string is no longer valid).
+2. The image is pinned to one old build (`gtm-cloud-image@sha256:688d35c…`). Edit & deploy a new revision with image `gcr.io/cloud-tagging-10302018/gtm-cloud-image:stable` (keep the same `CONTAINER_CONFIG`, port 8080, 1 GiB). This is the most likely fix.
+3. If it still fails: in Tag Manager open the server container `GTM-T8D4V2D7` → Admin → Container settings → copy the current "Container config" string, set it as `CONTAINER_CONFIG`, deploy again. Make sure the container has a published version.
+4. Check: `https://sgtm.khushbuwaala.com/healthy` must answer `ok`.
+Note: the `CONTAINER_CONFIG` value is a secret for that container. It was pasted in chat; it is not stored in the repositories or these documents.
 
 ## Deploy 2026-11-23 (09:27–09:30 UTC)
 
