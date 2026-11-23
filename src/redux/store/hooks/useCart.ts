@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from '../hooks'
 import {
   addToCart as addToCartAction,
   updateQuantity as updateQuantityAction,
+  setCartItemId as setCartItemIdAction,
   removeFromCart as removeFromCartAction,
   clearCart as clearCartAction,
   setCheckoutOnlyItem as setCheckoutOnlyItemAction,
@@ -52,30 +53,42 @@ export const useCart = () => {
             String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
         );
 
+        // the server row this line already has (if any), so a repeat add updates the same row
+        const existingLine = cartItems.find((item) => item.product?.id === product.id && item.selectedSize === selectedSize)
+        const signedIn = typeof window !== 'undefined' && Boolean(localStorage.getItem('accessToken'))
+
         const response: any = await addToCartApi({
           productId: product.id,
           variantId: variant?.id || null,
           size: variant?.size ? Number(variant.size) : null,
           unit: variant?.unit || null,
           quantity,
+          cartItemId: existingLine?.cartItemId || undefined,
         }).unwrap();
 
-        // 👉 CRUCIAL FIX: Sync the TRUE database quantity and cartItemId back into Redux!
         if (response?.data?.id) {
-          dispatch(
-            updateQuantityAction({
-              productId: product.id,
-              selectedSize,
-              quantity: response.data.quantity, // 👈 Takes the true DB quantity (e.g. 6, not 1)
-              cartItemId: response.data.id,
-            })
-          );
+          if (signedIn) {
+            // A signed-in customer's cart lives in their account: show the account's quantity.
+            dispatch(
+              updateQuantityAction({
+                productId: product.id,
+                selectedSize,
+                quantity: response.data.quantity,
+                cartItemId: response.data.id,
+              })
+            );
+          } else {
+            // A guest's cart lives on this device. Only remember the server row's id: the server's
+            // quantity must never overwrite what the visitor chose. (All guests used to share one
+            // server row per product, so one tap could show another visitor's total, e.g. 3.)
+            dispatch(setCartItemIdAction({ productId: product.id, selectedSize, cartItemId: response.data.id }));
+          }
         }
       } catch (err) {
         console.warn('Failed to sync add to cart API', err);
       }
     },
-    [dispatch, addToCartApi]
+    [dispatch, addToCartApi, cartItems]
   );
 
   const removeFromCart = useCallback(

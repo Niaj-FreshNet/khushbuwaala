@@ -149,6 +149,19 @@ const cartSlice = createSlice({
       // }
     },
 
+    // Remember which server cart row belongs to a line, without touching its quantity
+    setCartItemId: (
+      state,
+      action: PayloadAction<{ productId: string; selectedSize: string; cartItemId: string }>
+    ) => {
+      const { productId, selectedSize, cartItemId } = action.payload
+      const item = state.items.find((i) => i.product.id === productId && i.selectedSize === selectedSize)
+      if (item && item.cartItemId !== cartItemId) {
+        item.cartItemId = cartItemId
+        saveCartToStorage(state.items, state.appliedCouponCode)
+      }
+    },
+
     // Remove item from cart
     removeFromCart: (
       state,
@@ -227,6 +240,7 @@ const cartSlice = createSlice({
 export const {
   addToCart,
   updateQuantity,
+  setCartItemId,
   removeFromCart,
   clearCart,
   setCheckoutOnlyItem,
