@@ -88,12 +88,15 @@ interface ProductCardProps {
   product: IProductResponse;
   className?: string;
   onQuickView?: () => void;
+  /** First row of a page: load the picture straight away */
+  priority?: boolean;
 }
 
 export function ProductCard({
   product,
   className,
   onQuickView,
+  priority = false,
 }: ProductCardProps) {
   const cart = useCart();
   const wishlist = useWishlist();
@@ -155,7 +158,10 @@ export function ProductCard({
   }, [selectedVariant, product]);
 
   const accords = useMemo(() => {
-    const arr = (product as any)?.accords ?? (product as any)?.fragrances ?? [];
+    const families = (product as any)?.families;
+    const arr = Array.isArray(families) && families.length && typeof families[0] === "string"
+      ? families
+      : (product as any)?.accords ?? (product as any)?.fragrances ?? [];
     if (Array.isArray(arr) && arr.length) {
       return arr
         .map((item: any) => (typeof item === "string" ? item : item?.name))
@@ -284,7 +290,7 @@ export function ProductCard({
                 ? "group-hover:opacity-0 group-hover:scale-105"
                 : "group-hover:scale-105"
             )}
-            priority={false}
+            priority={priority}
             onError={() => setImageError(true)}
           />
 
@@ -303,31 +309,25 @@ export function ProductCard({
             />
           )}
 
-          {/* Floating Actions: Hidden by default, visible on hover / touch */}
-          <div
-            className={cn(
-              "absolute top-2 right-2 z-10 flex flex-col gap-1.5 items-center transition-all duration-300",
-              touchHover
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 -translate-y-1 group-hover:opacity-100 group-hover:translate-y-0"
-            )}
-          >
+          {/* Floating actions: always visible (phones have no hover) */}
+          <div className="absolute top-2 right-2 z-10 flex flex-col gap-1.5 items-center">
             {/* Wishlist Button - Frosted Glass Aesthetic */}
             <button
               type="button"
               onClick={handleToggleWishlist}
-              aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+              aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`}
+              aria-pressed={isWishlisted}
               className={cn(
-                "w-7 h-7 sm:w-7.5 sm:h-7.5 aspect-square rounded-full backdrop-blur-md border shadow-xs transition-all duration-200 active:scale-90 p-0 flex items-center justify-center shrink-0 cursor-pointer",
+                "min-h-0! w-9 h-9 aspect-square rounded-full border shadow-xs transition-all duration-200 active:scale-90 p-0 flex items-center justify-center shrink-0 cursor-pointer",
                 isWishlisted
-                  ? "bg-red-500/20 border-red-300/60 text-red-600 shadow-red-500/10"
-                  : "bg-white/40 hover:bg-white/70 border-white/60 text-gray-800 hover:text-red-600 shadow-black/5"
+                  ? "bg-white border-red-200 text-red-600"
+                  : "bg-white/85 hover:bg-white border-white/70 text-gray-700 hover:text-red-600"
               )}
             >
               <Heart
                 className={cn(
-                  "w-3.5 h-3.5 transition-all shrink-0 drop-shadow-xs",
-                  isWishlisted && "fill-current animate-pulse text-red-600"
+                  "w-4 h-4 transition-all shrink-0",
+                  isWishlisted && "fill-current text-red-600"
                 )}
               />
             </button>

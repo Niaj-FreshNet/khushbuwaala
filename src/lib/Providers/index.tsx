@@ -5,6 +5,7 @@ import { ReactNode } from 'react';
 import { Provider } from 'react-redux';
 // import { PersistGate } from 'redux-persist/integration/react';
 import { Toaster } from 'sonner';
+import WishlistSync from '@/components/Shared/WishlistSync';
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -14,6 +15,7 @@ export function Providers({ children }: { children: ReactNode }) {
         persistor={persistor}
       > */}
       <Toaster richColors position="top-right" />
+      <WishlistSync />
       {children}
       {/* </PersistGate> */}
     </Provider>

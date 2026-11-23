@@ -65,8 +65,10 @@ const TrustSignals = () => {
 
   const customerStats = [
     { number: "Since 2020", label: "Serving customers", icon: Clock, color: "text-sky-400" },
-    { number: "99%", label: "Satisfaction Rate", icon: MessageSquare, color: "text-blue-600" },
-    { number: "4.8/5", label: "Customer rating", icon: CheckCircle, color: "text-emerald-400" },
+    // Only things we can stand behind: no satisfaction percentages or star averages here,
+    // the shop does not have enough published reviews to quote one.
+    { number: "Cash on delivery", label: "Pay when it arrives", icon: CheckCircle, color: "text-emerald-400" },
+    { number: "Ask us first", label: "Help choosing on WhatsApp", icon: MessageSquare, color: "text-blue-400" },
     { number: "Repeat Customers", label: "Our biggest strength", icon: Award, color: "text-purple-400" },
   ];
 

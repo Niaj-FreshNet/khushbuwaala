@@ -69,7 +69,7 @@ const organizationStructuredData = {
   "@type": "Organization",
   name: "Khushbuwaala",
   url: "https://khushbuwaala.com",
-  logo: "https://khushbuwaala.com/images/khushbuwaala-logo.webp",
+  logo: "https://khushbuwaala.com/images/khushbuwaala.webp",
   description:
     "Premium perfumes, oriental attars, and natural fragrances with authentic quality",
   contactPoint: {
@@ -150,17 +150,13 @@ export const metadata: Metadata = {
     title: `${siteConfig.name} - Premium Perfumes & Attars`,
     description: siteConfig.description,
     images: [siteConfig.twitterImage],
-    creator: "@yourtwitterhandle",
   },
-  verification: siteConfig.verification,
 }
 
 export const viewport: Viewport = {
   themeColor: siteConfig.themeColor,
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 }
 
 export default function RootLayout({
@@ -215,7 +211,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               description: siteConfig.description,
               potentialAction: {
                 "@type": "SearchAction",
-                target: `${siteConfig.url}/search?q={search_term_string}`,
+                target: `${siteConfig.url}/shop?q={search_term_string}`,
                 "query-input": "required name=search_term_string",
               },
             }),

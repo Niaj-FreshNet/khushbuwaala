@@ -70,45 +70,41 @@ const parseStringList = (input?: string | string[]): string[] => {
   return input.replace(/([A-Z])/g, " $1").trim().split(" ").filter(Boolean);
 };
 
-const getLongevityDetails = (val?: string) => {
-  const norm = (val || "").toUpperCase().replace(/[^A_Z]/g, "_");
-  switch (norm) {
-    case "BEAST_MODE":
+// How long a perfume lasts depends on skin, weather and how much is applied, so we describe it in
+// plain words and never promise hours or feet. Unknown values return null and nothing is shown.
+// (Same wording as the shop filters: backend src/modules/Discovery/taxonomy.ts.)
+type StrengthInfo = { label: string; hint: string; percent: number };
+
+const normCode = (val?: string) => (val || "").trim().toUpperCase().replace(/[^A-Z]+/g, "_");
+
+const getLongevityDetails = (val?: string): StrengthInfo | null => {
+  switch (normCode(val)) {
     case "ETERNAL":
-    case "ULTRA":
-      return { label: "Ultra Lasting", hours: "12+ Hours", percent: 100, badge: "Extreme" };
-    case "EXCELLENT":
+      return { label: "Very long-lasting", hint: "Still there the next morning", percent: 100 };
     case "LONG_LASTING":
-      return { label: "Long Lasting", hours: "8–10 Hours", percent: 80, badge: "High" };
-    case "GOOD":
-    case "GOOD_LASTING":
-      return { label: "Good Lasting", hours: "5–6 Hours", percent: 65, badge: "Medium" };
+      return { label: "Long-lasting", hint: "Stays most of the day", percent: 80 };
     case "MODERATE":
-      return { label: "Moderate", hours: "3–5 Hours", percent: 50, badge: "Daily" };
+      return { label: "Moderate", hint: "Lasts through part of the day", percent: 55 };
     case "WEAK":
-    case "LIGHT":
     case "VERY_WEAK":
-      return { label: "Light", hours: "1–3 Hours", percent: 30, badge: "Soft" };
+      return { label: "Light", hint: "Fades in a few hours", percent: 30 };
     default:
-      return { label: "Moderate", hours: "4–6 Hours", percent: 60, badge: "Standard" };
+      return null;
   }
 };
 
-const getProjectionDetails = (val?: string) => {
-  const norm = (val || "").toUpperCase().replace(/[^A_Z]/g, "_");
-  switch (norm) {
+const getProjectionDetails = (val?: string): StrengthInfo | null => {
+  switch (normCode(val)) {
     case "NUCLEAR":
-    case "ENORMOUS":
-      return { label: "Nuclear", distance: "10+ Feet (Room Filler)", percent: 100 };
     case "STRONG":
-      return { label: "Strong", distance: "7–9 Feet (Noticeable Trail)", percent: 80 };
+      return { label: "Strong", hint: "Fills the room, gets noticed", percent: 90 };
     case "MODERATE":
-      return { label: "Moderate", distance: "4–6 Feet (Arm's Length)", percent: 60 };
+      return { label: "Moderate", hint: "Noticed at arm’s length", percent: 60 };
     case "INTIMATE":
     case "CLOSE":
-      return { label: "Intimate", distance: "1–2 Feet (Close to Skin)", percent: 35 };
+      return { label: "Close to skin", hint: "Only people near you notice", percent: 30 };
     default:
-      return { label: "Moderate", distance: "4–6 Feet (Arm's Length)", percent: 60 };
+      return null;
   }
 };
 
@@ -342,8 +338,15 @@ export default function ProductAccordion({
     }
   };
 
-  const longevityInfo = getLongevityDetails(product.longevity || product.performance);
-  const projectionInfo = getProjectionDetails(product.projection || product.sillage);
+  const longevityInfo = getLongevityDetails(product.longevity);
+  const projectionInfo = getProjectionDetails(product.projection);
+  const noteLayers = [
+    { title: "Top notes", when: "first minutes", notes: product.perfumeNotes?.top },
+    { title: "Heart notes", when: "after it settles", notes: product.perfumeNotes?.middle },
+    { title: "Base notes", when: "what stays", notes: product.perfumeNotes?.base },
+  ]
+    .map((l) => ({ ...l, notes: (Array.isArray(l.notes) ? l.notes : []).map((n) => String(n).trim()).filter((n) => n && n.toUpperCase() !== "N/A") }))
+    .filter((l) => l.notes.length > 0);
   const bestForList = parseStringList(product.bestFor);
   const accordsList = parseStringList(product.accords);
 
@@ -394,22 +397,17 @@ export default function ProductAccordion({
           </div>
 
           {/* Performance & Projection Indicators */}
+          {(longevityInfo || projectionInfo) && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {/* Longevity Card */}
+            {longevityInfo && (
             <div className="p-3 rounded-xl bg-emerald-50/40 border border-emerald-100/90 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-emerald-900 uppercase tracking-wide flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-emerald-600" /> Longevity
-                  </span>
-                  <Badge className="text-[10px] font-semibold bg-emerald-100 text-emerald-800 border-0 hover:bg-emerald-100">
-                    {longevityInfo.badge}
-                  </Badge>
-                </div>
-                <div className="text-sm font-bold text-gray-900 mt-1.5">
-                  {longevityInfo.hours}
-                  <span className="text-xs font-medium text-gray-500 ml-1.5">({longevityInfo.label})</span>
-                </div>
+                <span className="text-xs font-bold text-emerald-900 uppercase tracking-wide flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-emerald-600" /> How long it lasts
+                </span>
+                <div className="text-sm font-bold text-gray-900 mt-1.5">{longevityInfo.label}</div>
+                <div className="text-xs text-gray-600 mt-0.5">{longevityInfo.hint}</div>
               </div>
               <div className="mt-2.5 h-1.5 w-full rounded-full bg-emerald-100 overflow-hidden">
                 <div
@@ -418,21 +416,17 @@ export default function ProductAccordion({
                 />
               </div>
             </div>
+            )}
 
             {/* Projection Card */}
+            {projectionInfo && (
             <div className="p-3 rounded-xl bg-blue-50/40 border border-blue-100/90 flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-blue-900 uppercase tracking-wide flex items-center gap-1.5">
-                    <Wind className="w-3.5 h-3.5 text-blue-600" /> Projection
-                  </span>
-                  <Badge className="text-[10px] font-semibold bg-blue-100 text-blue-800 border-0 hover:bg-blue-100">
-                    {projectionInfo.label}
-                  </Badge>
-                </div>
-                <div className="text-sm font-bold text-gray-900 mt-1.5">
-                  {projectionInfo.distance}
-                </div>
+                <span className="text-xs font-bold text-blue-900 uppercase tracking-wide flex items-center gap-1.5">
+                  <Wind className="w-3.5 h-3.5 text-blue-600" /> How far it reaches
+                </span>
+                <div className="text-sm font-bold text-gray-900 mt-1.5">{projectionInfo.label}</div>
+                <div className="text-xs text-gray-600 mt-0.5">{projectionInfo.hint}</div>
               </div>
               <div className="mt-2.5 h-1.5 w-full rounded-full bg-blue-100 overflow-hidden">
                 <div
@@ -441,7 +435,9 @@ export default function ProductAccordion({
                 />
               </div>
             </div>
+            )}
           </div>
+          )}
 
           {/* Accords */}
           {accordsList.length > 0 && (
@@ -463,13 +459,15 @@ export default function ProductAccordion({
           )}
 
           {/* Perfume Notes */}
-          {product.perfumeNotes && typeof product.perfumeNotes === "object" && (
+          {noteLayers.length > 0 && (
             <div className="rounded-xl p-3 bg-gray-50/80 border border-gray-200/80 text-xs sm:text-sm space-y-1.5">
-              <span className="font-bold text-gray-900 block">Fragrance Notes:</span>
-              {Object.entries(product.perfumeNotes).map(([tier, note]) => (
-                <div key={tier} className="text-gray-700 flex flex-col sm:flex-row sm:gap-2">
-                  <span className="font-semibold text-gray-900 capitalize min-w-[70px]">{tier}:</span>
-                  <span>{Array.isArray(note) ? note.join(", ") : note}</span>
+              <span className="font-bold text-gray-900 block">Fragrance notes</span>
+              {noteLayers.map((layer) => (
+                <div key={layer.title} className="text-gray-700 flex flex-col sm:flex-row sm:gap-2">
+                  <span className="font-semibold text-gray-900 min-w-[150px]">
+                    {layer.title} <span className="font-normal text-gray-500">({layer.when})</span>
+                  </span>
+                  <span>{layer.notes.join(", ")}</span>
                 </div>
               ))}
             </div>
@@ -486,12 +484,14 @@ export default function ProductAccordion({
               </span>
             </div>
 
+            {product.origin && product.origin.trim().toUpperCase() !== "N/A" && (
             <div className="p-2.5 rounded-xl bg-gray-50/80 border border-gray-100">
               <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wide">Origin</span>
               <span className="text-xs sm:text-sm font-semibold text-gray-900 block mt-0.5 truncate">
-                {product.origin || "Imported"}
+                {product.origin}
               </span>
             </div>
+            )}
 
             <div className="p-2.5 rounded-xl bg-gray-50/80 border border-gray-100">
               <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wide">Gender</span>
@@ -516,7 +516,7 @@ export default function ProductAccordion({
                     </Badge>
                   ))
                 ) : (
-                  <span className="text-xs font-semibold text-gray-900">Versatile</span>
+                  <span className="text-xs text-gray-500">Not specified</span>
                 )}
               </div>
             </div>
@@ -539,7 +539,7 @@ export default function ProductAccordion({
             <div className="flex items-center gap-2.5 shrink-0">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-xs shrink-0">
                 <span className="text-base font-black leading-none">
-                  {avgRating > 0 ? avgRating.toFixed(1) : "5.0"}
+                  {avgRating > 0 ? avgRating.toFixed(1) : "–"}
                 </span>
               </div>
 
@@ -564,9 +564,11 @@ export default function ProductAccordion({
                   })}
                 </div>
                 <p className="text-[11px] font-bold text-gray-900 leading-tight mt-0.5">
-                  {reviews.length > 0 ? `${reviews.length} Verified Reviews` : "No reviews yet"}
+                  {reviews.length > 0 ? `${reviews.length} ${reviews.length === 1 ? "review" : "reviews"}` : "No reviews yet"}
                 </p>
-                <p className="text-[10px] text-gray-500 leading-tight">Genuine buyer feedback</p>
+                <p className="text-[10px] text-gray-500 leading-tight">
+                  {reviews.length > 0 ? "From customers of this perfume" : "Be the first to share how it wears"}
+                </p>
               </div>
             </div>
 

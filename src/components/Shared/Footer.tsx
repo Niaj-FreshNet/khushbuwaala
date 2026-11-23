@@ -16,7 +16,7 @@ const footerStructuredData = {
   "@type": "Organization",
   name: "Khushbuwaala",
   url: "https://khushbuwaala.com",
-  logo: "https://khushbuwaala.com/images/khushbuwaala-logo.webp",
+  logo: "https://khushbuwaala.com/images/khushbuwaala.webp",
   description: "Premium perfumes, oriental attars, and natural fragrances with authentic quality",
   contactPoint: {
     "@type": "ContactPoint",

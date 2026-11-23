@@ -49,9 +49,20 @@ const getCategoryInfo = (category: string) => {
     return categoryMap[category] || { name: "Shop", href: "/shop" };
 };
 
+// The collection page of each category (category name in lowercase with dashes)
+const CATEGORY_PAGES: Record<string, { name: string; href: string }> = {
+    "inspired-perfume-oil": { name: "Inspired Perfume Oils", href: "/inspired-perfume-oil" },
+    "oriental-attar": { name: "Oriental & Arabian Attar", href: "/oriental-attar" },
+    "artificial-oud": { name: "Oud Collection", href: "/artificial-oud" },
+    "natural-attar-oil": { name: "Natural Attar", href: "/organic-attar" },
+    "brand-perfumes": { name: "Brand Perfumes", href: "/brand-perfumes" },
+    "gifts-and-packages": { name: "Gift Sets & Packages", href: "/gifts-and-packages" },
+};
+
 // ✅ Generate dynamic breadcrumbs
-const generateBreadcrumbs = (product: IProduct): BreadcrumbItem[] => {
-    const categoryInfo = getCategoryInfo(product.categoryId);
+const generateBreadcrumbs = (product: IProduct, categoryName?: string): BreadcrumbItem[] => {
+    const key = (categoryName || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const categoryInfo = CATEGORY_PAGES[key] ?? getCategoryInfo(product.categoryId);
 
     return [
         { name: "Home", href: "/" },
@@ -72,7 +83,8 @@ function RelatedProductsLoading() {
 // ✅ SERVER COMPONENT - No "use client"
 export default function ProductDetailPage({ product }: IProductResponseProps) {
     const mappedProduct = mapProductResponseToProduct(product);
-    const breadcrumbItems = generateBreadcrumbs(mappedProduct);
+    const categoryName = product.category?.categoryName;
+    const breadcrumbItems = generateBreadcrumbs(mappedProduct, categoryName);
     // const categoryInfo = getCategoryInfo(mappedProduct.categoryId);
 
     return (
@@ -88,7 +100,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
 
             <main className="bg-white">
                 <ProductSelectionProvider product={mappedProduct}>
-                    <ViewItemDataLayer product={mappedProduct} />
+                    <ViewItemDataLayer product={mappedProduct} categoryName={categoryName} />
                     <TrackVariantChange product={mappedProduct} />
 
                     {/* Hero Section */}

@@ -468,3 +468,120 @@ export function kwPushPurchase(payload: {
     ...meta, // ✅ CRITICAL for sGTM match quality
   })
 }
+
+/** =========================================================================
+ * Discovery events (lists, search, wishlist, cart changes)
+ * Same dataLayer contract as the events above: GA4 ecommerce object, an
+ * event_id for Meta browser/server de-duplication, and the meta_* keys GTM maps.
+ * ========================================================================= */
+
+type KWListProduct = {
+  id: string
+  name: string
+  brand?: string | null
+  category?: { label?: string } | null
+  minPrice?: number
+}
+
+const listItem = (p: KWListProduct, index: number, listName: string) => ({
+  item_id: String(p.id),
+  item_name: p.name,
+  item_brand: p.brand || "Khushbuwaala",
+  item_category: p.category?.label,
+  item_list_name: listName,
+  index,
+  price: safeNum(p.minPrice),
+  quantity: 1,
+})
+
+/** view_item_list: a list of products was shown (once per result set, not per render) */
+export function kwPushViewItemList(payload: { listName: string; items: KWListProduct[]; page?: number; limit?: number }) {
+  if (typeof window === "undefined" || !payload.items.length) return
+  const offset = (Math.max(1, payload.page ?? 1) - 1) * (payload.limit ?? payload.items.length)
+  dlPush({ ecommerce: null })
+  dlPush({
+    event: "view_item_list",
+    event_id: makeEventId(),
+    ecommerce: {
+      item_list_name: payload.listName,
+      items: payload.items.map((p, i) => listItem(p, offset + i, payload.listName)),
+    },
+  })
+}
+
+/** select_item: the customer opened a product from a list */
+export function kwPushSelectItem(payload: { listName: string; item: KWListProduct; index: number }) {
+  if (typeof window === "undefined") return
+  dlPush({ ecommerce: null })
+  dlPush({
+    event: "select_item",
+    event_id: makeEventId(),
+    ecommerce: {
+      item_list_name: payload.listName,
+      items: [listItem(payload.item, payload.index, payload.listName)],
+    },
+  })
+}
+
+/** search (GA4) / Search (Meta): fired once per searched text, with how many results it gave */
+export function kwPushSearch(payload: { searchTerm: string; results?: number }) {
+  if (typeof window === "undefined") return
+  const term = payload.searchTerm.trim()
+  if (!term) return
+  dlPush({
+    event: "search",
+    event_id: makeEventId(),
+    event_time: Math.floor(Date.now() / 1000),
+    search_term: term,
+    search_results: payload.results,
+    meta_event_name: "Search",
+    search_string: term,
+    fbp: getFbp(),
+    fbc: getFbc(),
+    event_source_url: getEventSourceUrl(),
+  })
+}
+
+/** add_to_wishlist (GA4) / AddToWishlist (Meta) */
+export function kwPushAddToWishlist(payload: { item: KWListProduct; value?: number }) {
+  if (typeof window === "undefined") return
+  const value = safeNum(payload.value ?? payload.item.minPrice)
+  dlPush({ ecommerce: null })
+  dlPush({
+    event: "add_to_wishlist",
+    event_id: makeEventId(),
+    event_time: Math.floor(Date.now() / 1000),
+    ecommerce: { currency: "BDT", value, items: [listItem(payload.item, 0, "Wishlist")] },
+    meta_event_name: "AddToWishlist",
+    content_type: "product",
+    content_ids: [String(payload.item.id)],
+    contents: [{ id: String(payload.item.id), quantity: 1, item_price: value }],
+    value,
+    currency: "BDT",
+    fbp: getFbp(),
+    fbc: getFbc(),
+    event_source_url: getEventSourceUrl(),
+  })
+}
+
+/** remove_from_cart (GA4 only; Meta has no standard event for it) */
+export function kwPushRemoveFromCart(payload: { value: number; items: KWItem[] }) {
+  if (typeof window === "undefined" || !payload.items.length) return
+  dlPush({ ecommerce: null })
+  dlPush({
+    event: "remove_from_cart",
+    event_id: makeEventId(),
+    ecommerce: { currency: "BDT", value: safeNum(payload.value), items: normalizeItems(payload.items) },
+  })
+}
+
+/** view_cart (GA4): the cart page or drawer was opened with items in it */
+export function kwPushViewCart(payload: { value: number; items: KWItem[] }) {
+  if (typeof window === "undefined" || !payload.items.length) return
+  dlPush({ ecommerce: null })
+  dlPush({
+    event: "view_cart",
+    event_id: makeEventId(),
+    ecommerce: { currency: "BDT", value: safeNum(payload.value), items: normalizeItems(payload.items) },
+  })
+}

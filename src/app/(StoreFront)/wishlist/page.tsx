@@ -1,280 +1,149 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import StoreContainer from "@/components/Layout/StoreContainer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Heart, Grid3X3, Grid2X2, Columns3, Trash2, ShoppingCart, ArrowLeft } from "lucide-react";
+import { Heart, Trash2 } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
-import { useCart } from "@/context/CartContext";
-import type { IProduct } from "@/types/product.types";
+import { ProductCard } from "@/components/ReusableUI/ProductCard";
+import { ShopProductsSkeletonGrid } from "@/components/Modules/Shop/ShopProductsSkeletonGrid";
+import type { DiscoveryItem } from "@/lib/discovery";
+import type { IProductResponse } from "@/types/product.types";
 
-function getActiveDiscount(product: any, variant?: any) {
-  const now = new Date();
-  const discounts = (variant && variant.discounts && variant.discounts.length)
-    ? variant.discounts
-    : product?.discounts;
-
-  if (!discounts || discounts.length === 0) return null;
-
-  return discounts.find((d: any) => {
-    try {
-      const start = d.startDate || d.start || d.from;
-      const end = d.endDate || d.end || d.to;
-
-      if (!start && !end) return true;
-      const startDate = start ? new Date(start) : new Date(0);
-      const endDate = end ? new Date(end) : new Date(8640000000000000);
-
-      return now >= startDate && now <= endDate;
-    } catch {
-      return false;
-    }
-  }) || null;
-}
-
-function computeDiscountedPrice(basePrice: number, discount: any) {
-  if (!discount) return basePrice;
-  if (typeof discount.price === "number") return discount.price;
-  if (discount.type === "percentage" || discount.percent || discount.valueType === "percentage") {
-    const pct = discount.value ?? discount.percent ?? discount.amount ?? 0;
-    const percentVal = pct <= 1 ? pct * 100 : pct;
-    return Math.max(0, Math.round(basePrice * (1 - (percentVal / 100))));
-  }
-  if (discount.type === "fixed" || discount.amount) {
-    const amount = discount.amount ?? discount.value ?? 0;
-    return Math.max(0, Math.round(basePrice - amount));
-  }
-  return basePrice;
-}
-
-const priceFormatter = new Intl.NumberFormat("en-BD", {
-  style: "currency",
-  currency: "BDT",
-  minimumFractionDigits: 0,
-});
-
-const formatPrice = (n: number) => priceFormatter.format(n).replace("BDT", "৳");
+const API = process.env.NEXT_PUBLIC_API_URL;
+const GRID = "grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
 
 export default function WishlistPage() {
-  const wishlist = useWishlist();
-  const cart = useCart();
-  // items may be stored as { product, addedAt } or plain product objects
-  const rawItems = wishlist?.items ?? [];
-  const items = useMemo(() => rawItems.map((it: any) => (it?.product ? it.product : it)), [rawItems]);
+  const { items, removeFromWishlist, clearWishlist } = useWishlist();
+  // the saved list lives in the browser, so the first server-rendered frame has nothing to show
+  const [mounted, setMounted] = useState(false);
+  const [fresh, setFresh] = useState<Map<string, DiscoveryItem> | null>(null);
+  const [failed, setFailed] = useState(false);
 
-  const [columns, setColumns] = useState<number>(4);
+  useEffect(() => setMounted(true), []);
 
-  const handleAddToCart = (product: IProduct) => {
-    // determine default size & price (similar to ProductCard logic)
-    const variant = (product as any).variants?.[0] ?? null;
-    const basePrice = variant?.price ?? product.minPrice ?? product.price ?? 0;
-    const discount = getActiveDiscount(product as any, variant);
-    const selectedPrice = discount ? computeDiscountedPrice(basePrice, discount) : basePrice;
-    const defaultSize = variant ? (variant.size && variant.unit ? `${variant.size} ${variant.unit}` : `${variant.size ?? "3"}ml`) : ((product as any).variantPrices ? Object.keys((product as any).variantPrices)[0] : "3ml");
+  const idsKey = useMemo(() => items.map((i) => i.product.id).sort().join(","), [items]);
 
-    cart?.addToCart?.(product as any, 1, defaultSize, selectedPrice);
-  };
-
-  const handleRemove = (productId: string) => {
-    wishlist?.removeFromWishlist?.(productId);
-  };
-
-  const handleClear = () => wishlist?.clearWishlist?.();
-
-  const gridClass = useMemo(() => {
-    switch (columns) {
-      case 2:
-        return "grid-cols-2";
-      case 3:
-        return "grid-cols-2 md:grid-cols-3";
-      case 5:
-        return "grid-cols-2 md:grid-cols-4 lg:grid-cols-5";
-      default:
-        return "grid-cols-2 md:grid-cols-4";
+  // Current price, stock and offers for everything saved (the saved copy may be weeks old).
+  useEffect(() => {
+    if (!idsKey) {
+      setFresh(new Map());
+      return;
     }
-  }, [columns]);
+    const controller = new AbortController();
+    setFailed(false);
+    fetch(`${API}/discover?ids=${idsKey}&limit=100`, { signal: controller.signal })
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(String(res.status)))))
+      .then((body) => setFresh(new Map((body.data as DiscoveryItem[]).map((p) => [p.id, p]))))
+      .catch((err) => {
+        if (err?.name !== "AbortError") setFailed(true);
+      });
+    return () => controller.abort();
+  }, [idsKey]);
+
+  const count = items.length;
+  const loading = !mounted || (count > 0 && fresh === null && !failed);
+  const available = fresh ? items.filter((i) => fresh.has(i.product.id)) : [];
+  const unavailable = fresh ? items.filter((i) => !fresh.has(i.product.id)) : [];
 
   return (
-    <StoreContainer>
-      <div className="min-h-screen px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/shop" aria-label="Back to shop">
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-            </Button>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Wishlist</h1>
-              <p className="text-gray-600 mt-1">{items.length} saved {items.length === 1 ? "item" : "items"}</p>
-            </div>
-          </div>
-
-          {items.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => setColumns(2)} aria-label="2 columns">
-                <Grid2X2 className="w-5 h-5 mr-2" /> 2
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setColumns(3)} aria-label="3 columns" className="hidden sm:flex">
-                <Columns3 className="w-5 h-5 mr-2" /> 3
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setColumns(4)} aria-label="4 columns" className="hidden md:flex">
-                <Grid3X3 className="w-5 h-5 mr-2" /> 4
-              </Button>
-              <Button variant="destructive" size="sm" onClick={handleClear} aria-label="Clear wishlist">
-                <Trash2 className="w-5 h-5 mr-2" /> Clear
-              </Button>
-            </div>
-          )}
+    <div className="container mx-auto min-h-[60vh] px-3 pb-10 pt-4 sm:px-4 sm:pt-6">
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl">Your wishlist</h1>
+          <p className="mt-1 text-sm text-stone-600">
+            {!mounted
+              ? "Loading your saved perfumes…"
+              : count === 0
+                ? "Perfumes you save with the heart appear here."
+                : `${count} saved ${count === 1 ? "perfume" : "perfumes"}`}
+          </p>
         </div>
-
-        {/* Empty state */}
-        {items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 px-4">
-            <div className="relative w-48 h-48 mb-6 opacity-60">
-              <div className="absolute inset-0 bg-gradient-to-br from-red-100 to-pink-100 rounded-full" />
-              <div className="absolute inset-4 bg-white rounded-full shadow-inner flex items-center justify-center">
-                <Heart className="w-16 h-16 text-gray-400" strokeWidth={1} />
-              </div>
-            </div>
-
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3 text-center">Your Wishlist is Empty</h2>
-            <p className="text-gray-600 text-center max-w-md mb-8 leading-relaxed">
-              Save your favorite perfume oils to view them later. Explore the collection and add items to your wishlist.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button asChild variant="gradient" size="lg" className="min-w-[160px]">
-                <Link href="/shop">Continue Shopping</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="min-w-[160px]">
-                <Link href="/new-arrivals">New Arrivals</Link>
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {/* Grid of wishlist items */}
-            <div className={`grid ${gridClass} gap-4`}>
-              {items.map((product: any) => {
-                const productId = product?.id ?? product?._id ?? product?.slug ?? product?.name;
-                const variant = product?.variants?.[0] ?? null;
-                const basePrice = variant?.price ?? product?.minPrice ?? product?.price ?? 0;
-                const activeDiscount = getActiveDiscount(product, variant);
-                const selectedPrice = activeDiscount ? computeDiscountedPrice(basePrice, activeDiscount) : basePrice;
-                const priceStr = formatPrice(selectedPrice);
-
-                return (
-                  <Card key={productId} className="overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group">
-                    <div className="relative aspect-[4/5] w-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-                      <Link href={`/product/${product.slug ?? (product.name?.toLowerCase().replace(/ /g, '-')) ?? productId}`} aria-label={`View details for ${product.name}`}>
-                        <Image
-                          src={product.primaryImage ?? product.primary_image ?? "/placeholder.svg"}
-                          alt={product.name}
-                          fill
-                          sizes="(max-width:600px) 100vw, (max-width:1200px) 50vw, 33vw"
-                          className="object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      </Link>
-
-                      {/* remove button */}
-                      <div className="absolute top-3 right-3 z-10 flex gap-2">
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-8 w-8 rounded-full backdrop-blur-md bg-white/80 border-white/50 hover:bg-red-50 hover:border-red-200"
-                          aria-label="Remove from wishlist"
-                          onClick={() => handleRemove(productId)}
-                        >
-                          <Trash2 className="w-4 h-4 text-red-600" />
-                        </Button>
-                      </div>
-
-                      {/* category badge */}
-                      <div className="absolute top-3 left-3 z-10">
-                        <Badge variant="secondary" className="capitalize">
-                          {product.category?.categoryName ?? "product"}
-                        </Badge>
-                      </div>
-
-                      {/* discount badge */}
-                      {activeDiscount && (
-                        <div className="absolute top-12 left-3 z-10">
-                          {/* derive percent */}
-                          <div className="px-2 py-1 rounded-full bg-red-600 text-white text-xs font-semibold">
-                            {Math.round(((basePrice - selectedPrice) / (basePrice || 1)) * 100)}% OFF
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <CardContent className="p-4 space-y-2">
-                      <CardTitle className="text-base font-semibold line-clamp-2 text-center leading-tight">
-                        <Link href={`/product/${product.slug ?? (product.name?.toLowerCase().replace(/ /g, '-')) ?? productId}`} className="hover:text-red-600 transition-colors duration-300 group-hover:underline decoration-red-600 underline-offset-4">
-                          {product.name}
-                        </Link>
-                      </CardTitle>
-
-                      <div className="text-center space-y-1">
-                        <span className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-                          {priceStr}
-                        </span>
-                        {product.smell?.length ? (
-                          <div className="flex flex-wrap justify-center gap-1 mt-1">
-                            {product.smell.slice(0, 3).map((note: string) => (
-                              <span key={note} className="px-2 py-0.5 bg-red-50 text-red-700 text-[10px] rounded-full border border-red-100">
-                                {note}
-                              </span>
-                            ))}
-                            {product.smell.length > 3 && (
-                              <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] rounded-full">+{product.smell.length - 3}</span>
-                            )}
-                          </div>
-                        ) : null}
-                      </div>
-                    </CardContent>
-
-                    <CardFooter className="p-4 pt-0">
-                      <div className="grid grid-cols-2 gap-2 w-full">
-                        <Button variant="outline" className="w-full" asChild>
-                          <Link href={`/product/${product.slug ?? (product.name?.toLowerCase().replace(/ /g, '-')) ?? productId}`}>View</Link>
-                        </Button>
-                        <Button className="w-full" onClick={() => handleAddToCart(product)} aria-label={`Add ${product.name} to cart`}>
-                          <ShoppingCart className="w-4 h-4 mr-2" /> Add to Cart
-                        </Button>
-                      </div>
-                    </CardFooter>
-                  </Card>
-                );
-              })}
-            </div>
-
-            {/* Recommendation / CTA */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Looking for more?</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                <p className="text-gray-600">Explore our curated collections and discover your signature scent.</p>
-                <div className="flex gap-2">
-                  <Button asChild variant="outline">
-                    <Link href="/featured">Featured</Link>
-                  </Button>
-                  <Button asChild variant="gradient">
-                    <Link href="/new-arrivals">New Arrivals</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        {mounted && count > 0 && (
+          <button
+            type="button"
+            onClick={clearWishlist}
+            className="min-h-0! inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-stone-300 px-3 text-[13px] font-semibold text-stone-700 hover:border-red-300 hover:text-red-700"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> Clear all
+          </button>
         )}
       </div>
-    </StoreContainer>
+
+      <div className="mt-5">
+        {loading ? (
+          <ShopProductsSkeletonGrid count={4} colsClass={GRID} />
+        ) : count === 0 ? (
+          <div className="rounded-2xl border border-stone-200 px-6 py-14 text-center">
+            <Heart className="mx-auto h-10 w-10 text-stone-300" strokeWidth={1.5} />
+            <h2 className="mt-3 text-lg font-semibold text-stone-900">Nothing saved yet</h2>
+            <p className="mx-auto mt-1 max-w-sm text-sm text-stone-600">
+              Tap the heart on any perfume to keep it here while you decide. Sign in and it follows you to your other
+              devices.
+            </p>
+            <Link
+              href="/shop"
+              className="mt-4 inline-flex h-10 items-center rounded-full bg-emerald-700 px-5 text-sm font-semibold text-white"
+            >
+              Find a perfume
+            </Link>
+          </div>
+        ) : failed ? (
+          <div className="rounded-2xl border border-stone-200 px-6 py-10 text-center">
+            <h2 className="text-lg font-semibold text-stone-900">We could not load your saved perfumes</h2>
+            <p className="mx-auto mt-1 max-w-sm text-sm text-stone-600">
+              They are still saved. Please check your connection and reload the page.
+            </p>
+            <ul className="mx-auto mt-4 max-w-sm space-y-1 text-left text-sm">
+              {items.map((i) => (
+                <li key={i.product.id}>
+                  <Link href={`/product/${i.product.slug}`} className="font-medium text-emerald-800 underline underline-offset-2">
+                    {i.product.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <>
+            <ul className={`grid ${GRID} gap-2 sm:gap-3`}>
+              {available.map((i, index) => (
+                <li key={i.product.id}>
+                  <ProductCard product={fresh!.get(i.product.id) as unknown as IProductResponse} priority={index < 4} />
+                </li>
+              ))}
+            </ul>
+
+            {unavailable.length > 0 && (
+              <section className="mt-8">
+                <h2 className="text-base font-semibold text-stone-900">No longer available</h2>
+                <p className="mt-0.5 text-sm text-stone-600">
+                  These are not in the shop at the moment. Message us if you would like to know when they return.
+                </p>
+                <ul className="mt-3 divide-y divide-stone-100 rounded-2xl border border-stone-200">
+                  {unavailable.map((i) => (
+                    <li key={i.product.id} className="flex items-center gap-3 p-3">
+                      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-stone-100 grayscale">
+                        {i.product.primaryImage && (
+                          <Image src={i.product.primaryImage} alt="" fill sizes="48px" className="object-cover" />
+                        )}
+                      </div>
+                      <span className="min-w-0 flex-1 truncate text-sm font-medium text-stone-700">{i.product.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeFromWishlist(i.product.id)}
+                        className="min-h-0! h-9 shrink-0 rounded-full border border-stone-300 px-3 text-[13px] font-semibold text-stone-700"
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </>
+        )}
+      </div>
+    </div>
   );
 }

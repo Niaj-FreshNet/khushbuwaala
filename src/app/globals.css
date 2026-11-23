@@ -665,12 +665,12 @@
     touch-action: manipulation;
   }
 
-  /* Slightly reduced font size for compact, clean inputs */
+  /* 16px is the smallest size iPhones do not zoom into when a field is tapped. Smaller text here
+     forced the whole site to block pinch-zoom, which is an accessibility problem. */
   input,
   select,
   textarea {
-    font-size: 13px;
-    /* 👈 Changed from 16px */
+    font-size: 16px;
   }
 
   /* Smooth scrolling */

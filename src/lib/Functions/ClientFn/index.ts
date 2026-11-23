@@ -1,4 +1,5 @@
 import { IDiscount, IProduct, IProductResponse, IProductVariant } from "@/types/product.types";
+import { htmlToText } from "@/lib/text";
 
 function formatDate(date: string | Date | undefined) {
   if (!date) return "";
@@ -12,7 +13,7 @@ export default function mapProductResponseToProduct(
     id: product.id,
     name: product.name,
     slug: product.slug,
-    description: product.description,
+    description: htmlToText(product.description),
     primaryImage: product.primaryImage,
     otherImages: product.otherImages || [],
     videoUrl: product.videoUrl,

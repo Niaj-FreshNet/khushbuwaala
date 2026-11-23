@@ -12,7 +12,7 @@ import BannerSection from "@/components/Modules/Home/BannerSection.client"
 
 // SEO: Page-specific Metadata for the homepage
 export const metadata: Metadata = {
-  title: "Home", // This will be combined with the template from root layout
+  title: { absolute: "Khushbuwaala – Perfume Oils, Attar & Oud in Bangladesh" },
   description:
     "Discover Khushbuwaala's exquisite collection of premium perfumes, oriental attars, and natural fragrances. Shop best sellers, new arrivals, and more.",
   keywords:
@@ -25,14 +25,7 @@ export const metadata: Metadata = {
     description:
       "Your ultimate destination for premium perfumes and attars. Explore our best sellers, new collections, and exclusive offers.",
     url: "https://khushbuwaala.com/",
-    images: [
-      {
-        url: "/images/og-image-homepage.jpg", // Specific OG image for homepage
-        width: 1200,
-        height: 630,
-        alt: "Khushbuwaala Homepage - Premium Perfumes",
-      },
-    ],
+    images: [{ url: "/hero1desktop11.webp", alt: "Khushbuwaala perfume oils" }],
   },
   // Add more specific metadata as needed for the homepage
 }
