@@ -32,7 +32,7 @@ export function CategoryCard({
           src={CategoryImage || "/placeholder.svg"}
           alt={CategoryName}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          sizes="(max-width: 640px) 50vw, 17vw"
           className={cn(
             "object-cover",
             "transition-transform duration-700 ease-out",

@@ -183,7 +183,7 @@ const AccordionItem = ({
 
       <div
         className={cn(
-          "w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 bg-gray-50 text-gray-400",
+          "w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 bg-gray-50 text-gray-500",
           isOpen && "rotate-180 bg-emerald-50 text-emerald-700"
         )}
       >
@@ -476,7 +476,7 @@ export default function ProductAccordion({
           {/* Quick Specs Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 pt-0.5">
             <div className="p-2.5 rounded-xl bg-gray-50/80 border border-gray-100">
-              <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wide">Brand</span>
+              <span className="text-[10px] uppercase font-bold text-gray-500 block tracking-wide">Brand</span>
               <span className="text-xs sm:text-sm font-semibold text-gray-900 block mt-0.5 truncate">
                 {(product.brand || "Khushbuwaala")
                   .toLowerCase()
@@ -486,7 +486,7 @@ export default function ProductAccordion({
 
             {product.origin && product.origin.trim().toUpperCase() !== "N/A" && (
             <div className="p-2.5 rounded-xl bg-gray-50/80 border border-gray-100">
-              <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wide">Origin</span>
+              <span className="text-[10px] uppercase font-bold text-gray-500 block tracking-wide">Origin</span>
               <span className="text-xs sm:text-sm font-semibold text-gray-900 block mt-0.5 truncate">
                 {product.origin}
               </span>
@@ -494,14 +494,14 @@ export default function ProductAccordion({
             )}
 
             <div className="p-2.5 rounded-xl bg-gray-50/80 border border-gray-100">
-              <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wide">Gender</span>
+              <span className="text-[10px] uppercase font-bold text-gray-500 block tracking-wide">Gender</span>
               <span className="text-xs sm:text-sm font-semibold text-gray-900 capitalize block mt-0.5 truncate">
                 {(product.gender || "Unisex").toLowerCase().replace(/^./, (char) => char.toUpperCase())}
               </span>
             </div>
 
             <div className="p-2.5 rounded-xl bg-gray-50/80 border border-gray-100">
-              <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wide mb-1">
+              <span className="text-[10px] uppercase font-bold text-gray-500 block tracking-wide mb-1">
                 Best For
               </span>
               <div className="flex flex-wrap gap-1">
@@ -586,7 +586,7 @@ export default function ProductAccordion({
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <span className="w-6 text-right font-medium text-gray-400 text-[9px]">
+                    <span className="w-6 text-right font-medium text-gray-500 text-[9px]">
                       {pct}%
                     </span>
                   </div>
@@ -671,7 +671,7 @@ export default function ProductAccordion({
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="review-email" className="text-xs font-medium text-gray-700">
-                    Email <span className="text-gray-400 font-normal">(Optional)</span>
+                    Email <span className="text-gray-500 font-normal">(Optional)</span>
                   </Label>
                   <Input
                     id="review-email"
@@ -702,7 +702,7 @@ export default function ProductAccordion({
 
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-gray-700">
-                Attach Photo <span className="text-gray-400 font-normal">(Optional)</span>
+                Attach Photo <span className="text-gray-500 font-normal">(Optional)</span>
               </Label>
               <div className="flex items-center gap-3">
                 <input
@@ -765,7 +765,7 @@ export default function ProductAccordion({
           {/* Customer Reviews List */}
           <div className="space-y-1.5">
             {loadingReviews ? (
-              <p className="text-center py-5 text-xs sm:text-sm text-gray-400">Loading reviews...</p>
+              <p className="text-center py-5 text-xs sm:text-sm text-gray-500">Loading reviews...</p>
             ) : reviews.length === 0 ? (
               <div className="p-5 text-center rounded-xl bg-gray-50 border border-dashed border-gray-200">
                 <p className="text-xs sm:text-sm text-gray-500 font-medium">
@@ -845,7 +845,7 @@ export default function ProductAccordion({
                               </span>
                             )}
                           </div>
-                          <span className="text-[10px] text-gray-400 font-medium">
+                          <span className="text-[10px] text-gray-500 font-medium">
                             {formattedDate}
                           </span>
                         </div>

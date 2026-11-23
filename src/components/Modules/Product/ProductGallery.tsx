@@ -90,6 +90,7 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
               src={images[activeIdx]}
               alt={`${product.name} - Premium perfume bottle`}
               fill
+              fetchPriority="high"
               sizes="(max-width: 768px) 100vw, 50vw"
               className={`object-cover transition-transform duration-500 ${
                 zoomActive ? "scale-150" : "scale-100"

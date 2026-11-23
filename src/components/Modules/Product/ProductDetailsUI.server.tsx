@@ -198,7 +198,7 @@ export default function ProductDetailsUI({
                 ৳{(discount ? discountedPrice : currentPrice).toLocaleString()}
               </span>
               {discount && (
-                <span className="text-sm sm:text-base text-gray-400 line-through truncate font-medium">
+                <span className="text-sm sm:text-base text-gray-500 line-through truncate font-medium">
                   ৳{currentPrice.toLocaleString()}
                 </span>
               )}
@@ -340,7 +340,7 @@ export default function ProductDetailsUI({
                         <span className="text-xs sm:text-sm text-gray-600">
                           ৳{variantFinalPrice.toLocaleString()}
                         </span>
-                        <span className="text-[11px] sm:text-xs text-gray-400 line-through">
+                        <span className="text-[11px] sm:text-xs text-gray-500 line-through">
                           ৳{variant.price.toLocaleString()}
                         </span>
                       </>

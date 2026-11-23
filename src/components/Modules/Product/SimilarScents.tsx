@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { fetchSimilar, slimItem } from "@/lib/discovery";
+import { FAMILY_PAGES } from "@/config/scentPages";
 import { ProductCard } from "@/components/ReusableUI/ProductCard";
 import type { IProductResponse } from "@/types/product.types";
 
@@ -19,8 +20,8 @@ export default async function SimilarScents({ slug, name, familyId }: { slug: st
           <p className="text-[13px] text-stone-600">These share its notes and character.</p>
         </div>
         {familyId && (
-          <Link href={`/shop?families=${familyId}`} className="shrink-0 text-sm font-semibold text-emerald-800 underline underline-offset-2">
-            See more
+          <Link href={FAMILY_PAGES[familyId] ? `/scents/${familyId}` : `/shop?families=${familyId}`} className="shrink-0 text-sm font-semibold text-emerald-800 underline underline-offset-2">
+            More {FAMILY_PAGES[familyId]?.name.toLowerCase() ?? "similar"} perfumes
           </Link>
         )}
       </div>

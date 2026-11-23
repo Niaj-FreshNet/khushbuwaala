@@ -378,7 +378,7 @@ export function ProductCard({
               {formatPriceBDT(discountedPrice)}
             </span>
             {activeDiscount && (
-              <span className="text-[11px] sm:text-xs text-gray-400 line-through">
+              <span className="text-[11px] sm:text-xs text-gray-500 line-through">
                 {formatPriceBDT(basePrice)}
               </span>
             )}

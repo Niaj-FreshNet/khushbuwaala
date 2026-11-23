@@ -157,7 +157,7 @@ export function CarouselSlider({ slides: heroSlides }: { slides: HeroSlide[] }) 
                 onClick={() => goTo(i)}
                 className={[
                   "grid place-items-center rounded-full",
-                  "h-5 w-5 sm:h-6 sm:w-6",
+                  "min-h-0! h-6 w-6 sm:h-7 sm:w-7",
                   "relative",
                   "transition-transform duration-200",
                   "active:scale-95",
