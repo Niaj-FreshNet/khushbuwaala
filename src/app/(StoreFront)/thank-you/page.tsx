@@ -60,8 +60,26 @@ export default function ThankYouPage() {
   const lastOrder = useAppSelector(selectLastOrder);
   const orderById = useAppSelector(queryOrderId ? selectOrderById(queryOrderId) : () => undefined);
 
-  // Prefer query order > last order
-  const order = (orderById as any)?.data || (lastOrder as any)?.data;
+  // The order just placed is kept for this browser tab, so refreshing the page (people often do,
+  // or take a screenshot later) still shows it. It is cleared when the tab is closed.
+  const [keptOrder, setKeptOrder] = useState<any>(null);
+  const liveOrder = (orderById as any)?.data || (lastOrder as any)?.data;
+  useEffect(() => {
+    try {
+      if (liveOrder?.id) {
+        sessionStorage.setItem("kw_last_order", JSON.stringify(liveOrder));
+        return;
+      }
+      const raw = sessionStorage.getItem("kw_last_order");
+      const saved = raw ? JSON.parse(raw) : null;
+      if (saved?.id && (!queryOrderId || saved.id === queryOrderId)) setKeptOrder(saved);
+    } catch {
+      // private mode: the page simply shows nothing after a refresh, as before
+    }
+  }, [liveOrder, queryOrderId]);
+
+  // Prefer query order > last order > the copy kept for this tab
+  const order = liveOrder || keptOrder;
 
   const [discountBreakdown, setDiscountBreakdown] = useState<any>(null);
   const [applyDiscount] = useApplyDiscountMutation();
