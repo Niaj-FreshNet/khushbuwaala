@@ -96,3 +96,9 @@ The forms were removed because they did not save anything. Collecting emails nee
 
 ## SF-024 — Motion on the home page is CSS only (2026-11-23)
 Content must be visible in the HTML without waiting for a script. Entrance animations driven by a script library hid the category grid and headings until it loaded.
+
+## SF-025 — Shop events wait for Tag Manager (2026-11-23)
+Tag Manager loads late so pages open faster (SF-024 era speed work). Events pushed before it loads reached the Meta tag before the pixel was set up and were lost. Rather than load Tag Manager early again, events go through `kwDataLayerPush`, which holds them until Tag Manager is running. New tracking code must use it, not `window.dataLayer.push`.
+
+## SF-026 — Meta tags in Tag Manager use explicit standard events (2026-11-23)
+The Meta Pixel template's "Enhanced Ecommerce dataLayer Integration" and "Use GA4 dataLayer Integration" boxes stay off: they expect the old Universal Analytics data shape and fail silently with ours (this broke three events for about half an hour on 2026-11-23). Each tag names its standard event and lists value, currency, content_ids, contents and content_type itself.

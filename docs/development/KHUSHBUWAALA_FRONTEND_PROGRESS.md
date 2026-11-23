@@ -1,12 +1,50 @@
 # Khushbuwaala Storefront — Progress
 
-**Last updated:** 2026-11-23 (session 4)
+**Last updated:** 2026-11-23 (session 5)
 **Spec:** `Khusbuwaala_Storefront_Master_Development_Prompt.md` (same folder)
 **Related:** [TASKS](KHUSHBUWAALA_FRONTEND_TASKS.md) · [DECISIONS](KHUSHBUWAALA_FRONTEND_DECISIONS.md) · admin/backend history: `D:\Projects\khushbuwaala\KHUSHBUWAALA_*.md`
 
 ## Overall status
 
 Phase 0 (audit) done. Phase 1 (product discovery, header search, wishlist, SEO foundations) is **live since 2026-11-23 ~15:30 Dhaka** (owner approved the deploy).
+
+## Session 5 — 2026-11-23 evening (tracking accounts: Google Cloud, Tag Manager, Meta) — DEPLOYED
+
+**Live now:** backend `6a5a320`, storefront `1520cd7`, admin `34c8a66`. Tag Manager web container **version 17** (version 13 was live before this session; it is the rollback point in Tag Manager → Versions). Storefront rollback copy: `~/deploy-backups/khushbuwaala-frontend-20261123-140737`.
+
+Also shipped earlier today and not written up before: thank-you page survives a refresh (`863eb8a`, key `kw_last_order` in session storage); Lighthouse fixes (`c86a334`, Tag Manager loads with `lazyOnload`); admin "Fragrance data check" screen (backend `6a5a320`, admin `34c8a66`).
+
+### Tagging server (sGTM): cause found, blocked on a payment
+- Cloud Run request log says, word for word: "The request failed because billing is disabled for this project." The container itself is fine; the earlier guess (bad image) was wrong.
+- Google Cloud → Billing → "Khushbuwaala SGTM Billing A/C": overdue balance **$10.31**, Visa ending 0188 "Transaction declined". Cost stopped on Nov 8, which matches the drop in Meta events from Nov 9.
+- **Owner action:** pay the balance (Billing → Pay now, or fix the card with the bank). The service should come back by itself; then check `https://sgtm.khushbuwaala.com/healthy` answers `ok`. Until then GA4 receives nothing from the shop (every GA4 hit goes through this server) and Meta gets browser events only, plus the Purchase the backend sends directly.
+
+### Tag Manager (web container GTM-KDFMX5QL), versions 14 → 17
+| What was wrong | Fix | Checked how |
+| --- | --- | --- |
+| Meta browser Purchase used the bare order number as its event ID; the backend sends `kw_<orderId>`. The two never matched, so Meta could count an order twice | Purchase tag Event ID now reads `event_id` from the data layer (`kw_<orderId>`) | Live container script; **not yet seen on a real order** |
+| Meta ViewContent, AddToCart, InitiateCheckout sent no value, currency or product IDs | Each now sends value, currency, content_ids, contents, content_type=product | Meta Test Events: ViewContent arrived with value 1350, BDT, the product ID; AddToCart arrived. InitiateCheckout **not tested** |
+| Base pixel sent a nameless custom event on every page load (shown in Meta as `__missing_event`, about 2,000 in 28 days) and no PageView | Base pixel now sends PageView | Meta Test Events: PageView on load, no more `__missing_event` |
+| No tags for the new shop events | One GA4 tag "GA4 shop events Tag" for view_item_list, view_cart, remove_from_cart, add_shipping_info, add_payment_info, search, add_to_wishlist (event name from the data layer, ecommerce data on, `search_term`); one Meta tag "FB Search Tag" | GA4 requests for view_cart seen leaving the browser; **delivery to GA4 cannot be confirmed while sGTM is down**. Meta Search **not tested** |
+
+**Mistake made and corrected in this session:** version 14 switched the three Meta tags to the template's "Enhanced Ecommerce / GA4 dataLayer" mode. That mode expects the old Universal Analytics data shape, so the tags failed silently. ViewContent was broken from about 19:43 to 20:00 Dhaka (version 15), AddToCart and InitiateCheckout until about 20:02 (version 16). Roughly 20–35 minutes of those three Meta browser events were lost (longer for browsers that had the script cached, up to about 15 minutes more). Do not tick those two boxes on this template.
+
+### Storefront: events sent before Tag Manager loads were lost for Meta (`1520cd7`)
+- Since `c86a334` Tag Manager loads late (for speed). A product view pushed during page load was replayed before Tag Manager's start-up step and Meta never showed it; the same event sent after start-up arrived. Seen in Meta Test Events.
+- New `src/lib/Analytics/dataLayerGate.ts`: `kwDataLayerPush` holds events until Tag Manager is running, then hands them over in order (gives up waiting after 20 s). Used by `kwEcom.ts` and `ViewItemDataLayer.tsx`.
+- After the deploy: ViewContent on first page load shows in Meta Test Events as Processed with its parameters.
+- From the `c86a334` deploy earlier on 2026-11-23 until about 20:10 Dhaka this also means **landing-page ViewContent and checkout-page InitiateCheckout did not reach Meta from the browser** during those hours.
+
+### Found, not changed
+- Six Meta datasets exist in the business account; the shop uses `1100344042124349`.
+- Meta event match quality is 6.1/10 (Purchase 7.5). Advanced matching is off on the browser tags.
+- Product pages prefetch about 40 other pages on load (visible in the network list). Worth a look for data use on phones.
+- The in-app test browser runs pages in the background and sometimes does not run page scripts; use real Chrome for tracking checks.
+
+### Not done in this session
+- Meta tags for AddToWishlist and AddPaymentInfo (events are in the data layer; no tag yet).
+- GA4, Search Console, Merchant Center were not opened.
+- Fragrance data check not opened on the live admin.
 
 ## Session 4 — 2026-11-23 (home page, speed, admin-managed content, landing pages) — DEPLOYED
 

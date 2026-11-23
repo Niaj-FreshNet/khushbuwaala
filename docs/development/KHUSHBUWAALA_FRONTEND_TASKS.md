@@ -156,3 +156,22 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 - [ ] `~/deploy-backups` on the server is about 2.5 GB of build copies (disk is at 18%); prune old ones occasionally
 
 **Blocked on the owner** (unchanged): sGTM on Google Cloud is down; access to GTM, GA4, Meta Events Manager, Search Console, Merchant Center.
+
+## Update 2026-11-23, session 5 (tracking accounts)
+
+**Done**
+- [x] Found why the tagging server is down: Google Cloud billing disabled, $10.31 overdue, card declined
+- [x] Tag Manager v17: Meta Purchase event ID matches the backend; product data on ViewContent / AddToCart / InitiateCheckout; base pixel sends PageView; GA4 tag for the 7 new shop events; Meta Search tag
+- [x] Storefront `1520cd7`: events wait for Tag Manager before being sent
+
+**Owner**
+- [ ] Pay the Google Cloud balance ($10.31) so the tagging server and GA4 work again
+
+**Next, in this order**
+- [ ] After the bill is paid: confirm `/healthy` is `ok`, then GA4 Realtime shows page_view, view_item, add_to_cart, and the new events
+- [ ] Next real order: in Meta Events Manager confirm the browser and server Purchase show as one (de-duplicated)
+- [ ] Test InitiateCheckout and Search in Meta Test Events
+- [ ] Meta tags for AddToWishlist and AddPaymentInfo
+- [ ] Search Console (Domain property, submit sitemap) and Merchant Center (feed status, shipping): not opened yet
+- [ ] Open "Fragrance data check" on the live admin and read the real numbers
+- [ ] Product pages prefetch about 40 pages on load: decide whether to cut it
