@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/redux/store/hooks/useCart";
-import { kwPushBeginCheckout } from "@/lib/Analytics/kwEcom";
+import { kwPushBeginCheckout, kwCartItems, kwTrackViewCart } from "@/lib/Analytics/kwEcom";
 
 interface CartDrawerProps {
   visible: boolean;
@@ -277,18 +277,13 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
     };
   }, [visible]);
 
+  // view_cart: each time the drawer opens with items in it
+  useEffect(() => {
+    if (visible) kwTrackViewCart(cartItems as any[]);
+  }, [visible, cartItems]);
+
   const handleCheckout = () => {
-    const items = (cartItems || [])
-      .map((item: any) => ({
-        item_id: String(item?.product?.id || item?.product?.slug || ""),
-        item_name: String(item?.product?.name || ""),
-        item_brand: String(item?.product?.brand || "Khushbuwaala"),
-        item_category: String(item?.product?.categoryId || ""),
-        item_variant: String(item?.selectedSize || ""),
-        price: Number(item?.selectedPrice || 0),
-        quantity: Number(item?.quantity || 1),
-      }))
-      .filter((i: any) => i.item_id);
+    const items = kwCartItems(cartItems as any[]);
 
     kwPushBeginCheckout({
       currency: "BDT",

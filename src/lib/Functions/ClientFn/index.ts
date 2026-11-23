@@ -33,6 +33,8 @@ export default function mapProductResponseToProduct(
     bestFor: product.bestFor || [],
     
     categoryId: product.categoryId,
+    // readable category for analytics and breadcrumbs (the id alone means nothing in reports)
+    ...({ category: product.category } as object),
     published: product.published,
     
     supplier: product.supplier,

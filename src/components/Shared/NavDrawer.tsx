@@ -124,16 +124,16 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
       icon: <Star className="h-5 w-5" />,
       children: [
         {
-          key: "organic-attar",
-          label: "Organic Attar",
+          key: "natural-attar",
+          label: "Natural Attar",
           href: "/organic-attar",
-          description: "Pure natural fragrances",
+          description: "Traditional attars such as ruh khus",
         },
         {
           key: "artificial-oud",
           label: "Artificial Oud",
           href: "/artificial-oud",
-          description: "Premium oud alternatives",
+          description: "Blended oud oils",
         },
         {
           key: "oriental-attar",
@@ -153,18 +153,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
           href: "/brand-perfumes",
           description: "Popular Brand Perfumes",
         },
-        {
-          key: "niche-perfumes",
-          label: "Niche Perfumes",
-          href: "/niche-perfumes",
-          description: "Our In-house Creations",
-        },
-        {
-          key: "accessories",
-          label: "Accessories",
-          href: "/accessories",
-          description: "Perfume-related accessories and gifts",
-        },
+        // /niche-perfumes and /accessories are kept out of the menu until they have products
       ],
     },
     {

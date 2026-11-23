@@ -1,62 +1,97 @@
-import { Metadata } from "next";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Users, Heart } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
-  title: "About Us | Khushbuwaala Perfumes - Authentic Fragrances from Dhaka",
-  description: "Learn about Khushbuwaala Perfumes: Dhaka's premier destination for original perfumes since 2020. Our story, commitment to quality, and passion for scents.",
+  title: { absolute: "About Khushbuwaala – 8+ Years of Fragrance Expertise" },
+  description:
+    "Khushbuwaala has been selling perfume oils, attars and oud from Dhaka since 2020, built on more than eight years of working with fragrance. Who we are and how we help you choose.",
+  alternates: { canonical: `${siteConfig.url}/about` },
   openGraph: {
-    title: "About Khushbuwaala Perfumes - Dhaka's Scent Story",
-    description: "From passion to perfume: Discover our journey in bringing luxury fragrances to Bangladesh.",
-    url: "https://www.khushbuwaala.com/about",
+    title: "About Khushbuwaala",
+    description: "A fragrance shop from Dhaka, built on 8+ years of working with perfume oils, attars and oud.",
+    url: `${siteConfig.url}/about`,
   },
 };
 
+// Wording agreed with the owner (2026-11-23): the shop is "since 2020", the experience is
+// "8+ years in fragrance". No customer counts, brand counts or follower numbers.
+const WAYS_WE_HELP = [
+  {
+    title: "Start from what you like",
+    body: "You do not need to know perfume names. Tell the shop you want something fresh, sweet or woody, with a touch of oud or rose, and it narrows the collection for you.",
+    href: "/shop",
+    link: "Browse by scent",
+  },
+  {
+    title: "Honest descriptions",
+    body: "Every perfume lists its main scent families and notes, and says in plain words how long it tends to last and how far it reaches. Skin and weather change that, so we do not promise hours.",
+    href: "/shop?longevity=long,very_long",
+    link: "See the long-lasting ones",
+  },
+  {
+    title: "Ask a person",
+    body: "If you are choosing a gift or cannot decide between two, message us. We would rather help you pick the right one than sell you the wrong one.",
+    href: `https://wa.me/${siteConfig.contact.whatsapp}`,
+    link: "Message us on WhatsApp",
+  },
+];
+
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-gray-50 py-12">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <div className="text-center mb-12">
-          <Badge variant="secondary" className="mb-4">Our Story</Badge>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">About Khushbuwaala Perfumes</h1>
-          <p className="text-xl text-gray-600">Bringing the world's finest scents to Dhaka since 2020.</p>
+    <div className="bg-white">
+      <div className="container mx-auto max-w-3xl px-4 pb-14 pt-8 sm:pt-12">
+        <p className="text-sm font-semibold uppercase tracking-wide text-emerald-800">Our story</p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">
+          We have spent more than eight years around fragrance. Khushbuwaala is where we share it.
+        </h1>
+
+        <div className="mt-6 space-y-4 text-[15px] leading-relaxed text-stone-700 sm:text-base">
+          <p>
+            Khushbuwaala opened in Dhaka in 2020. The work behind it started earlier: over eight years of smelling,
+            comparing and selecting perfume oils, attars and oud, and of listening to what people actually ask for when
+            they say “something nice that lasts”.
+          </p>
+          <p>
+            That experience is why most of what we sell is concentrated perfume oil rather than spray. A small bottle goes a
+            long way, it sits close to the skin in our heat and humidity, and it lets you own several scents for the
+            price of one spray bottle. Alongside the oils you will find Arabian-style attars, oud blends, natural attars
+            such as ruh khus, a few brand perfumes, and gift sets.
+          </p>
+          <p>
+            We choose each fragrance ourselves and describe it the way we would across a shop counter: what it smells
+            like, when it suits, and how strong it is.
+          </p>
         </div>
 
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Heart className="h-6 w-6 text-amber-600" />
-              Our Passion
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="prose prose-lg max-w-none text-gray-700 space-y-6">
-            <p>
-              Founded in the heart of Dhaka, Khushbuwaala Perfumes was born from a simple love for fragrances that tell stories. We curate authentic, long-lasting perfumes from global brands, making luxury accessible to every Bangladeshi. From our flagship showroom in Khilgaon, we blend tradition with modernity—offering everything from classic attars to contemporary eau de parfums.
-            </p>
-            <p>
-              Our mission: <strong>Empower confidence through scent.</strong> We source directly from trusted suppliers, ensuring 100% originality without compromise.
-            </p>
-            <div className="grid md:grid-cols-2 gap-6 mt-8">
-              <div className="text-center">
-                <Users className="h-12 w-12 text-amber-600 mx-auto mb-4" />
-                <h3 className="font-bold text-xl">10K+</h3>
-                <p className="text-gray-600">Happy Customers</p>
-              </div>
-              <div className="text-center">
-                <Users className="h-12 w-12 text-amber-600 mx-auto mb-4" />
-                <h3 className="font-bold text-xl">50+</h3>
-                <p className="text-gray-600">Fragrance Brands</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <h2 className="mt-10 text-xl font-bold text-stone-900">How we help you choose</h2>
+        <ul className="mt-4 grid gap-3 sm:grid-cols-3">
+          {WAYS_WE_HELP.map((item) => (
+            <li key={item.title} className="flex flex-col rounded-2xl border border-stone-200 p-4">
+              <h3 className="text-[15px] font-semibold text-stone-900">{item.title}</h3>
+              <p className="mt-1.5 flex-1 text-sm leading-relaxed text-stone-600">{item.body}</p>
+              <Link href={item.href} className="mt-3 text-sm font-semibold text-emerald-800 underline underline-offset-2">
+                {item.link}
+              </Link>
+            </li>
+          ))}
+        </ul>
 
-        <div className="text-center">
-          <Button asChild variant="outline" size="lg">
-            <a href="/stores">Visit Our Showroom</a>
-          </Button>
+        <h2 className="mt-10 text-xl font-bold text-stone-900">Ordering from us</h2>
+        <p className="mt-3 text-[15px] leading-relaxed text-stone-700 sm:text-base">
+          We deliver across Bangladesh and you can pay cash on delivery. You are also welcome at our showroom to try
+          before you buy.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Link href="/shop" className="inline-flex h-11 items-center rounded-full bg-emerald-700 px-5 text-sm font-semibold text-white">
+            Find a perfume
+          </Link>
+          <Link href="/stores" className="inline-flex h-11 items-center rounded-full border border-stone-300 px-5 text-sm font-semibold text-stone-800">
+            Visit the showroom
+          </Link>
+          <Link href="/contact" className="inline-flex h-11 items-center rounded-full border border-stone-300 px-5 text-sm font-semibold text-stone-800">
+            Contact us
+          </Link>
         </div>
       </div>
     </div>

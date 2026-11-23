@@ -70,14 +70,15 @@ const defaultNotices = [
   "Cash on Delivery Available",
 ]
 
+// Only collections that have products. /niche-perfumes and /accessories still exist for later
+// (they show a friendly note and are hidden from Google); add them back here when stocked.
 const categories = [
-  { label: "Organic Attar", href: "/organic-attar" },
-  { label: "Artificial Oud", href: "/artificial-oud" },
-  { label: "Oriental & Arabian Attar", href: "/oriental-attar" },
   { label: "Inspired Perfume Oil", href: "/inspired-perfume-oil" },
+  { label: "Oriental & Arabian Attar", href: "/oriental-attar" },
+  { label: "Oud Collection", href: "/artificial-oud" },
+  { label: "Natural Attar", href: "/organic-attar" },
   { label: "Brand Perfumes", href: "/brand-perfumes" },
-  { label: "Niche Perfumes", href: "/niche-perfumes" },
-  { label: "Accessories", href: "/accessories" },
+  { label: "Gift Sets", href: "/gifts-and-packages" },
 ]
 
 export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: NavbarProps) {

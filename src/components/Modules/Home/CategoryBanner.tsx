@@ -4,10 +4,10 @@ import { CategoryGridClient } from "./CategoryGridClient"
 export function CategoryBanner() {
   const categories = [
     {
-      CategoryName: "Organic Attar",
+      CategoryName: "Natural Attar",
       CategoryImage: "/images/natural-category.jpg",
       CategoryLink: "/organic-attar",
-      description: "Pure natural attar and organic fragrances, crafted from the finest natural ingredients.",
+      description: "Traditional attars such as ruh khus: earthy, calm and close to the skin.",
     },
     {
       CategoryName: "Orientals",
@@ -16,10 +16,10 @@ export function CategoryBanner() {
       description: "Authentic oriental and Arabian attar, rich in tradition and exotic aromas.",
     },
     {
-      CategoryName: "Artificial Oud",
+      CategoryName: "Oud Collection",
       CategoryImage: "/images/oud-category.jpg",
       CategoryLink: "/artificial-oud",
-      description: "Premium artificial oud fragrances, offering deep and captivating woody notes.",
+      description: "Blended oud oils with deep, woody, slightly smoky character.",
     },
     {
       CategoryName: "Perfume Oils",
@@ -34,10 +34,10 @@ export function CategoryBanner() {
       description: "Designer Perfumes from Popular Brands.",
     },
     {
-      CategoryName: "Niche Perfumes",
-      CategoryImage: "/images/niche-perfume-category.jpg",
-      CategoryLink: "/niche-perfumes",
-      description: "Our In-house Perfume Creations.",
+      CategoryName: "All Perfumes",
+      CategoryImage: "/images/ab-category.jpg",
+      CategoryLink: "/shop",
+      description: "Everything in one place. Filter by the scent you like.",
     },
   ]
 

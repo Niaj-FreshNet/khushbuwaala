@@ -7,7 +7,7 @@ import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
 import { IDiscount, IProduct, IProductVariant } from "@/types/product.types";
 import { useRouter } from "next/navigation";
 import flyToCart from "./FlyToCart";
-import { kwPushAddToCart, kwPushBeginCheckout } from "@/lib/Analytics/kwEcom";
+import { kwPushAddToCart, kwPushBeginCheckout, kwCategoryName } from "@/lib/Analytics/kwEcom";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -177,10 +177,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                             ),
                             item_name: product.name,
                             item_brand: (product as any).brand || "Khushbuwaala",
-                            item_category:
-                                (product as any).categoryId ||
-                                (product as any).category?.categoryName ||
-                                "product",
+                            item_category: kwCategoryName(product),
                             item_variant: selectedSize || undefined,
                             price: Math.round(selectedPrice),
                             quantity: 1,
@@ -221,10 +218,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                         ),
                         item_name: product.name,
                         item_brand: (product as any).brand || "Khushbuwaala",
-                        item_category:
-                            (product as any).categoryId ||
-                            (product as any).category?.categoryName ||
-                            "product",
+                        item_category: kwCategoryName(product),
                         item_variant: selectedSize || undefined,
                         price: Math.round(selectedPrice),
                         quantity,

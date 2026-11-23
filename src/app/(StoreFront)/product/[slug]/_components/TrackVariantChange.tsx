@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { kwCategoryName } from "@/lib/Analytics/kwEcom";
 import { useProductSelection } from "@/context/ProductSelectionContext";
 import type { IProduct } from "@/types/product.types";
 
@@ -45,7 +46,7 @@ export default function TrackVariantChange({
     const itemId = String(product.id || product.slug);
     const variantId = String(selectedVariant.id);
 
-    const category = product.categoryId || undefined;
+    const category = kwCategoryName(product);
 
     window.dataLayer = window.dataLayer || [];
 

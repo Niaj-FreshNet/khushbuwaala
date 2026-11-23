@@ -28,7 +28,7 @@ import StoreContainer from "@/components/Layout/StoreContainer";
 import { useCreateDgepayPaymentMutation } from "@/redux/store/api/payment/paymentApi";
 import { cn } from "@/lib/utils";
 import { useApplyDiscountMutation } from "@/redux/store/api/discount/discountApi";
-import { kwPushAddPaymentInfo, kwPushAddShippingInfo } from "@/lib/Analytics/kwEcom";
+import { kwPushAddPaymentInfo, kwPushAddShippingInfo, kwCategoryName } from "@/lib/Analytics/kwEcom";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Command,
@@ -397,7 +397,7 @@ export default function CheckoutPage() {
 
         const productName = p?.name || product?.name || "Product";
         const brand = p?.brand || "Khushbuwaala";
-        const category = p?.categoryId || undefined;
+        const category = kwCategoryName(p);
         const variant = product?.selectedSize
           ? String(product.selectedSize).trim().toUpperCase()
           : undefined;

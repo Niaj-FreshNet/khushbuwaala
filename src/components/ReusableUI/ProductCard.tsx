@@ -14,7 +14,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import type { IProductResponse } from "@/types/product.types";
 import flyToCart from "../Modules/Product/FlyToCart";
-import { kwPushAddToCart, kwPushBeginCheckout } from "@/lib/Analytics/kwEcom";
+import { kwPushAddToCart, kwPushBeginCheckout, kwCategoryName } from "@/lib/Analytics/kwEcom";
 
 function getNumericSize(v: any) {
   const raw = v?.size ?? v?.title ?? v?.name ?? "";
@@ -191,7 +191,7 @@ export function ProductCard({
             item_id: String(productId),
             item_name: product.name,
             item_brand: (product as any).brand || "Khushbuwaala",
-            item_category: (product as any).categoryId || (product as any).category?.categoryName || "product",
+            item_category: kwCategoryName(product),
             item_variant: selectedSizeLabel,
             price: discountedPrice,
             quantity: 1,
@@ -230,7 +230,7 @@ export function ProductCard({
               item_id: String(productId),
               item_name: product.name,
               item_brand: (product as any).brand || "Khushbuwaala",
-              item_category: (product as any).categoryId || (product as any).category?.categoryName || "product",
+              item_category: kwCategoryName(product),
               item_variant: selectedSizeLabel,
               price: discountedPrice,
               quantity: 1,

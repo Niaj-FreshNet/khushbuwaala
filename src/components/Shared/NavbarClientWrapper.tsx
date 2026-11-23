@@ -49,9 +49,15 @@ export function NavbarClientWrapper({ children }: NavbarClientWrapperProps) {
     closeSearch: () => setSearchVisible(false),
   }), [])
 
+  // The cart is read from the browser, which the server cannot see. The first client render must
+  // match the server's (0), so the real number is shown right after the page becomes interactive.
+  // (Without this, anyone with items in the cart made React throw away and rebuild the whole page.)
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   // ✅ Sum up total quantities instead of array length
   const counts = useMemo(() => {
-    const totalCartQty = Array.isArray(cartItems)
+    const totalCartQty = mounted && Array.isArray(cartItems)
       ? cartItems.reduce((acc, item) => acc + (item?.quantity || 1), 0)
       : 0
 
@@ -66,7 +72,7 @@ export function NavbarClientWrapper({ children }: NavbarClientWrapperProps) {
       cart: totalCartQty,
       wishlist: totalWishlistQty,
     }
-  }, [cartItems, wishlistCount])
+  }, [cartItems, wishlistCount, mounted])
 
   // Scroll hide/show
   useEffect(() => {

@@ -585,3 +585,47 @@ export function kwPushViewCart(payload: { value: number; items: KWItem[] }) {
     ecommerce: { currency: "BDT", value: safeNum(payload.value), items: normalizeItems(payload.items) },
   })
 }
+
+/** A product's category as a readable name for reports (never the database id). */
+export function kwCategoryName(product: any): string | undefined {
+  const c = product?.category
+  const name = typeof c === "string" ? c : c?.label || c?.categoryName
+  if (!name) return undefined
+  // the admin stores names in capitals ("ORIENTAL ATTAR"); reports read better as "Oriental Attar",
+  // and every event then uses the same spelling
+  return String(name).trim().toLowerCase().replace(/(^|[\s-])(\p{L})/gu, (_m: string, sep: string, ch: string) => sep + ch.toUpperCase())
+}
+
+/** Cart lines → analytics items (one place, so every cart event describes items the same way). */
+export function kwCartItems(cartItems: any[]): KWItem[] {
+  return (Array.isArray(cartItems) ? cartItems : [])
+    .map((item: any) => ({
+      item_id: String(item?.product?.id || item?.product?.slug || ""),
+      item_name: String(item?.product?.name || ""),
+      item_brand: String(item?.product?.brand || "Khushbuwaala"),
+      item_category: kwCategoryName(item?.product),
+      item_variant: String(item?.selectedSize || ""),
+      price: Number(item?.selectedPrice || 0),
+      quantity: Number(item?.quantity || 1),
+    }))
+    .filter((i) => i.item_id)
+}
+
+const cartValue = (items: KWItem[]) => items.reduce((s, i) => s + safeNum(i.price) * Math.max(1, safeNum(i.quantity || 1)), 0)
+
+/** view_cart for the current cart, at most once per cart content per page view. */
+let lastViewCartKey = ""
+export function kwTrackViewCart(cartItems: any[]) {
+  const items = kwCartItems(cartItems)
+  if (!items.length) return
+  const key = items.map((i) => `${i.item_id}|${i.item_variant}|${i.quantity}`).sort().join("~")
+  if (key === lastViewCartKey) return
+  lastViewCartKey = key
+  kwPushViewCart({ value: cartValue(items), items })
+}
+
+/** remove_from_cart for one cart line. */
+export function kwTrackRemoveFromCart(cartItem: any) {
+  const items = kwCartItems([cartItem])
+  if (items.length) kwPushRemoveFromCart({ value: cartValue(items), items })
+}

@@ -7,7 +7,7 @@ import { IDiscount, IProduct, IProductVariant } from "@/types/product.types";
 import { useRouter } from "next/navigation";
 import ProductDetailsUI from "./ProductDetailsUI.server";
 import flyToCart from "./FlyToCart";
-import { kwPushAddToCart, kwPushBeginCheckout } from "@/lib/Analytics/kwEcom";
+import { kwPushAddToCart, kwPushBeginCheckout, kwCategoryName } from "@/lib/Analytics/kwEcom";
 
 export default function ProductDetailsClient({
   product,
@@ -171,7 +171,7 @@ export default function ProductDetailsClient({
               item_id: String((product as any).id || (product as any).slug),
               item_name: String((product as any).name || ""),
               item_brand: String((product as any).brand || "Khushbuwaala"),
-              item_category: String((product as any).categoryId || ""),
+              item_category: kwCategoryName(product),
               item_variant: selectedSizeLabel, // ✅ variant
               price: discountedPrice,
               quantity,
@@ -206,7 +206,7 @@ export default function ProductDetailsClient({
             item_id: String((product as any).id || (product as any).slug),
             item_name: String((product as any).name || ""),
             item_brand: String((product as any).brand || "Khushbuwaala"),
-            item_category: String((product as any).categoryId || ""),
+            item_category: kwCategoryName(product),
             item_variant: selectedSizeLabel,
             price: discountedPrice,
             quantity,

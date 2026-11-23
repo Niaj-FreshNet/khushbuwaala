@@ -31,7 +31,7 @@ import {
 
 import { useCart } from "@/context/CartContext"
 import { useWishlist } from "@/context/WishlistContext"
-import { kwPushAddToCart, kwPushBeginCheckout } from "@/lib/Analytics/kwEcom"
+import { kwPushAddToCart, kwPushBeginCheckout, kwCategoryName } from "@/lib/Analytics/kwEcom"
 
 interface ProductQuickViewProps {
   product: IProductResponse
@@ -228,7 +228,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
             item_id: String((product as any).id || (product as any).slug || product.name),
             item_name: product.name,
             item_brand: (product as any).brand || "Khushbuwaala",
-            item_category: (product as any).categoryId || (product as any).category?.categoryName || "product",
+            item_category: kwCategoryName(product),
             item_variant: selectedSize || "3 ml",
             price: discountedPrice,
             quantity: 1,
@@ -262,7 +262,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
             item_id: String((product as any).id || (product as any).slug || product.name),
             item_name: product.name,
             item_brand: (product as any).brand || "Khushbuwaala",
-            item_category: (product as any).categoryId || (product as any).category?.categoryName || "product",
+            item_category: kwCategoryName(product),
             item_variant: selectedSize || "3 ml",
             price: discountedPrice,
             quantity,

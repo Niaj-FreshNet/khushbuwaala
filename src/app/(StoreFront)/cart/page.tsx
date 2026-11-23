@@ -26,7 +26,7 @@ import { useCart } from "@/redux/store/hooks/useCart";
 import { CartItem } from "@/types/cart.types";
 import { CartItemCard } from "@/components/Modules/Home/CartItemCard";
 import { DesktopCartTable } from "@/components/Modules/Cart/DesktopCartTable";
-import { kwPushBeginCheckout } from "@/lib/Analytics/kwEcom";
+import { kwPushBeginCheckout, kwCartItems, kwTrackViewCart } from "@/lib/Analytics/kwEcom";
 import { useApplyDiscountMutation } from "@/redux/store/api/discount/discountApi";
 import { toast } from "sonner";
 
@@ -127,6 +127,11 @@ export default function CartPage() {
       const selectedPrice = Number(matchedVariant?.price) || 0;
       return sum + selectedPrice * (Number(item?.quantity) || 1);
     }, 0);
+  }, [cartItems]);
+
+  // view_cart: when the cart page shows items
+  useEffect(() => {
+    kwTrackViewCart(cartItems as any[]);
   }, [cartItems]);
 
   const totalItems = useMemo(() => {
@@ -279,17 +284,7 @@ export default function CartPage() {
     if (checkoutClicked) return;
     setCheckoutClicked(true);
 
-    const items = (cartItems || [])
-      .map((item: any) => ({
-        item_id: String(item?.product?.id || item?.product?.slug || ""),
-        item_name: String(item?.product?.name || ""),
-        item_brand: String(item?.product?.brand || "Khushbuwaala"),
-        item_category: String(item?.product?.categoryId || ""),
-        item_variant: String(item?.selectedSize || ""),
-        price: Number(item?.selectedPrice || 0),
-        quantity: Number(item?.quantity || 1),
-      }))
-      .filter((i: any) => i.item_id);
+    const items = kwCartItems(cartItems as any[]);
 
     kwPushBeginCheckout({
       currency: "BDT",

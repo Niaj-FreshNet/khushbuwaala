@@ -28,15 +28,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!blog) {
     return {
-      title: 'Blog Not Found | Khushbuwaala',
-      description: 'The requested blog post could not be found.',
+      title: 'Article not found',
+      description: 'The requested article could not be found.',
+      robots: { index: false, follow: true },
     };
   }
 
   const plainSummary = blog.metaDescription || blog.content?.replace(/<[^>]*>?/gm, '').slice(0, 160) || '';
 
   return {
-    title: `${blog.metaTitle || blog.title} | Khushbuwaala`,
+    title: { absolute: `${blog.metaTitle || blog.title} | Khushbuwaala` },
+    alternates: { canonical: `https://khushbuwaala.com/blog/${blog.slug}` },
     description: plainSummary,
     keywords: blog.keywords ? blog.keywords.split(',').map((k: string) => k.trim()) : [],
     openGraph: {

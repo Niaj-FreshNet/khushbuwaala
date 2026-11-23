@@ -1,12 +1,19 @@
 import { Metadata } from "next";
 import BlogListClient from "./_components/BlogListClient";
 
-export const metadata: Metadata = {
-  title: "Perfume Insights & Fragrance Journal | Khushbuwaala",
-  description: "Explore in-depth articles on natural attars, oud distillation, and fragrance notes.",
-};
-
 export const dynamic = "force-dynamic";
+
+// With no published articles the page is an empty shell: keep it out of search engines until there is one.
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await getBlogsData();
+  const hasPosts = Array.isArray(data?.data) && data.data.length > 0;
+  return {
+    title: "Fragrance Journal",
+    description: "Notes from Khushbuwaala on attars, oud and choosing a perfume.",
+    alternates: { canonical: "https://khushbuwaala.com/blog" },
+    robots: hasPosts ? { index: true, follow: true } : { index: false, follow: true },
+  };
+}
 
 async function getBlogsData() {
   try {

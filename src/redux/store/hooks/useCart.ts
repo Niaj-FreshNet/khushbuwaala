@@ -19,6 +19,7 @@ import {
 import type { IProductResponse } from '@/types/product.types'
 import { useAddToCartMutation, useUpdateCartItemMutation, useRemoveCartItemMutation } from '@/redux/store/api/cart/cartApi'
 import { useRouter } from 'next/navigation'
+import { kwTrackRemoveFromCart } from '@/lib/Analytics/kwEcom'
 // import { toast } from 'sonner'
 
 export const useCart = () => {
@@ -79,6 +80,8 @@ export const useCart = () => {
 
   const removeFromCart = useCallback(
     async (productId: string, size: string, productName?: string, cartItenId?: string) => {
+      const removed = cartItems.find((item) => item.product?.id === productId && item.selectedSize === size)
+      if (removed) kwTrackRemoveFromCart(removed)
       dispatch(removeFromCartAction({ productId, size }))
       // if (productName) toast.info(`${productName} removed from cart`)
 
@@ -90,7 +93,7 @@ export const useCart = () => {
         }
       }
     },
-    [dispatch, removeCartItemApi]
+    [dispatch, removeCartItemApi, cartItems]
   )
 
   const updateQuantity = useCallback(

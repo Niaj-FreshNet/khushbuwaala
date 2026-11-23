@@ -15,8 +15,8 @@ const TrustSignals = () => {
   const trustFeatures = [
     {
       icon: Clock,
-      title: "Since 2020",
-      description: "6+ years of trust",
+      title: "8+ years in fragrance",
+      description: "Khushbuwaala since 2020",
       bgColor: "bg-slate-50",
       iconColor: "text-slate-700",
       borderColor: "border-slate-200",
@@ -64,7 +64,7 @@ const TrustSignals = () => {
   ];
 
   const customerStats = [
-    { number: "Since 2020", label: "Serving customers", icon: Clock, color: "text-sky-400" },
+    { number: "8+ years", label: "Working with fragrance", icon: Clock, color: "text-sky-400" },
     // Only things we can stand behind: no satisfaction percentages or star averages here,
     // the shop does not have enough published reviews to quote one.
     { number: "Cash on delivery", label: "Pay when it arrives", icon: CheckCircle, color: "text-emerald-400" },

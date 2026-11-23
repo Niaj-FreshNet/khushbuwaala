@@ -67,7 +67,7 @@ export default function CareerPage() {
           <p className="text-gray-600 mb-4">No openings match? Send your resume to khushbuwaala@gmail.com</p>
           <div className="flex justify-center gap-4 text-sm text-gray-500">
             <Users className="h-4 w-4" />
-            <span>We're a growing team of 20+ passionate perfumists.</span>
+            <span>We're a small team that loves fragrance.</span>
           </div>
         </div>
       </div>

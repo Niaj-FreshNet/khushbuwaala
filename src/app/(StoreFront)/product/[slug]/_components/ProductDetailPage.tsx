@@ -9,7 +9,9 @@ import { ProductSelectionProvider } from "@/context/ProductSelectionContext";
 import { IProduct, IProductResponse } from "@/types/product.types";
 import mapProductResponseToProduct from "@/lib/Functions/ClientFn";
 import { Suspense } from "react";
-import RelatedProductsWrapper from "@/components/Modules/Product/RelatedProductsWrapper";
+import SimilarScents from "@/components/Modules/Product/SimilarScents";
+import ScentProfile, { type ProductProfile } from "@/components/Modules/Product/ScentProfile";
+import WishlistButton from "@/components/Modules/Product/WishlistButton";
 import ProductPageBottomBar from "@/components/Modules/Product/ProductPageBottomBar";
 import ViewItemDataLayer from "./ViewItemDataLayer";
 import TrackVariantChange from "./TrackVariantChange";
@@ -84,6 +86,7 @@ function RelatedProductsLoading() {
 export default function ProductDetailPage({ product }: IProductResponseProps) {
     const mappedProduct = mapProductResponseToProduct(product);
     const categoryName = product.category?.categoryName;
+    const profile = (product as IProductResponse & { profile?: ProductProfile }).profile;
     const breadcrumbItems = generateBreadcrumbs(mappedProduct, categoryName);
     // const categoryInfo = getCategoryInfo(mappedProduct.categoryId);
 
@@ -114,8 +117,13 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 xl:gap-8 items-start">
                                 {/* Product Gallery */}
                                 <div className="w-full order-1 flex justify-center">
-                                    <div className="w-full max-w-[520px] lg:max-w-none lg:sticky lg:top-16">
+                                    <div className="relative w-full max-w-[520px] lg:max-w-none lg:sticky lg:top-16">
                                         <ProductGallery product={product} />
+                                        <WishlistButton
+                                            product={{ id: product.id, name: product.name, slug: product.slug, primaryImage: product.primaryImage, minPrice: product.minPrice, brand: product.brand }}
+                                            categoryName={categoryName}
+                                            className="absolute right-3 top-3 z-10"
+                                        />
                                     </div>
                                 </div>
 
@@ -133,6 +141,9 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                     <section className="bg-white relative">
                         {/* ✅ same container + less padding */}
                         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
+                            <div className="mb-4">
+                                <ScentProfile profile={profile} name={product.name} />
+                            </div>
                             <div className="flex items-center gap-2 sm:gap-3 mb-1">
                                 {/* <div className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
                                     <Info className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
@@ -154,7 +165,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                         {/* ✅ MUCH smaller padding */}
                         <div className="relative max-w-7xl mx-auto">
                             <Suspense fallback={<RelatedProductsLoading />}>
-                                <RelatedProductsWrapper product={mappedProduct} />
+                                <SimilarScents slug={product.slug} name={product.name} familyId={profile?.mainFamilies?.[0]?.id} />
                             </Suspense>
                         </div>
                     </section>
