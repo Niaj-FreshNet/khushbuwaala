@@ -221,29 +221,6 @@ export default function BlogDetailClient({ initialData }: { slug: string; initia
                             </div>
                         </div>
 
-                        {/* Newsletter Subscription Box */}
-                        <div className="border-t border-neutral-200 pt-6">
-                            <h3 className="text-sm font-semibold text-neutral-900 mb-1">
-                                Do not miss new articles
-                            </h3>
-                            <p className="text-xs text-neutral-500 mb-4 leading-relaxed">
-                                Attar guides, notes, and exclusive stories straight to your inbox.
-                            </p>
-                            <form onSubmit={(e) => { e.preventDefault(); toast.success("Subscribed!"); }} className="space-y-2">
-                                <input
-                                    type="email"
-                                    required
-                                    placeholder="Your email"
-                                    className="w-full text-xs px-3.5 py-2.5 rounded-lg border border-neutral-200 focus:outline-none focus:border-neutral-900 transition-colors"
-                                />
-                                <button
-                                    type="submit"
-                                    className="w-full text-xs font-semibold py-2.5 px-4 rounded-lg bg-[#A46338] hover:bg-[#8D532D] text-white transition-colors"
-                                >
-                                    Subscribe
-                                </button>
-                            </form>
-                        </div>
                     </aside>
                 </div>
             </div>

@@ -9,13 +9,13 @@ export function ServicesSection() {
 
   const services = [
     {
-      title: "Fast Delivery",
-      description: "Free delivery on orders over 1000 BDT (selected areas).",
+      title: "Delivery across Bangladesh",
+      description: "Free delivery on orders of ৳1,000 or more.",
       icon: <Package className="h-5 w-5 sm:h-6 sm:w-6" />,
     },
     {
-      title: "Support 24/7",
-      description: "Chat or call anytime — we’re always here to help.",
+      title: "Help choosing",
+      description: "Not sure which one? Message or call us and we will suggest a scent.",
       icon: <LifeBuoy className="h-5 w-5 sm:h-6 sm:w-6" />,
     },
     {
@@ -24,8 +24,8 @@ export function ServicesSection() {
       icon: <RefreshCcw className="h-5 w-5 sm:h-6 sm:w-6" />,
     },
     {
-      title: "Secure Payment",
-      description: "Trusted checkout with encrypted transactions.",
+      title: "Cash on delivery",
+      description: "Pay when the parcel arrives, or pay online at checkout.",
       icon: <Lock className="h-5 w-5 sm:h-6 sm:w-6" />,
     },
   ]

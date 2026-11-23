@@ -116,7 +116,7 @@ export function CarouselSlider() {
                   sizes="100vw"
                   className="object-cover hidden md:block"
                   priority={false}
-                  loading="lazy"
+                  loading={index === 0 ? "eager" : "lazy"}
                   quality={85}
                 />
 
