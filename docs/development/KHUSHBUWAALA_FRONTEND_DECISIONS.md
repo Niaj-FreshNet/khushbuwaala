@@ -81,3 +81,18 @@ Save a copy → pull → build → restart, each as its own command, with no aut
 
 ## SF-020 — Test orders on live (2026-11-23)
 One marked order (`[TEST-CLAUDE]`, shop's own phone, no email, cash on delivery, cheapest in-stock size), placed only with the owner's explicit yes, cancelled through the normal admin route right after, stock checked before and after. It does count as one real Purchase at Meta; that is the point of the test and is recorded in PROGRESS.
+
+## SF-021 — Storefront content the owner edits lives in one settings document (2026-11-23)
+**Decision:** Announcement bar, hero banners and home rows are one JSON document (`storefront_settings`, key "storefront") behind `/api/storefront/settings`. The storefront carries the same content as a built-in fallback.
+**Why:** These are the things that change with campaigns and seasons. One small document with strict checking is enough; a general page builder would be more to learn and more to break.
+**Rules:** links must stay inside the shop; pictures only from the site or our image host; a row's products are described with the shop's own filters; a save with any bad entry saves nothing.
+
+## SF-022 — Indexable landing pages instead of indexable filters (2026-11-23)
+**Decision:** `/scents/<family>` and `/notes/<note>` are real pages with their own wording and are indexed; every `?filter=` view stays noindex.
+**Why:** People search "oud attar", "woody perfume". A written page per intent can rank; thousands of filter combinations would be near-duplicates.
+
+## SF-023 — No newsletter form until there is somewhere for the addresses to go (2026-11-23)
+The forms were removed because they did not save anything. Collecting emails needs a storage and sending tool chosen by the owner first.
+
+## SF-024 — Motion on the home page is CSS only (2026-11-23)
+Content must be visible in the HTML without waiting for a script. Entrance animations driven by a script library hid the category grid and headings until it loaded.

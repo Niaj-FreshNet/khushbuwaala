@@ -1,12 +1,48 @@
 # Khushbuwaala Storefront — Progress
 
-**Last updated:** 2026-11-23 (session 3)
+**Last updated:** 2026-11-23 (session 4)
 **Spec:** `Khusbuwaala_Storefront_Master_Development_Prompt.md` (same folder)
 **Related:** [TASKS](KHUSHBUWAALA_FRONTEND_TASKS.md) · [DECISIONS](KHUSHBUWAALA_FRONTEND_DECISIONS.md) · admin/backend history: `D:\Projects\khushbuwaala\KHUSHBUWAALA_*.md`
 
 ## Overall status
 
 Phase 0 (audit) done. Phase 1 (product discovery, header search, wishlist, SEO foundations) is **live since 2026-11-23 ~15:30 Dhaka** (owner approved the deploy).
+
+## Session 4 — 2026-11-23 (home page, speed, admin-managed content, landing pages) — DEPLOYED
+
+**Live now:** backend `ca429d1`, storefront `da1bd63`, admin `75b1684`. Latest rollback copies in `~/deploy-backups`: `backend-dist-20261123-115133`, `storefront-next-20261123-120318`, `admin-next-20261123-115219`.
+
+**Home page rebuilt (server-rendered)**
+- Product rows come from the discovery API on the server: 41 product links in the HTML (was 0), one main heading, built ahead of time and refreshed every minute.
+- New "Not sure which perfume? Start with what you like" section (18 one-tap ways into the collection) and a brand-story block using the agreed wording (since 2020, 8+ years in fragrance).
+- Removed: the newsletter form (it posted to an address that does not exist, so nothing was ever saved) and the blog page's "Subscribed!" box (it did nothing at all). "Support 24/7" replaced by what the shop actually offers.
+
+**Speed**
+- A card's second photo is fetched only on hover or swipe. It used to download for every card in view, doubling image data on phones.
+- Category grid and section headings no longer wait for JavaScript to become visible; the animation library is no longer loaded on the home page (about 130 KB less script: 1.18 MB → 1.05 MB uncompressed for the home page).
+- Listings hand cards only the fields they use; home HTML 1.14 MB → 0.87 MB (53 KB compressed).
+- Product pages are prebuilt (135 at build time) and refreshed every 5 minutes; a price or stock change used to take up to an hour to show.
+- Not measured: Lighthouse / Core Web Vitals. The numbers above are file sizes, not lab scores.
+
+**Admin-managed storefront content (new)**
+- Admin → **Home page content** (`/storefront`, admin and super admin): announcement bar messages, hero banners (upload, phone picture, button text and link, description) and the home page product rows (title, which products, order, show/hide). Rows are picked from ready-made choices (best sellers, newest, on offer, a collection, with oud, under ৳500…), no filter text to type.
+- Backend `/api/storefront/settings`: every save is checked (shop-internal links only, pictures only from the site or our image host, valid product selections); a bad entry is named and nothing is saved. Until the owner saves, the shop shows exactly what it showed before.
+- Storefront reads it on the server (refreshed every minute) with the same content built in as a fallback.
+- Verified: 7 unit tests; locally in the browser (edit, reorder, save, public read); **on live against the real database 6/6** (save, second save updates the same document, bad banner refused, public read), then the test document was removed so the shop is on its built-in content again.
+
+**Scent and note landing pages (new, indexable)**
+- `/scents/<family>` for all 18 families and `/notes/<note>` for 12 popular notes, each with its own heading, intro and description (`src/config/scentPages.ts`). In the sitemap (183 URLs now). A page with fewer than 4 perfumes marks itself noindex.
+- The product page's "at a glance" block and the home "start with what you like" section link to these pages, so search engines can follow them.
+
+**Clean-up**
+- 36 unreachable storefront files removed after an import-graph check (old in-storefront dashboard leftovers, duplicate API files, a broken cart badge).
+- `/api/orders` on the storefront answered every POST with a made-up order id; removed (nothing used it). `proxy.ts` only redirected signed-in admins to `/dashboard`, which no longer exists; removed.
+- One accurate Organization block for search engines (showroom address, real social links, founded 2020); the unconfirmed opening hours and a guessed Twitter link were dropped; the footer's duplicate block removed.
+- `npm run lint` works again (`eslint src`): 284 existing problems, not yet worked through. Type errors 100 → 36.
+
+**Checks this session**
+- Backend: tsc 0, lint 0, **69/69** tests. Admin: tsc 0, lint 0, build OK. Storefront: build OK (205 prebuilt pages).
+- Live after the last deploy: key pages 200, **135/135 product pages 200**, scent/note pages 200 with products, unknown ones 404, filtered views noindex, product page served from cache.
 
 ## Session 3 — 2026-11-23 (test order, guest-cart bug, checkout tracking) — DEPLOYED
 

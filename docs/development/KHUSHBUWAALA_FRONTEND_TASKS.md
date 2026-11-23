@@ -133,3 +133,26 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 - [ ] Thank-you page after a refresh shows no order details to a guest; consider a short-lived view token
 - [ ] purchase event items: add item_category (order lines do not carry the category today)
 - [!] Meta Events Manager: confirm #766624's browser + server Purchase appear as one event (needs access)
+
+---
+
+## Update 2026-11-23, session 4
+
+**Done and live**
+- [x] Home page server-rendered with discovery section and brand story; dead newsletter forms removed
+- [x] Speed: lazy second photo, no script-gated content on home, slimmer listings, prebuilt product pages (5-minute refresh)
+- [x] **Admin: Home page content** (announcement bar, banners, product rows) — backend + admin screen + storefront, verified on live
+- [x] Scent-family (18) and note (12) landing pages, in the sitemap, linked from product pages and home
+- [x] Clean-up: 36 unreachable files, fake `/api/orders`, dead `proxy.ts`, single Organization block, lint script
+
+**Still open (no blocker)**
+- [ ] Admin: edit the scent taxonomy (aliases, synonyms) and the collections/landing-page wording without code
+- [ ] Admin: contact details (phone, WhatsApp) in one editable place; today `config/site.ts` plus 13 hard-coded phone links
+- [ ] Storefront lint: 284 existing problems; 36 type errors (build ignores them)
+- [ ] Lighthouse / Core Web Vitals baseline on a phone; home page still ships about 1 MB of script (uncompressed)
+- [ ] Product page: thumbnails render blank until loaded; purchase event items have no category; thank-you page after refresh
+- [ ] Newsletter: there is no subscriber storage or sending tool. If the owner wants one, it needs a decision on the tool first
+- [ ] 144 old shared guest cart rows; price typos (Black Afgano, 50 ml cheaper than 25 ml on several products)
+- [ ] `~/deploy-backups` on the server is about 2.5 GB of build copies (disk is at 18%); prune old ones occasionally
+
+**Blocked on the owner** (unchanged): sGTM on Google Cloud is down; access to GTM, GA4, Meta Events Manager, Search Console, Merchant Center.
