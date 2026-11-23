@@ -41,9 +41,13 @@ Also shipped earlier today and not written up before: thank-you page survives a 
 - Product pages prefetch about 40 other pages on load (visible in the network list). Worth a look for data use on phones.
 - The in-app test browser runs pages in the background and sometimes does not run page scripts; use real Chrome for tracking checks.
 
+### Search Console and Merchant Center (read only, nothing changed)
+- Search Console: the Domain property `khushbuwaala.com` is verified. `sitemap.xml` was last read on 2026-11-23, status Success, 153 pages discovered (the sitemap now lists 183; Google has not re-counted yet). An old entry `sitemap_index.xml` from 2021 shows "Couldn't fetch"; it can be removed there.
+- Merchant Center (account 5532933892): only **30 products**, 2 approved, 28 not approved, 24 of them for a missing price. The shop's own feed has 993 items, so Merchant Center is not reading it. The store is set up for United Kingdom, India and United States, not Bangladesh. This needs a decision and set-up (see TASKS).
+
 ### Not done in this session
 - Meta tags for AddToWishlist and AddPaymentInfo (events are in the data layer; no tag yet).
-- GA4, Search Console, Merchant Center were not opened.
+- GA4 was not opened (it has no shop data while the tagging server is down).
 - Fragrance data check not opened on the live admin.
 
 ## Session 4 — 2026-11-23 (home page, speed, admin-managed content, landing pages) — DEPLOYED

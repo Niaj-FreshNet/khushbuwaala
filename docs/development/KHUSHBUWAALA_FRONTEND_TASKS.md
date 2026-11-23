@@ -172,6 +172,7 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 - [ ] Next real order: in Meta Events Manager confirm the browser and server Purchase show as one (de-duplicated)
 - [ ] Test InitiateCheckout and Search in Meta Test Events
 - [ ] Meta tags for AddToWishlist and AddPaymentInfo
-- [ ] Search Console (Domain property, submit sitemap) and Merchant Center (feed status, shipping): not opened yet
+- [x] Search Console checked: Domain property verified, sitemap read today (Success). Optional: remove the dead 2021 `sitemap_index.xml` entry
+- [ ] Merchant Center: it holds 30 old products (28 not approved) and targets UK / India / US. Add the shop feed (`https://api.khushbuwaala.com/api/products/google-shopping-feed.xml` or the address the backend is served on, 993 items) as the data source, set the country to Bangladesh and the shipping rates. Needs the owner's yes because it changes what Google shows
 - [ ] Open "Fragrance data check" on the live admin and read the real numbers
 - [ ] Product pages prefetch about 40 pages on load: decide whether to cut it
