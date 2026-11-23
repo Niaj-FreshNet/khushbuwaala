@@ -64,45 +64,36 @@ const navigationStructuredData = {
 }
 
 // SEO: Enhanced Structured Data for Organization (moved from footer)
+// Organization data for search engines. Only what the site itself states: the showroom address
+// (Stores page), the public phone and email, and the social pages linked in the footer.
+// Opening hours are left out until the owner confirms them.
 const organizationStructuredData = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Khushbuwaala",
   url: "https://khushbuwaala.com",
   logo: "https://khushbuwaala.com/images/khushbuwaala.webp",
-  description:
-    "Premium perfumes, oriental attars, and natural fragrances with authentic quality",
+  description: "Perfume oils, Arabian attars and oud from Dhaka, Bangladesh. Khushbuwaala since 2020.",
+  foundingDate: "2020",
   contactPoint: {
     "@type": "ContactPoint",
     telephone: "+8801777152588",
     contactType: "customer service",
     email: "khushbuwaala@gmail.com",
+    areaServed: "BD",
     availableLanguage: ["English", "Bengali"],
-    hoursAvailable: {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-      ],
-      opens: "09:00",
-      closes: "21:00",
-    },
   },
   address: {
     "@type": "PostalAddress",
+    streetAddress: "Shop-G/138, Eastern Banabithi Shopping Complex, South Banasree",
+    addressLocality: "Khilgaon, Dhaka",
+    postalCode: "1219",
     addressCountry: "BD",
-    addressLocality: "Dhaka",
-    addressRegion: "Dhaka Division",
   },
   sameAs: [
     "https://facebook.com/khushbuwaala",
-    "https://instagram.com/khushbuwaala",
-    "https://twitter.com/khushbuwaala",
-    "https://youtube.com/@khushbuwaala",
+    "https://www.instagram.com/khushbuwaala_perfumes",
+    "https://www.youtube.com/@khushbuwaala_perfumes",
   ],
 }
 

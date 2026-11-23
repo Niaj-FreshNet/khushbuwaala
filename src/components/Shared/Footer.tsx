@@ -11,38 +11,6 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 // SEO: Enhanced Structured Data for Footer (Server-side)
-const footerStructuredData = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "Khushbuwaala",
-  url: "https://khushbuwaala.com",
-  logo: "https://khushbuwaala.com/images/khushbuwaala.webp",
-  description: "Premium perfumes, oriental attars, and natural fragrances with authentic quality",
-  contactPoint: {
-    "@type": "ContactPoint",
-    telephone: "+8801777152588",
-    contactType: "customer service",
-    email: "khushbuwaala@gmail.com",
-    availableLanguage: ["English", "Bengali"],
-    hoursAvailable: {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-      opens: "09:00",
-      closes: "21:00",
-    },
-  },
-  address: {
-    "@type": "PostalAddress",
-    addressCountry: "BD",
-    addressLocality: "Dhaka",
-    addressRegion: "Dhaka Division",
-  },
-  sameAs: [
-    "https://facebook.com/khushbuwaala",
-    "https://www.instagram.com/khushbuwaala_perfumes",
-    "https://www.youtube.com/@khushbuwaala_perfumes",
-  ],
-}
 
 interface FooterSection {
   id: string
@@ -139,10 +107,6 @@ export const Footer = () => {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(footerStructuredData) }}
-      />
 
       <footer
         className={cn(
