@@ -23,6 +23,12 @@ Phase 0 (audit) done. Phase 1 (product discovery, header search, wishlist, SEO f
 - The old source "Found by Google" (30 products, mixed countries) was left as it is.
 - Shipping policy already there for Bangladesh, left unchanged: flat ৳50, free over ৳1,000, delivery 0–1 working days. The shop really charges ৳60 inside Dhaka and ৳120 outside (free over ৳1,000). Google does not allow showing a lower delivery charge than the real one, so this needs the owner's decision (see TASKS).
 
+### Merchant Center delivery charge corrected (owner's figures, same evening)
+- Owner confirmed the real charges: ৳60 inside Dhaka (within 1 day), ৳120 outside Dhaka (1–2 days), free over ৳1,000 in both.
+- Merchant Center offers only one rate for the whole of Bangladesh (the destination list has "All destinations" only; the cost table splits by price, weight or item count, not by area). Google's rule is that the charge shown must not be lower than the real one, so the policy now shows the higher figure: **flat ৳120, free over ৳1,000, 1–2 business days** (handling 0–1, transit 1). Read back from the saved policy.
+- Dhaka buyers therefore see ৳120 on Google but pay ৳60 at checkout. That is allowed (showing more than the real charge is fine, showing less is not).
+- Tagging server rechecked at about 21:00 Dhaka: still 503.
+
 ### This computer
 - Drive C: is full (0 MB free of 200 GB). A download was cut short because of it; work files now go to `D:\Projects\khushbuwaala\_dev\tmp`. The owner needs to free space on C:.
 

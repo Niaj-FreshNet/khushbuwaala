@@ -183,6 +183,6 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 - [x] Owner paid the Google Cloud balance
 - [ ] Tagging server still reports "billing is disabled" after the payment. Recheck `/healthy`; if still down, re-select the billing account on the project (steps in PROGRESS, session 6)
 - [ ] Merchant Center in 2–3 days: read approved / not approved counts and the top issues; find why 52 feed items were not taken in
-- [ ] **Owner decision:** Merchant Center delivery charge. It says ৳50 flat and 0–1 days; the shop charges ৳60 (Dhaka) / ৳120 (outside). Suggested: ৳120 flat, free over ৳1,000, 1–5 days
+- [x] Merchant Center delivery charge set to ৳120 flat, free over ৳1,000, 1–2 days (owner gave ৳60 Dhaka / ৳120 outside; Google allows one rate per country here, so the higher one is shown)
 - [ ] Feed descriptions contain leftover `&nbsp;` codes; clean them in the feed builder
 - [ ] Owner: free space on drive C: of the work computer (it is full)
