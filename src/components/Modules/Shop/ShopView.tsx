@@ -45,7 +45,12 @@ export function ShopView({ basePath, listName, state, locked = {}, result }: Pro
   const lastSentQuery = useRef(state.q);
   const topRef = useRef<HTMLDivElement | null>(null);
 
-  const lockedGroups = useMemo(() => FACET_GROUPS.filter((g) => (locked[g] ?? []).length > 0), [locked]);
+  // A collection page hides the "Collection" choice. A scent or note page keeps its group visible,
+  // so "Woody" can still be combined with "Sweet"; only its own value cannot be switched off.
+  const lockedGroups = useMemo(
+    () => FACET_GROUPS.filter((g) => (locked[g] ?? []).length > 0 && g !== "families" && g !== "notes"),
+    [locked]
+  );
   const activeCount = countActiveFilters(state, locked);
 
   const go = useCallback(
@@ -63,10 +68,11 @@ export function ShopView({ basePath, listName, state, locked = {}, result }: Pro
 
   const toggle = useCallback(
     (group: FacetGroup, id: string) => {
+      if ((locked[group] ?? []).includes(id)) return; // this page is about that value
       const current = state[group];
       change({ [group]: current.includes(id) ? current.filter((v) => v !== id) : [...current, id] } as Partial<ShopState>);
     },
-    [change, state]
+    [change, state, locked]
   );
 
   const clearAll = () => {

@@ -118,4 +118,19 @@ export default async function ProductPage({ params }: Props) {
   );
 }
 
-export const revalidate = 3600;
+// A price or stock change in the admin shows here within 5 minutes (it used to take up to an hour).
+export const revalidate = 300;
+
+// Product pages are built ahead of time, so a visitor arriving from an ad gets a ready page.
+// A product added later is built on its first visit.
+export async function generateStaticParams() {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/discover/sitemap`, { next: { revalidate: 300 } });
+    if (!res.ok) return [];
+    const body = await res.json();
+    const products: { slug: string }[] = body?.data?.products ?? [];
+    return products.map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
+}

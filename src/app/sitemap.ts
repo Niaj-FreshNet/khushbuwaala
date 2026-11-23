@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { collections } from "@/config/collections";
+import { FAMILY_PAGES, NOTE_PAGES } from "@/config/scentPages";
 import { siteConfig } from "@/config/site";
 
 const BASE_URL = siteConfig.url;
@@ -108,5 +109,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  return [...staticPages, ...collectionPages, ...productPages, ...blogPages];
+  // scent-family and note landing pages (each has its own wording; thin ones mark themselves noindex)
+  const scentPages: MetadataRoute.Sitemap = [
+    ...Object.keys(FAMILY_PAGES).map((id) => `${BASE_URL}/scents/${id}`),
+    ...Object.keys(NOTE_PAGES).map((id) => `${BASE_URL}/notes/${id}`),
+  ].map((url) => ({ url, lastModified: now, changeFrequency: "weekly" as const, priority: 0.7 }));
+
+  return [...staticPages, ...collectionPages, ...scentPages, ...productPages, ...blogPages];
 }

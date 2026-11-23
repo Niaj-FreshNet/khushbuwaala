@@ -9,7 +9,7 @@ export const getProductBySlug = cache(async (slug: string): Promise<IProductResp
       {
         // ✅ ISR cache
         next: {
-          revalidate: 3600,
+          revalidate: 300,
           tags: [`product-${slug}`],
         },
       }

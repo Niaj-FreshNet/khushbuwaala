@@ -28,6 +28,8 @@ export type ShopListingConfig = {
   locked?: Partial<Record<FacetGroup, string[]>>;
   /** Sort used when the customer has not picked one */
   defaultSort?: string;
+  /** With fewer products than this the page is shown but not offered to search engines (thin page) */
+  minProductsToIndex?: number;
 };
 
 const PAGE_SIZE = 24;
@@ -51,7 +53,7 @@ export async function shopMetadata(config: ShopListingConfig, searchParams: Shop
   // A collection with nothing in it yet is not worth a search result (same request as the page makes,
   // so it is answered from the cache).
   const result = filtered ? null : await fetchDiscovery(state, PAGE_SIZE);
-  const empty = result !== null && result.meta.total === 0;
+  const empty = result !== null && result.meta.total < Math.max(1, config.minProductsToIndex ?? 1);
 
   return {
     title: { absolute: `${config.title}${pageSuffix} | ${siteConfig.name}` },

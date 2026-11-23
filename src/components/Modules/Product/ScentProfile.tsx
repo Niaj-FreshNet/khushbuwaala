@@ -1,4 +1,9 @@
 import Link from "next/link";
+import { FAMILY_PAGES, NOTE_PAGES } from "@/config/scentPages";
+
+// a family or note with its own page links there (search engines can follow it); others open the filtered shop
+const familyHref = (id: string) => (FAMILY_PAGES[id] ? `/scents/${id}` : `/shop?families=${id}`);
+const noteHref = (id: string) => (NOTE_PAGES[id] ? `/notes/${id}` : `/shop?notes=${id}`);
 
 // "Scent at a glance": the product's fragrance facts in plain words, each one a link to more
 // perfumes like it. Server component: the links are in the HTML for customers and search engines.
@@ -52,7 +57,7 @@ export default function ScentProfile({ profile, name }: { profile?: ProductProfi
             <ul className="space-y-1.5">
               {main.map((f) => (
                 <li key={f.id} className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                  <Link href={`/shop?families=${f.id}`} className={chip}>
+                  <Link href={familyHref(f.id)} className={chip}>
                     {f.label}
                   </Link>
                   {f.hint && <span className="text-[13px] text-stone-600">{f.hint}</span>}
@@ -66,7 +71,7 @@ export default function ScentProfile({ profile, name }: { profile?: ProductProfi
           <Row title="You can pick out">
             <div className="flex flex-wrap gap-1.5">
               {notes.map((n) => (
-                <Link key={n.id} href={`/shop?notes=${n.id}`} className={chip}>
+                <Link key={n.id} href={noteHref(n.id)} className={chip}>
                   {n.label}
                 </Link>
               ))}
