@@ -74,9 +74,8 @@ export const Footer = () => {
       links: [
         { label: "About Us", href: "/about" },
         { label: "Blog & Fragrance Tips", href: "/blog" },
-        { label: "News & Updates", href: "/news" },
         { label: "Our Story & Values", href: "/manifesto" },
-        { label: "Careers", href: "/career", badge: "Hiring" },
+        { label: "Careers", href: "/career" },
       ],
     },
     {
@@ -100,7 +99,6 @@ export const Footer = () => {
         { label: "My Wishlist", href: "/wishlist" },
         { label: "Shopping Cart", href: "/cart" },
         { label: "Order History", href: "/orders" },
-        { label: "Click & Collect", href: "/click-collect", badge: "New" },
       ],
     },
   ]

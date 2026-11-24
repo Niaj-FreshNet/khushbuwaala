@@ -20,7 +20,12 @@ const nextConfig: NextConfig = {
   },
 
   async redirects() {
-    return [{ source: "/products/:slug", destination: "/product/:slug", permanent: true }];
+    return [
+      { source: "/products/:slug", destination: "/product/:slug", permanent: true },
+      // Pages taken down on 2026-11-24 (sample content, never real): old links go somewhere useful.
+      { source: "/click-collect", destination: "/stores", permanent: false },
+      { source: "/news", destination: "/blog", permanent: false },
+    ];
   },
 };
 

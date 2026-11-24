@@ -1,74 +1,34 @@
 import { Metadata } from "next";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Briefcase, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Careers | Khushbuwaala Perfumes - Join Our Team in Dhaka",
-  description: "Explore job openings at Khushbuwaala Perfumes. We're hiring passionate talent for sales, marketing, and more in our Dhaka showroom. Apply today!",
-  openGraph: {
-    title: "Careers at Khushbuwaala - Perfume Jobs in Dhaka",
-    description: "Be part of our scent revolution. Open positions now.",
-    url: "https://www.khushbuwaala.com/career",
-  },
+  title: "Careers at Khushbuwaala",
+  description:
+    "Interested in working with Khushbuwaala? There are no open positions listed right now, but you can send us your CV.",
+  alternates: { canonical: "/career" },
 };
 
+// The two jobs that used to be listed here were sample content, not real openings (owner,
+// 2026-11-24). The page stays, and says honestly that nothing is open at the moment.
 export default function CareerPage() {
-  const openings = [
-    {
-      title: "Sales Associate",
-      location: "Dhaka Showroom",
-      type: "Full-Time",
-      description: "Assist customers in discovering perfect fragrances. Experience in retail preferred.",
-    },
-    {
-      title: "Marketing Executive",
-      location: "Dhaka (Hybrid)",
-      type: "Full-Time",
-      description: "Drive campaigns for new perfume launches. Creative minds wanted!",
-    },
-    // Add more
-  ];
-
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <div className="text-center mb-12">
-          <Badge variant="secondary" className="mb-4">Hiring Now</Badge>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Careers</h1>
-          <p className="text-xl text-gray-600">Join our fragrance family and scent the future.</p>
-        </div>
-
-        <div className="space-y-6">
-          {openings.map((opening, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <Briefcase className="h-5 w-5" />
-                    {opening.title}
-                  </CardTitle>
-                  <Badge>{opening.type}</Badge>
-                </div>
-                <CardDescription>{opening.location}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700 mb-4">{opening.description}</p>
-                <Button variant="outline" asChild>
-                  <a href="mailto:khushbuwaala@gmail.com?subject=Job Application: {opening.title}">Apply Now</a>
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <div className="text-center mt-8">
-          <p className="text-gray-600 mb-4">No openings match? Send your resume to khushbuwaala@gmail.com</p>
-          <div className="flex justify-center gap-4 text-sm text-gray-500">
-            <Users className="h-4 w-4" />
-            <span>We're a small team that loves fragrance.</span>
-          </div>
+    <div className="bg-gray-50 py-8 sm:py-12">
+      <div className="mx-auto w-full max-w-2xl px-4">
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 sm:p-8">
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Careers</h1>
+          <p className="mt-3 text-gray-700">
+            We are a small team that loves fragrance. There are no open positions listed right now.
+          </p>
+          <p className="mt-3 text-gray-700">
+            If you would like to work with us in the future, send your CV and a few lines about yourself. We keep
+            every message and get in touch when something suitable opens.
+          </p>
+          <a
+            href="mailto:khushbuwaala@gmail.com?subject=Working%20at%20Khushbuwaala"
+            className="mt-5 inline-flex h-12 items-center justify-center rounded-xl bg-emerald-700 px-5 text-base font-bold text-white hover:bg-emerald-800"
+          >
+            Email your CV
+          </a>
+          <p className="mt-3 text-sm text-gray-600">khushbuwaala@gmail.com</p>
         </div>
       </div>
     </div>
