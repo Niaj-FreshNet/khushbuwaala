@@ -69,7 +69,8 @@ export const CartItemCard = ({ item }: CartItemCardProps) => {
                 variant="ghost"
                 size="icon-sm"
                 onClick={handleRemove}
-                className="text-red-500 hover:text-red-700 hover:bg-red-50 ml-2"
+                aria-label={`Remove ${item.product?.name ?? "item"} from cart`}
+                className="h-10 w-10 text-red-500 hover:text-red-700 hover:bg-red-50 ml-2"
               >
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -84,11 +85,12 @@ export const CartItemCard = ({ item }: CartItemCardProps) => {
                     size="icon-sm"
                     onClick={() => handleQuantityChange(-1)}
                     disabled={item.quantity === 1 || isUpdating}
-                    className="h-8.5! min-h-0! py-0 rounded-r-none border-r"
+                    aria-label="Decrease quantity"
+                    className="h-10! w-10 min-h-0! py-0 rounded-r-none border-r"
                   >
-                    <Minus className="w-3 h-3" />
+                    <Minus className="w-4 h-4" />
                   </Button>
-                  <div className="w-10 flex items-center justify-center text-sm font-medium">
+                  <div className="w-10 flex items-center justify-center text-sm font-medium" aria-live="polite">
                     {isUpdating ? "..." : item.quantity}
                   </div>
                   <Button
@@ -96,9 +98,10 @@ export const CartItemCard = ({ item }: CartItemCardProps) => {
                     size="icon-sm"
                     onClick={() => handleQuantityChange(1)}
                     disabled={isUpdating}
-                    className="h-8.5! min-h-0! py-0 rounded-l-none border-l"
+                    aria-label="Increase quantity"
+                    className="h-10! w-10 min-h-0! py-0 rounded-l-none border-l"
                   >
-                    <Plus className="w-3 h-3" />
+                    <Plus className="w-4 h-4" />
                   </Button>
                 </div>
               </div>

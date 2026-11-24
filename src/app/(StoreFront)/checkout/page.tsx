@@ -39,6 +39,9 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { districtAliases, districts } from "./_components/districts";
+
+// Most orders go to Dhaka, so it leads the list; the rest stay in A–Z order.
+const districtsDhakaFirst = [...districts].sort((a, b) => (a.en === "Dhaka" ? -1 : b.en === "Dhaka" ? 1 : 0));
 import { useAuth } from "@/redux/store/hooks/useAuth";
 import { useGetUserProfileQuery } from "@/redux/store/api/user/userApi";
 import Link from "next/link";
@@ -509,20 +512,27 @@ export default function CheckoutPage() {
     });
   }, [paymentMethod, total, analyticsItems, appliedPromoCode, userData, selectedDistrictEn]);
 
+  const districtRef = useRef<HTMLDivElement | null>(null);
+
   const validateForm = () => {
     const nextErrors: Record<string, string> = {};
     if (!name.trim()) nextErrors.name = "Please enter your full name.";
     if (contactNumber.replace(/\D/g, "").length < 10)
       nextErrors.contactNumber = "Enter a valid 11-digit mobile number.";
     if (!address.trim()) nextErrors.address = "Please enter full delivery address.";
+    // The delivery charge depends on the district (৳60 in Dhaka, ৳120 outside). Without one the
+    // order went through at the Dhaka rate, wherever it was going. Not asked for when delivery is free.
+    if (!isFreeShipping && !selectedDistrictEn)
+      nextErrors.district = "Please choose your district so we can show the right delivery charge.";
     setErrors(nextErrors);
 
-    const order: Array<keyof typeof nextErrors> = ["name", "contactNumber", "address"];
+    const order: Array<keyof typeof nextErrors> = ["name", "contactNumber", "address", "district"];
     const firstKey = order.find((k) => nextErrors[k]);
 
     if (firstKey === "name") scrollToField(nameRef.current);
     if (firstKey === "contactNumber") scrollToField(phoneRef.current);
     if (firstKey === "address") scrollToField(addressRef.current);
+    if (firstKey === "district") districtRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
 
     return Object.keys(nextErrors).length === 0;
   };
@@ -664,7 +674,7 @@ export default function CheckoutPage() {
     try {
       if (!validateForm()) {
         setSubmitStep("idle");
-        toast.error("Please provide name, phone and address");
+        toast.error("Please complete the fields marked in red");
         return;
       }
       if (!agreeToTerms) {
@@ -1110,17 +1120,25 @@ export default function CheckoutPage() {
                   </div>
 
                   {/* District Selector */}
-                  <div className="sm:col-span-2">
+                  <div className="sm:col-span-2" ref={districtRef}>
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-semibold text-gray-700">
                         District <span className="text-gray-400 font-normal">(জেলা)</span>
+                        {!isFreeShipping && <span className="text-rose-500"> *</span>}
                       </label>
-                      {selectedDistrictEn && (
-                        <span className="text-[11px] font-medium text-orange-500">
-                          Shipping: {selectedDistrictEn === "Dhaka" ? "Inside Dhaka (৳60)" : "Outside Dhaka (৳120)"}
+                      {isFreeShipping ? (
+                        <span className="text-xs font-medium text-emerald-700">Free delivery</span>
+                      ) : selectedDistrictEn ? (
+                        <span className="text-xs font-medium text-gray-600">
+                          Delivery: {selectedDistrictEn === "Dhaka" ? "Inside Dhaka ৳60" : "Outside Dhaka ৳120"}
                         </span>
+                      ) : (
+                        <span className="text-xs text-gray-500">Dhaka ৳60 · Outside ৳120</span>
                       )}
                     </div>
+                    {errors.district && !selectedDistrictEn && (
+                      <p className="text-xs text-rose-600 mt-1 font-medium">{errors.district}</p>
+                    )}
                     <div className="mt-0.5">
                       <Popover open={isDistrictPopoverOpen} onOpenChange={setIsDistrictPopoverOpen}>
                         <PopoverTrigger asChild>
@@ -1167,7 +1185,7 @@ export default function CheckoutPage() {
                                 >
                                   <span className="text-xs text-gray-500 font-semibold">Clear Selection</span>
                                 </CommandItem>
-                                {districts.map((d) => {
+                                {districtsDhakaFirst.map((d) => {
                                   const label = `${d.en} — ${d.bn}`;
                                   return (
                                     <CommandItem
@@ -1522,6 +1540,10 @@ export default function CheckoutPage() {
                       )}
                     </span>
                   </div>
+                  {/* The total below already includes this charge, so say which rate it is */}
+                  {!isFreeShipping && !selectedDistrictEn && (
+                    <p className="text-xs text-gray-500">Dhaka rate shown. Outside Dhaka is ৳120: choose your district above.</p>
+                  )}
 
                   <Separator />
 
