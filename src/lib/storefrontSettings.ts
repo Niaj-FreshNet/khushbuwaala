@@ -3,7 +3,44 @@
 // Read on the server and refreshed every minute. If the API cannot be reached, the built-in
 // defaults below are used, so the shop never renders without a hero or product rows.
 
-export type HeroSlide = { image: string; mobileImage?: string; alt: string; buttonText: string; link: string };
+export type HeroSlide = {
+  image: string;
+  mobileImage?: string;
+  /** Pixel size of the pictures as uploaded (absent on banners saved before sizes were recorded). */
+  imageWidth?: number;
+  imageHeight?: number;
+  mobileWidth?: number;
+  mobileHeight?: number;
+  alt: string;
+  /** Empty = no button; the whole banner is the link. */
+  buttonText: string;
+  link: string;
+};
+
+// The banner box takes the shape of the FIRST banner's pictures, so a picture made to the advised
+// size (or any size close to it) is shown whole. The shape is kept inside a sensible range: a very
+// tall picture would push the products off the first screen, a very flat one would be a sliver.
+// Keep in step with the admin panel's copy (src/lib/heroShape.ts there), which previews the same box.
+export const HERO_SHAPE = {
+  desktop: { min: 2, max: 3.2, fallback: 2.2 },
+  phone: { min: 0.8, max: 2.4, fallback: 1 },
+} as const;
+
+const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
+const ratio = (w?: number, h?: number) => (w && h && w > 0 && h > 0 ? w / h : null);
+
+/** Width ÷ height of the banner box on phones and on wider screens. */
+export function heroBoxShape(slides: HeroSlide[]): { phone: number; desktop: number } {
+  const first = slides[0];
+  const wide = first ? ratio(first.imageWidth, first.imageHeight) : null;
+  // without a separate phone picture, phones show the wide one
+  const narrow = first?.mobileImage ? ratio(first.mobileWidth, first.mobileHeight) : wide;
+  const round = (n: number) => Math.round(n * 1000) / 1000;
+  return {
+    desktop: round(wide ? clamp(wide, HERO_SHAPE.desktop.min, HERO_SHAPE.desktop.max) : HERO_SHAPE.desktop.fallback),
+    phone: round(narrow ? clamp(narrow, HERO_SHAPE.phone.min, HERO_SHAPE.phone.max) : HERO_SHAPE.phone.fallback),
+  };
+}
 export type HomeRow = { title: string; query: string; href: string; linkLabel: string; enabled: boolean };
 export type StorefrontSettings = { notices: string[]; hero: HeroSlide[]; homeRows: HomeRow[] };
 
