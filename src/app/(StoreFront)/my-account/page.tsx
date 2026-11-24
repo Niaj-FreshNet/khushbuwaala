@@ -537,6 +537,19 @@ export default function ProfileClient() {
                             <div className="flex items-center justify-between pt-1.5 border-t border-gray-100 text-[11px]">
                                 <span className="text-gray-500">
                                     Delivery: <strong className="text-gray-700">৳{order.shippingCost || 0}</strong>
+                                    {/* Without this line the items and delivery did not add up to the total on a coupon order */}
+                                    {(() => {
+                                        const lines = (order.orderItems || []).reduce(
+                                            (sum: number, it: any) => sum + Number(it.price || 0) * Number(it.quantity || 0),
+                                            0
+                                        );
+                                        const saved = Math.round(lines + Number(order.shippingCost || 0) - Number(order.amount || 0));
+                                        return saved > 0 ? (
+                                            <span className="ml-2 text-emerald-700">
+                                                Discount: <strong>-৳{saved.toLocaleString("en-US")}</strong>
+                                            </span>
+                                        ) : null;
+                                    })()}
                                 </span>
                                 <div>
                                     <span className="text-gray-400 mr-1">Total:</span>
