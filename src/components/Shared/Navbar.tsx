@@ -230,40 +230,36 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
                 <div className="flex-1 flex justify-center min-w-0">
                   <ul
                     className="flex items-center justify-center gap-0.5 xl:gap-1.5 text-gray-800 font-semibold text-xs xl:text-sm whitespace-nowrap"
-                    role="menubar"
                   >
-                    <li role="none">
+                    <li>
                       <Link
                         href="/"
                         className="px-2.5 xl:px-3.5 py-1.5 rounded-lg hover:text-emerald-700 hover:bg-gray-50 transition-colors"
-                        role="menuitem"
                       >
                         HOME
                       </Link>
                     </li>
 
-                    <li role="none">
+                    <li>
                       <Link
                         href="/new-arrivals"
                         className="px-2.5 xl:px-3.5 py-1.5 rounded-lg hover:text-emerald-700 hover:bg-gray-50 transition-colors"
-                        role="menuitem"
                       >
                         NEW IN
                       </Link>
                     </li>
 
-                    <li role="none">
+                    <li>
                       <Link
                         href="/shop"
                         className="px-2.5 xl:px-3.5 py-1.5 rounded-lg hover:text-emerald-700 hover:bg-gray-50 transition-colors"
-                        role="menuitem"
                       >
                         SHOP
                       </Link>
                     </li>
 
                     {/* Smooth Hover & Focus-Accessible Dropdown */}
-                    <li role="none" className="relative group">
+                    <li className="relative group">
                       <button
                         type="button"
                         className="flex items-center gap-1 px-2.5 xl:px-3.5 py-1.5 text-xs xl:text-sm font-semibold rounded-lg text-gray-800 hover:text-emerald-700 focus-visible:text-emerald-700 focus-visible:outline-none group-hover:text-emerald-700 group-hover:bg-emerald-50/50 transition-colors duration-200"
@@ -281,7 +277,6 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
                             <Link
                               key={item.href}
                               href={item.href}
-                              role="menuitem"
                               className="group/item flex items-center justify-between rounded-lg px-3 py-2 text-[13px] font-medium text-gray-700 transition-all duration-150 hover:bg-emerald-50 hover:text-emerald-800 focus-visible:bg-emerald-50 focus-visible:text-emerald-800 focus-visible:outline-none"
                             >
                               <span>{item.label}</span>
@@ -292,31 +287,28 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
                       </div>
                     </li>
 
-                    <li role="none">
+                    <li>
                       <Link
                         href="/womens-perfume"
                         className="px-2.5 xl:px-3.5 py-1.5 rounded-lg hover:text-emerald-700 hover:bg-gray-50 transition-colors"
-                        role="menuitem"
                       >
                         FOR WOMEN
                       </Link>
                     </li>
 
-                    <li role="none">
+                    <li>
                       <Link
                         href="/gifts-and-packages"
                         className="px-2.5 xl:px-3.5 py-1.5 rounded-lg hover:text-emerald-700 hover:bg-gray-50 transition-colors"
-                        role="menuitem"
                       >
                         COMBO
                       </Link>
                     </li>
 
-                    <li role="none">
+                    <li>
                       <Link
                         href="/contact"
                         className="px-2.5 xl:px-3.5 py-1.5 rounded-lg hover:text-emerald-700 hover:bg-gray-50 transition-colors"
-                        role="menuitem"
                       >
                         CONTACT
                       </Link>
