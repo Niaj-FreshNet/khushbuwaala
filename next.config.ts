@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: true },
 
+  // Deploys build into a side folder (NEXT_DIST_DIR=.next-build) and swap it in when ready, so
+  // the running shop keeps its files while the new version is being built.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
+
   images: {
     formats: ["image/avif", "image/webp"], // ✅ better compression
     minimumCacheTTL: 60 * 60 * 24 * 31,   // resized pictures are kept by browsers for 31 days
