@@ -229,8 +229,13 @@ export const orderApi = baseApi.injectEndpoints({
       providesTags: ["Order"],
     }),
 
-    trackOrders: builder.query<ApiResponse<any[]>, string>({
-      query: (query) => `/order/track/${encodeURIComponent(query)}`,
+    // The phone number (when given) unlocks the name and address. It goes in the body, never
+    // in the address, so it does not end up in browser history or server logs.
+    trackOrders: builder.query<ApiResponse<any[]>, { query: string; phone?: string }>({
+      query: ({ query, phone }) =>
+        phone
+          ? { url: `/order/track/${encodeURIComponent(query)}`, method: "POST", body: { phone } }
+          : `/order/track/${encodeURIComponent(query)}`,
       providesTags: ["Order"],
     }),
 

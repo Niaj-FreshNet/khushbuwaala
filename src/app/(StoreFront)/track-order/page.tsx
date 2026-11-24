@@ -52,6 +52,9 @@ function TrackOrderContent() {
 
   const [searchQuery, setSearchQuery] = useState(urlQuery || "");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  // Phone number used on the order: the shop shows the name and address only when it matches.
+  const [verifyPhone, setVerifyPhone] = useState("");
+  const [phoneTried, setPhoneTried] = useState(false);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const detailSectionRef = useRef<HTMLDivElement | null>(null);
 
@@ -63,7 +66,8 @@ function TrackOrderContent() {
     if (urlQuery && urlQuery.trim()) {
       setSearchQuery(urlQuery.trim());
       setSelectedIndex(0);
-      triggerTrackOrders(urlQuery.trim());
+      setPhoneTried(false);
+      triggerTrackOrders({ query: urlQuery.trim() });
     }
   }, [urlQuery, triggerTrackOrders]);
 
@@ -87,6 +91,14 @@ function TrackOrderContent() {
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") onSearch();
+  };
+
+  const showDetails = () => {
+    const query = (urlQuery || searchQuery).trim();
+    const phone = verifyPhone.replace(/\D/g, "");
+    if (!query || phone.length < 10) return;
+    setPhoneTried(true);
+    triggerTrackOrders({ query, phone });
   };
 
   const selectOrder = (idx: number) => {
@@ -519,6 +531,45 @@ function TrackOrderContent() {
                           Delivery Destination
                         </CardTitle>
                       </CardHeader>
+                      {selectedOrder.detailsHidden && selectedOrder.needsInvoice ? (
+                        <CardContent className="p-3 text-sm leading-snug text-gray-700">
+                          To protect your privacy, the name and address are not shown here. Search with your
+                          invoice number (it is on your order confirmation) to see the delivery details.
+                        </CardContent>
+                      ) : selectedOrder.detailsHidden ? (
+                        <CardContent className="p-3 space-y-2 text-sm text-gray-700">
+                          <p className="leading-snug">
+                            To protect your privacy, the name and address are shown only to the person who
+                            placed the order. Enter the phone number used on this order.
+                          </p>
+                          <div className="flex gap-2">
+                            <input
+                              type="tel"
+                              inputMode="numeric"
+                              autoComplete="tel"
+                              value={verifyPhone}
+                              onChange={(e) => setVerifyPhone(e.target.value)}
+                              onKeyDown={(e) => { if (e.key === "Enter") showDetails(); }}
+                              placeholder="01XXXXXXXXX"
+                              aria-label="Phone number used on the order"
+                              className="h-11 min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 text-base text-gray-900 outline-none focus:border-emerald-600"
+                            />
+                            <button
+                              type="button"
+                              onClick={showDetails}
+                              disabled={isFetching || verifyPhone.replace(/\D/g, "").length < 10}
+                              className="h-11 shrink-0 rounded-lg bg-emerald-700 px-4 text-sm font-semibold text-white disabled:opacity-50"
+                            >
+                              Show details
+                            </button>
+                          </div>
+                          {phoneTried && !isFetching ? (
+                            <p className="text-sm font-medium text-rose-600" role="alert">
+                              That number does not match this order. Please check it and try again.
+                            </p>
+                          ) : null}
+                        </CardContent>
+                      ) : (
                       <CardContent className="p-2.5 space-y-1 text-[11px] text-gray-700">
                         <div className="font-semibold text-gray-900 flex items-center gap-1.5">
                           <User className="h-3 w-3 text-gray-400" />
@@ -533,6 +584,7 @@ function TrackOrderContent() {
                           {selectedOrder.shipping?.district ? `, ${selectedOrder.shipping.district}` : ""}
                         </div>
                       </CardContent>
+                      )}
                     </Card>
                   </div>
                 </div>
