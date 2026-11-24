@@ -830,9 +830,12 @@ export default function CheckoutPage() {
     setTimeout(() => (el as any)?.focus?.(), 300);
   }
 
+  // True once the real form is on the page (not the placeholder, not the empty-cart message)
+  const hasItems = itemsToDisplay.length > 0;
+
   useEffect(() => {
     nameRef.current?.focus?.();
-  }, []);
+  }, [mounted, hasItems]);
 
   const inlineButtonRef = useRef<HTMLDivElement | null>(null);
   const [isInlineButtonVisible, setIsInlineButtonVisible] = useState(false);
@@ -856,7 +859,9 @@ export default function CheckoutPage() {
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, []);
+    // The button is not on the page while the placeholder or the empty-cart message is shown,
+    // so attach again once the real form is drawn.
+  }, [mounted, hasItems]);
 
   const isBillingFilled = useMemo(() => {
     return Boolean(
