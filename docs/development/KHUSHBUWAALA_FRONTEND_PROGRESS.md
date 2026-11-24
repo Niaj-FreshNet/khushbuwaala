@@ -302,6 +302,12 @@ Still open: the few seconds of "502" on each deploy; account page and invoice at
   - Not saved with `pm2 save` (the saved list is shared with the other businesses on the server): after a server reboot pm2 would start the storefront the old single-process way, which still works; run the switch again then.
   - Admin panel and backend still restart the old way (a few seconds each); they are not customer-facing pages, though the shop's API calls can fail for those seconds during a backend deploy.
 
+### Pass 21, 2026-11-25: last open checks (storefront `06a86e7`)
+- Account page and invoice at phone width, seen as 360px frames inside the owner's signed-in Chrome (browser simulation): account page fits (tabs, order cards with discount lines, profile form); the invoice top bar pushed Download PDF off the right edge (12px sideways scroll). Phones now show a print icon and "PDF"; after the fix no sideways scroll, right edge of the last button at 323 of 358.
+- Desktop accessibility after removing the incomplete menubar roles: 100.
+- A regression of my own, found and fixed the same hour: the new deploy routine swapped in a build folder with an empty picture cache (`.next/cache/images`), so every picture was resized again on first view. Desktop Performance fell from 96 to 67 and 73 on two runs. The cache (5,480 files) was restored from the newest backup and `~/deploy-storefront.sh` now carries it into each new build. Next run: Performance 93, Accessibility 100, Best practices 100, SEO 100 (first paint 0.3 s, largest picture 0.8 s).
+- Backend stays a single process on purpose: it runs the scheduled courier sync and keeps request limits in memory, so two copies would sync twice and halve the limits' meaning. A backend deploy therefore still interrupts the shop's data requests for a few seconds.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
