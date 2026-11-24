@@ -187,3 +187,21 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 - [x] Merchant Center delivery charge set to ৳120 flat, free over ৳1,000, 1–2 days (owner gave ৳60 Dhaka / ৳120 outside; Google allows one rate per country here, so the higher one is shown)
 - [ ] Feed descriptions contain leftover `&nbsp;` codes; clean them in the feed builder
 - [ ] Owner: free space on drive C: of the work computer (it is full)
+
+## Update 2026-11-24, session 7 (owner Sections 15–17)
+
+**Done (pass 1)**
+- [x] Sections 15–17 added to the master spec; QA checklist file created
+- [x] Site declared light-only; browser bar, toasts, autofill, fonts and Taka sign made the same on every phone
+- [x] Bottom bar, product card, section headings, product page buttons and sticky bar fixed and looked at (320 / 390 / 1440 scaled)
+
+**Next, in this order (purchase journey first)**
+- [ ] Cart page and cart drawer: inspect at 320 / 390 / 430 / 768 / 1440, fix, tick the checklist
+- [ ] Checkout: same, plus form validation, delivery charge shown, submit states (no real order without the owner's yes)
+- [ ] Thank-you page
+- [ ] Shop filters, sorting and search drawer
+- [ ] Product gallery, quick view, navigation drawer
+- [ ] Recount text under 11px and raise it
+- [ ] Category pages, wishlist, account, track order, policy and brand pages
+- [ ] Review `100vh` / `h-screen` use (30 files) for phones with moving toolbars
+- [ ] Owner: look at the shop on a Samsung phone in dark mode (Samsung Internet) and on an iPhone, and say what looks off

@@ -186,11 +186,11 @@ export default function ProductDetailsUI({
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight tracking-tight">
             {product.name}
           </h1>
-          <div className="w-20 h-0.5 sm:h-1 bg-linear-to-r from-blue-500 to-purple-500 rounded-full"></div>
+          <div className="w-20 h-0.5 sm:h-1 bg-emerald-600 rounded-full"></div>
         </div>
 
         {/* Price Section */}
-        <div className="relative p-1.5 sm:p-2.5 bg-linear-to-r from-blue-50/70 via-indigo-50/60 to-purple-50/70 rounded-xl border border-blue-100/80 overflow-hidden">
+        <div className="relative p-1.5 sm:p-2.5 bg-stone-50 rounded-xl border border-stone-200 overflow-hidden">
           <div className="relative flex items-center justify-between gap-3">
             {/* Left: Prices */}
             <div className="flex items-baseline gap-2 sm:gap-2.5 min-w-0">
@@ -270,7 +270,7 @@ export default function ProductDetailsUI({
                         <button
                           onClick={onReadMore}
                           type="button"
-                          className="inline-flex items-center ml-1 text-sm sm:text-base text-blue-700 hover:text-blue-900 font-semibold hover:underline active:scale-[0.98] align-baseline"
+                          className="inline-flex items-center ml-1 text-sm sm:text-base text-emerald-700 hover:text-emerald-900 font-semibold hover:underline active:scale-[0.98] align-baseline"
                         >
                           Read more
                         </button>
@@ -312,8 +312,8 @@ export default function ProductDetailsUI({
                 className={cn(
                   "group relative p-1.5 sm:p-2.5 rounded-xl border transition-all duration-200 active:scale-[0.98] sm:hover:scale-105 cursor-pointer",
                   isSelected
-                    ? "border-blue-500 bg-linear-to-br from-blue-50 to-indigo-50 text-blue-700 shadow-xs sm:shadow-sm ring-2 ring-blue-200"
-                    : "border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50"
+                    ? "border-emerald-600 bg-emerald-50 text-emerald-800 shadow-xs sm:shadow-sm ring-2 ring-emerald-200"
+                    : "border-gray-200 bg-white text-gray-700 hover:border-emerald-300 hover:bg-emerald-50"
                 )}
               >
                 {/* Per-variant discount pill badge */}
@@ -326,7 +326,7 @@ export default function ProductDetailsUI({
                 )} */}
 
                 {isSelected && (
-                  <div className="absolute -bottom-1.5 -right-1.5 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center shadow-2xs">
+                  <div className="absolute -bottom-1.5 -right-1.5 w-5 h-5 bg-emerald-600 rounded-full flex items-center justify-center shadow-2xs">
                     <CheckIcon className="w-3.5 h-3.5 text-white" />
                   </div>
                 )}
@@ -414,7 +414,7 @@ export default function ProductDetailsUI({
             "flex-1 h-12 sm:h-14 text-sm sm:text-lg font-bold rounded-xl transition-all duration-300 active:scale-[0.99] sm:hover:scale-[1.01] cursor-pointer",
             isAddingToCart
               ? "bg-gray-400 cursor-not-allowed text-white"
-              : "bg-linear-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-700 text-white shadow-xs sm:shadow-sm"
+              : "bg-emerald-700 hover:bg-emerald-800 text-white shadow-xs sm:shadow-sm"
           )}
           onClick={(e) => onAddToCart(e)}
           disabled={isAddingToCart || isBuyingNow}
@@ -437,7 +437,7 @@ export default function ProductDetailsUI({
             "flex-1 h-12 sm:h-14 text-md sm:text-xl font-bold rounded-xl transition-all duration-300 active:scale-[0.99] sm:hover:scale-[1.01] cursor-pointer",
             isBuyingNow
               ? "bg-gray-400 cursor-not-allowed text-white"
-              : "bg-linear-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white shadow-xs sm:shadow-sm"
+              : "bg-linear-to-r from-orange-600 via-red-600 to-rose-600 hover:from-orange-700 hover:via-red-700 hover:to-rose-700 text-white shadow-xs sm:shadow-sm"
           )}
           onClick={onBuyNow}
           disabled={isAddingToCart || isBuyingNow || isPending}

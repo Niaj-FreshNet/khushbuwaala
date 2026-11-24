@@ -257,7 +257,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
             )}
         >
             {/* Frosted Glass Backdrop */}
-            <div className="absolute inset-0 bg-white/92 backdrop-blur-xl border-t border-gray-200/80 shadow-[0_-8px_24px_-10px_rgba(0,0,0,0.12)]" />
+            <div className="absolute inset-0 bg-white border-t border-gray-200 shadow-[0_-8px_24px_-10px_rgba(0,0,0,0.12)]" />
 
             {/* Content Container */}
             <div className="relative mx-auto max-w-7xl px-3 sm:px-6 pb-[calc(env(safe-area-inset-bottom)+8px)] pt-2.5">
@@ -322,7 +322,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                             aria-busy={busy}
                             onClick={handleAddToCart}
                             className="h-11 px-5 rounded-xl font-bold shadow-xs transition-all duration-200
-                bg-linear-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-700 text-white
+                bg-emerald-700 hover:bg-emerald-800 text-white
                 hover:shadow-md active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                         >
                             <span className="flex items-center gap-2 text-sm">
@@ -341,7 +341,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                             aria-busy={busy}
                             onClick={handleBuyNow}
                             className="h-11 px-6 rounded-xl font-bold shadow-xs transition-all duration-200
-                bg-linear-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white
+                bg-linear-to-r from-orange-600 via-red-600 to-rose-600 hover:from-orange-700 hover:via-red-700 hover:to-rose-700 text-white
                 hover:shadow-md active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                         >
                             <span className="flex items-center gap-2 text-sm">
@@ -420,7 +420,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                             disabled={busy}
                             onClick={handleAddToCart}
                             className="h-10 rounded-xl font-bold shadow-xs text-xs transition-all duration-200
-                bg-linear-to-r from-blue-600 via-purple-600 to-blue-700 text-white
+                bg-emerald-700 text-white
                 active:scale-95 disabled:opacity-60 cursor-pointer flex items-center justify-center gap-1.5"
                         >
                             {isAdding ? (
@@ -435,7 +435,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                             disabled={busy}
                             onClick={handleBuyNow}
                             className="h-10 rounded-xl font-bold shadow-xs text-xs transition-all duration-200
-                bg-linear-to-r from-orange-500 via-red-500 to-pink-500 text-white
+                bg-linear-to-r from-orange-600 via-red-600 to-rose-600 text-white
                 active:scale-95 disabled:opacity-60 cursor-pointer flex items-center justify-center gap-1.5"
                         >
                             {isBuying || isPending ? (

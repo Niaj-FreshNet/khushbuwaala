@@ -47,7 +47,7 @@ export function ProductCarouselClient({
   const wrapRef = useRef<HTMLDivElement | null>(null)
 
   return (
-    <section ref={wrapRef} className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-1 sm:px-2 lg:px-3 mb-8 sm:mb-10 lg:mb-12">
+    <section ref={wrapRef} className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 mb-8 sm:mb-10 lg:mb-12">
       <SectionTitle
         title={title}
         subtitle={titleSubtitle}
@@ -64,7 +64,7 @@ export function ProductCarouselClient({
             {products.map((product) => (
               <CarouselItem
                 key={product.id}
-                className="pl-1 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 2xl:basis-1/6"
+                className="pl-2 md:pl-3 basis-1/2 min-[360px]:basis-[46%] sm:basis-1/3 md:basis-1/4 lg:basis-1/5 2xl:basis-1/6"
               >
                 <div className="h-full">
                   <ProductCard className="h-auto" product={product} onQuickView={() => handleQuickView(product)} />

@@ -281,7 +281,9 @@ export function ProductCard({
         onTouchMove={onTouchMoveCard}
         onTouchEnd={onTouchEndCard}
         className={cn(
-          "w-full flex flex-col overflow-hidden rounded-xl bg-white border border-gray-100 shadow-2xs hover:shadow-md transition-all duration-300 hover:border-emerald-200 p-0",
+          // gap-0: the base card puts 24px between its children, which left empty bands above the name
+          // and above the buttons
+          "w-full flex flex-col gap-0 overflow-hidden rounded-xl bg-white border border-gray-100 shadow-2xs hover:shadow-md transition-all duration-300 hover:border-emerald-200 p-0",
           className
         )}
       >
@@ -368,13 +370,13 @@ export function ProductCard({
         </div>
 
         {/* Content Details: Snug spacing, zero dead margins */}
-        <div className="px-2 pt-1.5 pb-0 flex flex-col items-center text-center">
+        <div className="px-2 pt-2 pb-0 flex flex-col items-center text-center">
           <h3 className="text-sm sm:text-base font-semibold text-gray-900 line-clamp-1 group-hover:text-black transition-colors leading-tight">
             {product.name}
           </h3>
 
           <div className="flex items-baseline justify-center gap-1.5 mt-0.5">
-            <span className="text-xs sm:text-sm font-bold text-gray-900">
+            <span className="text-sm font-bold text-gray-900">
               {formatPriceBDT(discountedPrice)}
             </span>
             {activeDiscount && (
@@ -389,7 +391,11 @@ export function ProductCard({
               {accords.slice(0, 3).map((accord: string, idx: number) => (
                 <span
                   key={idx}
-                  className="px-1.5 py-0.5 bg-gray-50 text-gray-500 text-[10px] sm:text-[11px] rounded-md border border-gray-100 leading-none whitespace-nowrap truncate shrink-0 max-w-[45%]"
+                  // Two labels on phones (three were cut off at both ends of a narrow card), three from tablets up
+                  className={cn(
+                    "min-w-0 px-1.5 py-1 bg-gray-50 text-gray-600 text-[11px] rounded-md border border-gray-100 leading-none whitespace-nowrap truncate",
+                    idx === 2 && "hidden sm:inline-block"
+                  )}
                 >
                   {accord}
                 </span>
@@ -399,11 +405,11 @@ export function ProductCard({
         </div>
 
         {/* Action Buttons: Flush beneath accords with only 6px padding */}
-        <div className="px-2 pb-2 pt-1.5 flex items-center gap-1.5">
+        <div className="px-2 pb-2 pt-2 flex items-center gap-1.5">
           <Button
             type="button"
             className={cn(
-              "flex-1 h-7.5 sm:h-9 rounded-lg font-bold text-sm shadow-xs transition-all duration-200 active:scale-[0.98] cursor-pointer",
+              "flex-1 min-w-0 shrink h-10 min-h-0! px-1.5 rounded-lg font-bold text-[13px] min-[360px]:text-sm shadow-xs transition-all duration-200 active:scale-[0.98] cursor-pointer",
               isBuyingNow
                 ? "bg-gray-400 cursor-not-allowed text-white"
                 : "bg-linear-to-r from-orange-600 via-red-600 to-rose-600 hover:from-orange-700 hover:via-red-700 hover:to-rose-700 text-white"
@@ -415,7 +421,7 @@ export function ProductCard({
               <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
             ) : (
               <span className="flex items-center justify-center gap-1">
-                <Zap className="h-3.5 w-3.5 fill-current" />
+                <Zap className="hidden min-[360px]:block h-3.5 w-3.5 fill-current" />
                 Buy Now
               </span>
             )}
@@ -426,7 +432,7 @@ export function ProductCard({
             variant="outline"
             size="icon"
             className={cn(
-              "w-7.5 h-7.5 sm:w-9 sm:h-8 min-w-7.5 min-h-7.5 sm:min-w-8 sm:min-h-8 rounded-lg border-blue-700/30 text-blue-800 hover:bg-blue-50 hover:text-blue-900 transition-all duration-200 active:scale-95 shrink-0 p-0 flex items-center justify-center cursor-pointer",
+              "w-9 min-[360px]:w-10 h-10 min-h-0! rounded-lg border-emerald-700/30 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900 transition-all duration-200 active:scale-95 shrink-0 p-0 flex items-center justify-center cursor-pointer",
               isAddingToCart && "bg-emerald-50 cursor-not-allowed"
             )}
             onClick={handleAddToCart}
@@ -437,7 +443,7 @@ export function ProductCard({
             {isAddingToCart ? (
               <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-emerald-700" />
             ) : (
-              <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-blue-200" />
+              <ShoppingCart className="h-4 w-4" />
             )}
           </Button>
         </div>

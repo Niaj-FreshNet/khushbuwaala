@@ -14,7 +14,7 @@ export function Providers({ children }: { children: ReactNode }) {
         loading={null}
         persistor={persistor}
       > */}
-      <Toaster richColors position="top-right" />
+      <Toaster richColors position="top-right" theme="light" />
       <WishlistSync />
       {children}
       {/* </PersistGate> */}

@@ -2053,3 +2053,130 @@ When a customer visits Khushbuwaala for the first time, they should not feel tha
 They should feel that they have discovered an experienced fragrance business that has been working with perfumes for years, understands the industry, cares about product quality, and is genuinely capable of helping them find the right fragrance.
 
 **Build the website in a way that makes our experience evident without needing to repeatedly tell customers that we are experienced. Let the entire experience demonstrate it.**
+
+---
+
+# ADDITIONAL MANDATORY REQUIREMENTS — VISUAL QA, CROSS-DEVICE CONSISTENCY, BUSINESS OBJECTIVE
+
+Added by the owner on 2026-11-24 as "Sections 15, 16 and 17". They are mandatory, not optional recommendations. They are kept under the owner's own numbers; they do not replace sections 15–17 above.
+
+Owner's instructions that came with them:
+
+1. Do not abandon or discard current work. Preserve all completed analytics, tracking, infrastructure and other implementations.
+2. Finish and verify current actionable tasks first.
+3. After that, make the comprehensive storefront UI/UX overhaul a major priority.
+4. These sections require actual implementation and verification, not documentation as future improvements.
+5. Inspect the entire existing storefront before making changes. Identify what was previously implemented incorrectly or incompletely.
+6. Work systematically across all routes, shared components, responsive layouts, interactions, transitions and customer purchase journeys.
+7. Visually inspect the actual rendered website on mobile and desktop throughout implementation.
+8. Maintain a route-by-route QA checklist and do not mark anything complete without visual and functional verification.
+9. Prioritise commercial success: Khushbuwaala is a sales-generating ecommerce business, and the entire customer experience must support product discovery, purchase confidence and completed orders.
+10. Continue autonomously through the remaining tasks without waiting for confirmation between individual tasks.
+
+The owner wants substantial, measurable improvements in the actual customer-facing experience, not just code changes or superficial styling adjustments.
+
+## OWNER SECTION 15. MANDATORY VISUAL QA — INSPECT EVERY PAGE ON MOBILE AND DESKTOP
+
+Do not consider any UI/UX task completed simply because the code compiles or the component looks correct in isolation. Visually inspect, interact with, and verify the actual rendered website throughout the entire implementation process.
+
+### A. Test Every Page at Multiple Screen Sizes
+Inspect every public-facing route and all important interactive components in:
+- Small mobile: 320px–360px
+- Standard mobile: 375px–390px
+- Large mobile: 414px–430px
+- Tablet: approximately 768px
+- Laptop: 1280px–1440px
+- Desktop: 1600px and above
+
+Check actual rendered layouts, not just CSS breakpoints.
+
+### B. Inspect Every Interaction and Transition
+Manually or through browser automation, inspect: navigation opening and closing; drawer opening, closing and swipe gestures; cart interactions; search interactions; dropdowns and select menus; filters and sorting; product image galleries; variant selection; add-to-cart animations; quantity controls; modal transitions; toast notifications; form validation; checkout submission states; loading and skeleton transitions; sticky headers and filters; scroll behaviour; hover, focus, active and disabled states.
+
+Every interaction must feel intentional, smooth, responsive and consistent. Pay particular attention to mobile touch interactions.
+
+### C. Compare Visual Consistency Across Pages
+Check the same shared components across different routes:
+- Are buttons visually identical wherever they serve the same purpose?
+- Are headings following the same typography hierarchy?
+- Are prices and discount labels consistently styled?
+- Are product cards maintaining consistent proportions?
+- Are drawers using consistent widths and animations?
+- Are loading skeletons matching their actual content?
+- Are margins, paddings and section gaps consistent?
+- Are icons aligned and appropriately sized?
+- Are background colours and surface treatments consistent?
+- Are navigation elements positioned correctly during scrolling?
+
+No component should look like it was independently designed without considering the rest of the website.
+
+### D. Inspect Transitions and Animation Quality
+Avoid: abrupt opening and closing; unnecessary animation delays; excessive bouncing; inconsistent animation speeds; layout shifts; flickering; broken sticky positioning; scroll locking problems; animations that interfere with touch interactions. Use appropriate durations and easing curves. Respect reduced-motion preferences.
+
+### E. Perform Screenshot-Based Visual Regression Checks
+Where screenshot/browser tools are available: capture the original state; implement improvements; capture the updated state at the same viewport; compare; identify clipping, misalignment, inconsistent spacing, typography problems and visual regressions; correct every identified issue; repeat until satisfactory. Do not rely exclusively on interpretation of the source code.
+
+### F. Check for Irrelevant and Unnecessary Elements
+Remove or improve anything that creates unnecessary visual noise, repeats information, distracts from the primary action, looks inconsistent with the brand, has no meaningful purpose, creates awkward whitespace, or makes the interface unnecessarily complicated. Every element must have a clear purpose.
+
+### G. Final Acceptance Criteria
+A page is not complete until: mobile layout has been visually inspected; desktop layout has been visually inspected; important intermediate viewport sizes have been checked; all major interactions have been tested; transitions and animations have been reviewed; loading and skeleton states have been checked; typography and spacing are consistent; no obvious clipping, overflow or alignment issues remain; no irrelevant or unnecessary UI elements remain; no regressions have been introduced.
+
+Maintain a route-by-route and component-by-component QA checklist. Mark a page completed only after its actual mobile and desktop experience has been inspected and verified.
+
+Work like a highly experienced product design and engineering team that takes ownership of the final customer experience. Continuously inspect the real website, identify imperfections, improve them, and inspect again. Visual quality, interaction quality, responsiveness and consistency are mandatory acceptance criteria, not optional finishing touches.
+
+## OWNER SECTION 16. CROSS-DEVICE THEME, COLOR & RENDERING CONSISTENCY
+
+The owner has noticed that Khushbuwaala sometimes looks different across different mobile phones. Colours, themes, text appearance and other visual elements are not always consistent. Investigate and resolve these inconsistencies throughout the entire website.
+
+### A. Consistent Theme Across All Devices
+A predictable and consistent appearance across: different Android phone brands and models; screen sizes and resolutions; Android versions; Chrome and other supported mobile browsers; Samsung Internet where applicable; iPhones and Safari; tablets, laptops and desktop browsers.
+
+### B. Light Theme and Color Accuracy
+Use consistent background and surface colours. Text colours remain consistent. Appropriate contrast. Prevent unexpected dark backgrounds and browser-generated colour changes. Buttons, borders, cards, inputs, dropdowns and drawers keep their intended colours. Check placeholder text and disabled states. All icons and SVGs render with the correct colours. Product images and promotional banners keep their intended appearance. Components must not independently interpret or override the website's theme.
+
+### C. System Dark Mode and Browser Theme Behavior
+Investigate whether the operating system's dark mode or browser colour preferences are unexpectedly changing the website's appearance. If Khushbuwaala is intended to use a light theme, it must consistently respect that. Inspect: CSS color-scheme; prefers-color-scheme; browser automatic darkening; theme-related metadata; HTML theme attributes; CSS variables; Tailwind dark-mode configuration; component-library theme settings; native form control appearance; input and autofill styling. Do not introduce an unintended dark theme.
+
+### D. Typography and Font Rendering
+Inspect: font loading and fallbacks; font family differences; font weights; line heights; letter spacing; text rendering and antialiasing; Bengali and English text rendering; heading wrapping; button text alignment; button size (height, width) alignment; text clipping and overflow. Use appropriate fallback fonts and ensure font files load reliably. Avoid fixed dimensions that cause text to clip on devices with different font rendering or display scaling.
+
+### E. Device-Specific Rendering and Responsive Testing
+Investigate issues caused by: device pixel ratio; browser zoom; viewport scaling; safe-area insets; dynamic mobile browser toolbars; different default form-control styles; native input rendering; scrollbar behaviour; CSS viewport units; image rendering differences. Use appropriate responsive CSS, fluid sizing, safe-area handling and modern viewport units where necessary.
+
+### F. Cross-Device Verification
+Where actual devices are available, test the same pages on multiple phones. Where physical devices are unavailable, use browser emulation and responsive testing, while clearly distinguishing simulated results from real-device verification. Compare the same page at equivalent viewport sizes and verify: background colours; text colours; theme appearance; typography; layout and spacing; images; buttons; drawers; modals; sticky elements; animations and transitions. Investigate any unexpected difference rather than dismissing it as device-specific.
+
+### Acceptance Requirement
+One coherent visual identity across supported devices and browsers. Device-specific differences only when deliberately required for responsive usability. Not complete until theme consistency, colour accuracy and typography have been thoroughly audited and verified.
+
+## OWNER SECTION 17. BUSINESS OBJECTIVE — SALES, CONVERSION & COMPLETE CUSTOMER EXPERIENCE
+
+Khushbuwaala is a commercial ecommerce business. The primary objective is to generate sales, increase revenue, convert visitors into paying customers, and build long-term customer relationships. It is not a portfolio website or a design showcase. Approach the project as an experienced ecommerce product designer, conversion rate optimisation specialist, customer experience strategist and senior frontend engineer.
+
+### A. Design for Business Results
+Every major design and UX decision should consider: will this make customers more likely to purchase; does it make product discovery easier; does it increase customer confidence; does it reduce friction or confusion; does it make shopping faster; does it help customers understand the product and its value; does it make adding to cart easier; does it improve checkout completion; does it encourage repeat purchases. Do not add visual elements or interactions simply to look sophisticated.
+
+### B. Optimize the Entire Customer Journey
+Landing Page → Homepage → Shop → Product Details → Add to Cart → Cart → Checkout → Successful Order. Intuitive, seamless and consistent. Customers should never feel lost, confused, overwhelmed or unnecessarily redirected. Remove obstacles between product discovery and order completion.
+
+### C. Build Customer Trust and Purchase Confidence
+Present clearly: fragrance characteristics and descriptions; product variations and sizes; accurate prices and discounts; product images; availability; delivery information; payment options; return and exchange policies; genuine customer reviews where available; authentic brand and service information. Never invent customer reviews, certifications, statistics or trust claims. Clear, professional messaging rather than excessive trust badges and promotional text.
+
+### D. Make the Purchase Experience Effortless
+Clear and visible shopping actions; easy product and variant selection; convenient cart access; understandable pricing; minimal checkout friction; mobile-friendly forms; fast interactions; clear validation and error messages; helpful purchase feedback; smooth order confirmation. Avoid unnecessary steps, confusing navigation, distracting elements and excessive content during purchase.
+
+### E. Balance Visual Excellence With Conversion
+Do not sacrifice: readability for decorative typography; product visibility for excessive whitespace; purchase buttons for unnecessary design elements; loading performance for heavy animations; usability for visual experimentation; checkout simplicity for promotional content. Premium, elegant, modern, trustworthy and commercially effective.
+
+### F. Think Beyond the Existing Implementation
+Use professional judgment to find meaningful improvements not explicitly mentioned. Evaluate: better product discovery; improved recommendations; effective cart experiences; clear promotional messaging; better mobile shopping patterns; improved product information hierarchy; repeat-purchase experiences; relevant cross-selling and upselling. Implement when genuinely beneficial, technically appropriate and consistent with the business model. Do not add features just because competitors have them.
+
+### G. Measure and Preserve Business Integrity
+Maintain the accuracy of: product prices; variant pricing; discounts; inventory; shipping charges; checkout calculations; payment information; order creation; ecommerce analytics events. UI/UX improvements must never break business logic or create discrepancies between what customers see and what the backend processes. The customer journey must be measurable without duplicate or misleading events.
+
+### H. Final Business Acceptance Criteria
+A consistent and premium brand identity; excellent mobile and desktop experiences; intuitive product discovery; clear and persuasive product presentation; smooth cart and checkout; minimal unnecessary distractions; strong customer confidence; fast and reliable interactions; consistent design and behaviour across devices; a purchase journey optimised for conversion.
+
+Do not optimise merely for appearance. Optimise for the complete customer experience and the commercial success of Khushbuwaala. Take ownership of the final quality and do not stop at partial improvements.

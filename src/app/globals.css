@@ -51,6 +51,9 @@
 }
 
 :root {
+  /* One look on every phone: light only. Stops browsers darkening the page by themselves and
+     keeps form fields, scrollbars and autofill light when the phone is in dark mode. */
+  color-scheme: only light;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -124,8 +127,25 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    background-color: #ffffff;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Saved-details autofill: keep the field white with dark text instead of the browser tint */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-text-fill-color: #111827;
+    box-shadow: 0 0 0 1000px #ffffff inset;
+    caret-color: #111827;
   }
 
   /* Universal placeholder font size across the entire website */
@@ -262,13 +282,13 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #ef4444, #ec4899);
+  background: #cbd5e1;
   border-radius: 10px;
   border: 2px solid #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #dc2626, #db2777);
+  background: #94a3b8;
 }
 
 /* Enhanced Focus Styles */
@@ -282,11 +302,6 @@
 ::selection {
   background-color: rgba(239, 68, 68, 0.2);
   color: #1f2937;
-}
-
-/* Smooth Transitions for Layout Changes */
-.grid {
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Enhanced Card Hover Effects */

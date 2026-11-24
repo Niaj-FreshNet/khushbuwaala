@@ -102,3 +102,12 @@ Tag Manager loads late so pages open faster (SF-024 era speed work). Events push
 
 ## SF-026 — Meta tags in Tag Manager use explicit standard events (2026-11-23)
 The Meta Pixel template's "Enhanced Ecommerce dataLayer Integration" and "Use GA4 dataLayer Integration" boxes stay off: they expect the old Universal Analytics data shape and fail silently with ours (this broke three events for about half an hour on 2026-11-23). Each tag names its standard event and lists value, currency, content_ids, contents and content_type itself.
+
+## SF-027 — The shop is light-only and says so (2026-11-24)
+There is no dark theme. The page declares `color-scheme: only light` (CSS and meta tag) and a white browser bar, so browsers do not darken it or its form fields by themselves. Do not add `prefers-color-scheme` branches or a theme switch without the owner asking.
+
+## SF-028 — Two action colours (2026-11-24)
+Buy Now is the red gradient (`from-orange-600 via-red-600 to-rose-600`) everywhere; Add to Cart and selected states are brand green (`emerald-700`). No blue, purple or pink gradients on shopping actions. Section headings use one plain style (`SectionTitle`), no moving decorations.
+
+## SF-029 — Fonts without generated stand-ins (2026-11-24)
+`adjustFontFallback: false` on Inter and Noto Serif Bengali. The stand-in is the phone's own Arial/Roboto and sat in front of the Bengali font, so the Taka sign differed between phones. Order is now Inter, Noto Serif Bengali, system.

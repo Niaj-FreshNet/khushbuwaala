@@ -1,12 +1,40 @@
 # Khushbuwaala Storefront — Progress
 
-**Last updated:** 2026-11-23 (session 6)
+**Last updated:** 2026-11-24 (session 7)
 **Spec:** `Khusbuwaala_Storefront_Master_Development_Prompt.md` (same folder)
 **Related:** [TASKS](KHUSHBUWAALA_FRONTEND_TASKS.md) · [DECISIONS](KHUSHBUWAALA_FRONTEND_DECISIONS.md) · admin/backend history: `D:\Projects\khushbuwaala\KHUSHBUWAALA_*.md`
 
 ## Overall status
 
 Phase 0 (audit) done. Phase 1 (product discovery, header search, wishlist, SEO foundations) is **live since 2026-11-23 ~15:30 Dhaka** (owner approved the deploy).
+
+## Session 7 — 2026-11-24 (owner Sections 15–17: visual QA, same look on every phone, selling first)
+
+The owner added three mandatory sections (visual QA on every page, cross-device consistency, business objective). They are appended to the master spec under "ADDITIONAL MANDATORY REQUIREMENTS". A route-by-route checklist now lives in `KHUSHBUWAALA_FRONTEND_QA_CHECKLIST.md`; nothing is ticked there without being looked at.
+
+### Why the shop looked different on different phones (found in code and on the live site)
+- The site never told the browser it is a light-only site. A phone in dark mode could therefore darken the page, form fields, scrollbars and autofill on its own, and each browser does that differently.
+- The browser bar colour was set to black for dark-mode phones and white for the rest.
+- The Taka sign was drawn by whichever system font the phone had (the stand-in font generated for Inter sat in front of the Bengali font), so its shape and size changed from phone to phone.
+- Every grid on the site carried `transition: all 0.5s`, so layouts animated whenever anything changed.
+
+### Fixed in this pass (pass 1)
+| Where | What |
+| --- | --- |
+| Whole site | Declared light-only (`color-scheme: only light` in CSS and as a meta tag); browser bar always white; toasts fixed to light; autofill fields stay white; grid transition removed; scrollbar is neutral grey instead of red-pink |
+| Fonts | Inter, then the Bengali font, then system. Taka sign and Bengali text now come from the shop's own font everywhere |
+| Bottom bar (phones) | The fifth item (Login) was off the screen on 320px phones; a strip of the bar stayed visible after it hid on scroll; the hook order changed between pages. Rebuilt as one solid bar, five items fit at 320px |
+| Product card | The base card put 24px between its parts, leaving empty bands above the name and above the buttons. Removed. Buy Now and the cart button are 40px tall and fit two-across at 320px. Two scent labels on phones (three were cut off at both ends) |
+| Section headings | Bouncing dots, pulsing sparkle and pink band removed. One calm heading with a short green line |
+| Home product rows | Same side margin as the rest of the page; the third card peeks in to show the row scrolls |
+| Product page | Add to Cart is brand green; Buy Now is the same red as on the cards (they were blue-purple and orange-pink); selected size, title line and "Read more" use green; price box is neutral; the sticky buy bar is solid (the description text showed through it) |
+
+### How it was checked
+- Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
+- Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
+
+### Work computer
+- Drive D: had 0.6 GB free; the storefront's local dev cache (`.next/dev`, 5.4 GB, rebuilt automatically) was deleted so the test copy could start. The admin project has a similar 4.6 GB cache that can go the same way.
 
 ## Session 6 — 2026-11-23 night (after the owner paid Google Cloud and Meta)
 

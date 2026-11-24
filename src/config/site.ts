@@ -10,10 +10,9 @@ export const siteConfig = {
   authors: [{ name: "Khushbuwaala" }],
   creator: "Khushbuwaala",
   publisher: "Khushbuwaala",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
-  ],
+  // The shop has one look: light. The browser bar stays white even when the phone is in dark mode
+  // (it used to turn black there, one of the reasons the site looked different between phones).
+  themeColor: "#ffffff",
   // Link-preview picture (Facebook, WhatsApp, X). These files exist in /public; the old
   // og-image.jpg / twitter-image.jpg paths were 404s.
   ogImage: "/hero1desktop11.webp",
