@@ -877,6 +877,24 @@ export default function CheckoutPage() {
     );
   }
 
+  // Nothing to order: say so and send the shopper back to the shop. This page used to show
+  // "0 items" with a delivery charge as the total and a live Place Order button.
+  // Only while idle, so it never flashes in the moment after an order is placed and the cart is cleared.
+  if (itemsToDisplay.length === 0 && submitStep === "idle") {
+    return (
+      <div className="mx-auto flex min-h-[60vh] w-full max-w-md flex-col items-center justify-center px-4 py-10 text-center">
+        <h1 className="text-xl font-bold text-gray-900">Your cart is empty</h1>
+        <p className="mt-2 text-sm text-gray-600">Add a perfume to your cart and come back here to place the order.</p>
+        <Link
+          href="/shop"
+          className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-emerald-700 px-5 text-base font-bold text-white hover:bg-emerald-800"
+        >
+          Browse perfumes
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <StoreContainer>
       {/* Processing Modal Screen */}
