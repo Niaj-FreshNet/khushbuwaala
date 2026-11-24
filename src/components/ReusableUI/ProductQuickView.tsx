@@ -94,7 +94,9 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
     setQuantity(1)
 
     if (sortedVariants.length) {
-      const first = sortedVariants[0]
+      // Same starting size as the product card and the product page (the second size up), so the
+      // price in this window matches the price on the card that opened it.
+      const first = sortedVariants[1] ?? sortedVariants[0]
       setSelectedSize(`${first.size} ${String(first.unit || "").toLowerCase()}`)
     } else {
       setSelectedSize("3 ml")
@@ -414,9 +416,10 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                   <div className="p-4 sm:p-6 space-y-5">
                     {/* Header */}
                     <div className="space-y-3">
-                      <div className="flex items-start justify-between gap-3">
+                      {/* room on the right for the window close button */}
+                      <div className="flex items-start justify-between gap-3 pr-12">
                         <div className="min-w-0 flex-1">
-                          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 leading-tight break-words">
+                          <h1 className="text-lg sm:text-xl font-bold text-gray-900 leading-tight break-words">
                             {product.name}
                           </h1>
                         </div>
@@ -455,7 +458,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                       {/* ✅ Price (only selected variant final price) */}
                       <div className="space-y-2">
                         <div className="flex items-end gap-3 flex-wrap">
-                          <div className="text-2xl sm:text-3xl font-bold text-gray-900">
+                          <div className="text-xl sm:text-2xl font-bold text-gray-900">
                             {formatPrice(currentPrice)}
                           </div>
 
