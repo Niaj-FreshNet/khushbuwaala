@@ -52,7 +52,7 @@ const priceFormatter = new Intl.NumberFormat("en-BD", {
   currency: "BDT",
   minimumFractionDigits: 0,
 });
-const formatPriceBDT = (price: number) => priceFormatter.format(price).replace("BDT", "৳");
+const formatPriceBDT = (price: number) => priceFormatter.format(price).replace(/BDT\s*/, "৳");
 
 function getActiveDiscount(product: any, variant?: any) {
   if (product?.discount && typeof product.discount === "object") {

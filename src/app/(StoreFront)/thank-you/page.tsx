@@ -33,7 +33,7 @@ function formatBDT(amount: number) {
     maximumFractionDigits: 0,
   })
     .format(Math.max(0, Math.round(Number(amount || 0))))
-    .replace("BDT", "৳")
+    .replace(/BDT\s*/, "৳")
     .trim();
 }
 

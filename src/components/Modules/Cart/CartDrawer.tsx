@@ -72,7 +72,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
       maximumFractionDigits: 0,
     })
       .format(Math.max(0, Math.round(Number(amount || 0))))
-      .replace("BDT", "৳")
+      .replace(/BDT\s*/, "৳")
       .trim();
 
   const subtotalRef = useRef<HTMLDivElement | null>(null);

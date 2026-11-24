@@ -65,7 +65,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
       minimumFractionDigits: 0,
     })
       .format(Number(price || 0))
-      .replace("BDT", "৳")
+      .replace(/BDT\s*/, "৳")
   }, [])
 
   // ✅ Sort variants (stable selection + consistent UI)
@@ -331,7 +331,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                       <div className="absolute top-3 left-3 z-10">
                         <Badge className="bg-white text-green-700 border-0 shadow-lg font-bold">
                           <Tag className="h-3 w-3 mr-1" />
-                          {discount.type === "percentage" ? `${discount.value}% OFF` : `৳${discount.value} OFF`}
+                          {discount.type === "percentage" ? `${Math.round(discount.value)}% OFF` : `৳${discount.value} OFF`}
                         </Badge>
                       </div>
                     )}
@@ -534,7 +534,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                               {hasDiscount && (
                                 <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                                   {vDiscount!.type === "percentage"
-                                    ? `-${vDiscount!.value}%`
+                                    ? `-${Math.round(vDiscount!.value)}%`
                                     : `-৳${vDiscount!.value}`}
                                 </div>
                               )}

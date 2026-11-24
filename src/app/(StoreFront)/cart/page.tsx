@@ -111,7 +111,7 @@ export default function CartPage() {
       maximumFractionDigits: 0,
     })
       .format(Math.max(0, Math.round(Number(amount || 0))))
-      .replace("BDT", "৳")
+      .replace(/BDT\s*/, "৳")
       .trim();
 
   const subtotal = useMemo(() => {

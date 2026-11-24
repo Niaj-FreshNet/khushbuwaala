@@ -175,7 +175,7 @@ export default function ProductDetailsUI({
             <Badge className="bg-linear-to-r from-green-600 to-emerald-500 text-white px-3 py-1 sm:px-4 shadow-xs sm:shadow-sm">
               <Tag className="w-3 h-3 mr-2" />
               {discount.type === "percentage"
-                ? `${discount.value}% OFF`
+                ? `${Math.round(discount.value)}% OFF`
                 : `৳${discount.value} OFF`}
             </Badge>
           )}
@@ -211,7 +211,7 @@ export default function ProductDetailsUI({
                 <div className="sm:hidden text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-2 py-0.5 rounded-lg">
                   Save ৳{(currentPrice - discountedPrice).toLocaleString()}
                   <span className="text-emerald-600/80 font-medium ml-1">
-                    ({discount.type === "percentage" ? `${discount.value}% OFF` : `৳${discount.value.toLocaleString()}`})
+                    ({discount.type === "percentage" ? `${Math.round(discount.value)}% OFF` : `৳${discount.value.toLocaleString()}`})
                   </span>
                 </div>
 
@@ -221,7 +221,7 @@ export default function ProductDetailsUI({
                     You save ৳{(currentPrice - discountedPrice).toLocaleString()}
                   </div>
                   <div className="text-xs text-green-700 leading-tight mt-0.5">
-                    That's {discount.type === "percentage" ? `${discount.value}%` : `৳${discount.value.toLocaleString()}`} off!
+                    That's {discount.type === "percentage" ? `${Math.round(discount.value)}%` : `৳${discount.value.toLocaleString()}`} off!
                   </div>
                 </div>
               </div>

@@ -284,7 +284,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                 </h3>
                                 {discountValue > 0 && (
                                     <span className="shrink-0 text-[10px] font-bold px-1.5 py-0.2 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                        {discountValue}% OFF
+                                        {Math.round(discountValue)}% OFF
                                     </span>
                                 )}
                             </div>
