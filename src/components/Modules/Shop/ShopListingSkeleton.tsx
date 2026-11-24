@@ -27,13 +27,13 @@ export function ProductCardSkeleton() {
 export function ShopListingSkeleton({ count = 12 }: { count?: number }) {
   return (
     <div aria-busy="true" aria-label="Loading perfumes">
-      <header className="container mx-auto px-3 pb-3 pt-4 sm:px-4 sm:pt-6">
+      <header className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8 pb-3 pt-4 sm:pt-6">
         <Skeleton className="h-8 w-56 rounded-md sm:h-9 sm:w-72" />
         <Skeleton className="mt-2 h-4 w-full max-w-xl rounded-md" />
         <Skeleton className="mt-1.5 h-4 w-2/3 max-w-md rounded-md" />
       </header>
 
-      <div className="container mx-auto px-3 sm:px-4">
+      <div className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8">
         {/* Filters + search, then count + sort */}
         <div className="-mx-3 border-b border-stone-200 bg-white px-3 py-2 sm:-mx-4 sm:px-4 lg:mx-0 lg:border-0 lg:px-0 lg:pb-3">
           <div className="flex items-center gap-2">

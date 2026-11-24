@@ -126,13 +126,13 @@ export async function ShopListing({ config, searchParams }: { config: ShopListin
         <link rel="next" href={shopHref(config.basePath, { ...linkState, page: result.meta.page + 1 }, config.locked)} />
       )}
 
-      <header className="container mx-auto px-3 pb-3 pt-4 sm:px-4 sm:pt-6">
+      <header className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8 pb-3 pt-4 sm:pt-6">
         <h1 className="text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl">{config.heading}</h1>
         <p className="mt-1 max-w-2xl text-sm leading-relaxed text-stone-600 sm:text-[15px]">{config.intro}</p>
       </header>
 
       {emptyCollection ? (
-        <div className="container mx-auto px-3 sm:px-4">
+        <div className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8">
           <div className="rounded-2xl border border-stone-200 px-6 py-12 text-center">
             <h2 className="text-lg font-semibold text-stone-900">Nothing is listed in this collection right now</h2>
             <p className="mx-auto mt-1 max-w-md text-sm text-stone-600">

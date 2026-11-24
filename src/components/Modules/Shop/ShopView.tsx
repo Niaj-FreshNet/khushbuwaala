@@ -153,7 +153,7 @@ export function ShopView({ basePath, listName, state, locked = {}, result }: Pro
   ) : null;
 
   return (
-    <div className="container mx-auto px-3 sm:px-4">
+    <div className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8">
       <div ref={topRef} className="scroll-mt-24" />
 
       {/* Controls */}
