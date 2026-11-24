@@ -6,7 +6,7 @@ export default function StoreFrontLoading() {
       {/* 1. Banner: the box the real banner uses (see heroBoxShape) */}
       <section className="w-full overflow-hidden relative mt-1 sm:mt-2 mb-2 sm:mb-4">
         <div className="mx-auto w-full max-w-7xl md:px-4 lg:px-6">
-          <Skeleton className="w-full aspect-square md:aspect-[2.2] rounded-none md:rounded-2xl" />
+          <Skeleton className="w-full aspect-square md:aspect-[2.2] md:max-h-[max(55vh,400px)] rounded-none md:rounded-2xl" />
         </div>
       </section>
 
