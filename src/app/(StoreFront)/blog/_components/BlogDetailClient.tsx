@@ -47,6 +47,26 @@ function calculateReadingTime(text: string): string {
 export default function BlogDetailClient({ initialData }: { slug: string; initialData: BlogData }) {
     const { blog } = initialData;
 
+    // Questions and answers typed in the admin panel (saved as JSON in `others`). They were
+    // stored but never shown.
+    const faqs = useMemo(() => {
+        try {
+            const raw = (blog as { others?: unknown }).others;
+            const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+            let list: unknown = (parsed as { faqs?: unknown } | null)?.faqs;
+            if (typeof list === "string") list = JSON.parse(list);
+            if (!Array.isArray(list)) return [];
+            return list
+                .map((f) => ({
+                    question: String((f as { question?: unknown })?.question ?? "").trim(),
+                    answer: String((f as { answer?: unknown })?.answer ?? "").trim(),
+                }))
+                .filter((f) => f.question && f.answer);
+        } catch {
+            return [];
+        }
+    }, [blog]);
+
     // 1. Parse HTML to extract Table of Contents headings and inject unique IDs
     const { parsedHtml, toc } = useMemo(() => {
         if (typeof window === "undefined" || !blog.content) {
@@ -163,6 +183,36 @@ export default function BlogDetailClient({ initialData }: { slug: string; initia
                 prose-img:rounded-2xl prose-img:w-full prose-img:my-8"
                             dangerouslySetInnerHTML={{ __html: parsedHtml }}
                         />
+
+                        {faqs.length > 0 && (
+                            <section aria-labelledby="blog-faq-heading" className="mt-10 border-t border-neutral-200 pt-6">
+                                <h2 id="blog-faq-heading" className="text-lg font-bold text-neutral-900 sm:text-xl">
+                                    Quick questions
+                                </h2>
+                                <dl className="mt-3 divide-y divide-neutral-200">
+                                    {faqs.map((f) => (
+                                        <div key={f.question} className="py-3">
+                                            <dt className="text-[15px] font-semibold text-neutral-900">{f.question}</dt>
+                                            <dd className="mt-1 text-[15px] leading-relaxed text-neutral-700">{f.answer}</dd>
+                                        </div>
+                                    ))}
+                                </dl>
+                                <script
+                                    type="application/ld+json"
+                                    dangerouslySetInnerHTML={{
+                                        __html: JSON.stringify({
+                                            "@context": "https://schema.org",
+                                            "@type": "FAQPage",
+                                            mainEntity: faqs.map((f) => ({
+                                                "@type": "Question",
+                                                name: f.question,
+                                                acceptedAnswer: { "@type": "Answer", text: f.answer },
+                                            })),
+                                        }).replace(/</g, "\\u003c"),
+                                    }}
+                                />
+                            </section>
+                        )}
                     </main>
 
                     {/* Right Column: Sticky Sidebar */}
