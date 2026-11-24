@@ -49,8 +49,11 @@ const InvoiceDocument = forwardRef<HTMLDivElement, Props>(
         const key = `${productId}__${variantId}`;
         const itemDiscountInfo = breakdownItemMap.get(key);
 
+        // The price this line was sold at is the truth. The linked size's price is only a
+        // fallback: it is today's price, and after an order is edited it can even belong to
+        // another size (an invoice printed 650 / 150 / 1,280 for lines sold at 700 / 550 / 650).
         const unitOriginal = Number(
-          it.variant?.price ?? it.price ?? 0
+          it.price ?? it.variant?.price ?? 0
         );
 
         const lineOriginal = Math.max(0, Math.round(unitOriginal * qty));
