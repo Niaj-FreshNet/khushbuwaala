@@ -296,11 +296,15 @@ export default function ThankYouPage() {
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Order Information</h1>
           <p className="text-sm text-gray-500 mt-2">
-            We couldn’t find any active order details. If you recently completed an order, please check your SMS or email for confirmation.
+            We could not show an order on this device. If you have just ordered, your order is safe: you can
+            look it up any time with your invoice number.
           </p>
           <Button asChild className="mt-6 bg-green-600 hover:bg-green-700 text-white rounded-xl px-6">
-            <Link href="/shop">Continue Shopping</Link>
+            <Link href="/track-order">Track my order</Link>
           </Button>
+          <Link href="/shop" className="mt-3 text-sm font-semibold text-emerald-700 underline underline-offset-2">
+            Continue shopping
+          </Link>
         </div>
       </StoreContainer>
     );

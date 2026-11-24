@@ -32,6 +32,14 @@ const nextConfig: NextConfig = {
       // Pages taken down on 2026-11-24 (sample content, never real): old links go somewhere useful.
       { source: "/click-collect", destination: "/stores", permanent: false },
       { source: "/news", destination: "/blog", permanent: false },
+      // Old addresses Google still asks for (Search Console, "Not found", 2026-11-25)
+      { source: "/news/:path*", destination: "/blog", permanent: true },
+      { source: "/for-women", destination: "/womens-perfume", permanent: true },
+      { source: "/oriental-collection", destination: "/oriental-attar", permanent: true },
+      { source: "/oriental/:slug", destination: "/product/:slug", permanent: true },
+      { source: "/artificialOud/:slug", destination: "/product/:slug", permanent: true },
+      { source: "/inspiredPerfumeOil/:slug", destination: "/product/:slug", permanent: true },
+      { source: "/naturalAttar/:slug", destination: "/product/:slug", permanent: true },
     ];
   },
 };
