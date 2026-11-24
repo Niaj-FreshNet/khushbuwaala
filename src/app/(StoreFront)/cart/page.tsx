@@ -254,6 +254,9 @@ export default function CartPage() {
 
   useEffect(() => {
     const revalidate = async () => {
+      // Before the page has read the device-saved cart the list is empty for a moment. Treating
+      // that as "cart is empty" threw the customer's coupon away on every visit to this page.
+      if (!mounted) return;
       if (!appliedCouponCode) return;
       if (!cartItems?.length) {
         clearAppliedCouponCode();
@@ -270,16 +273,18 @@ export default function CartPage() {
         }).unwrap();
         setDiscount(pickDiscountAmount(res));
         setDiscountInfo(pickDiscountInfo(res));
-      } catch {
-        clearAppliedCouponCode();
+      } catch (e: any) {
+        // Drop the coupon only when the shop says it no longer applies, not when the
+        // connection failed for a moment.
         setDiscount(0);
         setDiscountInfo(null);
+        if (e?.data?.message) clearAppliedCouponCode();
       }
     };
 
     revalidate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cartItems, appliedCouponCode]);
+  }, [mounted, cartItems, appliedCouponCode]);
 
   const handleCheckout = () => {
     if (checkoutClicked) return;
