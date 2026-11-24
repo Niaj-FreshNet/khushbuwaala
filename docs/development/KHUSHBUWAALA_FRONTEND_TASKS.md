@@ -197,12 +197,12 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 
 **Next, in this order (purchase journey first)**
 - [x] Cart page, cart drawer, checkout: first pass at 390px (checkout also 320px), five defects fixed and live (`92a43a2`)
-- [ ] Cart and checkout: remaining widths (430 / 768 / 1440), quantity and remove buttons, form validation messages, delivery charge by district, submit states (no real order without the owner's yes)
-- [ ] Checkout: hide the sticky Place Order bar when the in-page button is on screen
-- [ ] Thank-you page
-- [ ] Shop filters, sorting and search drawer
-- [ ] Product gallery, quick view, navigation drawer
-- [ ] Recount text under 11px and raise it
+- [x] Cart quantity and remove, checkout validation, delivery charge by district, sticky bar hiding (pass 3, live `414ba38`)
+- [ ] Cart and checkout at 430 / 768 / 1440 with items; coupon; submit states (no real order without the owner's yes)
+- [ ] Watch for the checkout placeholder sticking (seen once after a restart)
+- [ ] Deploys: avoid the few seconds of 502 on restart (pm2 reload or a second instance)
+- [x] Thank-you page (390px, made-up local order), shop filters, search drawer, menu drawer, small text
+- [ ] Shop sorting; product gallery, size change, quick view; menu category sub-menu; hero slider
 - [ ] Category pages, wishlist, account, track order, policy and brand pages
 - [ ] Review `100vh` / `h-screen` use (30 files) for phones with moving toolbars
 - [ ] Owner: look at the shop on a Samsung phone in dark mode (Samsung Internet) and on an iPhone, and say what looks off

@@ -9,20 +9,20 @@ Required by the owner's Sections 15, 16 and 17 (2026-11-24, at the end of the ma
 - `ISSUE` a problem is known and not fixed yet (described under the table)
 - `—` not inspected yet
 
-**Honest limits of these checks.** Everything here is browser emulation on one Windows computer, not real phones. The test browser could only draw 320–430px widths at full size; 768px and wider were drawn scaled down, so small details at those sizes are not confirmed. No real Android phone, Samsung Internet or iPhone has been used yet. Real-device checks are a separate column and are all still open.
+**Honest limits of these checks.** Phone widths are browser emulation on one Windows computer, not real phones. The 1600+ column was looked at in real Chrome on the live site (window about 1570px wide). 768px and 1440px were only drawn scaled down, so small details at those sizes are not confirmed. No real Android phone, Samsung Internet or iPhone has been used yet. Real-device checks are a separate column and are all still open.
 
-Last updated: 2026-11-24 (pass 2: cart and checkout).
+Last updated: 2026-11-24 (pass 3: checkout rules, cart buttons, shop filters, search, menu, thank-you, desktop look).
 
 ## Routes
 
 | Route | 320 | 390 | 430 | 768 | 1440 | 1600+ | Interactions | Real phone |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `/` Home | FIXED | FIXED | — | — | OK (scaled) | — | — | — |
-| `/shop` | FIXED | — | — | — | — | — | — | — |
-| `/product/[slug]` | — | FIXED | — | — | OK (scaled) | — | — | — |
-| `/cart` | — | FIXED | — | — | — | — | Quantity and remove not tried yet | — |
-| `/checkout` | FIXED | FIXED | — | — | — | — | Form validation and placing an order not tried yet | — |
-| `/thank-you` | — | — | — | — | — | — | — | — |
+| `/` Home | FIXED | FIXED | — | — | OK (scaled) | OK | Product row scroll seen; hero slider not tried | — |
+| `/shop` | FIXED | OK | OK | — | — | OK | Filter, clear, search suggestions tried and work; sorting not tried | — |
+| `/product/[slug]` | — | FIXED | — | — | OK (scaled) | OK | Add to cart tried; gallery, size change, quantity not tried | — |
+| `/cart` | — | FIXED | — | — | — | OK (empty cart) | Quantity up, down and remove tried: counts and totals follow. Coupon not tried | — |
+| `/checkout` | FIXED | FIXED | — | — | — | OK (empty cart) | Empty-form validation, district rule and district list tried. Placing an order, coupon and online payment not tried | — |
+| `/thank-you` | — | OK (made-up local order) | — | — | — | — | Invoice and track buttons not tried | — |
 | `/wishlist` | — | — | — | — | — | — | — | — |
 | Category pages (`/inspired-perfume-oil`, `/oriental-attar`, `/organic-attar`, `/artificial-oud`, `/brand-perfumes`, `/niche-perfumes`, `/womens-perfume`, `/gifts-and-packages`, `/new-arrivals`, `/accessories`) | — | — | — | — | — | — | — | — |
 | `/notes`, `/scents` | — | — | — | — | — | — | — | — |
@@ -45,14 +45,15 @@ Last updated: 2026-11-24 (pass 2: cart and checkout).
 | Product page buttons | FIXED | Add to Cart is brand green, Buy Now is the same red as on the cards (were blue-purple and orange-pink) |
 | Product page sticky buy bar | FIXED | Was see-through over the description text; now solid |
 | Header and announcement bar | — | At 320px the announcement text looked empty in one capture; to re-check |
-| Navigation drawer | — | |
-| Cart drawer | FIXED | Seen at 390px with one item. A second subtotal sat under the close button; removed. Quantity, remove and swipe-to-close not tried yet |
-| Search drawer | — | |
-| Filters and sorting (shop) | — | |
+| Navigation drawer | FIXED | Seen at 390px. Track Order button was blue-purple and the header pink; now green and plain. Category sub-menu not opened |
+| Cart drawer | FIXED | Seen at 390px with one item. A second subtotal sat under the close button; removed. Quantity, remove and swipe-to-close not tried in the drawer |
+| Cart item buttons | FIXED | Remove, minus and plus had no names for screen readers and were 32–34px; now named and 40px |
+| Search drawer | OK | Seen at 390px: typing "oud" gives browse-by chips, six products with prices, "See all 50 results" |
+| Filters and sorting (shop) | OK | Filter sheet at 390px: plain-language groups with counts, live "Show N perfumes", chosen filter shown as a chip with Clear all. Sorting not tried |
 | Product gallery | — | |
 | Quick view | — | |
-| Toasts | FIXED (not seen yet) | Forced to the light look; not yet triggered and looked at |
-| Forms and validation (checkout, login, contact) | — | |
+| Toasts | OK | Seen on checkout validation: light, readable |
+| Forms and validation (checkout) | FIXED | Field messages and red borders appear; district is now asked for when it sets the delivery charge. Login and contact forms not inspected |
 | Loading skeletons | — | |
 | Footer | — | |
 
@@ -69,15 +70,16 @@ Last updated: 2026-11-24 (pass 2: cart and checkout).
 | Scrollbar colour | FIXED | Was a red-pink gradient; now neutral grey |
 | Samsung Internet forced dark mode | ISSUE | That browser can still darken sites on its own; it does not fully honour the light-only signal. Needs a real Samsung phone to see what it does now |
 | Dark-mode classes left in shared UI parts (`dark:`) | OK | Nothing ever switches them on |
-| Text below 11px | ISSUE | 144 pieces of text under 11px on the home page at 390px (before this pass); to recount and raise |
+| Text below 11px | FIXED | Home page at 390px: 144 before pass 1, 2 after it (two badges). Those and the 11px labels on product cards are now 11–12px |
 | Safe-area and 100vh use | — | 30 files use `100vh` / `h-screen`; to review on phones with moving toolbars |
 | Real Android / iPhone comparison | — | Not done |
 
 ## Known issues not fixed yet
 
-1. Home page at 390px had 144 small-text items under 11px (labels, badges). Recount after pass 1 and raise the worst.
 2. Announcement bar at 320px: text looked missing in one capture; may be the fade animation mid-way.
 3. Samsung Internet's own dark mode (see table).
-4. Checkout: when scrolled to the bottom, two Place Order buttons are on screen (the one in the page and the sticky one). The sticky one should step aside there.
+4. Checkout stuck on its loading placeholder once, in real Chrome on the live site, a few minutes after a restart (the footer image failed to load in the same view). Five further loads cleared the placeholder in under half a second. Not reproduced; to watch.
+7. Each deploy gives a few seconds of 502 while the shop restarts.
+8. Shop page: an empty band shows between the header and the sticky filter bar while scrolling.
 5. The Taka sign in regular (not bold) text is drawn smaller than the digits next to it. Bold prices look right.
 6. Thank-you page and every other route in the table marked `—`.

@@ -30,7 +30,7 @@ The owner added three mandatory sections (visual QA on every page, cross-device 
 | Product page | Add to Cart is brand green; Buy Now is the same red as on the cards (they were blue-purple and orange-pink); selected size, title line and "Read more" use green; price box is neutral; the sticky buy bar is solid (the description text showed through it) |
 
 ### Deployed
-- Live storefront after pass 1 was `25bb3ec` (was `1520cd7`); after pass 2 it is `92a43a2`. Rollback copy of the previous build: `~/deploy-backups/khushbuwaala-frontend-next-20261124-103834`.
+- Live storefront after pass 1 was `25bb3ec` (was `1520cd7`); after pass 2 it was `92a43a2`; after pass 3 it is `414ba38`. Rollback copy of the previous build: `~/deploy-backups/khushbuwaala-frontend-next-20261124-103834`.
 - Checked on the live site after the deploy, with dark mode emulated: page stays light (`color-scheme: light only`), white browser-bar tag, five bottom-bar items inside 320px, font order Inter → Noto Serif Bengali → stand-in, product page buttons in the new colours. Home, shop, product, cart, checkout and wishlist answer 200.
 - `adjustFontFallback: false` did nothing in the production build, so the font order is written out in `globals.css` instead.
 
@@ -45,6 +45,20 @@ The owner added three mandatory sections (visual QA on every page, cross-device 
 | Cart, checkout, thank-you | "1 items" | "1 item" |
 
 Checked: cart and checkout with one item on the local test copy at 390px (checkout also at 320px); empty cart and empty checkout on the live site at 390px. Not checked: placing an order, form validation messages, quantity and remove buttons, tablet and desktop widths. The checkout with an item was looked at before the last small change (the empty-cart message), not after it.
+
+### Pass 3, same day (live as `414ba38`)
+| Where | What was wrong | Fix |
+| --- | --- | --- |
+| Checkout (my own regression from pass 2) | The sticky Place Order bar no longer hid when the in-page button was on screen, and the name field lost its focus: both were set up before the form existed. Live for about an hour | Set up again once the form is drawn (`0fac279`) |
+| Checkout delivery charge | With no district chosen, an order under ৳1,000 went through at the Dhaka rate (৳60) wherever it was going | District is required when it sets the charge; both rates shown beside the field; a note under Delivery Fee until one is chosen; Dhaka first in the list. Checked: ৳360 + Chattogram = ৳480 |
+| Checkout | "Shipping: Inside Dhaka (৳60)" showed even on free-delivery orders | Says "Free delivery" |
+| Cart item buttons | No names for screen readers, 32–34px | Named, 40px |
+| Menu drawer | Blue-purple Track Order button, pink header | Green, plain |
+| Small text | Discount badge 10px, scent labels and old price 11px, cart count 9px | 11–12px |
+
+Looked at and found fine: shop filters, search drawer, thank-you page (with a made-up local order), home / shop / product at desktop width in real Chrome on the live site.
+
+Seen once and not reproduced: the live checkout stayed on its loading placeholder in real Chrome a few minutes after a restart. Five further loads were normal.
 
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
