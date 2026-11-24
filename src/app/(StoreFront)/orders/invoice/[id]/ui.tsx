@@ -163,7 +163,7 @@ export default function InvoicePageClient({ orderId }: { orderId: string }) {
                 {/* Top Control Bar (Hidden on print) */}
                 <div className="max-w-4xl mx-auto px-4 mb-4 print:hidden">
                     <div className="flex flex-row items-center justify-between gap-3 bg-white p-2.5 sm:p-3 rounded-2xl border border-gray-200/80 shadow-sm">
-                        <div className="flex items-center gap-3">
+                        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                             <Button
                                 asChild
                                 variant="ghost"
@@ -180,29 +180,31 @@ export default function InvoicePageClient({ orderId }: { orderId: string }) {
                                     <ArrowLeft className="w-4 h-4 text-gray-700" />
                                 </Button>
                             </Button>
-                            <div>
+                            <div className="min-w-0">
                                 <div className="flex items-center gap-2">
-                                    <h1 className="text-base sm:text-lg font-bold text-gray-900">
+                                    <h1 className="truncate text-base sm:text-lg font-bold text-gray-900">
                                         Invoice #{invoiceNo}
                                     </h1>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        {/* Short labels on phones so both buttons stay on the screen */}
+                        <div className="flex shrink-0 items-center gap-2">
                             <Button
                                 onClick={handlePrint}
+                                aria-label="Print invoice"
                                 variant="outline"
                                 size="sm"
-                                className="rounded-md border-gray-300 text-xs font-semibold hover:bg-gray-50 h-9 px-3.5 cursor-pointer"
+                                className="rounded-md border-gray-300 text-xs font-semibold hover:bg-gray-50 h-9 px-2.5 sm:px-3.5 cursor-pointer"
                             >
-                                <Printer className="w-3.5 h-3.5 mr-1.5" /> Print
+                                <Printer className="w-3.5 h-3.5 sm:mr-1.5" /> <span className="hidden sm:inline">Print</span>
                             </Button>
                             <Button
                                 onClick={handleDownloadPDF}
                                 disabled={isDownloading}
                                 size="sm"
-                                className="rounded-md bg-green-700 hover:bg-green-600 text-white text-xs font-bold shadow-sm h-9 px-4 cursor-pointer"
+                                className="rounded-md bg-green-700 hover:bg-green-600 text-white text-xs font-bold shadow-sm h-9 px-3 sm:px-4 cursor-pointer"
                             >
                                 {isDownloading ? (
                                     <>
@@ -212,7 +214,8 @@ export default function InvoicePageClient({ orderId }: { orderId: string }) {
                                 ) : (
                                     <>
                                         <Download className="w-3.5 h-3.5 mr-1.5" />
-                                        Download PDF
+                                        <span className="sm:hidden">PDF</span>
+                                        <span className="hidden sm:inline">Download PDF</span>
                                     </>
                                 )}
                             </Button>
