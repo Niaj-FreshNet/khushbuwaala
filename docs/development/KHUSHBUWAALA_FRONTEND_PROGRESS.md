@@ -250,6 +250,36 @@ Blog (owner asked for articles, pictures and a test of the section):
 - The sitemap caches for an hour, so the three articles appear there after the next refresh (not seen yet).
 - An uncommitted one-word change in the admin menu ("Home page content" → "Homepage content") was in the working folder and went out with the admin commit.
 
+### Pass 18, 2026-11-25: speed, indexing, remaining pages (live: storefront `af60f8a`, `b24a671`)
+Speed (Google PageSpeed Insights, home page, simulated Moto G Power on slow 4G; one run each, scores vary a few points between runs):
+
+| | Before | After |
+| --- | --- | --- |
+| Performance | 84 | 89 |
+| Largest picture shown (LCP) | 3.9 s | 2.9 s |
+| First paint | 1.2 s | 1.2 s |
+| Blocking time | 210 ms | 270 ms |
+| Layout shift | 0 | 0 |
+| Accessibility / Best practices / SEO | 100 / 100 / 100 | 100 / 100 / 100 |
+
+- Cause of the slow banner: the browser found the picture late. The first banner is now preloaded with one hint per screen size (`CaoruselSlider`). The file itself is small (about 30 KB as AVIF at phone size).
+- Resized pictures are cached 31 days (was 7). Home HTML is 880 KB before compression (51 KB sent): 50 product cards, mostly repeated class names; not changed.
+- Left: about 60 KB of older-browser JavaScript and the 28 KB stylesheet that must load before first paint. Desktop was not measured.
+
+Indexing:
+- robots.txt, sitemap (187 addresses, blog included after its hourly refresh), canonical links and structured data (Organization, Product with offers and rating, CollectionPage, BreadcrumbList, FAQPage on articles) read from the live pages: in order.
+- `www.khushbuwaala.com` answered with a full copy of the shop; it now redirects to the main address (done in next.config because nginx needs root).
+- Search Console (owner's Chrome): sitemap status Success, 183 pages discovered; resubmitted so Google re-reads it with the blog. Page indexing as of its last update (16 Nov, before this project): 89 indexed, 86 not. Reasons: crawled but not indexed 52 (mostly script, font and picture addresses plus a few product pages), alternate with canonical 12, not found 7, noindex 6, redirect 3, discovered 5, duplicate 1.
+- The "not found" addresses were old paths (`/for-women`, `/oriental-collection`, `/oriental/<product>`, `/artificialOud/<product>`, `/inspiredPerfumeOil/<product>`, `/news/1`): each now redirects to the matching page (checked live).
+- An old `sitemap_index.xml` entry from 2021 shows "Couldn't fetch" in Search Console; left for the owner to remove. Nothing can guarantee ranking: these steps make every page reachable and readable by Google.
+
+Other screens:
+- Meta Events Manager (dataset 1100344042124349, last 28 days): PageView 1.1K, View content 400, Initiate checkout 36, Add to cart 32, Purchase 17, all "Multiple" integrations (browser and server), match quality 6.1–7.1. Diagnostics shows 2 items, not opened.
+- Merchant Center: 1,014 products, "all your prioritized fixes are resolved".
+- Checkout with an item at 360: title 20px, labels 12px, inputs 16px, no sideways scroll. Photo zoom opens with its close button. Thank-you page without an order on the device told visitors to check an SMS or email the shop does not send; it now offers order tracking.
+
+Not done: the few seconds of "502" on each deploy (needs nginx or a process change; not touched), desktop speed test, GA4 screens, account page on a phone, order invoice, product-level promo codes, profit figure on a coupon order. Deploy backups on the server are 19 GB (182 folders, 64 GB free): nothing deleted.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
