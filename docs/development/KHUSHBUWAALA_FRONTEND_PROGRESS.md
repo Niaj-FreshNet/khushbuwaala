@@ -103,6 +103,13 @@ Not checked: uploading a real picture from the live admin screen (it sends the f
 
 Still live until the owner removes it: the third banner with the 30% claim.
 
+### Pass 7, same day: one discount figure, one price format (live: storefront `b29fed2`)
+- Sale percent is a whole number everywhere (cards said -38% while the product page said 37.5% OFF). Seen live: product page HTML has "38% OFF" only.
+- Prices print as ৳360 with no gap on every page (cart and checkout summaries, cart drawer, cards, quick view, thank-you used "৳ 360"). Seen on the local copy: cart at 1440, checkout at 768 and 1440, no sideways scroll.
+- Seen live at 390 wide, no sideways scroll: /career (says no openings), /forgot-password (16px input), the not-found page, /notes/amber, /scents/aquatic, /gifts-and-packages. All category pages, /stores, /manifesto, /about, /contact, /track-order, /wishlist answer 200. /notes, /scents and /reset-password have no index page (only /notes/[note], /scents/[family], /reset-password/[token]) and nothing links to the bare addresses.
+- Owner confirmed (2026-11-24): up to 6 banners is the limit he wants (backend `LIMITS.hero` = 6, at least 1); he will remove the 30% banner himself from a desktop and send phone screenshots of anything inconsistent.
+- Not checked: cart at 430 and 768 with items after this change (the local copy ran out of memory; only the price text was read at 1440), sticky Place Order bar hiding when the in-page button is in view (the test browser's hidden tab does not fire the observer), coupon, account pages, menu category sub-menu.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
