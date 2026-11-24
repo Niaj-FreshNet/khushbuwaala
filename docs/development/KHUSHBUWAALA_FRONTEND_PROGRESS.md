@@ -29,6 +29,11 @@ The owner added three mandatory sections (visual QA on every page, cross-device 
 | Home product rows | Same side margin as the rest of the page; the third card peeks in to show the row scrolls |
 | Product page | Add to Cart is brand green; Buy Now is the same red as on the cards (they were blue-purple and orange-pink); selected size, title line and "Read more" use green; price box is neutral; the sticky buy bar is solid (the description text showed through it) |
 
+### Deployed
+- Live storefront is now `25bb3ec` (was `1520cd7`). Rollback copy of the previous build: `~/deploy-backups/khushbuwaala-frontend-next-20261124-103834`.
+- Checked on the live site after the deploy, with dark mode emulated: page stays light (`color-scheme: light only`), white browser-bar tag, five bottom-bar items inside 320px, font order Inter → Noto Serif Bengali → stand-in, product page buttons in the new colours. Home, shop, product, cart, checkout and wishlist answer 200.
+- `adjustFontFallback: false` did nothing in the production build, so the font order is written out in `globals.css` instead.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
