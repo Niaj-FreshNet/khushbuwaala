@@ -51,8 +51,8 @@ export default function StoresPage() {
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4">Find Us</Badge>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Store Locator</h1>
-            <p className="text-xl text-gray-600">Experience our collection in person at Khushbuwaala Perfumes stores across Dhaka.</p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Our showroom</h1>
+            <p className="text-lg text-gray-600">Smell the collection in person at our showroom in Dhaka.</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -60,7 +60,7 @@ export default function StoresPage() {
               <Card key={index} className="shadow-md">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-amber-600" />
+                    <MapPin className="h-5 w-5 text-emerald-700" />
                     {store.name}
                   </CardTitle>
                 </CardHeader>
@@ -71,14 +71,14 @@ export default function StoresPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-gray-500" />
-                    <a href={`tel:${store.phone}`} className="text-sm font-medium text-amber-600 hover:underline">{store.phone}</a>
+                    <a href={`tel:${store.phone}`} className="text-sm font-medium text-emerald-700 hover:underline">{store.phone}</a>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-gray-500" />
                     <p className="text-sm">{store.hours}</p>
                   </div>
                   <Button variant="outline" asChild className="w-full">
-                    <a href={store.mapLink} target="_blank">Get Directions</a>
+                    <a href={store.mapLink} target="_blank" rel="noopener noreferrer">Get Directions</a>
                   </Button>
                 </CardContent>
               </Card>
@@ -86,9 +86,8 @@ export default function StoresPage() {
           </div>
 
           <div className="text-center mt-8">
-            <p className="text-gray-600 mb-4">Coming soon: More locations in Chittagong and Sylhet.</p>
-            <Button asChild>
-              <a href="/contact">Contact for New Store Inquiries</a>
+            <Button asChild className="bg-emerald-700 hover:bg-emerald-800 text-white">
+              <a href="/contact">Contact us</a>
             </Button>
           </div>
         </div>

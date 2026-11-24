@@ -1,6 +1,13 @@
 import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import LoginForm from './LoginForm';
+import type { Metadata } from 'next';
+
+// The tab used to read the shop's general title. Sign-in pages are kept out of search results.
+export const metadata: Metadata = {
+  title: 'Sign in',
+  robots: { index: false, follow: true },
+};
 
 export default function LoginPage() {
   return (

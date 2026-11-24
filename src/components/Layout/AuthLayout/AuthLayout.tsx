@@ -21,7 +21,7 @@ export default function AuthLayout({
       <div className={cn('w-full max-w-md mx-auto', className)}>
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold tracking-tight text-stone-900">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
             {title}
           </h1>
           {subtitle && (

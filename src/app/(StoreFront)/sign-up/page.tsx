@@ -180,7 +180,7 @@ export default function SignUp() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-4 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold  text-stone-950 bg-green-600 hover:bg-green-700 active:scale-[0.99] transition-all shadow-md shadow-amber-500/25 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full mt-4 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-base font-semibold text-white bg-emerald-700 hover:bg-emerald-800 active:scale-[0.99] transition-all  disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
             >
               {isLoading ? (
                 <>

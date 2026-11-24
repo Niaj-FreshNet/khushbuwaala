@@ -1,98 +1,106 @@
 import { Metadata } from "next";
-import Head from "next/head";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { MapPin, Clock, Phone } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Phone, MessageCircle, Mail, MapPin, PackageSearch } from "lucide-react";
+import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
-  title: "Store Locator | Khushbuwaala Perfumes - Find Nearest Perfume Store in Dhaka",
-  description: "Discover Khushbuwaala Perfumes stores in Dhaka. Visit our flagship showroom at Eastern Banabithi Shopping Complex for authentic fragrances. Locations, hours, and directions.",
-  openGraph: {
-    title: "Store Locator - Khushbuwaala Perfumes Dhaka",
-    description: "Find your nearest Khushbuwaala store for premium perfumes. Open daily 10 AM–10 PM.",
-    url: "https://www.khushbuwaala.com/stores",
-    type: "website",
-  },
+  title: "Contact Khushbuwaala – Call, WhatsApp or Message Us",
+  description:
+    "Talk to Khushbuwaala about a perfume, an order or a delivery: call, WhatsApp, Messenger or email. Showroom in South Banasree, Dhaka.",
+  alternates: { canonical: "/contact" },
 };
 
-export default function StoresPage() {
-  const stores = [
-    {
-      name: "Flagship Showroom",
-      address: "Shop-G/138, Eastern Banabithi Shopping Complex, South Banasree, Khilgaon, Dhaka-1219",
-      phone: "+8801777152588",
-      hours: "10:00 AM – 10:00 PM (Daily)",
-      mapLink: "https://maps.app.goo.gl/kEXvaRHQ46CbRh7f7", // Replace with real Google Maps link
-    },
-    // Add more stores if available
-  ];
+// This page used to be a copy of the store locator. Someone who taps "Contact" wants to reach
+// the shop, so the ways to do that come first; the showroom is one of them.
+const ways = [
+  {
+    icon: Phone,
+    title: "Call us",
+    detail: siteConfig.contact.phone,
+    href: `tel:${siteConfig.contact.phone}`,
+    cta: "Call now",
+  },
+  {
+    icon: MessageCircle,
+    title: "WhatsApp",
+    detail: "Ask about a scent or place an order",
+    href: `https://wa.me/${siteConfig.contact.whatsapp}`,
+    cta: "Open WhatsApp",
+  },
+  {
+    icon: MessageCircle,
+    title: "Messenger",
+    detail: "Message our Facebook page",
+    href: "https://m.me/111483794112905",
+    cta: "Open Messenger",
+  },
+  {
+    icon: Mail,
+    title: "Email",
+    detail: "khushbuwaala@gmail.com",
+    href: "mailto:khushbuwaala@gmail.com",
+    cta: "Send an email",
+  },
+];
 
+export default function ContactPage() {
   return (
-    <>
-      <Head>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Store",
-          name: "Khushbuwaala Perfumes",
-          address: {
-            "@type": "PostalAddress",
-            streetAddress: "Shop-G/138, Eastern Banabithi Shopping Complex, South Banasree",
-            addressLocality: "Khilgaon, Dhaka",
-            addressRegion: "Dhaka",
-            postalCode: "1219",
-            addressCountry: "BD",
-          },
-          telephone: "+8801777152588",
-          openingHours: "Mo-Su 10:00-22:00",
-        }) }} />
-      </Head>
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="text-center mb-12">
-            <Badge variant="secondary" className="mb-4">Find Us</Badge>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Store Locator</h1>
-            <p className="text-xl text-gray-600">Experience our collection in person at Khushbuwaala Perfumes stores across Dhaka.</p>
-          </div>
+    <div className="bg-gray-50 py-8 sm:py-12">
+      <div className="mx-auto w-full max-w-3xl px-4">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Contact us</h1>
+        <p className="mt-2 text-gray-700">
+          Not sure which perfume to pick, or have a question about an order? Reach us any of these ways.
+        </p>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {stores.map((store, index) => (
-              <Card key={index} className="shadow-md">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-amber-600" />
-                    {store.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4 text-gray-700">
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-gray-500 mt-0.5" />
-                    <p className="text-sm">{store.address}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-gray-500" />
-                    <a href={`tel:${store.phone}`} className="text-sm font-medium text-amber-600 hover:underline">{store.phone}</a>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-gray-500" />
-                    <p className="text-sm">{store.hours}</p>
-                  </div>
-                  <Button variant="outline" asChild className="w-full">
-                    <a href={store.mapLink} target="_blank">Get Directions</a>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          {ways.map((w) => (
+            <a
+              key={w.title}
+              href={w.href}
+              target={w.href.startsWith("http") ? "_blank" : undefined}
+              rel={w.href.startsWith("http") ? "noopener noreferrer" : undefined}
+              className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-4 transition-colors hover:border-emerald-300"
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
+                <w.icon className="h-5 w-5" aria-hidden />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-semibold text-gray-900">{w.title}</span>
+                <span className="block truncate text-sm text-gray-600">{w.detail}</span>
+                <span className="mt-0.5 block text-sm font-semibold text-emerald-700">{w.cta}</span>
+              </span>
+            </a>
+          ))}
+        </div>
 
-          <div className="text-center mt-8">
-            <p className="text-gray-600 mb-4">Coming soon: More locations in Chittagong and Sylhet.</p>
-            <Button asChild>
-              <a href="/contact">Contact for New Store Inquiries</a>
-            </Button>
+        <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-5">
+          <div className="flex items-start gap-3">
+            <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" aria-hidden />
+            <div>
+              <h2 className="font-semibold text-gray-900">Visit the showroom</h2>
+              <p className="mt-1 text-sm text-gray-700">
+                Shop-G/138, Eastern Banabithi Shopping Complex, South Banasree, Khilgaon, Dhaka-1219
+              </p>
+              <Link href="/stores" className="mt-2 inline-block text-sm font-semibold text-emerald-700 underline underline-offset-2">
+                Directions and opening hours
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3 rounded-2xl border border-gray-200 bg-white p-5">
+          <div className="flex items-start gap-3">
+            <PackageSearch className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" aria-hidden />
+            <div>
+              <h2 className="font-semibold text-gray-900">Already ordered?</h2>
+              <p className="mt-1 text-sm text-gray-700">Check where your parcel is with your order ID or phone number.</p>
+              <Link href="/track-order" className="mt-2 inline-block text-sm font-semibold text-emerald-700 underline underline-offset-2">
+                Track your order
+              </Link>
+            </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
