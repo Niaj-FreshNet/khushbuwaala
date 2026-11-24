@@ -155,6 +155,17 @@ Found and fixed in the admin order list (live):
 
 Not checked: stock for Hawas Ice going back after the cancel (the cancel path is the shop's normal one), the Meta/GA4 dashboards for the one test purchase (it will show as a ৳384 purchase on 25 Nov), net profit figure on a coupon order.
 
+### Pass 12, 2026-11-25: after the test order (live: backend `6495119`, storefront `9ad2dc4`)
+- Stock: Hawas Ice log shows -6 "Sold" then +6 "Order cancelled: stock back" for order #899921.
+- Meta: the server log has "[meta capi] Purchase kw_<order id> accepted" for the test order, and the browser event carried the same id, so the two can be matched as one purchase. Events Manager itself was not opened.
+- Sign-in kept alive (storefront `baseApi.ts`): the access token is short-lived and the shop never renewed it, so a returning customer looked signed in but the account page said "Customer, 0 orders" (seen in the owner's Chrome: token expired on 31 Oct). A 401 now calls `/auth/refresh-token` once (shared by all waiting requests) and repeats the request; only a clear refusal signs the customer out. Seen live: four 401s, one refresh, then all 200 and the account showed its 3 orders.
+- Account order card: shows "Discount: -৳36" when items + delivery are more than the total.
+- Tracking route was public and sent each variant whole (cost price included), the order's payment token and courier settlement fields. It now sends variant size/unit only and leaves those fields out. Checked live: no `payToken`, variant keys `id,size,unit`, the tracking page still shows items, discount, total and address.
+- Shopping feed: 8 descriptions had a literal `&nbsp;`; the feed cleaner now decodes rich-text codes. Live feed: 993 items, 0 "nbsp".
+
+Open for the owner: the tracking page shows name, phone and address to anyone who types a 6-digit invoice number (30 tries per 10 minutes per visitor). Asking for the phone number as well, or hiding part of the details, is his decision.
+Not checked: Meta Events Manager and GA4 screens, net profit on a coupon order, product-level promo codes.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
