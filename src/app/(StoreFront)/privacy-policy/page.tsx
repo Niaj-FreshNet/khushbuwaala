@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Khushbuwaala",
+  title: "Privacy Policy",
   description:
     "Learn how Khushbuwaala collects, uses, stores, and protects your personal information when you visit or purchase from khushbuwaala.com.",
   openGraph: {

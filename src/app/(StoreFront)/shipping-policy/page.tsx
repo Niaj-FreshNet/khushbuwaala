@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Shipping Policy | Khushbuwaala Perfumes",
+  title: "Shipping Policy",
   description:
     "Delivery across Bangladesh from Khushbuwaala: ৳60 inside Dhaka, ৳120 outside Dhaka, free on orders of ৳1,000 or more. Cash on delivery available.",
 };

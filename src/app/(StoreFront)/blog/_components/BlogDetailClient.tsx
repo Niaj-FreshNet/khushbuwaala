@@ -141,7 +141,7 @@ export default function BlogDetailClient({ initialData }: { slug: string; initia
                         </div>
 
                         {/* Primary Cover Image */}
-                        <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-neutral-100 mb-10 shadow-xs">
+                        <div className="relative aspect-[1200/630] w-full rounded-2xl overflow-hidden bg-neutral-100 mb-10 shadow-xs">
                             <Image
                                 src={blog.imageUrl || "/images/placeholder.webp"}
                                 alt={blog.title}

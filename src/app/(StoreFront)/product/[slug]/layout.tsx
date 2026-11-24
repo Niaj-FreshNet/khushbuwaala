@@ -3,7 +3,7 @@ import React, { ReactNode } from "react";
 
 export const metadata = {
   // Optional: static metadata fallback
-  title: "Product Details | Khushbuwaala",
+  title: "Product Details",
   description: "Explore our premium products at Khushbuwaala.",
 };
 

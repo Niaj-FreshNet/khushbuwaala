@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions | Khushbuwaala",
+  title: "Terms & Conditions",
   description:
     "Read Khushbuwaala Terms & Conditions covering orders, payments, shipping, returns, privacy, liability, and more.",
 };

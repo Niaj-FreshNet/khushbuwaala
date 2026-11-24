@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Fingerprint, Award, Handshake, Sparkles, HeartHandshake } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Our Values | Khushbuwaala",
+  title: "Our Values",
   description:
     "Discover what Khushbuwaala stands for—authenticity, quality, honesty, personal fragrance stories, and customer-first service.",
   openGraph: {

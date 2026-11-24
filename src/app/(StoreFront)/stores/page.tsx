@@ -6,7 +6,7 @@ import { MapPin, Clock, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Store Locator | Khushbuwaala Perfumes - Find Nearest Perfume Store in Dhaka",
+  title: "Store Locator",
   description: "Discover Khushbuwaala Perfumes stores in Dhaka. Visit our flagship showroom at Eastern Banabithi Shopping Complex for authentic fragrances. Locations, hours, and directions.",
   openGraph: {
     title: "Store Locator - Khushbuwaala Perfumes Dhaka",

@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const plainSummary = blog.metaDescription || blog.content?.replace(/<[^>]*>?/gm, '').slice(0, 160) || '';
 
   return {
-    title: { absolute: `${blog.metaTitle || blog.title} | Khushbuwaala` },
+    title: { absolute: `${String(blog.metaTitle || blog.title).replace(/\s*[|–-]\s*Khushbuwaala.*$/i, "")} | Khushbuwaala` },
     alternates: { canonical: `https://khushbuwaala.com/blog/${blog.slug}` },
     description: plainSummary,
     keywords: blog.keywords ? blog.keywords.split(',').map((k: string) => k.trim()) : [],

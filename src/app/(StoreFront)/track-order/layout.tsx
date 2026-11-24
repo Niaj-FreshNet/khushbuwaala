@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Track Order | Khushbuwaala - Order Status",
+  title: "Track Order",
   description:
     "Track your order by ID, see live status updates, and view delivery details. Secure and simple tracking for your purchases.",
   keywords: [

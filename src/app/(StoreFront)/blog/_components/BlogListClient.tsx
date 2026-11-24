@@ -81,7 +81,7 @@ export default function BlogListClient({ initialData }: BlogListClientProps) {
               return (
                 <article key={blog.id} className="group flex flex-col cursor-pointer">
                   {/* Image with Tag Pill */}
-                  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-neutral-100 mb-4">
+                  <div className="relative aspect-[1200/630] w-full overflow-hidden rounded-2xl bg-neutral-100 mb-4">
                     <Link href={`/blog/${blog.slug}`} className="block h-full w-full">
                       <Image
                         src={blog.imageUrl || "/images/placeholder.webp"}

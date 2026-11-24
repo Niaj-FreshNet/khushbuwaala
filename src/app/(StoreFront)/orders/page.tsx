@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import MyOrders from "./_components/MyOrders";
 
 export const metadata: Metadata = {
-    title: "My Orders | Khushbuwaala Perfumes",
+    title: "My Orders",
     description: "View all your past and current perfume orders.",
     openGraph: {
         title: "My Orders | Khushbuwaala Perfumes",

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const metadata: Metadata = {
-  title: "Refund & Exchange Policy | Khushbuwaala",
+  title: "Refund & Exchange Policy",
   description:
     "Read Khushbuwaala's Return, Refund & Exchange Policy including eligibility, non-returnable items, and return process.",
 };
