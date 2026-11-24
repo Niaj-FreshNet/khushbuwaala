@@ -141,6 +141,20 @@ With the owner's go-ahead a test coupon (cart-wide, 10%, one use) was made in ad
 
 Not checked: an order placed with a coupon (needs the owner's yes for a test order), product-level promo codes, usage limit being reached.
 
+### Pass 11, 2026-11-25: test order with a coupon on the live shop (admin `7d67fb2`)
+Owner said yes to one test order. Done in the owner's real Chrome (signed in to the shop as the shop's own account and to admin as Super Admin).
+- Coupon TESTCLAUDE8Q (whole order, 10%, one use) made in admin → Discounts.
+- Order #899921: Hawas Ice 6 ml ৳360 − ৳36 coupon + ৳60 Dhaka delivery = ৳384, cash on delivery, name "[TEST-CLAUDE] Do not ship". Thank-you page showed the same figures. The browser sent one `purchase` event (value 384, coupon TESTCLAUDE8Q, shipping 60, event id `kw_<order id>`).
+- Admin: coupon usage went 0/1 → 1/1; order detail showed the delivery name/phone, the discount line and ৳384.
+- Order set to CANCELED from admin → Orders → full page. The courier button was never pressed. Usage stays 1/1 after cancelling (a cancelled order does not give the use back).
+- The coupon row was left in place: it is used up, and deleting a coupon an order points to was not worth the risk. The owner can delete it.
+
+Found and fixed in the admin order list (live):
+- Bill showed ৳360 (before the coupon) on this order; it now shows ৳324. The coupon is taken off only when that makes the lines add up to the order total.
+- A signed-in customer was listed by account name and phone instead of the delivery name and phone typed at checkout; the delivery contact now comes first (the courier booking already used it).
+
+Not checked: stock for Hawas Ice going back after the cancel (the cancel path is the shop's normal one), the Meta/GA4 dashboards for the one test purchase (it will show as a ৳384 purchase on 25 Nov), net profit figure on a coupon order.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
