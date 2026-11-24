@@ -90,7 +90,7 @@ export default function ProductDetailsUI({
       `*Product:* ${product.name || ""}`,
       `*Size:* ${selectedSizeLabel}`,
       `*Quantity:* ${quantity}`,
-      `*Price:* ৳${effectivePrice.toLocaleString()} (Total: ৳${totalPrice.toLocaleString()})`,
+      `*Price:* ৳${effectivePrice.toLocaleString("en-US")} (Total: ৳${totalPrice.toLocaleString("en-US")})`,
       shareUrl ? `🔗 *Link:* ${shareUrl}` : "",
       `Please let me know how to proceed with the delivery.`,
     ]
@@ -172,7 +172,7 @@ export default function ProductDetailsUI({
         {/* Discount Badge */}
         <div className="flex items-center gap-3 flex-wrap">
           {discount && (
-            <Badge className="bg-linear-to-r from-green-600 to-emerald-500 text-white px-3 py-1 sm:px-4 shadow-xs sm:shadow-sm">
+            <Badge className="bg-green-600 bg-linear-to-r from-green-600 to-emerald-500 text-white px-3 py-1 sm:px-4 shadow-xs sm:shadow-sm">
               <Tag className="w-3 h-3 mr-2" />
               {discount.type === "percentage"
                 ? `${Math.round(discount.value)}% OFF`
@@ -195,11 +195,11 @@ export default function ProductDetailsUI({
             {/* Left: Prices */}
             <div className="flex items-baseline gap-2 sm:gap-2.5 min-w-0">
               <span className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight shrink-0">
-                ৳{(discount ? discountedPrice : currentPrice).toLocaleString()}
+                ৳{(discount ? discountedPrice : currentPrice).toLocaleString("en-US")}
               </span>
               {discount && (
                 <span className="text-sm sm:text-base text-gray-500 line-through truncate font-medium">
-                  ৳{currentPrice.toLocaleString()}
+                  ৳{currentPrice.toLocaleString("en-US")}
                 </span>
               )}
             </div>
@@ -209,19 +209,19 @@ export default function ProductDetailsUI({
               <div className="text-right shrink-0">
                 {/* Mobile: Compact Pill Badge */}
                 <div className="sm:hidden text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-2 py-0.5 rounded-lg">
-                  Save ৳{(currentPrice - discountedPrice).toLocaleString()}
+                  Save ৳{(currentPrice - discountedPrice).toLocaleString("en-US")}
                   <span className="text-emerald-600/80 font-medium ml-1">
-                    ({discount.type === "percentage" ? `${Math.round(discount.value)}% OFF` : `৳${discount.value.toLocaleString()}`})
+                    ({discount.type === "percentage" ? `${Math.round(discount.value)}% OFF` : `৳${discount.value.toLocaleString("en-US")}`})
                   </span>
                 </div>
 
                 {/* Desktop: Full Original Two-Line Text */}
                 <div className="hidden sm:block">
                   <div className="text-md font-bold text-green-600 leading-tight">
-                    You save ৳{(currentPrice - discountedPrice).toLocaleString()}
+                    You save ৳{(currentPrice - discountedPrice).toLocaleString("en-US")}
                   </div>
                   <div className="text-xs text-green-700 leading-tight mt-0.5">
-                    That's {discount.type === "percentage" ? `${Math.round(discount.value)}%` : `৳${discount.value.toLocaleString()}`} off!
+                    That's {discount.type === "percentage" ? `${Math.round(discount.value)}%` : `৳${discount.value.toLocaleString("en-US")}`} off!
                   </div>
                 </div>
               </div>
@@ -338,15 +338,15 @@ export default function ProductDetailsUI({
                     {hasDiscount ? (
                       <>
                         <span className="text-xs sm:text-sm text-gray-600">
-                          ৳{variantFinalPrice.toLocaleString()}
+                          ৳{variantFinalPrice.toLocaleString("en-US")}
                         </span>
                         <span className="text-[11px] sm:text-xs text-gray-500 line-through">
-                          ৳{variant.price.toLocaleString()}
+                          ৳{variant.price.toLocaleString("en-US")}
                         </span>
                       </>
                     ) : (
                       <span className="text-xs sm:text-sm text-gray-600 font-semibold">
-                        ৳{variant.price.toLocaleString()}
+                        ৳{variant.price.toLocaleString("en-US")}
                       </span>
                     )}
                   </div> */}
@@ -401,7 +401,7 @@ export default function ProductDetailsUI({
               Total
             </div>
             <div className="text-lg sm:text-2xl font-bold text-gray-900">
-              ৳{(discountedPrice * quantity).toLocaleString()}
+              ৳{(discountedPrice * quantity).toLocaleString("en-US")}
             </div>
           </div>
         </div>
@@ -437,7 +437,7 @@ export default function ProductDetailsUI({
             "flex-1 h-12 sm:h-14 text-md sm:text-xl font-bold rounded-xl transition-all duration-300 active:scale-[0.99] sm:hover:scale-[1.01] cursor-pointer",
             isBuyingNow
               ? "bg-gray-400 cursor-not-allowed text-white"
-              : "bg-linear-to-r from-orange-600 via-red-600 to-rose-600 hover:from-orange-700 hover:via-red-700 hover:to-rose-700 text-white shadow-xs sm:shadow-sm"
+              : "bg-red-600 bg-linear-to-r from-orange-600 via-red-600 to-rose-600 hover:from-orange-700 hover:via-red-700 hover:to-rose-700 text-white shadow-xs sm:shadow-sm"
           )}
           onClick={onBuyNow}
           disabled={isAddingToCart || isBuyingNow || isPending}

@@ -27,14 +27,7 @@ import { kwPushPurchase } from "@/lib/Analytics/kwEcom";
 import { useApplyDiscountMutation } from "@/redux/store/api/discount/discountApi";
 
 function formatBDT(amount: number) {
-  return new Intl.NumberFormat("en-BD", {
-    style: "currency",
-    currency: "BDT",
-    maximumFractionDigits: 0,
-  })
-    .format(Math.max(0, Math.round(Number(amount || 0))))
-    .replace(/BDT\s*/, "৳")
-    .trim();
+  return ("৳" + (Math.max(0, Math.round(Number(amount || 0)))).toLocaleString("en-US"));
 }
 
 function upper(v: any) {
@@ -322,7 +315,7 @@ export default function ThankYouPage() {
         <div className="container mx-auto px-3 sm:px-4 max-w-6xl">
 
           {/* Success Banner */}
-          <div className="mb-4 rounded-2xl bg-gradient-to-r from-green-600 to-green-500 p-5 text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="mb-4 rounded-2xl bg-green-600 bg-gradient-to-r from-green-600 to-green-500 p-5 text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="h-11 w-11 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0">
                 <CheckCircle2 className="h-6 w-6 text-white" />

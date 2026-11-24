@@ -157,7 +157,7 @@ export function ShopView({ basePath, listName, state, locked = {}, result }: Pro
       <div ref={topRef} className="scroll-mt-24" />
 
       {/* Controls */}
-      <div className="sticky top-16 z-30 -mx-3 border-b border-stone-200 bg-white/95 px-3 py-2 backdrop-blur-sm sm:-mx-4 sm:px-4 lg:static lg:mx-0 lg:border-0 lg:px-0 lg:pb-3">
+      <div className="sticky top-[var(--kw-nav-offset,4rem)] z-30 -mx-3 border-b border-stone-200 bg-white px-3 py-2 transition-[top] duration-500 ease-out motion-reduce:transition-none sm:-mx-4 sm:px-4 lg:static lg:mx-0 lg:border-0 lg:px-0 lg:pb-3">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -278,7 +278,7 @@ export function ShopView({ basePath, listName, state, locked = {}, result }: Pro
         {/* Desktop filters */}
         {panel && (
           <aside className="hidden w-64 shrink-0 lg:block" aria-label="Filters">
-            <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto rounded-2xl border border-stone-200 bg-white px-4 py-1">
+            <div className="sticky top-[calc(var(--kw-nav-offset,4rem)+1rem)] max-h-[calc(100vh-6rem)] transition-[top] duration-500 ease-out overflow-y-auto rounded-2xl border border-stone-200 bg-white px-4 py-1">
               {panel}
             </div>
           </aside>

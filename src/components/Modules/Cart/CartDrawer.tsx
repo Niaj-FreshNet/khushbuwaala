@@ -66,14 +66,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
   );
 
   const formatBDT = (amount: number) =>
-    new Intl.NumberFormat("en-BD", {
-      style: "currency",
-      currency: "BDT",
-      maximumFractionDigits: 0,
-    })
-      .format(Math.max(0, Math.round(Number(amount || 0))))
-      .replace(/BDT\s*/, "৳")
-      .trim();
+    ("৳" + (Math.max(0, Math.round(Number(amount || 0)))).toLocaleString("en-US"));
 
   const subtotalRef = useRef<HTMLDivElement | null>(null);
   const checkoutBtnRef = useRef<HTMLButtonElement | null>(null);

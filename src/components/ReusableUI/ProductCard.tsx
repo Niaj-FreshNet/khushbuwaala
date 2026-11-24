@@ -47,12 +47,8 @@ function variantLabel(v: any) {
   return `${size} ${unit}`;
 }
 
-const priceFormatter = new Intl.NumberFormat("en-BD", {
-  style: "currency",
-  currency: "BDT",
-  minimumFractionDigits: 0,
-});
-const formatPriceBDT = (price: number) => priceFormatter.format(price).replace(/BDT\s*/, "৳");
+// The sign is written by hand: Safari puts it after the number when Intl formats BDT.
+const formatPriceBDT = (price: number) => "৳" + Math.round(Number(price) || 0).toLocaleString("en-US");
 
 function getActiveDiscount(product: any, variant?: any) {
   if (product?.discount && typeof product.discount === "object") {
@@ -412,7 +408,7 @@ export function ProductCard({
               "flex-1 min-w-0 shrink h-10 min-h-0! px-1.5 rounded-lg font-bold text-[13px] min-[360px]:text-sm shadow-xs transition-all duration-200 active:scale-[0.98] cursor-pointer",
               isBuyingNow
                 ? "bg-gray-400 cursor-not-allowed text-white"
-                : "bg-linear-to-r from-orange-600 via-red-600 to-rose-600 hover:from-orange-700 hover:via-red-700 hover:to-rose-700 text-white"
+                : "bg-red-600 bg-linear-to-r from-orange-600 via-red-600 to-rose-600 hover:from-orange-700 hover:via-red-700 hover:to-rose-700 text-white"
             )}
             onClick={handleBuyNow}
             disabled={isBuyingNow || isAddingToCart}

@@ -136,9 +136,27 @@ export function NavbarClientWrapper({ children }: NavbarClientWrapperProps) {
     }
   }, [])
 
+  // Bars that stick under the header (the shop's filter bar) read this, so they move up to the
+  // very top when the header slides away instead of leaving an empty strip above them.
+  const barRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    const root = document.documentElement
+    const apply = () => {
+      const height = barRef.current?.offsetHeight || 0
+      root.style.setProperty("--kw-nav-offset", isVisible && height ? `${height}px` : "0px")
+    }
+    apply()
+    const el = barRef.current
+    if (!el || typeof ResizeObserver === "undefined") return
+    const observer = new ResizeObserver(apply)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [isVisible])
+
   return (
     <>
       <div
+        ref={barRef}
         className={[
           "fixed w-full z-50",
           "will-change-transform",

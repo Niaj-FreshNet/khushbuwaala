@@ -105,14 +105,7 @@ export default function CartPage() {
     useApplyDiscountMutation();
 
   const formatBDT = (amount: number) =>
-    new Intl.NumberFormat("en-BD", {
-      style: "currency",
-      currency: "BDT",
-      maximumFractionDigits: 0,
-    })
-      .format(Math.max(0, Math.round(Number(amount || 0))))
-      .replace(/BDT\s*/, "৳")
-      .trim();
+    ("৳" + (Math.max(0, Math.round(Number(amount || 0)))).toLocaleString("en-US"));
 
   const subtotal = useMemo(() => {
     if (!Array.isArray(cartItems) || cartItems.length === 0) return 0;

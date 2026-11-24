@@ -59,13 +59,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
   }, [product.primaryImage, product.otherImages])
 
   const formatPrice = React.useCallback((price: number) => {
-    return new Intl.NumberFormat("en-BD", {
-      style: "currency",
-      currency: "BDT",
-      minimumFractionDigits: 0,
-    })
-      .format(Number(price || 0))
-      .replace(/BDT\s*/, "৳")
+    return ("৳" + (Number(price || 0)).toLocaleString("en-US"))
   }, [])
 
   // ✅ Sort variants (stable selection + consistent UI)
@@ -690,7 +684,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                     "flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold rounded-xl shadow-sm transition-all active:scale-[0.98]",
                     isBuyingNow
                       ? "bg-gray-400 cursor-not-allowed text-white"
-                      : "bg-linear-to-r from-orange-600 via-red-600 to-rose-600 hover:from-orange-700 hover:via-red-700 hover:to-rose-700 text-white"
+                      : "bg-red-600 bg-linear-to-r from-orange-600 via-red-600 to-rose-600 hover:from-orange-700 hover:via-red-700 hover:to-rose-700 text-white"
                   )}
                   onClick={handleBuyNow}
                   disabled={/* isOutOfStock || */ isAddingToCart || isBuyingNow}

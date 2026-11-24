@@ -113,8 +113,16 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
           >
             {/* Announcement Bar */}
             {/* hidden when the owner has cleared every message in the admin panel */}
-            <div className={`relative overflow-hidden bg-gradient-to-r from-emerald-800 via-emerald-600 to-emerald-700 px-3 py-0 text-white sm:px-4${notices.length === 0 ? " hidden" : ""}`}>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+            {/* Plain colours written out here on purpose: on a Samsung phone the theme's gradient
+                did not draw and the white text sat on a white bar. */}
+            <div
+              className={`relative overflow-hidden px-3 py-0 sm:px-4${notices.length === 0 ? " hidden" : ""}`}
+              style={{
+                backgroundColor: "#047857",
+                backgroundImage: "linear-gradient(to right, #065f46, #059669, #047857)",
+                color: "#ffffff",
+              }}
+            >
               <div className="relative flex items-center justify-center gap-2 text-[11px] sm:text-xs min-h-5 sm:min-h-6">
                 <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 animate-pulse text-amber-300" />
                 <span

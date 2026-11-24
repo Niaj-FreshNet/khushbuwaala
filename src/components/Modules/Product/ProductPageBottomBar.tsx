@@ -307,11 +307,11 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                                 Total Price
                             </div>
                             <div className="text-xl font-extrabold text-gray-900 leading-tight">
-                                ৳{totalDiscounted.toLocaleString()}
+                                ৳{totalDiscounted.toLocaleString("en-US")}
                             </div>
                             {totalDiscounted !== totalCurrent && (
                                 <div className="text-xs text-gray-400 line-through leading-none">
-                                    ৳{totalCurrent.toLocaleString()}
+                                    ৳{totalCurrent.toLocaleString("en-US")}
                                 </div>
                             )}
                         </div>
@@ -341,7 +341,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                             aria-busy={busy}
                             onClick={handleBuyNow}
                             className="h-11 px-6 rounded-xl font-bold shadow-xs transition-all duration-200
-                bg-linear-to-r from-orange-600 via-red-600 to-rose-600 hover:from-orange-700 hover:via-red-700 hover:to-rose-700 text-white
+                bg-red-600 bg-linear-to-r from-orange-600 via-red-600 to-rose-600 hover:from-orange-700 hover:via-red-700 hover:to-rose-700 text-white
                 hover:shadow-md active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                         >
                             <span className="flex items-center gap-2 text-sm">
@@ -408,7 +408,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
 
                             <div className="text-right leading-none">
                                 <div className="text-sm font-extrabold text-gray-900">
-                                    ৳{totalDiscounted.toLocaleString()}
+                                    ৳{totalDiscounted.toLocaleString("en-US")}
                                 </div>
                             </div>
                         </div>
@@ -435,7 +435,7 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                             disabled={busy}
                             onClick={handleBuyNow}
                             className="h-10 rounded-xl font-bold shadow-xs text-xs transition-all duration-200
-                bg-linear-to-r from-orange-600 via-red-600 to-rose-600 text-white
+                bg-red-600 bg-linear-to-r from-orange-600 via-red-600 to-rose-600 text-white
                 active:scale-95 disabled:opacity-60 cursor-pointer flex items-center justify-center gap-1.5"
                         >
                             {isBuying || isPending ? (

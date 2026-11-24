@@ -528,7 +528,7 @@ export default function ProfileClient() {
                                             </div>
                                         </div>
                                         <span className="font-semibold text-gray-900 shrink-0 text-xs">
-                                            ৳{(Number(item.price) * Number(item.quantity)).toLocaleString()}
+                                            ৳{(Number(item.price) * Number(item.quantity)).toLocaleString("en-US")}
                                         </span>
                                     </div>
                                 ))}
@@ -541,7 +541,7 @@ export default function ProfileClient() {
                                 <div>
                                     <span className="text-gray-400 mr-1">Total:</span>
                                     <span className="font-bold text-emerald-700 text-xs">
-                                        ৳{Number(order.amount || 0).toLocaleString()}
+                                        ৳{Number(order.amount || 0).toLocaleString("en-US")}
                                     </span>
                                 </div>
                             </div>
