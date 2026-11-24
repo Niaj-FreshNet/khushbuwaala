@@ -133,6 +133,14 @@ Seen on the local copy (stand-in API, signed in as the local test admin):
 Not checked: account page with real orders in it (the test account has none), a real coupon, order invoice pages, forgot/reset password being submitted (they send email), the sticky Place Order bar hiding on a tablet.
 Server note: `~/deploy-backups` is now 11 GB (166 entries); nothing was deleted.
 
+### Pass 10, same day: coupon tested on the live shop (live: storefront `eec02c4`)
+With the owner's go-ahead a test coupon (cart-wide, 10%, one use) was made in admin → Discounts, tried on the live cart at 390 wide, and deleted afterwards (usage stayed 0; no order was placed; the test item was removed from the cart).
+- Wrong code: notice "Invalid discount code". Right code typed in lower case: accepted, -৳36 on ৳360, total ৳324. Checkout carried it: ৳360 − ৳36 + ৳60 delivery = ৳384.
+- Bug found and fixed: coming back to the cart (or reloading it) removed the coupon. The cart page shows an empty list until it has read the device-saved cart, and the coupon re-check treated that as an empty cart. It now waits for `mounted`, and only the shop refusing the code removes it (a failed connection does not). Seen live after the fix: cart → checkout → cart keeps the coupon and the ৳324 total.
+- The admin panel in the owner's real Chrome is already signed in, so no password is needed for admin checks.
+
+Not checked: an order placed with a coupon (needs the owner's yes for a test order), product-level promo codes, usage limit being reached.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
