@@ -166,6 +166,14 @@ Not checked: stock for Hawas Ice going back after the cancel (the cancel path is
 Open for the owner: the tracking page shows name, phone and address to anyone who types a 6-digit invoice number (30 tries per 10 minutes per visitor). Asking for the phone number as well, or hiding part of the details, is his decision.
 Not checked: Meta Events Manager and GA4 screens, net profit on a coupon order, product-level promo codes.
 
+### Pass 13, 2026-11-25: tracking asks for the order's phone (live: backend `80f7672`, storefront `9907848`)
+Owner decision: "Yes, ask for phone".
+- Rule: the public tracking route sends the name, phone, email, address and notes only when the order was found by its own invoice number (or order id) AND the caller gives the phone number used on it (`POST /order/track/:query` with `{ phone }` in the body, so it is not in any address or log). Otherwise: status, items, totals, the district, the last three digits of the phone, `detailsHidden: true`.
+- An order found by a phone number or email keeps its invoice number hidden as well (`••••21`, `needsInvoice: true`); otherwise knowing someone's phone would be enough to unlock their address.
+- Tracking page: the Delivery Destination card shows a phone box and "Show details"; a wrong number says so.
+- Checked live: invoice alone → hidden; wrong phone → hidden; right phone written as "+880 1777-152588" → shown; search by phone → 2 orders, invoice and details hidden. Page at 390 wide: wrong number shows the red line, right number shows name, phone and address; no sideways scroll.
+- Links from the thank-you page and the account page open tracking with the invoice number only, so the customer types the phone once to see the address.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
