@@ -196,6 +196,37 @@ Checked on the live shop at 360: home cards, menu drawer (78%, flick left closes
 Not checked: the quick view and other pop-ups, the cart drawer with items in it, the owner's phone itself. "Text size in some sections" was only changed on product cards: the owner should name the other sections.
 This computer could not run a local copy during this pass (out of memory: dev server, build and the stand-in API all crashed), so the check was done on live after deploying, with the previous build backed up.
 
+### Pass 16, 2026-11-25: typography audit (live: storefront `dc11ac2`, `32a0c40`)
+Owner asked for a full typography audit without being asked which sections. Method: a script loaded each page in the live shop at 360 and 1440 wide and listed the computed size of every heading and text element (browser simulation, not a real phone).
+
+The type scale (use it for new work):
+
+| Role | Phone | Computer |
+| --- | --- | --- |
+| Page title (h1) | 24 | 30 |
+| Page title on task pages (cart, checkout, tracking, thank-you) | 20 | 24 |
+| Home page section title | 20 | 24, 28 from md |
+| Heading inside a page (product sections, policies) | 18 | 20 |
+| Body | 14 (15–16 for long reading) | 14–16 |
+| Small print, labels | 12; chips and badges 11 | 12 |
+| Smallest allowed | 11 | 11 |
+
+What was found and changed:
+- Page titles were 18, 24, 30 and 36 on phones for the same role (tracking 18; about, blog, stores 30; values page 36) and 24–36 on computers. All now follow the table.
+- Section titles were 16, 18, 20, 22 and 24 on phones. Home is 20; product page sections ("at a glance", "Product Details", "If you like…") are all 18/20.
+- 51 uses of 8–10px text raised to 11px (product details labels, cart, checkout, footer, menu). Invoice print layouts were left alone.
+- Product page on computers: Add to Cart was 18px and Buy Now 20px; both 16px.
+- Privacy, Refund, Terms and Exchange pages used `prose` classes from a typography plug-in that is not installed: headings were plain 16px/400 text, lists had no bullets, the title was 30px. New `.kw-prose` style in globals.css (also added to blog articles).
+- Tracking page sentences 11px → 12px; values page lead 18 → 16 and its card titles 20 → 18; showroom lead 18 → 16.
+
+Interactive states looked at (live, browser simulation):
+- Quick view (1440 wide): three faults fixed — it opened on the smallest size (3 ml, ৳220) while the card showed the second size (6 ml, ৳360); the close button sat on the wishlist icon; the price (30px) was larger than the name. Now 6 ml / ৳360, icons clear, price 24px.
+- Cart drawer with one item (360 wide): item card, free-delivery bar, totals and buttons fit; the pink ring on Proceed to Checkout is the deliberate 1-second attention cue.
+- Menu, cart, search and filter panels: see pass 15.
+
+After the change, measured at 360: h1 24 on /shop, product, about, stores, values, privacy; 20 on tracking; h2 20 on home, 18 on product and policy pages; smallest text 11px (one 10.5px label left on tracking); no page scrolls sideways.
+Not looked at: checkout and thank-you with the new sizes (no order placed), blog article page (no articles exist), order invoice, zoom lightbox, account page on a phone. Nothing in this pass was seen on a real phone.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
