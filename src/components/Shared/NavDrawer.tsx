@@ -131,7 +131,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
         },
         {
           key: "artificial-oud",
-          label: "Artificial Oud",
+          label: "Oud Collection",
           href: "/artificial-oud",
           description: "Blended oud oils",
         },

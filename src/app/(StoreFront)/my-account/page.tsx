@@ -409,16 +409,16 @@ export default function ProfileClient() {
         const s = (status || "").toUpperCase();
         switch (s) {
             case "DELIVERED":
-                return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] px-2 py-0.5">Delivered</Badge>;
+                return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs px-2 py-0.5">Delivered</Badge>;
             case "PROCESSING":
             case "CONFIRMED":
-                return <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] px-2 py-0.5">Processing</Badge>;
+                return <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-xs px-2 py-0.5">Processing</Badge>;
             case "SHIPPED":
-                return <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] px-2 py-0.5">Shipped</Badge>;
+                return <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-xs px-2 py-0.5">Shipped</Badge>;
             case "CANCELED":
-                return <Badge className="bg-rose-50 text-rose-700 border-rose-200 text-[10px] px-2 py-0.5">Canceled</Badge>;
+                return <Badge className="bg-rose-50 text-rose-700 border-rose-200 text-xs px-2 py-0.5">Canceled</Badge>;
             default:
-                return <Badge className="bg-gray-50 text-gray-700 border-gray-200 text-[10px] px-2 py-0.5">{status || "Pending"}</Badge>;
+                return <Badge className="bg-gray-50 text-gray-700 border-gray-200 text-xs px-2 py-0.5">{status || "Pending"}</Badge>;
         }
     };
 
@@ -470,7 +470,7 @@ export default function ProfileClient() {
                                     <Badge
                                         variant="outline"
                                         className={cn(
-                                            "text-[9px] font-semibold px-1.5 py-0",
+                                            "text-[11px] font-semibold px-1.5 py-0",
                                             order.isPaid
                                                 ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                                 : "bg-amber-50 text-amber-700 border-amber-200"
@@ -481,7 +481,7 @@ export default function ProfileClient() {
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                                    <span className="text-xs text-gray-400 flex items-center gap-1">
                                         <Calendar className="w-3 h-3" />
                                         {new Date(order.orderTime || order.createdAt).toLocaleDateString("en-GB", {
                                             day: "numeric",
@@ -522,7 +522,7 @@ export default function ProfileClient() {
                                                 <p className="font-semibold text-gray-900 text-xs truncate">
                                                     {item.product?.name || "Attar / Perfume"}
                                                 </p>
-                                                <p className="text-[10px] text-gray-500">
+                                                <p className="text-xs text-gray-500">
                                                     Qty: {item.quantity} {item.variant?.size ? `• ${item.variant.size} ${item.variant?.unit || "ML"}` : ""}
                                                 </p>
                                             </div>
@@ -633,7 +633,7 @@ export default function ProfileClient() {
                         <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                             <div className="flex items-center gap-4 bg-gray-50/90 px-4 py-2 rounded-lg border border-gray-100 flex-1 sm:flex-initial justify-around shrink-0">
                                 <div className="text-center">
-                                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">Total Orders</span>
+                                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Total Orders</span>
                                     <span className="text-sm font-bold text-gray-900">{totalOrders}</span>
                                 </div>
 
@@ -641,7 +641,7 @@ export default function ProfileClient() {
 
                                 <div className="text-center relative">
                                     <div className="flex items-center justify-center gap-1">
-                                        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Points</span>
+                                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Points</span>
                                         <button
                                             type="button"
                                             onClick={() => setShowPointsInfo(!showPointsInfo)}
@@ -695,22 +695,24 @@ export default function ProfileClient() {
                 {/* 2. Navigation Pills */}
                 <div className="flex items-center gap-1 p-1 rounded-xl bg-gray-100 border border-gray-200/60">
                     {[
-                        { id: "current-orders", label: `Current Orders (${currentOrders.length})`, icon: Package },
-                        { id: "purchase-history", label: `Order History (${purchaseHistory.length})`, icon: History },
-                        { id: "edit", label: "Edit Profile", icon: User },
+                        { id: "current-orders", label: `Current Orders (${currentOrders.length})`, short: `Current (${currentOrders.length})`, icon: Package },
+                        { id: "purchase-history", label: `Order History (${purchaseHistory.length})`, short: `History (${purchaseHistory.length})`, icon: History },
+                        { id: "edit", label: "Edit Profile", short: "Profile", icon: User },
                     ].map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => switchTab(tab.id as TabType)}
                             className={cn(
-                                "flex-1 flex items-center justify-center gap-1.5 py-1.5 sm:py-2 px-2 text-xs font-semibold rounded-lg whitespace-nowrap transition-all",
+                                "min-w-0 flex-1 flex items-center justify-center gap-1.5 py-2 px-1.5 sm:px-2 text-xs sm:text-sm font-semibold rounded-lg whitespace-nowrap transition-all",
                                 activeTab === tab.id
                                     ? "bg-white text-emerald-700 shadow-2xs"
                                     : "text-gray-600 hover:text-gray-900"
                             )}
                         >
-                            <tab.icon className="w-3.5 h-3.5" />
-                            {tab.label}
+                            <tab.icon className="w-3.5 h-3.5 shrink-0" />
+                            {/* Short names on phones so all three fit without sideways scrolling */}
+                            <span className="sm:hidden">{tab.short}</span>
+                            <span className="hidden sm:inline">{tab.label}</span>
                         </button>
                     ))}
                 </div>
@@ -821,12 +823,12 @@ export default function ProfileClient() {
 
                                             <div className="text-left text-xs">
                                                 <p className="font-semibold text-gray-800">Profile Picture</p>
-                                                <p className="text-[10px] text-gray-400">Click to upload (JPG, PNG, WebP)</p>
+                                                <p className="text-xs text-gray-400">Click to upload (JPG, PNG, WebP)</p>
                                                 {profileForm.imageUrl && (
                                                     <button
                                                         type="button"
                                                         onClick={() => setProfileForm((prev) => ({ ...prev, imageUrl: "" }))}
-                                                        className="text-[10px] text-rose-600 hover:underline mt-0.5"
+                                                        className="text-xs text-rose-600 hover:underline mt-0.5"
                                                     >
                                                         Remove photo
                                                     </button>
@@ -836,7 +838,7 @@ export default function ProfileClient() {
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                             <div className="space-y-1">
-                                                <Label htmlFor="name" className="text-[11px] font-semibold text-gray-700">
+                                                <Label htmlFor="name" className="text-sm font-semibold text-gray-700">
                                                     Full Name
                                                 </Label>
                                                 <Input
@@ -850,7 +852,7 @@ export default function ProfileClient() {
                                             </div>
 
                                             <div className="space-y-1">
-                                                <Label htmlFor="email" className="text-[11px] font-semibold text-gray-700">
+                                                <Label htmlFor="email" className="text-sm font-semibold text-gray-700">
                                                     Email Address
                                                 </Label>
                                                 <Input
@@ -867,7 +869,7 @@ export default function ProfileClient() {
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                             <div className="space-y-1">
-                                                <Label htmlFor="phone" className="text-[11px] font-semibold text-gray-700">
+                                                <Label htmlFor="phone" className="text-sm font-semibold text-gray-700">
                                                     Phone Number
                                                 </Label>
                                                 <Input
@@ -881,11 +883,11 @@ export default function ProfileClient() {
 
                                             <div className="space-y-1">
                                                 <div className="flex items-center justify-between">
-                                                    <Label htmlFor="district" className="text-[11px] font-semibold text-gray-700">
+                                                    <Label htmlFor="district" className="text-sm font-semibold text-gray-700">
                                                         District
                                                     </Label>
                                                     {districtSource === "auto" && profileForm.district && (
-                                                        <span className="text-[9px] text-emerald-600 font-medium flex items-center gap-0.5">
+                                                        <span className="text-[11px] text-emerald-600 font-medium flex items-center gap-0.5">
                                                             <CheckCircle2 className="w-2.5 h-2.5" /> Auto-detected
                                                         </span>
                                                     )}
@@ -910,7 +912,7 @@ export default function ProfileClient() {
                                         </div>
 
                                         <div className="space-y-1">
-                                            <Label htmlFor="address" className="text-[11px] font-semibold text-gray-700">
+                                            <Label htmlFor="address" className="text-sm font-semibold text-gray-700">
                                                 Full Address
                                             </Label>
                                             <Textarea
@@ -958,7 +960,7 @@ export default function ProfileClient() {
                                             <form onSubmit={handlePasswordSubmit} className="space-y-3" noValidate>
                                                 {/* Current Password */}
                                                 <div className="space-y-1">
-                                                    <Label htmlFor="oldPass" className="text-[11px] font-semibold text-gray-700">
+                                                    <Label htmlFor="oldPass" className="text-sm font-semibold text-gray-700">
                                                         Current Password
                                                     </Label>
                                                     <div className="relative">
@@ -985,14 +987,14 @@ export default function ProfileClient() {
                                                         </button>
                                                     </div>
                                                     {passwordErrors.oldPassword && (
-                                                        <p className="text-[10px] text-rose-500 font-medium">{passwordErrors.oldPassword}</p>
+                                                        <p className="text-xs text-rose-500 font-medium">{passwordErrors.oldPassword}</p>
                                                     )}
                                                 </div>
 
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                                     {/* New Password */}
                                                     <div className="space-y-1">
-                                                        <Label htmlFor="newPass" className="text-[11px] font-semibold text-gray-700">
+                                                        <Label htmlFor="newPass" className="text-sm font-semibold text-gray-700">
                                                             New Password
                                                         </Label>
                                                         <div className="relative">
@@ -1019,13 +1021,13 @@ export default function ProfileClient() {
                                                             </button>
                                                         </div>
                                                         {passwordErrors.newPassword && (
-                                                            <p className="text-[10px] text-rose-500 font-medium">{passwordErrors.newPassword}</p>
+                                                            <p className="text-xs text-rose-500 font-medium">{passwordErrors.newPassword}</p>
                                                         )}
                                                     </div>
 
                                                     {/* Confirm Password */}
                                                     <div className="space-y-1">
-                                                        <Label htmlFor="confirmPass" className="text-[11px] font-semibold text-gray-700">
+                                                        <Label htmlFor="confirmPass" className="text-sm font-semibold text-gray-700">
                                                             Confirm Password
                                                         </Label>
                                                         <div className="relative">
@@ -1052,7 +1054,7 @@ export default function ProfileClient() {
                                                             </button>
                                                         </div>
                                                         {passwordErrors.confirmPassword && (
-                                                            <p className="text-[10px] text-rose-500 font-medium">{passwordErrors.confirmPassword}</p>
+                                                            <p className="text-xs text-rose-500 font-medium">{passwordErrors.confirmPassword}</p>
                                                         )}
                                                     </div>
                                                 </div>
