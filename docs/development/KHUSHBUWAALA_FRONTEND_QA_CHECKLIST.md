@@ -11,29 +11,29 @@ Required by the owner's Sections 15, 16 and 17 (2026-11-24, at the end of the ma
 
 **Honest limits of these checks.** Phone widths are browser emulation on one Windows computer, not real phones. The 1600+ column was looked at in real Chrome on the live site (window about 1570px wide). 768px and 1440px were only drawn scaled down, so small details at those sizes are not confirmed. No real Android phone, Samsung Internet or iPhone has been used yet. Real-device checks are a separate column and are all still open.
 
-Last updated: 2026-11-24 (pass 3: checkout rules, cart buttons, shop filters, search, menu, thank-you, desktop look).
+Last updated: 2026-11-24 (pass 4: policy, contact, showroom, sign-in, not-found, category and information pages).
 
 ## Routes
 
 | Route | 320 | 390 | 430 | 768 | 1440 | 1600+ | Interactions | Real phone |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `/` Home | FIXED | FIXED | — | — | OK (scaled) | OK | Product row scroll seen; hero slider not tried | — |
-| `/shop` | FIXED | OK | OK | — | — | OK | Filter, clear, search suggestions tried and work; sorting not tried | — |
-| `/product/[slug]` | — | FIXED | — | — | OK (scaled) | OK | Add to cart tried; gallery, size change, quantity not tried | — |
+| `/shop` | FIXED | OK | OK | — | — | OK | Filter, clear, search suggestions and sorting (cheapest first) tried and work | — |
+| `/product/[slug]` | — | FIXED | — | — | OK (scaled) | OK | Add to cart, gallery pictures, size change and quantity tried: price and sticky bar follow. Quick view not tried (desktop only) | — |
 | `/cart` | — | FIXED | — | — | — | OK (empty cart) | Quantity up, down and remove tried: counts and totals follow. Coupon not tried | — |
 | `/checkout` | FIXED | FIXED | — | — | — | OK (empty cart) | Empty-form validation, district rule and district list tried. Placing an order, coupon and online payment not tried | — |
 | `/thank-you` | — | OK (made-up local order) | — | — | — | — | Invoice and track buttons not tried | — |
-| `/wishlist` | — | — | — | — | — | — | — | — |
-| Category pages (`/inspired-perfume-oil`, `/oriental-attar`, `/organic-attar`, `/artificial-oud`, `/brand-perfumes`, `/niche-perfumes`, `/womens-perfume`, `/gifts-and-packages`, `/new-arrivals`, `/accessories`) | — | — | — | — | — | — | — | — |
-| `/notes`, `/scents` | — | — | — | — | — | — | — | — |
-| `/track-order`, `/orders` | — | — | — | — | — | — | — | — |
-| `/login`, `/sign-up`, `/forgot-password`, `/reset-password`, `/verify-email` | — | — | — | — | — | — | — | — |
+| `/wishlist` | — | OK (empty) | — | — | — | — | With saved items not seen | — |
+| Category pages (`/inspired-perfume-oil`, `/oriental-attar`, `/organic-attar`, `/artificial-oud`, `/brand-perfumes`, `/niche-perfumes`, `/womens-perfume`, `/gifts-and-packages`, `/new-arrivals`, `/accessories`) | — | OK (`/inspired-perfume-oil` only; same layout as the shop) | — | — | — | — | — | — |
+| `/notes`, `/scents` | — | — | — | — | — | — | The bare addresses answer 404 (only the inner pages exist). Inner pages not inspected | — |
+| `/track-order`, `/orders` | — | OK (`/track-order`, empty form) | — | — | — | — | Looking up an order not tried | — |
+| `/login`, `/sign-up`, `/forgot-password`, `/reset-password`, `/verify-email` | — | FIXED (`/login`, `/sign-up`) | — | — | — | — | Signing in not tried | — |
 | `/my-account` | — | — | — | — | — | — | — | — |
-| `/contact`, `/stores`, `/click-collect` | — | — | — | — | — | — | — | — |
-| `/about`, `/manifesto`, `/career` | — | — | — | — | — | — | — | — |
-| `/blog`, `/news` | — | — | — | — | — | — | — | — |
-| Policy pages (`/shipping-policy`, `/refund-policy`, `/exchange-policy`, `/privacy-policy`, `/terms-conditions`) | — | — | — | — | — | — | — | — |
-| Not-found and error pages | — | — | — | — | — | — | — | — |
+| `/contact`, `/stores`, `/click-collect` | — | FIXED (`/contact`, `/stores`); `/click-collect` ISSUE | — | — | — | — | Links not tapped | — |
+| `/about`, `/manifesto`, `/career` | — | OK (`/about`); `/career` ISSUE | — | — | — | — | — | — |
+| `/blog`, `/news` | — | ISSUE (both) | — | — | — | — | — | — |
+| Policy pages (`/shipping-policy`, `/refund-policy`, `/exchange-policy`, `/privacy-policy`, `/terms-conditions`) | — | FIXED (`/shipping-policy`); OK (`/refund-policy`, `/terms-conditions` top of page) | — | — | — | — | — | — |
+| Not-found and error pages | — | FIXED (not-found) | — | — | — | — | Error page not seen | — |
 
 ## Shared components
 
@@ -81,5 +81,11 @@ Last updated: 2026-11-24 (pass 3: checkout rules, cart buttons, shop filters, se
 4. Checkout stuck on its loading placeholder once, in real Chrome on the live site, a few minutes after a restart (the footer image failed to load in the same view). Five further loads cleared the placeholder in under half a second. Not reproduced; to watch.
 7. Each deploy gives a few seconds of 502 while the shop restarts.
 8. Shop page: an empty band shows between the header and the sticky filter bar while scrolling.
+9. `/click-collect` promises free pickup "ready in 2 hours", but checkout has no pickup choice. The wrong (Banani) address on it is corrected; the page itself needs the owner's decision.
+10. `/career` lists two open jobs and the footer shows a "Hiring" badge; `/news` shows two items dated 2025. Not confirmed by the owner.
+11. `/blog` is empty ("No articles available") but is linked from the footer.
+12. Showroom opening hours (10 AM – 10 PM daily) are shown on `/stores` and `/click-collect`; never confirmed by the owner.
+13. Announcement bar text is missing in most captures from the test browser but shows in real Chrome. Likely the fade animation not running in a background tab; not seen by real visitors so far.
+14. Prices are written "৳360" on the product page and "৳ 360" on cards and in the cart.
 5. The Taka sign in regular (not bold) text is drawn smaller than the digits next to it. Bold prices look right.
 6. Thank-you page and every other route in the table marked `—`.

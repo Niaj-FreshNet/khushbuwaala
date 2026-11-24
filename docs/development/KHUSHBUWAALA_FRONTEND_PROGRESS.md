@@ -30,7 +30,7 @@ The owner added three mandatory sections (visual QA on every page, cross-device 
 | Product page | Add to Cart is brand green; Buy Now is the same red as on the cards (they were blue-purple and orange-pink); selected size, title line and "Read more" use green; price box is neutral; the sticky buy bar is solid (the description text showed through it) |
 
 ### Deployed
-- Live storefront after pass 1 was `25bb3ec` (was `1520cd7`); after pass 2 it was `92a43a2`; after pass 3 it is `414ba38`. Rollback copy of the previous build: `~/deploy-backups/khushbuwaala-frontend-next-20261124-103834`.
+- Live storefront after pass 1 was `25bb3ec` (was `1520cd7`); after pass 2 it was `92a43a2`; after pass 3 it was `414ba38`; after pass 4 it is `9d5c9b8`. Rollback copy of the previous build: `~/deploy-backups/khushbuwaala-frontend-next-20261124-103834`.
 - Checked on the live site after the deploy, with dark mode emulated: page stays light (`color-scheme: light only`), white browser-bar tag, five bottom-bar items inside 320px, font order Inter → Noto Serif Bengali → stand-in, product page buttons in the new colours. Home, shop, product, cart, checkout and wishlist answer 200.
 - `adjustFontFallback: false` did nothing in the production build, so the font order is written out in `globals.css` instead.
 
@@ -59,6 +59,20 @@ Checked: cart and checkout with one item on the local test copy at 390px (checko
 Looked at and found fine: shop filters, search drawer, thank-you page (with a made-up local order), home / shop / product at desktop width in real Chrome on the live site.
 
 Seen once and not reproduced: the live checkout stayed on its loading placeholder in real Chrome a few minutes after a restart. Five further loads were normal.
+
+### Pass 4, same day (live as `9d5c9b8`)
+| Where | What was wrong | Fix |
+| --- | --- | --- |
+| Shipping policy | Said ৳70 inside Dhaka, ৳100 outside, 2–5 working days. Checkout charges ৳60 / ৳120, free from ৳1,000 | States the checkout charges and the owner's times (within 1 day in Dhaka, 1–2 days outside); no sideways-scrolling table |
+| Contact page | Was a copy of the store locator | Call, WhatsApp, Messenger, email, showroom, order tracking |
+| Showroom page | "stores across Dhaka" (there is one) and "Coming soon: Chittagong and Sylhet" (unconfirmed) | One showroom; the coming-soon line removed |
+| Click & Collect | Pickup address was a Banani address that is not the shop's | Real showroom address |
+| Sign-in and sign-up | Serif heading, black text on the green button, generic tab title | Same heading font and green button as the rest; "Sign in" title |
+| Not-found page | Bare page, black button, a "try searching" line that was not a link | Buttons to the shop and home, links to order tracking and contact |
+
+Looked at and found fine at 390px: a category page, wishlist (empty), track order, about, refund policy, terms. Product page gallery, size change and quantity work and prices follow. Shop sorting works.
+
+Needs the owner (see TASKS): Click & Collect, Careers, News, the empty blog, opening hours.
 
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.

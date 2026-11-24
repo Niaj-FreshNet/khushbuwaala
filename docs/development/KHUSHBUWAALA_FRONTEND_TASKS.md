@@ -202,7 +202,16 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 - [ ] Watch for the checkout placeholder sticking (seen once after a restart)
 - [ ] Deploys: avoid the few seconds of 502 on restart (pm2 reload or a second instance)
 - [x] Thank-you page (390px, made-up local order), shop filters, search drawer, menu drawer, small text
-- [ ] Shop sorting; product gallery, size change, quick view; menu category sub-menu; hero slider
+- [x] Shop sorting, product gallery, size change, quantity (pass 4)
+- [x] Shipping policy, contact, showroom, sign-in, not-found pages (pass 4, live `9d5c9b8`)
+- [ ] Quick view (desktop); menu category sub-menu; hero slider
+- [ ] **Owner decisions (pages that promise things nobody has confirmed):**
+  - Click & Collect: is pickup really offered? Checkout has no pickup choice. Keep and add it to checkout, or take the page and its footer link down
+  - Careers: are Sales Associate and Marketing Executive really open? If not, remove the jobs and the "Hiring" badge
+  - News: two items dated 2025. Keep, update or take down
+  - Blog: empty but linked from the footer. Hide the link until there is an article?
+  - Showroom hours: is 10 AM – 10 PM daily correct?
+  - Delivery outside Bangladesh: really offered?
 - [ ] Category pages, wishlist, account, track order, policy and brand pages
 - [ ] Review `100vh` / `h-screen` use (30 files) for phones with moving toolbars
 - [ ] Owner: look at the shop on a Samsung phone in dark mode (Samsung Internet) and on an iPhone, and say what looks off
