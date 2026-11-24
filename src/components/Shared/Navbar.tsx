@@ -124,16 +124,15 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
               }}
             >
               <div className="relative flex items-center justify-center gap-2 text-[11px] sm:text-xs min-h-5 sm:min-h-6">
-                <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 animate-pulse text-amber-300" />
+                <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-amber-300" />
                 <span
                   key={currentNoticeIndex}
-                  className="animate-fade-in truncate tracking-wide text-center"
+                  className="truncate text-center font-medium tracking-wide text-white"
                 >
                   {notices[currentNoticeIndex % Math.max(1, notices.length)]}
                 </span>
                 <Star
-                  className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 animate-pulse text-amber-300"
-                  style={{ animationDelay: "0.5s" }}
+                  className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-amber-300"
                 />
               </div>
             </div>
@@ -144,7 +143,7 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
               aria-label="Main navigation"
             >
               {/* Mobile / Tablet (< lg) */}
-              <div className="lg:hidden grid grid-cols-[auto_1fr_auto] items-center gap-2 h-12 sm:h-13">
+              <div className="lg:hidden grid grid-cols-[1fr_auto_1fr] items-center gap-2 h-12 sm:h-13">
                 <div className="flex items-center">
                   <Button
                     variant="ghost"

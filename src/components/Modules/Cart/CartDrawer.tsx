@@ -302,7 +302,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
     >
       <SheetContent
         side="right"
-        className="w-[88vw] max-w-[420px] sm:w-[420px] sm:max-w-[430px] flex flex-col p-0 bg-[#FBFBFA] border-l border-gray-200"
+        className="w-[82vw] max-w-[380px] sm:w-[420px] sm:max-w-[430px] flex flex-col p-0 bg-[#FBFBFA] border-l border-gray-200"
       >
         {/* Header */}
         <SheetHeader className="px-4 py-3 border-b border-gray-200 bg-white">

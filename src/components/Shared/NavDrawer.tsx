@@ -8,7 +8,7 @@ import Image from "next/image"
 
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Sheet, SheetClose, SheetContent } from "@/components/ui/sheet"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Badge } from "@/components/ui/badge"
 
@@ -20,7 +20,6 @@ import {
   ChevronRight,
   Sparkles,
   Star,
-  X,
   Droplets,
   Globe,
   Flame,
@@ -193,21 +192,8 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
       <SheetContent
         side="left"
         onOpenAutoFocus={(e) => e.preventDefault()}
-        className="w-80 p-0 flex flex-col h-full bg-linear-to-b from-white via-white to-gray-50 [&>button]:hidden"
+        className="w-[78vw] max-w-[320px] p-0 flex flex-col h-full bg-white"
       >
-        {/* Custom Close Button */}
-        <SheetClose asChild>
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full 
-              bg-gray-100 text-gray-700 
-              hover:bg-gray-200 hover:text-gray-900
-              shadow-xs transition-all duration-300 focus:outline-none z-10"
-            aria-label="Close menu"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </SheetClose>
 
         {/* Brand Header */}
         <div className="pt-3 pb-3 px-5 border-b bg-white">

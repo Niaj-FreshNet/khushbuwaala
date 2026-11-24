@@ -138,7 +138,7 @@ export default function SearchDrawer({ visible, onClose }: SearchDrawerProps) {
             e.preventDefault();
             seeAll(query);
           }}
-          className="flex shrink-0 items-center gap-2 border-b border-stone-200 px-3 py-3 pr-12 sm:px-6"
+          className="flex shrink-0 items-center gap-2 border-b border-stone-200 px-3 py-3 pr-16 sm:px-6 sm:pr-16"
         >
           <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />

@@ -367,7 +367,7 @@ export function ProductCard({
 
         {/* Content Details: Snug spacing, zero dead margins */}
         <div className="px-2 pt-2 pb-0 flex flex-col items-center text-center">
-          <h3 className="text-sm sm:text-base font-semibold text-gray-900 line-clamp-1 group-hover:text-black transition-colors leading-tight">
+          <h3 className="text-[13px] min-[400px]:text-sm sm:text-base font-semibold text-gray-900 line-clamp-1 group-hover:text-black transition-colors leading-tight">
             {product.name}
           </h3>
 
@@ -389,7 +389,7 @@ export function ProductCard({
                   key={idx}
                   // Two labels on phones (three were cut off at both ends of a narrow card), three from tablets up
                   className={cn(
-                    "min-w-0 px-1.5 py-1 bg-gray-50 text-gray-600 text-xs rounded-md border border-gray-100 leading-none whitespace-nowrap truncate",
+                    "min-w-0 px-1.5 py-1 bg-gray-50 text-gray-600 text-[11px] min-[400px]:text-xs rounded-md border border-gray-100 leading-none whitespace-nowrap truncate",
                     idx === 2 && "hidden sm:inline-block"
                   )}
                 >
@@ -405,7 +405,7 @@ export function ProductCard({
           <Button
             type="button"
             className={cn(
-              "flex-1 min-w-0 shrink h-10 min-h-0! px-1.5 rounded-lg font-bold text-[13px] min-[360px]:text-sm shadow-xs transition-all duration-200 active:scale-[0.98] cursor-pointer",
+              "flex-1 min-w-0 shrink h-10 min-h-0! px-2 rounded-lg font-bold text-[13px] min-[400px]:text-sm whitespace-nowrap shadow-xs transition-all duration-200 active:scale-[0.98] cursor-pointer",
               isBuyingNow
                 ? "bg-gray-400 cursor-not-allowed text-white"
                 : "bg-red-600 bg-linear-to-r from-orange-600 via-red-600 to-rose-600 hover:from-orange-700 hover:via-red-700 hover:to-rose-700 text-white"
@@ -417,7 +417,7 @@ export function ProductCard({
               <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white" />
             ) : (
               <span className="flex items-center justify-center gap-1">
-                <Zap className="hidden min-[360px]:block h-3.5 w-3.5 fill-current" />
+                <Zap className="hidden min-[400px]:block h-3.5 w-3.5 shrink-0 fill-current" />
                 Buy Now
               </span>
             )}
