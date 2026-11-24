@@ -181,6 +181,21 @@ The owner sent two Samsung screenshots taken before pass 8 (prices still "৳ 35
 - Checked: live header computed background is solid white with no blur; top bar green; Buy Now has a colour under its gradient.
 - Not checked: the owner's Samsung itself after these changes.
 
+### Pass 15, 2026-11-25: owner's Honor X8d report (live: storefront `d4f81b6`)
+The phone is 360px wide (the narrowest size in real use so far: check at 360, not only 390). The top bar was green and the header solid in his new screenshots, so pass 14 worked there.
+
+| Reported | Cause | Fix |
+| --- | --- | --- |
+| Logo not in the middle | Header grid was `auto 1fr auto` with one icon left and two right | `1fr auto 1fr`; logo centre measured at 180 of 360 |
+| Close buttons unclear / misaligned | Bare 16px crosses in different places; the menu drawer's own button was hidden by `[&>button]:hidden` (it had no visible close at all) | One style in `ui/sheet.tsx` and `ui/dialog.tsx`: 40px grey round button, top-right. The menu drawer uses it too |
+| Drawers too wide, no swipe to close | Menu 320px (89% of 360), cart 88% | Menu 78%, cart 82%, default side sheets 80%. A sideways flick (60px+, mostly horizontal) closes a side drawer; built into `SheetContent` |
+| Buy Now "stretchy" on home rows | At 360 the bolt + 14px label filled the button edge to edge | Bolt from 400px up, 13px label below that, a little more side padding; card name 13px and scent labels 11px below 400px |
+| Top bar text looked faint in two screenshots | Not reproduced; the text faded in on every change and the stars pulsed | Steady white text, steady stars |
+
+Checked on the live shop at 360: home cards, menu drawer (78%, flick left closes), cart drawer (82%, flick right closes), search drawer and shop filter sheet (close button top-right, not over the search box). The flicks were sent as touch events by script, not by a finger.
+Not checked: the quick view and other pop-ups, the cart drawer with items in it, the owner's phone itself. "Text size in some sections" was only changed on product cards: the owner should name the other sections.
+This computer could not run a local copy during this pass (out of memory: dev server, build and the stand-in API all crashed), so the check was done on live after deploying, with the previous build backed up.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
