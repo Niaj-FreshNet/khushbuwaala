@@ -281,6 +281,12 @@ export default function CheckoutPage() {
     if (typeof window !== "undefined") window.scrollTo(0, 0);
   }, []);
 
+  // The cart is saved on the device, so the server cannot draw this page with the right items.
+  // Both sides draw a placeholder first and the real page follows at once; before this the two
+  // disagreed and the whole page was thrown away and drawn again on every visit.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const itemsToDisplay = useMemo(() => {
     if (checkoutMode && checkoutItem) {
       const item = checkoutItem as any;
@@ -861,6 +867,16 @@ export default function CheckoutPage() {
     );
   }, [hasDifferentBillingAddress, billingName, billingContactNumber, billingAddress]);
 
+  if (!mounted) {
+    return (
+      <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-4" aria-busy="true" aria-label="Loading checkout">
+        <div className="h-8 w-56 rounded-lg bg-gray-100 animate-pulse" />
+        <div className="mt-4 h-14 rounded-2xl bg-gray-100 animate-pulse" />
+        <div className="mt-3 h-96 rounded-2xl bg-gray-100 animate-pulse" />
+      </div>
+    );
+  }
+
   return (
     <StoreContainer>
       {/* Processing Modal Screen */}
@@ -920,7 +936,7 @@ export default function CheckoutPage() {
               <div className="flex items-center gap-2 text-left">
                 <span className="text-xs font-semibold text-gray-700">Order Items & Summary</span>
                 <span className="text-xs bg-gray-100 text-gray-700 font-semibold px-2 py-0.5 rounded-full">
-                  {itemsToDisplay.reduce((acc: number, it: any) => acc + (it?.quantity || 1), 0)} items
+                  {(() => { const n = itemsToDisplay.reduce((acc: number, it: any) => acc + (it?.quantity || 1), 0); return `${n} ${n === 1 ? "item" : "items"}`; })()}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -1392,7 +1408,7 @@ export default function CheckoutPage() {
                 <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                   <h3 className="text-sm font-bold text-gray-900">Order Summary</h3>
                   <span className="text-xs bg-gray-100 text-gray-700 font-semibold px-2 py-0.5 rounded-full">
-                    {itemsToDisplay.reduce((acc: number, it: any) => acc + (it?.quantity || 1), 0)} items
+                    {(() => { const n = itemsToDisplay.reduce((acc: number, it: any) => acc + (it?.quantity || 1), 0); return `${n} ${n === 1 ? "item" : "items"}`; })()}
                   </span>
                 </div>
 

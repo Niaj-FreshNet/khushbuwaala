@@ -88,7 +88,7 @@ export const DesktopCartTable = ({ items }: DesktopCartTableProps) => {
                 {/* Price */}
                 <div className="col-span-2 text-right">
                   <span className="font-medium text-sm text-gray-800 whitespace-nowrap">
-                    ৳{item.selectedPrice.toFixed(2)}
+                    ৳ {Math.round(Number(item.selectedPrice || 0)).toLocaleString("en-US")}
                   </span>
                 </div>
 
@@ -132,7 +132,7 @@ export const DesktopCartTable = ({ items }: DesktopCartTableProps) => {
                 {/* Total */}
                 <div className="col-span-2 text-right pr-2">
                   <span className="font-bold text-sm text-gray-900 whitespace-nowrap">
-                    ৳{subtotalPrice.toFixed(2)}
+                    ৳ {Math.round(Number(subtotalPrice || 0)).toLocaleString("en-US")}
                   </span>
                 </div>
               </div>

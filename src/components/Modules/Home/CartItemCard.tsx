@@ -105,10 +105,10 @@ export const CartItemCard = ({ item }: CartItemCardProps) => {
 
               <div className="text-right">
                 <p className="text-xs text-gray-500">
-                  ৳{item?.selectedPrice.toFixed(2)} each
+                  ৳ {Math.round(Number(item?.selectedPrice || 0)).toLocaleString("en-US")} each
                 </p>
                 <p className="font-semibold text-gray-900">
-                  ৳{subtotalPrice.toFixed(2)}
+                  ৳ {Math.round(Number(subtotalPrice || 0)).toLocaleString("en-US")}
                 </p>
               </div>
             </div>

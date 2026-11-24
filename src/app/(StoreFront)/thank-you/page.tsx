@@ -360,7 +360,7 @@ export default function ThankYouPage() {
               <div className="flex items-center gap-2 text-left">
                 <span className="text-xs font-semibold text-gray-700">Order Items & Summary</span>
                 <span className="text-xs bg-gray-100 text-gray-700 font-semibold px-2 py-0.5 rounded-full">
-                  {cartItems.reduce((acc: number, it: any) => acc + (it?.quantity || 1), 0)} items
+                  {(() => { const n = cartItems.reduce((acc: number, it: any) => acc + (it?.quantity || 1), 0); return `${n} ${n === 1 ? "item" : "items"}`; })()}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -514,7 +514,7 @@ export default function ThankYouPage() {
                 <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                   <h3 className="text-sm font-bold text-gray-900">Order Summary</h3>
                   <span className="text-xs bg-gray-100 text-gray-700 font-semibold px-2 py-0.5 rounded-full">
-                    {cartItems.reduce((acc: number, it: any) => acc + (it?.quantity || 1), 0)} items
+                    {(() => { const n = cartItems.reduce((acc: number, it: any) => acc + (it?.quantity || 1), 0); return `${n} ${n === 1 ? "item" : "items"}`; })()}
                   </span>
                 </div>
 

@@ -80,11 +80,19 @@ const EmptyCartIllustration = () => (
 export default function CartPage() {
   const router = useRouter();
   const {
-    cartItems,
+    cartItems: storedCartItems,
     appliedCouponCode,
     setAppliedCouponCode,
     clearAppliedCouponCode,
   } = useCart();
+
+  // The saved cart lives on the device, so the server always draws this page with 0 items.
+  // Until the page has started in the browser we draw the same thing (a placeholder), then the
+  // real cart. Reading the saved cart straight away made the two disagree: the whole page was
+  // thrown away and drawn again, and "Your cart is empty" flashed for shoppers who had items.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const cartItems = useMemo(() => (mounted ? storedCartItems : []), [mounted, storedCartItems]);
 
   const [couponCode, setCouponCode] = useState("");
   const [isRouting, startTransition] = useTransition();
@@ -320,7 +328,7 @@ export default function CartPage() {
                   Shopping Cart
                 </h1>
                 <p className="text-[11px] sm:text-xs text-gray-500">
-                  {totalItems} {totalItems === 1 ? "item" : "items"} in your cart
+                  {mounted ? `${totalItems} ${totalItems === 1 ? "item" : "items"} in your cart` : " "}
                 </p>
               </div>
             </div>
@@ -335,7 +343,12 @@ export default function CartPage() {
             </div> */}
           </div>
 
-          {totalItems === 0 ? (
+          {!mounted ? (
+            <div className="space-y-3" aria-busy="true" aria-label="Loading your cart">
+              <div className="h-28 rounded-2xl bg-gray-100 animate-pulse" />
+              <div className="h-56 rounded-2xl bg-gray-100 animate-pulse" />
+            </div>
+          ) : totalItems === 0 ? (
             <EmptyCartIllustration />
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
@@ -461,7 +474,7 @@ export default function CartPage() {
                       variant="secondary"
                       className="bg-gray-100 text-gray-700 font-bold text-[11px] px-2 py-0.5"
                     >
-                      {totalItems} items
+                      {totalItems} {totalItems === 1 ? "item" : "items"}
                     </Badge>
                   </div>
 

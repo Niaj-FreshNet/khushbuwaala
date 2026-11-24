@@ -328,14 +328,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
               </div>
             </div>
 
-            {totalItems > 0 && (
-              <Badge
-                variant="secondary"
-                className="bg-emerald-50 text-emerald-800 border border-emerald-100 font-bold px-2 py-0.5 text-xs"
-              >
-                {formatBDT(subtotal)}
-              </Badge>
-            )}
+            {/* The subtotal used to sit here, under the close button. It is shown once, at the bottom. */}
           </SheetTitle>
 
           {/* Dynamic Free Shipping Bar */}
