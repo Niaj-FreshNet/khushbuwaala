@@ -16,7 +16,7 @@ const SocialIcons = () => {
       name: "Instagram",
       href: "https://www.instagram.com/khushbuwaala_perfumes",
       icon: <Instagram className="h-5 w-5" />,
-      color: "hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 hover:text-white",
+      color: "hover:bg-linear-to-r hover:from-purple-500 hover:to-pink-500 hover:text-white",
     },
     {
       name: "YouTube",

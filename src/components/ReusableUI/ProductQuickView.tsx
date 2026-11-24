@@ -295,7 +295,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
             <div className="flex-1 overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-2">
                 {/* Image Gallery */}
-                <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
+                <div className="relative bg-linear-to-br from-gray-50 to-gray-100 flex flex-col">
                   <div className="relative w-full aspect-square sm:aspect-[4/3] md:aspect-square">
                     <Image
                       src={!imageError ? images[currentImageIndex] : "/placeholder.svg?height=800&width=800&text=No+Image"}

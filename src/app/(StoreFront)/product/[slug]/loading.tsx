@@ -37,7 +37,7 @@ export default function ProductPageLoading() {
       <main className="bg-white">
         {/* 2. Hero Section */}
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-50/30 via-white to-blue-50/20 pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-br from-gray-50/30 via-white to-blue-50/20 pointer-events-none" />
 
           <div className="relative max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 xl:gap-8 items-start">
@@ -52,7 +52,7 @@ export default function ProductPageLoading() {
 
                     {/* Diagonal Light Sweep */}
                     <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30">
-                      <div className="absolute -inset-x-40 -inset-y-20 rotate-12 bg-gradient-to-r from-transparent via-white/70 to-transparent animate-[pulse_1.5s_ease-in-out_infinite]" />
+                      <div className="absolute -inset-x-40 -inset-y-20 rotate-12 bg-linear-to-r from-transparent via-white/70 to-transparent animate-[pulse_1.5s_ease-in-out_infinite]" />
                     </div>
 
                     {/* Center Spinner Ring */}
@@ -271,7 +271,7 @@ export default function ProductPageLoading() {
         {/* 5. Trust Signals / Help Section */}
         <section className="bg-white">
           <div className="relative max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 text-center space-y-3">
+            <div className="bg-linear-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200 text-center space-y-3">
               <Skeleton className="h-5 w-44 mx-auto rounded" />
               <Skeleton className="h-3.5 w-72 mx-auto rounded" />
               <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">

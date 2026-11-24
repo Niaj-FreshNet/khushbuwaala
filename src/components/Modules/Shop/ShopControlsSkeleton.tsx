@@ -6,7 +6,7 @@ import { LiveSkeleton } from "@/app/(StoreFront)/shop/_components/LiveSkeleton";
 
 export function ShopControlsSkeleton() {
     return (
-        <div className="sticky top-0 z-40 flex items-center gap-2 bg-white/95 backdrop-blur-xl py-2 sm:py-3 px-2 sm:px-4 rounded-b-xl shadow-sm mb-4 sm:mb-8 border border-gray-200 transition-all duration-300">
+        <div className="sticky top-0 z-40 flex items-center gap-2 bg-white py-2 sm:py-3 px-2 sm:px-4 rounded-b-xl shadow-sm mb-4 sm:mb-8 border border-gray-200 transition-all duration-300">
             {/* LEFT: Filter button */}
             <LiveSkeleton delayMs={100} speedMs={1400} className="shrink-0">
                 <Skeleton className="h-8.5 sm:h-9 w-19 sm:w-23.5 rounded-lg" />

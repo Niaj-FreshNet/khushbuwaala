@@ -102,7 +102,7 @@ const TrustSignals = () => {
       </div> */}
 
       {/* Customer Statistics */}
-      {/* <div className="bg-gray-900 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-3xl p-5 sm:p-8 text-white">
+      {/* <div className="bg-gray-900 bg-linear-to-r from-gray-900 via-gray-800 to-gray-900 rounded-3xl p-5 sm:p-8 text-white">
         <div className="text-center mb-5 sm:mb-8">
           <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">
             Trusted Since 2020

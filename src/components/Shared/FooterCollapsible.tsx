@@ -50,7 +50,7 @@ export default function FooterCollapsible({ section }: FooterCollapsibleProps) {
               {section.title}
             </h3>
             <div
-              className={`h-0.5 ${section.underlineWidth} bg-gradient-to-r from-red-500 to-red-600 rounded-full`}
+              className={`h-0.5 ${section.underlineWidth} bg-linear-to-r from-red-500 to-red-600 rounded-full`}
             />
           </div>
 

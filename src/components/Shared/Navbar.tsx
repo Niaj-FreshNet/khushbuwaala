@@ -108,7 +108,7 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
       <NavbarClientWrapper>
         {({ handlers, counts, drawerOpen, cartBump }) => (
           <header
-            className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur-xl shadow-xs transition-all duration-300"
+            className="sticky top-0 z-50 border-b border-gray-100 bg-white shadow-xs transition-all duration-300"
             role="banner"
           >
             {/* Announcement Bar */}

@@ -48,7 +48,7 @@ export default function ManifestoPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-amber-50 py-12">
+    <div className="min-h-screen bg-linear-to-b from-white to-amber-50 py-12">
       <div className="container mx-auto px-4 max-w-5xl">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Our Values</h1>

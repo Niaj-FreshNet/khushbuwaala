@@ -3,7 +3,7 @@ import { Skeleton, SkeletonText, SkeletonAvatar } from "@/components/ui/skeleton
 
 export default function ProductPageLoading() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-red-50/30">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-red-50/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Breadcrumbs Skeleton */}
         <div className="mb-8 bg-white/80 backdrop-blur-sm rounded-lg px-4 py-3 shadow-sm">

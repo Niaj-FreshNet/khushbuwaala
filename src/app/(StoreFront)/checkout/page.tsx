@@ -1604,7 +1604,7 @@ export default function CheckoutPage() {
       {/* Floating Mobile Sticky CTA */}
       <div
         className={cn(
-          "lg:hidden fixed left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.08)] transition-all duration-200 ease-out bottom-0",
+          "lg:hidden fixed left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.08)] transition-all duration-200 ease-out bottom-0",
           isInlineButtonVisible
             ? "translate-y-full opacity-0 pointer-events-none invisible"
             : "translate-y-0 opacity-100 pointer-events-auto visible"

@@ -108,9 +108,9 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
 
                     {/* Hero Section */}
                     <section className="relative overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-gray-50/30 via-white to-blue-50/20 pointer-events-none" />
-                        <div className="absolute top-0 right-0 w-72 h-72 sm:w-96 sm:h-96 bg-gradient-to-bl from-blue-50/40 to-transparent rounded-full blur-3xl pointer-events-none" />
-                        <div className="absolute bottom-0 left-0 w-72 h-72 sm:w-96 sm:h-96 bg-gradient-to-tr from-purple-50/30 to-transparent rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute inset-0 bg-linear-to-br from-gray-50/30 via-white to-blue-50/20 pointer-events-none" />
+                        <div className="absolute top-0 right-0 w-72 h-72 sm:w-96 sm:h-96 bg-linear-to-bl from-blue-50/40 to-transparent rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute bottom-0 left-0 w-72 h-72 sm:w-96 sm:h-96 bg-linear-to-tr from-purple-50/30 to-transparent rounded-full blur-3xl pointer-events-none" />
 
                         {/* ✅ tighter vertical spacing + proper container padding */}
                         <div className="relative max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
@@ -145,7 +145,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                                 <ScentProfile profile={profile} name={product.name} />
                             </div>
                             <div className="flex items-center gap-2 sm:gap-3 mb-1">
-                                {/* <div className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+                                {/* <div className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg">
                                     <Info className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                                 </div> */}
                                 <h2 className="text-base sm:text-lg font-bold text-gray-900">

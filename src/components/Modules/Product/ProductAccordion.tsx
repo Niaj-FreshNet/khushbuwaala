@@ -537,7 +537,7 @@ export default function ProductAccordion({
           <div className="p-2 sm:p-2.5 rounded-xl bg-amber-50/50 border border-amber-200/60 flex items-center justify-between gap-3">
             {/* Left: Rating Badge & Verification Summary */}
             <div className="flex items-center gap-2.5 shrink-0">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-xs shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-linear-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-xs shrink-0">
                 <span className="text-base font-black leading-none">
                   {avgRating > 0 ? avgRating.toFixed(1) : "–"}
                 </span>
