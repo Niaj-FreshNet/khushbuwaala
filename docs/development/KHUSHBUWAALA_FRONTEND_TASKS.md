@@ -204,7 +204,11 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 - [x] Thank-you page (390px, made-up local order), shop filters, search drawer, menu drawer, small text
 - [x] Shop sorting, product gallery, size change, quantity (pass 4)
 - [x] Shipping policy, contact, showroom, sign-in, not-found pages (pass 4, live `9d5c9b8`)
-- [ ] Quick view (desktop); menu category sub-menu; hero slider
+- [x] Quick view (sale price was ignored: fixed), hero slider and banner shape (pass 5, live `1af5992`)
+- [x] Owner's answers applied: Click & Collect and News removed, Careers without sample jobs, blog kept, hours and international delivery confirmed
+- [ ] Menu category sub-menu; look at the new Careers page; card "-38%" vs page "37.5% OFF"
+- [x] Backend recomputes every website order price, delivery charge and total itself, so the quick view fault overcharged nobody
+- [ ] Owner: a wide desktop banner (about 1760×800) would fill the new banner box with no cropping; confirm the "up to 30% off on all products" banner is a running offer
 - [ ] **Owner decisions (pages that promise things nobody has confirmed):**
   - Click & Collect: is pickup really offered? Checkout has no pickup choice. Keep and add it to checkout, or take the page and its footer link down
   - Careers: are Sales Associate and Marketing Executive really open? If not, remove the jobs and the "Hiring" badge

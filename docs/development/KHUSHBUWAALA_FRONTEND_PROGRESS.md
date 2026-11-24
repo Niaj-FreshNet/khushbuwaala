@@ -30,7 +30,7 @@ The owner added three mandatory sections (visual QA on every page, cross-device 
 | Product page | Add to Cart is brand green; Buy Now is the same red as on the cards (they were blue-purple and orange-pink); selected size, title line and "Read more" use green; price box is neutral; the sticky buy bar is solid (the description text showed through it) |
 
 ### Deployed
-- Live storefront after pass 1 was `25bb3ec` (was `1520cd7`); after pass 2 it was `92a43a2`; after pass 3 it was `414ba38`; after pass 4 it is `9d5c9b8`. Rollback copy of the previous build: `~/deploy-backups/khushbuwaala-frontend-next-20261124-103834`.
+- Live storefront after pass 1 was `25bb3ec` (was `1520cd7`); after pass 2 it was `92a43a2`; after pass 3 it was `414ba38`; after pass 4 it was `9d5c9b8`; after pass 5 it is `1af5992`. Rollback copy of the previous build: `~/deploy-backups/khushbuwaala-frontend-next-20261124-103834`.
 - Checked on the live site after the deploy, with dark mode emulated: page stays light (`color-scheme: light only`), white browser-bar tag, five bottom-bar items inside 320px, font order Inter → Noto Serif Bengali → stand-in, product page buttons in the new colours. Home, shop, product, cart, checkout and wishlist answer 200.
 - `adjustFontFallback: false` did nothing in the production build, so the font order is written out in `globals.css` instead.
 
@@ -73,6 +73,18 @@ Seen once and not reproduced: the live checkout stayed on its loading placeholde
 Looked at and found fine at 390px: a category page, wishlist (empty), track order, about, refund policy, terms. Product page gallery, size change and quantity work and prices follow. Shop sorting works.
 
 Needs the owner (see TASKS): Click & Collect, Careers, News, the empty blog, opening hours.
+
+### Pass 5, same day (live as `1af5992`)
+Owner's answers (2026-11-24): pickup is not offered, remove Click & Collect; the Careers jobs and the News items were sample content; the blog is fed from the admin panel and stays; opening hours (10 AM – 10 PM daily) and delivery outside Bangladesh on request are correct.
+
+| Where | What was wrong | Fix |
+| --- | --- | --- |
+| Click & Collect, News | Sample pages promising things that are not offered | Removed; `/click-collect` leads to `/stores`, `/news` to `/blog`; footer links removed |
+| Careers | Two sample jobs and a "Hiring" badge | Page says no positions are open and how to send a CV. My reading of "keep it, but it is dummy": keep the page, drop the made-up jobs |
+| Quick view (desktop) | A product on sale at ৳550 showed ৳880 and went into the cart at ৳880: quick view ignored the sale that product lists carry. Add to Cart was red and Buy Now green, the reverse of everywhere else | Sale price shown and charged (seen on the live site: ৳550, "Save ৳330"); colours match |
+| Hero banner | The box was a thin strip (up to 5:1) while the artwork is 2:3 / 3:2, so under a third of each picture showed and the offer text was cut apart | Phone box is square, desktop 2.2:1 inside the page width. Seen on the live site at 390px and at desktop width |
+
+Nobody was overcharged by the quick view fault: for website orders the backend works out every price, the delivery charge and the total itself (`priceWebsiteOrder` in `order.service.ts`) and ignores what the browser sends. The fault was what the shopper saw (৳880 in quick view, cart and checkout summary), which could have put them off buying.
 
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.

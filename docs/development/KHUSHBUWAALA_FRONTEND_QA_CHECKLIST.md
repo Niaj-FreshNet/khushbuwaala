@@ -11,15 +11,15 @@ Required by the owner's Sections 15, 16 and 17 (2026-11-24, at the end of the ma
 
 **Honest limits of these checks.** Phone widths are browser emulation on one Windows computer, not real phones. The 1600+ column was looked at in real Chrome on the live site (window about 1570px wide). 768px and 1440px were only drawn scaled down, so small details at those sizes are not confirmed. No real Android phone, Samsung Internet or iPhone has been used yet. Real-device checks are a separate column and are all still open.
 
-Last updated: 2026-11-24 (pass 4: policy, contact, showroom, sign-in, not-found, category and information pages).
+Last updated: 2026-11-24 (pass 5: sample pages removed, quick view price, hero banner).
 
 ## Routes
 
 | Route | 320 | 390 | 430 | 768 | 1440 | 1600+ | Interactions | Real phone |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `/` Home | FIXED | FIXED | — | — | OK (scaled) | OK | Product row scroll seen; hero slider not tried | — |
+| `/` Home | FIXED | FIXED | — | — | FIXED (scaled) | FIXED | Hero slider arrows and dots work; banner reshaped so the artwork shows | — |
 | `/shop` | FIXED | OK | OK | — | — | OK | Filter, clear, search suggestions and sorting (cheapest first) tried and work | — |
-| `/product/[slug]` | — | FIXED | — | — | OK (scaled) | OK | Add to cart, gallery pictures, size change and quantity tried: price and sticky bar follow. Quick view not tried (desktop only) | — |
+| `/product/[slug]` | — | FIXED | — | — | OK (scaled) | OK | Add to cart, gallery pictures, size change and quantity tried: price and sticky bar follow. Quick view: see shared components | — |
 | `/cart` | — | FIXED | — | — | — | OK (empty cart) | Quantity up, down and remove tried: counts and totals follow. Coupon not tried | — |
 | `/checkout` | FIXED | FIXED | — | — | — | OK (empty cart) | Empty-form validation, district rule and district list tried. Placing an order, coupon and online payment not tried | — |
 | `/thank-you` | — | OK (made-up local order) | — | — | — | — | Invoice and track buttons not tried | — |
@@ -29,9 +29,9 @@ Last updated: 2026-11-24 (pass 4: policy, contact, showroom, sign-in, not-found,
 | `/track-order`, `/orders` | — | OK (`/track-order`, empty form) | — | — | — | — | Looking up an order not tried | — |
 | `/login`, `/sign-up`, `/forgot-password`, `/reset-password`, `/verify-email` | — | FIXED (`/login`, `/sign-up`) | — | — | — | — | Signing in not tried | — |
 | `/my-account` | — | — | — | — | — | — | — | — |
-| `/contact`, `/stores`, `/click-collect` | — | FIXED (`/contact`, `/stores`); `/click-collect` ISSUE | — | — | — | — | Links not tapped | — |
-| `/about`, `/manifesto`, `/career` | — | OK (`/about`); `/career` ISSUE | — | — | — | — | — | — |
-| `/blog`, `/news` | — | ISSUE (both) | — | — | — | — | — | — |
+| `/contact`, `/stores` | — | FIXED | — | — | — | — | Links not tapped. `/click-collect` was removed (owner: pickup is not offered); the address now leads to `/stores` | — |
+| `/about`, `/manifesto`, `/career` | — | OK (`/about`); FIXED (`/career`, not looked at after the rewrite) | — | — | — | — | — | — |
+| `/blog` | — | OK (empty: articles come from the admin panel) | — | — | — | — | `/news` was removed (sample content); the address now leads to `/blog` | — |
 | Policy pages (`/shipping-policy`, `/refund-policy`, `/exchange-policy`, `/privacy-policy`, `/terms-conditions`) | — | FIXED (`/shipping-policy`); OK (`/refund-policy`, `/terms-conditions` top of page) | — | — | — | — | — | — |
 | Not-found and error pages | — | FIXED (not-found) | — | — | — | — | Error page not seen | — |
 
@@ -51,7 +51,7 @@ Last updated: 2026-11-24 (pass 4: policy, contact, showroom, sign-in, not-found,
 | Search drawer | OK | Seen at 390px: typing "oud" gives browse-by chips, six products with prices, "See all 50 results" |
 | Filters and sorting (shop) | OK | Filter sheet at 390px: plain-language groups with counts, live "Show N perfumes", chosen filter shown as a chip with Clear all. Sorting not tried |
 | Product gallery | — | |
-| Quick view | — | |
+| Quick view | FIXED | Desktop, real Chrome, live site. It showed and charged the full price (৳880) for a product on sale at ৳550; buttons were the reverse colours of the rest of the shop. Both fixed and seen |
 | Toasts | OK | Seen on checkout validation: light, readable |
 | Forms and validation (checkout) | FIXED | Field messages and red borders appear; district is now asked for when it sets the delivery charge. Login and contact forms not inspected |
 | Loading skeletons | — | |
@@ -81,10 +81,9 @@ Last updated: 2026-11-24 (pass 4: policy, contact, showroom, sign-in, not-found,
 4. Checkout stuck on its loading placeholder once, in real Chrome on the live site, a few minutes after a restart (the footer image failed to load in the same view). Five further loads cleared the placeholder in under half a second. Not reproduced; to watch.
 7. Each deploy gives a few seconds of 502 while the shop restarts.
 8. Shop page: an empty band shows between the header and the sticky filter bar while scrolling.
-9. `/click-collect` promises free pickup "ready in 2 hours", but checkout has no pickup choice. The wrong (Banani) address on it is corrected; the page itself needs the owner's decision.
-10. `/career` lists two open jobs and the footer shows a "Hiring" badge; `/news` shows two items dated 2025. Not confirmed by the owner.
-11. `/blog` is empty ("No articles available") but is linked from the footer.
-12. Showroom opening hours (10 AM – 10 PM daily) are shown on `/stores` and `/click-collect`; never confirmed by the owner.
+9. The banner artwork is 2:3 for phones and 3:2 for desktop. The banner box now suits those shapes, but a wide banner (about 2.2:1, e.g. 1760×800) made for desktop would fill it without any cropping.
+10. The third banner says "Get up to 30% off on all products". Whether that offer is running is the owner's to confirm.
+11. Product card shows "-38%" where the product page shows "37.5% OFF" for the same sale.
 13. Announcement bar text is missing in most captures from the test browser but shows in real Chrome. Likely the fade animation not running in a background tab; not seen by real visitors so far.
 14. Prices are written "৳360" on the product page and "৳ 360" on cards and in the cart.
 5. The Taka sign in regular (not bold) text is drawn smaller than the digits next to it. Bold prices look right.
