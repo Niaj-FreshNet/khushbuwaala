@@ -291,6 +291,17 @@ Not done: the few seconds of "502" on each deploy (needs nginx or a process chan
 
 Still open: the few seconds of "502" on each deploy; account page and invoice at phone width; the header accessibility score re-run; whether cancelled orders should give a coupon use back (owner's call).
 
+### Pass 20, 2026-11-25: coupon use on cancel, deploys without an outage (backend `3c60c46`, storefront `7e331f8`)
+- Owner decision: a cancelled order gives its coupon use back. `utils/orderStock.ts` → `releaseCouponUse` runs with the stock return (cancel, delete, abandoned online checkout); re-opening a cancelled order holds the use again; returned parcels keep it. The OrderDiscount row is removed with the use, so it happens once per order. Three unit tests added (72 pass). Proven live on test order #899921: re-opened then cancelled, coupon usage went 1/1 → 0/1. Both test coupons are deleted.
+- Server backups: with the owner's yes, all but the newest 3 build copies per app were deleted (45 folders); 19 GB → 3.1 GB. Data snapshots, environment backups and logs untouched.
+- Deploy outage removed without root:
+  - The storefront now runs as two processes (pm2 cluster mode, `node_modules/next/dist/bin/next start`), so `pm2 reload` restarts them one at a time.
+  - New versions are built into `.next-build` (`NEXT_DIST_DIR`, see next.config) while the shop keeps serving `.next`, then swapped in. Building in place used to overwrite the running shop's files for the length of the build.
+  - `~/deploy-storefront.sh` on the server does pull → side build → swap → reload; the previous build stays in `.next-prev` for rollback (the command is in the script).
+  - Checked: on a spare port a reload served 60 of 60 requests; a full deploy of the live shop served 150 of 150 requests to `/shop` (one every 0.3 s).
+  - Not saved with `pm2 save` (the saved list is shared with the other businesses on the server): after a server reboot pm2 would start the storefront the old single-process way, which still works; run the switch again then.
+  - Admin panel and backend still restart the old way (a few seconds each); they are not customer-facing pages, though the shop's API calls can fail for those seconds during a backend deploy.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
