@@ -340,6 +340,13 @@ The shared rule (use it for any new full-width section): `mx-auto w-full max-w-7
 Measured on the live page in the owner's Chrome at 1920 wide (real desktop browser). The banner is taller now (about 660px at that width) with the next section's title still on the first screen.
 Also live from the working folder (not my edit): the menu drawer's small descriptions were changed to 10px grey; that is below the 11px floor from pass 16.
 
+### Pass 24, 2026-11-25: banner too tall after pass 23 (storefront `e23b0bf`, admin `abd3b2a`)
+Owner's screenshot: with the banner at full page width it was about 660px tall on a 1920 screen and Best Sellers was half off the first screen. My pass 23 change caused it.
+- The desktop banner box is now kept between 2.8:1 and 3.4:1 (was 2:1 to 3.2:1; fallback 2.9). `HERO_SHAPE` changed in both `storefrontSettings.ts` and the admin copy `heroShape.ts`, so the admin preview and its "about N% is cut" note stay truthful. A height cap tried first was removed in favour of this.
+- Advised banner size for computers is now 1920 × 680 (was 1760 × 800). Phones unchanged (1080 × 1080).
+- Measured live in the owner's Chrome, 1920 × 945 window: banner 508px tall, first product picture starts at 662, so 283px of the product row is on the first screen (pictures, names and prices).
+- The three default banner pictures are 3:2 (1177 × 785), so about half their height is trimmed in this box; on the third one the "GET UPTO" line touches the top edge. New artwork at 1920 × 680 with the text in the middle band fits whole.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
