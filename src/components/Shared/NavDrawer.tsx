@@ -200,8 +200,8 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
           <button
             onClick={onClose}
             className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full 
-              bg-linear-to-r from-red-100 to-pink-100 text-red-600 
-              hover:from-red-200 hover:to-pink-200 hover:text-red-700
+              bg-gray-100 text-gray-700 
+              hover:bg-gray-200 hover:text-gray-900
               shadow-xs transition-all duration-300 focus:outline-none z-10"
             aria-label="Close menu"
           >
@@ -210,7 +210,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
         </SheetClose>
 
         {/* Brand Header */}
-        <div className="pt-3 pb-3 px-5 border-b bg-linear-to-r from-red-50 to-pink-50">
+        <div className="pt-3 pb-3 px-5 border-b bg-white">
           <Link href="/" onClick={onClose} className="flex items-center group">
             <div className="relative">
               <Image
@@ -241,7 +241,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
             <Button
               type="submit"
               size="sm"
-              className="h-8! min-h-0! py-0 px-2.5 text-xs font-semibold bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-md shadow-xs shrink-0"
+              className="h-9! min-h-0! py-0 px-3 text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white rounded-md shadow-xs shrink-0"
             >
               Track Order
             </Button>
@@ -396,7 +396,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
               className="w-full justify-start h-10 px-2.5 text-sm font-medium hover:bg-white text-gray-700 hover:text-red-600 rounded-xl"
               onClick={() => handleNavigation("/login")}
             >
-              <div className="p-1.5 rounded-lg bg-white border border-gray-200 mr-2.5 text-blue-600">
+              <div className="p-1.5 rounded-lg bg-white border border-gray-200 mr-2.5 text-emerald-700">
                 <LogIn className="h-4 w-4" />
               </div>
               <span className="font-semibold text-xs">Log In / Register</span>

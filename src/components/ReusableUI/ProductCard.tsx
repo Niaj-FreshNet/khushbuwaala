@@ -362,7 +362,7 @@ export function ProductCard({
           {/* Discount Badge */}
           {discountPercentLabel && (
             <div className="absolute top-2 left-2 z-10 pointer-events-none">
-              <span className="px-1.5 py-0.5 rounded-md bg-white text-green-700 text-[10px] font-bold tracking-tight shadow-xs">
+              <span className="px-1.5 py-0.5 rounded-md bg-white text-green-700 text-xs font-bold tracking-tight shadow-xs">
                 {discountPercentLabel}
               </span>
             </div>
@@ -380,7 +380,7 @@ export function ProductCard({
               {formatPriceBDT(discountedPrice)}
             </span>
             {activeDiscount && (
-              <span className="text-[11px] sm:text-xs text-gray-500 line-through">
+              <span className="text-xs text-gray-500 line-through">
                 {formatPriceBDT(basePrice)}
               </span>
             )}
@@ -393,7 +393,7 @@ export function ProductCard({
                   key={idx}
                   // Two labels on phones (three were cut off at both ends of a narrow card), three from tablets up
                   className={cn(
-                    "min-w-0 px-1.5 py-1 bg-gray-50 text-gray-600 text-[11px] rounded-md border border-gray-100 leading-none whitespace-nowrap truncate",
+                    "min-w-0 px-1.5 py-1 bg-gray-50 text-gray-600 text-xs rounded-md border border-gray-100 leading-none whitespace-nowrap truncate",
                     idx === 2 && "hidden sm:inline-block"
                   )}
                 >

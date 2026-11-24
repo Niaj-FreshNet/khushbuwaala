@@ -54,7 +54,7 @@ export function ServicesSection() {
                 <h3 className="text-xs sm:text-sm font-semibold text-gray-900 leading-snug">
                   {service.title}
                 </h3>
-                <p className="text-[11px] sm:text-xs text-gray-500 mt-1 leading-normal">
+                <p className="text-xs text-gray-600 mt-1 leading-normal">
                   {service.description}
                 </p>
               </div>

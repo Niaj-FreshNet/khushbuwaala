@@ -193,7 +193,7 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
                     aria-label={`Shopping cart (${counts.cart} items)`}
                   >
                     <ShoppingCart className="h-4.5 w-4.5" />
-                    <Badge className="absolute -top-1 -right-1 bg-red-500 text-white h-4.5 min-w-4.5 text-[9px] flex items-center justify-center p-0.5 rounded-full border border-white">
+                    <Badge className="absolute -top-1 -right-1 bg-red-500 text-white h-5 min-w-5 text-[11px] font-semibold flex items-center justify-center p-0.5 rounded-full border border-white">
                       {counts.cart > 99 ? "99+" : counts.cart}
                     </Badge>
                   </Button>
@@ -352,7 +352,7 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
                     >
                       <Heart className="h-4 w-4 xl:h-4.5 xl:w-4.5" />
                       {counts.wishlist > 0 && (
-                        <Badge className="absolute -top-0.5 -right-0.5 bg-rose-600 text-white text-[9px] h-4 min-w-4 flex items-center justify-center p-0 rounded-full border border-white">
+                        <Badge className="absolute -top-0.5 -right-0.5 bg-rose-600 text-white text-[11px] font-semibold h-4.5 min-w-4.5 flex items-center justify-center p-0 rounded-full border border-white">
                           {counts.wishlist > 99 ? "99+" : counts.wishlist}
                         </Badge>
                       )}
@@ -372,7 +372,7 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
                     title="Cart"
                   >
                     <ShoppingCart className="h-4 w-4 xl:h-4.5 xl:w-4.5" />
-                    <Badge className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] h-4 min-w-4 flex items-center justify-center p-0 rounded-full border border-white">
+                    <Badge className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[11px] font-semibold h-4.5 min-w-4.5 flex items-center justify-center p-0 rounded-full border border-white">
                       {counts.cart > 99 ? "99+" : counts.cart}
                     </Badge>
                   </Button>
