@@ -63,19 +63,22 @@ export function CarouselSlider({ slides: heroSlides }: { slides: HeroSlide[] }) 
 
   return (
     <section className="w-full overflow-hidden relative mt-1 sm:mt-2 mb-2 sm:mb-4" aria-label="Hero Carousel">
-      <Carousel setApi={setApi} plugins={[plugin.current]} className="w-full">
+      <Carousel setApi={setApi} plugins={[plugin.current]} className="mx-auto w-full max-w-7xl md:px-4 lg:px-6">
         <CarouselContent>
           {slides.map((slide, index) => (
             <CarouselItem key={index}>
-              {/* Sleeker responsive container: Compact min-height, capped max-height */}
-              <div className="relative w-full aspect-21/9 sm:aspect-[2.6/1] md:aspect-[3/1] lg:aspect-[3.4/1] 2xl:aspect-[3.8/1] min-h-[190px] sm:min-h-[240px] max-h-[380px]">
+              {/* The banner pictures are 2:3 on phones and 3:2 on desktop. The box used to be a thin
+                  strip (up to 5:1), which showed under a third of each picture and cut the offer text
+                  to pieces. These shapes show most of the picture while keeping the first products in
+                  view below it. */}
+              <div className="relative w-full overflow-hidden aspect-square sm:aspect-[3/2] md:aspect-[2.2/1] max-h-[560px] md:rounded-2xl">
                 {/* Mobile image */}
                 <Image
                   src={slide.mobileSrc || slide.src}
                   alt={slide.alt}
                   fill
                   sizes="100vw"
-                  className="object-cover md:hidden"
+                  className="object-cover object-[center_30%] md:hidden"
                   priority={index === 0}
                   fetchPriority={index === 0 ? "high" : "auto"}
                   loading={index === 0 ? "eager" : "lazy"}
