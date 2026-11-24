@@ -110,6 +110,18 @@ Still live until the owner removes it: the third banner with the 30% claim.
 - Owner confirmed (2026-11-24): up to 6 banners is the limit he wants (backend `LIMITS.hero` = 6, at least 1); he will remove the 30% banner himself from a desktop and send phone screenshots of anything inconsistent.
 - Not checked: cart at 430 and 768 with items after this change (the local copy ran out of memory; only the price text was read at 1440), sticky Place Order bar hiding when the in-page button is in view (the test browser's hidden tab does not fire the observer), coupon, account pages, menu category sub-menu.
 
+### Pass 8, same day: owner's phone report (live: storefront `5fd5cdc`)
+Owner sent an iPhone screenshot of /shop and a Samsung report.
+
+| Reported | Cause | Fix |
+| --- | --- | --- |
+| Shop page: after scrolling down, an empty strip above the Filters/search bar with products showing through | The header slides away on scroll but the bar stayed stuck 64px down (`top-16`) | `NavbarClientWrapper` publishes `--kw-nav-offset` on `<html>` (header height, 0px when hidden); the filter bar and the desktop filter column use it for `top`. Any future bar that sticks under the header must use the same variable |
+| Samsung: top announcement bar all white, text only visible when selected | Not reproduced here (no Samsung device). The bar used the theme gradient plus a white "sheen" gradient layer | Bar colours are now plain hex in an inline style, the sheen layer is gone; gradient buttons with white text also get a solid colour underneath |
+| (seen in the screenshot) prices as "420৳" on iPhone | Safari's `Intl.NumberFormat("en-BD", currency BDT)` puts the sign after the number | The sign is written by hand ("৳" + number). Every `toLocaleString()` now passes "en-US" so a phone set to Bangla cannot change the digits |
+
+Checked: real Chrome on the live shop: the variable is 81px with the header shown, 0px after scrolling down, 81px again after scrolling up. Test browser at 390 wide: with the header hidden the filter bar sits at the very top (0px). Top bar computed colours on live: green background, white text.
+Not checked: an actual Samsung phone and an actual iPhone (owner to confirm both).
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
