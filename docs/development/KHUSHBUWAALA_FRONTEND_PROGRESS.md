@@ -280,6 +280,17 @@ Other screens:
 
 Not done: the few seconds of "502" on each deploy (needs nginx or a process change; not touched), desktop speed test, GA4 screens, account page on a phone, order invoice, product-level promo codes, profit figure on a coupon order. Deploy backups on the server are 19 GB (182 folders, 64 GB free): nothing deleted.
 
+### Pass 19, 2026-11-25: remaining checks (live: backend `a35d43e`, storefront `2ac9483`, admin `1a19943`)
+- Promo codes were public: `get-product-by-slug` returned every discount on a product, codes included, so a product-only code could be read from the product page's source. Found by making a test code for one product. The public response now carries automatic (code-less) discounts only. Checked live on six public product routes: the test code no longer appears. Rule: never return a discount `code` from a public route.
+- Product-only promo code (TESTCLAUDE9P, Hawas Ice, 10%, one use): not applied automatically on the product page; typed in the cart it gave -৳36 on ৳360. Deleted afterwards (never used). Cart emptied.
+- Admin order list: profit on a coupon order ignored the coupon (the Finance report already subtracts order discounts in its totals); the row now takes it off under the same rule as the bill.
+- Desktop speed (PageSpeed Insights, one run): Performance 96, Accessibility 95, Best practices 100, SEO 100; first paint 0.3 s, largest picture 0.7 s. The accessibility item was the desktop menu claiming to be a menubar with an incomplete set of roles; the roles are removed (plain navigation list). Not re-measured after the fix.
+- Account page with real orders and the order invoice, seen at desktop width in the owner's Chrome (its window would not go narrower): orders list with discount lines; invoice shows bill-to, coupon, discount and ৳384. The invoice prints a different shop phone (+880 1566-395807) from the footer (+8801777-152588): owner to confirm both are right.
+- GA4 home: last 7 days 108 active users, 1.4K events, 5 purchases; realtime showed 3 users.
+- Server backups: the owner approved deleting those older than three days. Only two build copies were that old (about 100 MB, deleted). Environment-file backups, migration log and data snapshots from 21 Nov were kept on purpose. The 19 GB is build copies from the last three days (24 storefront copies, about 600 MB each).
+
+Still open: the few seconds of "502" on each deploy; account page and invoice at phone width; the header accessibility score re-run; whether cancelled orders should give a coupon use back (owner's call).
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
