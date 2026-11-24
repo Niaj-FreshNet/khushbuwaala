@@ -308,6 +308,22 @@ Still open: the few seconds of "502" on each deploy; account page and invoice at
 - A regression of my own, found and fixed the same hour: the new deploy routine swapped in a build folder with an empty picture cache (`.next/cache/images`), so every picture was resized again on first view. Desktop Performance fell from 96 to 67 and 73 on two runs. The cache (5,480 files) was restored from the newest backup and `~/deploy-storefront.sh` now carries it into each new build. Next run: Performance 93, Accessibility 100, Best practices 100, SEO 100 (first paint 0.3 s, largest picture 0.8 s).
 - Backend stays a single process on purpose: it runs the scheduled courier sync and keeps request limits in memory, so two copies would sync twice and halve the limits' meaning. A backend deploy therefore still interrupts the shop's data requests for a few seconds.
 
+### Pass 22, 2026-11-25: invoice did not match an edited order (backend `da6ff49`, admin `a28275a`, storefront `a7bc919`)
+Owner's report: order #254630 after an edit. Order list and edit window: Kathgolap 700, Baccarat Rouge 550, Paris Hilton 650, total 1,900. Admin invoice: 650 / 150 / 650 with "was 1,280, save 630", subtotal 2,080.
+
+Cause: every order line stores the price it was sold at (`price`) and a price before discount (`originalPrice`), and is linked to a size (`variant`). Saving an edit wrote the new size and price only. The old `originalPrice` and the old size link stayed, and both invoices read them:
+- admin `OrderInvoice.tsx` printed `originalPrice` whenever it found no discount;
+- storefront `InvoiceDocument.tsx` printed the linked size's current price.
+
+Fixes:
+- Backend `updateOrder`: an edited line's `originalPrice` follows the edit (another size: equals the new price; same size: the higher of the old list price and the new price); `discount` is recalculated. New lines get both.
+- Admin invoice: prints the sold price; a "was" price only when it is higher, belongs to the same size, and is not above that size's own list price.
+- Storefront invoice: prints the sold price; the linked size's price is only a fallback.
+- Admin order list: a cancelled or returned coupon order showed a profit of -৳36 (from pass 19's change); it shows ৳0 again.
+
+Checked live on #254630: admin invoice 700 / 550 / 650, subtotal 1,900, total 1,900; customer invoice the same. #899921 shows profit ৳0. Rule for the future: an invoice prints what was charged (`price`), never a price looked up from the product.
+Not done: old lines edited before this fix still carry a stale `originalPrice` in the database (the invoices no longer depend on it); the thank-you page's own invoice window still reads `originalPrice`, which is correct for a just-placed order.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
