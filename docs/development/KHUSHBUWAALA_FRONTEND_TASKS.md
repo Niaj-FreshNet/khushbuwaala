@@ -196,8 +196,9 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 - [x] Bottom bar, product card, section headings, product page buttons and sticky bar fixed and looked at (320 / 390 / 1440 scaled)
 
 **Next, in this order (purchase journey first)**
-- [ ] Cart page and cart drawer: inspect at 320 / 390 / 430 / 768 / 1440, fix, tick the checklist
-- [ ] Checkout: same, plus form validation, delivery charge shown, submit states (no real order without the owner's yes)
+- [x] Cart page, cart drawer, checkout: first pass at 390px (checkout also 320px), five defects fixed and live (`92a43a2`)
+- [ ] Cart and checkout: remaining widths (430 / 768 / 1440), quantity and remove buttons, form validation messages, delivery charge by district, submit states (no real order without the owner's yes)
+- [ ] Checkout: hide the sticky Place Order bar when the in-page button is on screen
 - [ ] Thank-you page
 - [ ] Shop filters, sorting and search drawer
 - [ ] Product gallery, quick view, navigation drawer

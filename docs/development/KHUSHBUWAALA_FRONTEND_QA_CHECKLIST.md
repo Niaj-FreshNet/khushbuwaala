@@ -11,7 +11,7 @@ Required by the owner's Sections 15, 16 and 17 (2026-11-24, at the end of the ma
 
 **Honest limits of these checks.** Everything here is browser emulation on one Windows computer, not real phones. The test browser could only draw 320–430px widths at full size; 768px and wider were drawn scaled down, so small details at those sizes are not confirmed. No real Android phone, Samsung Internet or iPhone has been used yet. Real-device checks are a separate column and are all still open.
 
-Last updated: 2026-11-24 (pass 1).
+Last updated: 2026-11-24 (pass 2: cart and checkout).
 
 ## Routes
 
@@ -20,8 +20,8 @@ Last updated: 2026-11-24 (pass 1).
 | `/` Home | FIXED | FIXED | — | — | OK (scaled) | — | — | — |
 | `/shop` | FIXED | — | — | — | — | — | — | — |
 | `/product/[slug]` | — | FIXED | — | — | OK (scaled) | — | — | — |
-| `/cart` | — | — | — | — | — | — | — | — |
-| `/checkout` | — | — | — | — | — | — | — | — |
+| `/cart` | — | FIXED | — | — | — | — | Quantity and remove not tried yet | — |
+| `/checkout` | FIXED | FIXED | — | — | — | — | Form validation and placing an order not tried yet | — |
 | `/thank-you` | — | — | — | — | — | — | — | — |
 | `/wishlist` | — | — | — | — | — | — | — | — |
 | Category pages (`/inspired-perfume-oil`, `/oriental-attar`, `/organic-attar`, `/artificial-oud`, `/brand-perfumes`, `/niche-perfumes`, `/womens-perfume`, `/gifts-and-packages`, `/new-arrivals`, `/accessories`) | — | — | — | — | — | — | — | — |
@@ -46,7 +46,7 @@ Last updated: 2026-11-24 (pass 1).
 | Product page sticky buy bar | FIXED | Was see-through over the description text; now solid |
 | Header and announcement bar | — | At 320px the announcement text looked empty in one capture; to re-check |
 | Navigation drawer | — | |
-| Cart drawer | — | |
+| Cart drawer | FIXED | Seen at 390px with one item. A second subtotal sat under the close button; removed. Quantity, remove and swipe-to-close not tried yet |
 | Search drawer | — | |
 | Filters and sorting (shop) | — | |
 | Product gallery | — | |
@@ -78,4 +78,6 @@ Last updated: 2026-11-24 (pass 1).
 1. Home page at 390px had 144 small-text items under 11px (labels, badges). Recount after pass 1 and raise the worst.
 2. Announcement bar at 320px: text looked missing in one capture; may be the fade animation mid-way.
 3. Samsung Internet's own dark mode (see table).
-4. Cart, checkout, thank-you and every other route in the table marked `—`.
+4. Checkout: when scrolled to the bottom, two Place Order buttons are on screen (the one in the page and the sticky one). The sticky one should step aside there.
+5. The Taka sign in regular (not bold) text is drawn smaller than the digits next to it. Bold prices look right.
+6. Thank-you page and every other route in the table marked `—`.

@@ -30,9 +30,21 @@ The owner added three mandatory sections (visual QA on every page, cross-device 
 | Product page | Add to Cart is brand green; Buy Now is the same red as on the cards (they were blue-purple and orange-pink); selected size, title line and "Read more" use green; price box is neutral; the sticky buy bar is solid (the description text showed through it) |
 
 ### Deployed
-- Live storefront is now `25bb3ec` (was `1520cd7`). Rollback copy of the previous build: `~/deploy-backups/khushbuwaala-frontend-next-20261124-103834`.
+- Live storefront after pass 1 was `25bb3ec` (was `1520cd7`); after pass 2 it is `92a43a2`. Rollback copy of the previous build: `~/deploy-backups/khushbuwaala-frontend-next-20261124-103834`.
 - Checked on the live site after the deploy, with dark mode emulated: page stays light (`color-scheme: light only`), white browser-bar tag, five bottom-bar items inside 320px, font order Inter → Noto Serif Bengali → stand-in, product page buttons in the new colours. Home, shop, product, cart, checkout and wishlist answer 200.
 - `adjustFontFallback: false` did nothing in the production build, so the font order is written out in `globals.css` instead.
+
+### Pass 2, same day: cart drawer, cart page, checkout (live as `92a43a2`)
+| Where | What was wrong | Fix |
+| --- | --- | --- |
+| Cart page | The saved cart was read before the page had started in the browser, so the server's "0 items" and the browser's real count disagreed. The page was thrown away and drawn again on every visit, and "Your cart is empty" flashed for shoppers with items | The page draws a short placeholder first, then the real cart |
+| Checkout | Same redraw on every visit | Same fix |
+| Checkout with nothing in the cart | Showed "0 items", a ৳60 total and a live Place Order button | Shows "Your cart is empty" with a button to the shop |
+| Cart page | Line prices read "৳1350.00" while the summary read "৳ 1,350" | Whole taka with separators everywhere |
+| Cart drawer | A second subtotal sat under the close button | Removed; the subtotal is shown once, at the bottom |
+| Cart, checkout, thank-you | "1 items" | "1 item" |
+
+Checked: cart and checkout with one item on the local test copy at 390px (checkout also at 320px); empty cart and empty checkout on the live site at 390px. Not checked: placing an order, form validation messages, quantity and remove buttons, tablet and desktop widths. The checkout with an item was looked at before the last small change (the empty-cart message), not after it.
 
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
