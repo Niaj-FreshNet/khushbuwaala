@@ -174,6 +174,13 @@ Owner decision: "Yes, ask for phone".
 - Checked live: invoice alone → hidden; wrong phone → hidden; right phone written as "+880 1777-152588" → shown; search by phone → 2 orders, invoice and details hidden. Page at 390 wide: wrong number shows the red line, right number shows name, phone and address; no sideways scroll.
 - Links from the thank-you page and the account page open tracking with the invoice number only, so the customer types the phone once to see the address.
 
+### Pass 14, 2026-11-25: Samsung screenshots explained (live: storefront `0e7ede6`, admin `bdf8989`)
+The owner sent two Samsung screenshots taken before pass 8 (prices still "৳ 350"): top bar white with only the stars visible, and product pictures faintly visible through the header and the shop filter bar.
+- Cause of the white bar, read from the live stylesheet: the old class name `bg-gradient-to-*` is written as `--tw-gradient-position: to right in oklab` with no fallback, and a browser that does not know "in oklab" throws the whole gradient away. `bg-linear-to-*` is written with a fallback first. Rule: never use `bg-gradient-to-*` in this project. All 22 uses in the storefront and 6 in the admin are now `bg-linear-to-*`; the live stylesheet has no `bg-gradient-to` rule left.
+- See-through bars: header, checkout bar and shop bar were `bg-white/95` with a blur; without blur support the page shows through. They are plain `bg-white` now (the shop filter bar already was since pass 8).
+- Checked: live header computed background is solid white with no blur; top bar green; Buy Now has a colour under its gradient.
+- Not checked: the owner's Samsung itself after these changes.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
