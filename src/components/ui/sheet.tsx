@@ -52,32 +52,72 @@ function SheetContent({
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "right" | "bottom" | "left"
 }) {
-  // A sideways flick closes a side drawer (right drawer: flick right, left drawer: flick left).
+  // Ways to close a drawer besides the button: tap the dimmed area, or drag / flick a side
+  // drawer back the way it came (it follows the finger and closes past a third of its width).
   const closeRef = React.useRef<HTMLButtonElement | null>(null)
-  const start = React.useRef<{ x: number; y: number } | null>(null)
+  const panelRef = React.useRef<HTMLDivElement | null>(null)
+  const drag = React.useRef<{ x: number; y: number; t: number; active: boolean; dead: boolean; dx: number } | null>(null)
   const swipeable = side === "left" || side === "right"
+  const close = React.useCallback(() => closeRef.current?.click(), [])
+
+  const settle = (el: HTMLElement | null) => {
+    if (!el) return
+    el.style.transition = "transform 180ms ease-out"
+    el.style.transform = ""
+    window.setTimeout(() => {
+      el.style.transition = ""
+    }, 200)
+  }
   const onTouchStart = (e: React.TouchEvent) => {
     const t = e.touches[0]
-    start.current = t ? { x: t.clientX, y: t.clientY } : null
+    drag.current = t ? { x: t.clientX, y: t.clientY, t: Date.now(), active: false, dead: false, dx: 0 } : null
   }
-  const onTouchEnd = (e: React.TouchEvent) => {
-    const from = start.current
-    const t = e.changedTouches[0]
-    start.current = null
-    if (!from || !t) return
-    const dx = t.clientX - from.x
-    const dy = t.clientY - from.y
-    // mostly sideways and far enough, so scrolling the list up and down never closes it
-    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return
-    if ((side === "right" && dx > 0) || (side === "left" && dx < 0)) closeRef.current?.click()
+  const onTouchMove = (e: React.TouchEvent) => {
+    const d = drag.current
+    const t = e.touches[0]
+    const el = panelRef.current
+    if (!d || !t || !el || d.dead) return
+    const dx = t.clientX - d.x
+    const dy = t.clientY - d.y
+    if (!d.active) {
+      // an up/down move is a scroll: leave it alone for the rest of this touch
+      if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { d.dead = true; return }
+      if (Math.abs(dx) < 10) return
+      d.active = true
+    }
+    const shift = side === "right" ? Math.max(0, dx) : Math.min(0, dx)
+    d.dx = shift
+    el.style.transition = "none"
+    el.style.transform = `translateX(${shift}px)`
+  }
+  const onTouchEnd = () => {
+    const d = drag.current
+    const el = panelRef.current
+    drag.current = null
+    if (!d || !el || !d.active) return
+    const far = Math.abs(d.dx) > el.offsetWidth / 3
+    const fast = Math.abs(d.dx) > 40 && Date.now() - d.t < 300
+    if (far || fast) {
+      close()
+      // let the closing animation take over, then drop the manual offset
+      window.setTimeout(() => {
+        el.style.transition = ""
+        el.style.transform = ""
+      }, 320)
+    } else {
+      settle(el)
+    }
   }
 
   return (
     <SheetPortal>
-      <SheetOverlay />
+      {/* Some phones did not close the drawer on a tap here, so the tap is handled directly. */}
+      <SheetOverlay onClick={close} />
       <SheetPrimitive.Content
+        ref={panelRef}
         data-slot="sheet-content"
         className={cn(
+          swipeable && "touch-pan-y",
           "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
           side === "right" &&
             "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-[80vw] max-w-[360px] border-l sm:max-w-sm",
@@ -91,7 +131,9 @@ function SheetContent({
         )}
         {...props}
         onTouchStart={swipeable ? onTouchStart : undefined}
+        onTouchMove={swipeable ? onTouchMove : undefined}
         onTouchEnd={swipeable ? onTouchEnd : undefined}
+        onTouchCancel={swipeable ? onTouchEnd : undefined}
       >
         {children}
         {/* used by the flick gesture; works even where a drawer hides the visible button */}

@@ -118,11 +118,14 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                                 {/* Product Gallery */}
                                 <div className="w-full order-1 flex justify-center">
                                     <div className="relative w-full max-w-[520px] lg:max-w-none lg:sticky lg:top-16">
-                                        <ProductGallery product={product} />
-                                        <WishlistButton
-                                            product={{ id: product.id, name: product.name, slug: product.slug, primaryImage: product.primaryImage, minPrice: product.minPrice, brand: product.brand }}
-                                            categoryName={categoryName}
-                                            className="absolute right-3 top-3 z-10"
+                                        <ProductGallery
+                                            product={product}
+                                            corner={
+                                                <WishlistButton
+                                                    product={{ id: product.id, name: product.name, slug: product.slug, primaryImage: product.primaryImage, minPrice: product.minPrice, brand: product.brand }}
+                                                    categoryName={categoryName}
+                                                />
+                                            }
                                         />
                                     </div>
                                 </div>

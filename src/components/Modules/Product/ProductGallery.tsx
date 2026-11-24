@@ -16,9 +16,11 @@ import { IProduct } from "@/types/product.types";
 
 interface ProductGalleryProps {
   product: Pick<IProduct, "id" | "name" | "primaryImage" | "otherImages">;
+  /** A small control drawn in the bottom-left corner of the photo (the save button). */
+  corner?: React.ReactNode;
 }
 
-export default function ProductGallery({ product }: ProductGalleryProps) {
+export default function ProductGallery({ product, corner }: ProductGalleryProps) {
   const images = useMemo(() => {
     const list = [product.primaryImage, ...(product.otherImages ?? [])]
       .filter(Boolean)
@@ -27,6 +29,9 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
   }, [product.primaryImage, product.otherImages]);
 
   const [activeIdx, setActiveIdx] = useState(0);
+  // The frame takes the shape of the photo (square up to 3:4 tall), so a tall photo is not cut
+  // at the top where its name is written.
+  const [frame, setFrame] = useState(1);
   const [lightbox, setLightbox] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
 
@@ -77,7 +82,8 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
       {/* Main Image Container - Exact square matching the product photos */}
       <div className="relative group w-full">
         <div
-          className="relative w-full aspect-square rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center cursor-pointer overflow-hidden"
+          className="relative w-full rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center cursor-pointer overflow-hidden"
+          style={{ aspectRatio: frame }}
           onClick={() => setLightbox(true)}
           onMouseMove={handleMouseMove}
           onMouseEnter={() => setIsHovering(true)}
@@ -91,8 +97,14 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
               alt={`${product.name} - Premium perfume bottle`}
               fill
               fetchPriority="high"
+              onLoad={(e) => {
+                const img = e.currentTarget;
+                if (img.naturalWidth && img.naturalHeight) {
+                  setFrame(Math.min(1, Math.max(0.75, img.naturalWidth / img.naturalHeight)));
+                }
+              }}
               sizes="(max-width: 768px) 100vw, 50vw"
-              className={`object-cover transition-transform duration-500 ${
+              className={`object-cover object-top transition-transform duration-500 ${
                 zoomActive ? "scale-150" : "scale-100"
               } ${isRotating ? "animate-pulse" : ""}`}
               style={
@@ -126,6 +138,13 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
               </button>
             </div>
           )}
+
+          {/* Save button: bottom-left, clear of the name printed at the top of the photos */}
+          {corner ? (
+            <div className="absolute bottom-3 left-3 z-20" onClick={(e) => e.stopPropagation()}>
+              {corner}
+            </div>
+          ) : null}
 
           {/* Zoom Instruction */}
           {zoomActive && (

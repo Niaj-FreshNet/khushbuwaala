@@ -235,7 +235,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
         </div>
 
         {/* 2. Main Navigation Menus */}
-        <ScrollArea className="flex-1 px-3 py-1 bg-white">
+        <ScrollArea className="min-h-0 flex-1 px-3 py-1 bg-white">
           <nav aria-label="Mobile navigation menu">
             <ul className="space-y-2">
               {menuItems.map((item) => (

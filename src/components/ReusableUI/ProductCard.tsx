@@ -284,14 +284,14 @@ export function ProductCard({
         )}
       >
         {/* Visual Box: aspect-[1/1.05] crops out the redundant bottom white strip from the bottle photo */}
-        <div className="relative aspect-[1/1.05] w-full overflow-hidden bg-gray-50/80 shrink-0">
+        <div className="relative aspect-square w-full overflow-hidden bg-gray-50/80 shrink-0">
           <Image
             src={!imageError ? product.primaryImage : "/placeholder.svg?height=256&width=200&text=No+Image"}
             alt={product.name}
             fill
             sizes="(max-width:640px) 50vw, (max-width:1200px) 33vw, 20vw"
             className={cn(
-              "object-cover object-[center_20%] transition-all duration-700 ease-out",
+              "object-cover object-top transition-all duration-700 ease-out",
               wantAlt && product.otherImages && product.otherImages.length > 0
                 ? "group-hover:opacity-0 group-hover:scale-105"
                 : "group-hover:scale-105"
@@ -307,7 +307,7 @@ export function ProductCard({
               fill
               sizes="(max-width:640px) 50vw, (max-width:1200px) 33vw, 20vw"
               className={cn(
-                "object-cover object-[center_20%] absolute inset-0 transition-all duration-700 ease-out",
+                "object-cover object-top absolute inset-0 transition-all duration-700 ease-out",
                 touchHover
                   ? "opacity-100 scale-105"
                   : "opacity-0 group-hover:opacity-100 group-hover:scale-105"
@@ -316,7 +316,7 @@ export function ProductCard({
           )}
 
           {/* Floating actions: always visible (phones have no hover) */}
-          <div className="absolute top-2 right-2 z-10 flex flex-col gap-1.5 items-center">
+          <div className="absolute bottom-2 right-2 z-10 flex flex-col-reverse gap-1.5 items-center">
             {/* Wishlist Button - Frosted Glass Aesthetic */}
             <button
               type="button"
@@ -324,7 +324,7 @@ export function ProductCard({
               aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`}
               aria-pressed={isWishlisted}
               className={cn(
-                "min-h-0! w-9 h-9 aspect-square rounded-full border shadow-xs transition-all duration-200 active:scale-90 p-0 flex items-center justify-center shrink-0 cursor-pointer",
+                "min-h-0! w-8 h-8 aspect-square rounded-full border shadow-xs transition-all duration-200 active:scale-90 p-0 flex items-center justify-center shrink-0 cursor-pointer",
                 isWishlisted
                   ? "bg-white border-red-200 text-red-600"
                   : "bg-white/85 hover:bg-white border-white/70 text-gray-700 hover:text-red-600"
@@ -357,7 +357,7 @@ export function ProductCard({
 
           {/* Discount Badge */}
           {discountPercentLabel && (
-            <div className="absolute top-2 left-2 z-10 pointer-events-none">
+            <div className="absolute bottom-2 left-2 z-10 pointer-events-none">
               <span className="px-1.5 py-0.5 rounded-md bg-white text-green-700 text-xs font-bold tracking-tight shadow-xs">
                 {discountPercentLabel}
               </span>
