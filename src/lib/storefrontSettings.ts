@@ -22,7 +22,9 @@ export type HeroSlide = {
 // tall picture would push the products off the first screen, a very flat one would be a sliver.
 // Keep in step with the admin panel's copy (src/lib/heroShape.ts there), which previews the same box.
 export const HERO_SHAPE = {
-  desktop: { min: 2, max: 3.2, fallback: 2.2 },
+  // Wide and short on purpose: on a computer the banner must leave the first product row on
+  // the first screen (a 2.2:1 banner at full page width was about 660px tall on a 1920 screen).
+  desktop: { min: 2.8, max: 3.4, fallback: 2.9 },
   phone: { min: 0.8, max: 2.4, fallback: 1 },
 } as const;
 

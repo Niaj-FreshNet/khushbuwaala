@@ -81,7 +81,7 @@ export function CarouselSlider({ slides }: { slides: HeroSlide[] }) {
                   </>
                 )}
                 <div
-                  className="relative w-full overflow-hidden bg-gray-100 aspect-(--hero-phone) md:aspect-(--hero-wide) md:max-h-[max(55vh,400px)] md:rounded-2xl"
+                  className="relative w-full overflow-hidden bg-gray-100 aspect-(--hero-phone) md:aspect-(--hero-wide) md:rounded-2xl"
                   style={{ "--hero-phone": shape.phone, "--hero-wide": shape.desktop } as React.CSSProperties}
                 >
                   {/* The whole banner is the link, so artwork with its own text needs no button */}
