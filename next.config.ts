@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
 
   images: {
     formats: ["image/avif", "image/webp"], // ✅ better compression
-    minimumCacheTTL: 60 * 60 * 24 * 7,    // ✅ cache optimized images 7 days
+    minimumCacheTTL: 60 * 60 * 24 * 31,   // resized pictures are kept by browsers for 31 days
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
       { protocol: "https", hostname: "i.ibb.co", pathname: "/**" },
@@ -21,6 +21,13 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+      // One address for the shop: www sends visitors (and Google) to the plain domain.
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.khushbuwaala.com" }],
+        destination: "https://khushbuwaala.com/:path*",
+        permanent: true,
+      },
       { source: "/products/:slug", destination: "/product/:slug", permanent: true },
       // Pages taken down on 2026-11-24 (sample content, never real): old links go somewhere useful.
       { source: "/click-collect", destination: "/stores", permanent: false },

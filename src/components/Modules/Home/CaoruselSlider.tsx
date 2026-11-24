@@ -72,6 +72,14 @@ export function CarouselSlider({ slides }: { slides: HeroSlide[] }) {
 
             return (
               <CarouselItem key={index}>
+                {/* The first banner is the biggest thing on the screen: tell the browser to fetch it
+                    straight away (one hint per screen size, so only the right file is fetched). */}
+                {first && (
+                  <>
+                    <link rel="preload" as="image" media="(max-width: 767.98px)" imageSrcSet={phoneSrcSet} imageSizes={img.sizes} fetchPriority="high" />
+                    <link rel="preload" as="image" media="(min-width: 768px)" imageSrcSet={wide.srcSet} imageSizes={wide.sizes} fetchPriority="high" />
+                  </>
+                )}
                 <div
                   className="relative w-full overflow-hidden bg-gray-100 aspect-(--hero-phone) md:aspect-(--hero-wide) md:rounded-2xl"
                   style={{ "--hero-phone": shape.phone, "--hero-wide": shape.desktop } as React.CSSProperties}
