@@ -110,4 +110,4 @@ There is no dark theme. The page declares `color-scheme: only light` (CSS and me
 Buy Now is the red gradient (`from-orange-600 via-red-600 to-rose-600`) everywhere; Add to Cart and selected states are brand green (`emerald-700`). No blue, purple or pink gradients on shopping actions. Section headings use one plain style (`SectionTitle`), no moving decorations.
 
 ## SF-029 — Fonts without generated stand-ins (2026-11-24)
-`adjustFontFallback: false` on Inter and Noto Serif Bengali. The stand-in is the phone's own Arial/Roboto and sat in front of the Bengali font, so the Taka sign differed between phones. Order is now Inter, Noto Serif Bengali, system.
+The font order is written out in `globals.css`: Inter, Noto Serif Bengali, then the generated stand-in. The stand-in is the phone's own Arial/Roboto and used to sit in front of the Bengali font, so the Taka sign differed between phones. (`adjustFontFallback: false` was tried first; the production build ignores it.)

@@ -7,11 +7,14 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* English default with Noto Serif Bengali as fallback for Bangla text */
-  --font-sans: var(--font-inter), var(--font-noto-serif-bengali), system-ui, sans-serif;
+  /* Inter for English, then the Bengali font, and only then the stand-in fonts.
+     The stand-ins are the phone's own Arial / Times; when they sat in front of the Bengali font
+     the Taka sign came from whichever of them the phone had, so it differed between phones.
+     The names are written out because the generated variables always put a stand-in second. */
+  --font-sans: "Inter", "Noto Serif Bengali", "Inter Fallback", system-ui, sans-serif;
 
   /* Dedicated Bengali Serif Class */
-  --font-bangla: var(--font-noto-serif-bengali), var(--font-inter), serif;
+  --font-bangla: "Noto Serif Bengali", "Inter", "Noto Serif Bengali Fallback", serif;
 
   --font-mono: var(--font-geist-mono);
 

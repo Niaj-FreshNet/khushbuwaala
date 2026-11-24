@@ -11,10 +11,6 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
-  // No generated stand-in font. The stand-in is the phone's own Arial/Roboto and it sat in front
-  // of the Bengali font, so the Taka sign came from whichever of those the phone had: a different
-  // shape on different phones. Without it the order is Inter, then the Bengali font, then system.
-  adjustFontFallback: false,
 })
 
 // Bangla Serif Font
@@ -23,7 +19,6 @@ const notoSerifBengali = Noto_Serif_Bengali({
   subsets: ["bengali"],
   variable: "--font-noto-serif-bengali",
   display: "swap",
-  adjustFontFallback: false,
 })
 
 const GTM_ID = "GTM-KDFMX5QL"
