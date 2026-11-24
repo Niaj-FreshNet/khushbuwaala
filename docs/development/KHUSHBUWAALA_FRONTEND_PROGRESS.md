@@ -324,6 +324,22 @@ Fixes:
 Checked live on #254630: admin invoice 700 / 550 / 650, subtotal 1,900, total 1,900; customer invoice the same. #899921 shows profit ৳0. Rule for the future: an invoice prints what was charged (`price`), never a price looked up from the product.
 Not done: old lines edited before this fix still carry a stale `originalPrice` in the database (the invoices no longer depend on it); the thank-you page's own invoice window still reads `originalPrice`, which is correct for a just-placed order.
 
+### Pass 23, 2026-11-25: one page width on wide screens (storefront `a430447`, `9417d7f`)
+Owner's desktop screenshots (1920 wide) asked whether the home page layout is good practice. It was not: sections started and ended at different places.
+
+| Section | Before (left–right at 1920) | After |
+| --- | --- | --- |
+| Header | 220–1690 | 220–1692 |
+| Banner | 340–1572 | 220–1692 |
+| Product rows | 213–1687 | 220–1692 |
+| "Not sure which perfume" box and brand story box | 348–1563 | 220–1692 |
+| Category grid | 201–1711 | 220–1692 |
+| Service cards, footer | 220–1690 | 220–1692 |
+
+The shared rule (use it for any new full-width section): `mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8`. The banner keeps full width on phones. Shop and collection pages use the same rule (title and filter column start at 220). Product, cart, checkout and text pages stay narrower on purpose: forms and reading text are easier in a narrower column.
+Measured on the live page in the owner's Chrome at 1920 wide (real desktop browser). The banner is taller now (about 660px at that width) with the next section's title still on the first screen.
+Also live from the working folder (not my edit): the menu drawer's small descriptions were changed to 10px grey; that is below the 11px floor from pass 16.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
