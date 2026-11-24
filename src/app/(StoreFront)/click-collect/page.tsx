@@ -109,7 +109,7 @@ export default function ClickAndCollect() {
               <div className="space-y-2 text-gray-700">
                 <p>
                   <strong>Khushbuwaala Perfumes – Flagship Store</strong><br />
-                  House 12, Road 5, Block C, Banani, Dhaka 1213
+                  Shop-G/138, Eastern Banabithi Shopping Complex, South Banasree, Khilgaon, Dhaka-1219
                 </p>
                 <p className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4" />
