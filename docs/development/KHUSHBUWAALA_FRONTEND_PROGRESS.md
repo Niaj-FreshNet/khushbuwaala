@@ -122,6 +122,17 @@ Owner sent an iPhone screenshot of /shop and a Samsung report.
 Checked: real Chrome on the live shop: the variable is 81px with the header shown, 0px after scrolling down, 81px again after scrolling up. Test browser at 390 wide: with the header hidden the filter bar sits at the very top (0px). Top bar computed colours on live: green background, white text.
 Not checked: an actual Samsung phone and an actual iPhone (owner to confirm both).
 
+### Pass 9, same day: cart, menu and account pages (live: storefront `003f5b5`)
+Seen on the local copy (stand-in API, signed in as the local test admin):
+- Cart with one item at 390: item card, free-delivery bar, summary, coupon box (16px input), no sideways scroll. A refused coupon shows the server's message as a notice at the top (the stand-in refuses every write, so a real valid/invalid code was not tried).
+- Phone menu at 390: opens, Categories sub-menu opens and lists five collections. Label fixed: "Artificial Oud" → "Oud Collection" (same as the desktop menu).
+- Account page at 390 and 768: the three tabs ran off the right edge on a phone; they now use short names (Current, History, Profile). 9–10px text raised to 11–12px, form labels to 14px. Profile tab form: inputs 16px, Save and Change Password visible.
+- Shop at 768: three cards per row, no sideways scroll.
+- Full-height rules: only one `100vh` left (desktop filter column), nothing on phones.
+
+Not checked: account page with real orders in it (the test account has none), a real coupon, order invoice pages, forgot/reset password being submitted (they send email), the sticky Place Order bar hiding on a tablet.
+Server note: `~/deploy-backups` is now 11 GB (166 entries); nothing was deleted.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
