@@ -36,6 +36,12 @@ Phase 0 (audit) done. Phase 1 (product discovery, header search, wishlist, SEO f
 - **Not stable yet:** it answered for 2–3 minutes, then about 10 minutes of 503 ("The service you requested is not available yet. Please try again in 30 seconds."), then up again, then down again. During the down periods the container log shows the server still running and no failed requests reaching it, so the refusals come from Google's front door, not from our server. This looks like Google still switching the project back on. Nothing in our set-up was changed.
 - Not tested yet in GA4: add_to_cart and the seven new shop events.
 
+### Tagging server steady again (checked 2026-11-24, about 16:10–16:20 Dhaka)
+- `/healthy` answered 200 on 63 checks in a row over about 10 minutes, no failures (the night before it never stayed up longer than about 3 minutes). Nothing was changed on our side; Google finished switching the project back on.
+- GA4 Realtime shows real visitors again: 4 users in the last 30 minutes, events page_view (9), view_item (5), first_visit (3), session_start (3), select_item (2), user_engagement (2).
+- GA4 has **no shop data from about Nov 8 to the night of Nov 23**. That gap cannot be filled in afterwards.
+- Still not seen in GA4: add_to_cart, begin_checkout, purchase and the seven new shop events (no one did those in the minutes I watched).
+
 ### This computer
 - Drive C: is full (0 MB free of 200 GB). A download was cut short because of it; work files now go to `D:\Projects\khushbuwaala\_dev\tmp`. The owner needs to free space on C:.
 

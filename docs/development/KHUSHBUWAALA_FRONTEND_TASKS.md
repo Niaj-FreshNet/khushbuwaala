@@ -181,7 +181,7 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 
 - [x] Merchant Center: shop feed added as a product source for Bangladesh (941 products taken in)
 - [x] Owner paid the Google Cloud balance
-- [ ] Tagging server: billing is back and GA4 received page_view and view_item (seen in Realtime), but the server was still going up and down on the night of Nov 23–24 (Google 503 "not available yet"). Recheck `/healthy` stays `ok` for 10 minutes; if it still flaps after a day, redeploy the Cloud Run service (same image and settings) and contact Google Cloud billing support
+- [x] Tagging server steady again on 2026-11-24 (63 checks in a row over 10 minutes); GA4 Realtime shows real visitors with page_view, view_item, select_item
 - [ ] GA4 Realtime: confirm add_to_cart and the seven new shop events once the server is steady
 - [ ] Merchant Center in 2–3 days: read approved / not approved counts and the top issues; find why 52 feed items were not taken in
 - [x] Merchant Center delivery charge set to ৳120 flat, free over ৳1,000, 1–2 days (owner gave ৳60 Dhaka / ৳120 outside; Google allows one rate per country here, so the higher one is shown)
