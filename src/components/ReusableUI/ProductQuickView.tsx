@@ -122,6 +122,11 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
 
   // ✅ Pricing logic aligned with Product Details page (variant discounts first + product discounts)
   // ✅ Pricing logic: ONLY auto discounts (code must be empty)
+  const listDiscount = React.useMemo(() => {
+    const d = (product as any)?.discount;
+    return d && typeof d === "object" ? (d as IDiscount) : null;
+  }, [product]);
+
   const { discount, discountedPrice } = React.useMemo(() => {
     const now = new Date();
 
@@ -138,7 +143,12 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
         const startOk = !d.startDate || new Date(d.startDate) <= now;
         const endOk = !d.endDate || new Date(d.endDate) >= now;
         return startOk && endOk;
-      }) || null;
+      }) ||
+      // Product lists (shop, home rows) carry the running sale as one ready-made `discount`
+      // instead of the full `discounts` list. Without this the quick view showed and charged the
+      // full price for products that were on sale everywhere else.
+      listDiscount ||
+      null;
 
     let final = originalPrice;
 
@@ -152,7 +162,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
 
     final = Math.max(0, Math.round(final)); // ✅ no decimals + no negative
     return { discount: (active as IDiscount | null), discountedPrice: Number(final) };
-  }, [product.discounts, currentVariant, originalPrice]);
+  }, [product.discounts, currentVariant, originalPrice, listDiscount]);
 
   const currentPrice = discountedPrice // ✅ final price for UI + cart
   const savings = Math.max(0, originalPrice - discountedPrice)
@@ -199,11 +209,13 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
           const startOk = !d.startDate || new Date(d.startDate) <= now;
           const endOk = !d.endDate || new Date(d.endDate) >= now;
           return startOk && endOk;
-        }) || null;
+        }) ||
+        listDiscount ||
+        null;
 
       return active as IDiscount | null;
     },
-    [product.discounts]
+    [product.discounts, listDiscount]
   );
 
   const handleAddToCart = async () => {
@@ -317,7 +329,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                     {/* Discount badge (selected variant only) */}
                     {discount && (
                       <div className="absolute top-3 left-3 z-10">
-                        <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 shadow-lg">
+                        <Badge className="bg-white text-green-700 border-0 shadow-lg font-bold">
                           <Tag className="h-3 w-3 mr-1" />
                           {discount.type === "percentage" ? `${discount.value}% OFF` : `৳${discount.value} OFF`}
                         </Badge>
@@ -510,7 +522,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                                 "relative rounded-xl border px-2.5 py-2 sm:px-3 sm:py-2.5 text-xs sm:text-sm font-semibold transition-all",
                                 "active:scale-[0.98]",
                                 selectedSize === size
-                                  ? "border-red-500 bg-red-50 text-red-700 shadow-sm"
+                                  ? "border-emerald-600 bg-emerald-50 text-emerald-800 shadow-sm"
                                   : "border-gray-200 bg-white text-gray-800 hover:border-gray-300 hover:bg-gray-50"
                               )}
                               onClick={() => {
@@ -537,7 +549,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                     {product.accords && product.accords.length > 0 && (
                       <div className="space-y-2">
                         <h3 className="font-semibold text-gray-900 flex items-center gap-2 text-sm sm:text-base">
-                          <Award className="h-4 w-4 text-purple-500 shrink-0" />
+                          <Award className="h-4 w-4 text-emerald-700 shrink-0" />
                           Scent Profile
                         </h3>
                         <div className="flex flex-wrap gap-2">
@@ -545,7 +557,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                             <Badge
                               key={idx}
                               variant="outline"
-                              className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200 text-purple-700 text-xs rounded-full"
+                              className="bg-gray-50 border-gray-200 text-gray-700 text-xs rounded-full"
                             >
                               {note}
                             </Badge>
@@ -654,7 +666,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                     "flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold rounded-xl shadow-sm transition-all active:scale-[0.98]",
                     isAddingToCart
                       ? "bg-gray-400 cursor-not-allowed text-white"
-                      : "bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white"
+                      : "bg-emerald-700 hover:bg-emerald-800 text-white"
                   )}
                   onClick={handleAddToCart}
                   disabled={/* isOutOfStock || */ isAddingToCart || isBuyingNow}
@@ -678,7 +690,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                     "flex-1 h-11 sm:h-12 text-sm sm:text-base font-semibold rounded-xl shadow-sm transition-all active:scale-[0.98]",
                     isBuyingNow
                       ? "bg-gray-400 cursor-not-allowed text-white"
-                      : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                      : "bg-linear-to-r from-orange-600 via-red-600 to-rose-600 hover:from-orange-700 hover:via-red-700 hover:to-rose-700 text-white"
                   )}
                   onClick={handleBuyNow}
                   disabled={/* isOutOfStock || */ isAddingToCart || isBuyingNow}
