@@ -42,7 +42,7 @@ export default function AboutPage() {
     <div className="bg-white">
       <div className="container mx-auto max-w-3xl px-4 pb-14 pt-8 sm:pt-12">
         <p className="text-sm font-semibold uppercase tracking-wide text-emerald-800">Our story</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl">
           We have spent more than eight years around fragrance. Khushbuwaala is where we share it.
         </h1>
 

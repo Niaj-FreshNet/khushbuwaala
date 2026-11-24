@@ -46,7 +46,7 @@ export default function ScentProfile({ profile, name }: { profile?: ProductProfi
 
   return (
     <section aria-labelledby="scent-profile-heading" className="rounded-2xl border border-stone-200 bg-stone-50/60 px-4 py-3 sm:px-5">
-      <h2 id="scent-profile-heading" className="text-base font-bold text-stone-900">
+      <h2 id="scent-profile-heading" className="text-lg font-bold text-stone-900 sm:text-xl">
         {name} at a glance
       </h2>
       <p className="text-[13px] text-stone-600">Tap anything to see more perfumes like it.</p>

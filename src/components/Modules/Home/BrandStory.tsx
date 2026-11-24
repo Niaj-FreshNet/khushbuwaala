@@ -9,7 +9,7 @@ export function BrandStory() {
       <div className="grid gap-5 rounded-3xl bg-emerald-950 px-5 py-7 text-emerald-50 sm:px-10 sm:py-10 md:grid-cols-[1.2fr_1fr] md:items-center md:gap-10">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-emerald-300">8+ years in fragrance</p>
-          <h2 id="story-heading" className="mt-2 text-2xl font-bold leading-snug tracking-tight text-white sm:text-3xl">
+          <h2 id="story-heading" className="mt-2 text-xl font-bold leading-snug tracking-tight text-white sm:text-2xl md:text-[28px]">
             We choose every scent ourselves, and tell you plainly what it is like.
           </h2>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-emerald-100/90 sm:text-[15px]">

@@ -51,8 +51,8 @@ export default function StoresPage() {
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4">Find Us</Badge>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Our showroom</h1>
-            <p className="text-lg text-gray-600">Smell the collection in person at our showroom in Dhaka.</p>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 mb-3">Our showroom</h1>
+            <p className="text-base text-gray-600">Smell the collection in person at our showroom in Dhaka.</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">

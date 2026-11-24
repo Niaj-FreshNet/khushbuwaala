@@ -734,7 +734,7 @@ export default function ProfileClient() {
                 {activeTab === "current-orders" && (
                     <div className="space-y-2.5">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-xs sm:text-sm font-bold text-gray-900">Current Orders</h2>
+                            <h2 className="text-sm sm:text-base font-bold text-gray-900">Current Orders</h2>
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -761,7 +761,7 @@ export default function ProfileClient() {
                 {activeTab === "purchase-history" && (
                     <div className="space-y-2.5">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-xs sm:text-sm font-bold text-gray-900">Purchase History</h2>
+                            <h2 className="text-sm sm:text-base font-bold text-gray-900">Purchase History</h2>
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -795,7 +795,7 @@ export default function ProfileClient() {
                             <>
                                 {/* Profile Info Card */}
                                 <div className="bg-white rounded-xl border border-gray-200/80 p-3.5 sm:p-5 space-y-3">
-                                    <h2 className="text-xs sm:text-sm font-bold text-gray-900">Personal Details</h2>
+                                    <h2 className="text-sm sm:text-base font-bold text-gray-900">Personal Details</h2>
                                     <form onSubmit={handleProfileSubmit} className="space-y-3">
                                         {/* Avatar Selector */}
                                         <div className="flex items-center gap-3">
@@ -957,7 +957,7 @@ export default function ProfileClient() {
                                         <div className="flex items-center gap-2">
                                             <Lock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                                             <div>
-                                                <h2 className="text-xs sm:text-sm font-bold text-gray-900 leading-tight">Change Password</h2>
+                                                <h2 className="text-sm sm:text-base font-bold text-gray-900 leading-tight">Change Password</h2>
                                             </div>
                                         </div>
                                         <ChevronDown

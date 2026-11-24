@@ -126,18 +126,18 @@ function TrackOrderContent() {
   const renderStatusBadge = (status: string) => {
     const s = String(status || "").toUpperCase();
     if (s === "DELIVERED" || s === "COMPLETED") {
-      return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] px-2 py-0.5">Delivered</Badge>;
+      return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs px-2 py-0.5">Delivered</Badge>;
     }
     if (s === "PROCESSING" || s === "CONFIRMED") {
-      return <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] px-2 py-0.5">Processing</Badge>;
+      return <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-xs px-2 py-0.5">Processing</Badge>;
     }
     if (s === "SHIPPED") {
-      return <Badge className="bg-purple-50 text-purple-700 border-purple-200 text-[10px] px-2 py-0.5">Shipped</Badge>;
+      return <Badge className="bg-purple-50 text-purple-700 border-purple-200 text-xs px-2 py-0.5">Shipped</Badge>;
     }
     if (s === "CANCELED") {
-      return <Badge className="bg-rose-50 text-rose-700 border-rose-200 text-[10px] px-2 py-0.5">Canceled</Badge>;
+      return <Badge className="bg-rose-50 text-rose-700 border-rose-200 text-xs px-2 py-0.5">Canceled</Badge>;
     }
-    return <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] px-2 py-0.5">Pending</Badge>;
+    return <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-xs px-2 py-0.5">Pending</Badge>;
   };
 
   return (
@@ -156,10 +156,10 @@ function TrackOrderContent() {
               <ArrowLeft className="w-4 h-4 text-gray-700" />
             </Button>
             <div>
-              <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-gray-900 leading-tight">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 leading-tight">
                 Track Your Order
               </h1>
-              <p className="text-[11px] sm:text-xs text-gray-500">
+              <p className="text-xs sm:text-xs text-gray-500">
                 Real-time tracking for parcels and delivery updates
               </p>
             </div>
@@ -238,7 +238,7 @@ function TrackOrderContent() {
                 <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-semibold text-amber-900 text-xs sm:text-sm">No orders found</h3>
-                  <p className="text-[11px] text-amber-700 mt-0.5">
+                  <p className="text-xs text-amber-700 mt-0.5">
                     No orders match <span className="font-semibold text-amber-900">"{searchQuery}"</span>. Please
                     check for typos or search using your mobile number.
                   </p>
@@ -262,13 +262,13 @@ function TrackOrderContent() {
               {orders.length > 1 && (
                 <div className="lg:hidden space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
                       Orders Found ({orders.length})
                     </span>
 
                     <Sheet open={isPickerOpen} onOpenChange={setIsPickerOpen}>
                       <SheetTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-6 text-[11px] text-emerald-700 flex items-center gap-1 px-1">
+                        <Button variant="ghost" size="sm" className="h-6 text-xs text-emerald-700 flex items-center gap-1 px-1">
                           <ListOrdered className="h-3 w-3" /> View All ({orders.length})
                         </Button>
                       </SheetTrigger>
@@ -292,7 +292,7 @@ function TrackOrderContent() {
                                     </span>
                                     {renderStatusBadge(ord.status)}
                                   </div>
-                                  <p className="text-[11px] text-gray-500 mt-0.5">
+                                  <p className="text-xs text-gray-500 mt-0.5">
                                     {ord.createdAt ? format(new Date(ord.createdAt), "dd MMM yyyy") : ""} • {formatBDT(ord.amount)}
                                   </p>
                                 </div>
@@ -319,12 +319,12 @@ function TrackOrderContent() {
                             }`}
                         >
                           <div className="flex items-center gap-1">
-                            <span className="font-bold text-[11px] text-gray-900">
+                            <span className="font-bold text-xs text-gray-900">
                               #{ord.invoice || ord.id.slice(-6)}
                             </span>
                             {renderStatusBadge(ord.status)}
                           </div>
-                          <p className="text-[10px] text-gray-500 mt-0.5">{formatBDT(ord.amount)}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">{formatBDT(ord.amount)}</p>
                         </div>
                       );
                     })}
@@ -337,7 +337,7 @@ function TrackOrderContent() {
                 {/* Desktop Left Sidebar: Order List */}
                 {orders.length > 1 && (
                   <div className="hidden lg:block lg:col-span-4 space-y-2">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">
                       Orders Found ({orders.length})
                     </span>
 
@@ -388,7 +388,7 @@ function TrackOrderContent() {
                           <CardTitle className="text-xs sm:text-sm font-bold text-gray-900">
                             Invoice: <span className="text-emerald-700 font-extrabold">#{selectedOrder.invoice || selectedOrder.id}</span>
                           </CardTitle>
-                          <p className="text-[10px] sm:text-[11px] text-gray-400 mt-0.5">
+                          <p className="text-xs sm:text-xs text-gray-400 mt-0.5">
                             Placed on {selectedOrder.createdAt ? format(new Date(selectedOrder.createdAt), "dd MMM yyyy, p") : "—"}
                           </p>
                         </div>
@@ -411,7 +411,7 @@ function TrackOrderContent() {
                                 <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                               </div>
                               <span
-                                className={`text-[10px] sm:text-[11px] mt-1.5 text-center font-medium ${isDone ? "text-gray-900 font-semibold" : "text-gray-400"
+                                className={`text-xs sm:text-xs mt-1.5 text-center font-medium ${isDone ? "text-gray-900 font-semibold" : "text-gray-400"
                                   }`}
                               >
                                 {step.label}
@@ -462,7 +462,7 @@ function TrackOrderContent() {
                                 <h4 className="text-xs font-semibold text-gray-900 truncate">
                                   {item.product?.name || "Perfume Item"}
                                 </h4>
-                                <p className="text-[10px] text-gray-400 mt-0.5">
+                                <p className="text-xs text-gray-400 mt-0.5">
                                   Size: {sizePart} {String(unitPart || "").toUpperCase()}
                                 </p>
                                 <span className="text-[10.5px] text-gray-600 font-medium sm:hidden">
@@ -472,7 +472,7 @@ function TrackOrderContent() {
                             </div>
 
                             <div className="text-right shrink-0">
-                              <p className="text-[10px] text-gray-400 hidden sm:block">Qty: {item.quantity}</p>
+                              <p className="text-xs text-gray-400 hidden sm:block">Qty: {item.quantity}</p>
                               <p className="text-xs font-bold text-gray-900">
                                 {formatBDT(item.price * item.quantity)}
                               </p>
@@ -488,11 +488,11 @@ function TrackOrderContent() {
                     {/* Financial Summary */}
                     <Card className="border-gray-200/80 shadow-2xs bg-white">
                       <CardHeader className="p-2.5 border-b bg-gray-50/50">
-                        <CardTitle className="text-[10px] font-bold text-gray-900 uppercase tracking-wider">
+                        <CardTitle className="text-xs font-bold text-gray-900 uppercase tracking-wider">
                           Payment Details
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="p-2.5 space-y-1.5 text-[11px]">
+                      <CardContent className="p-2.5 space-y-1.5 text-xs">
                         <div className="flex justify-between text-gray-600">
                           <span>Method</span>
                           <span className="font-semibold text-gray-900 capitalize">
@@ -526,7 +526,7 @@ function TrackOrderContent() {
                     {/* Delivery Destination */}
                     <Card className="border-gray-200/80 shadow-2xs bg-white">
                       <CardHeader className="p-2.5 border-b bg-gray-50/50">
-                        <CardTitle className="text-[10px] font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1">
+                        <CardTitle className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1">
                           <MapPin className="h-3 w-3 text-emerald-600" />
                           Delivery Destination
                         </CardTitle>
@@ -570,7 +570,7 @@ function TrackOrderContent() {
                           ) : null}
                         </CardContent>
                       ) : (
-                      <CardContent className="p-2.5 space-y-1 text-[11px] text-gray-700">
+                      <CardContent className="p-2.5 space-y-1 text-xs text-gray-700">
                         <div className="font-semibold text-gray-900 flex items-center gap-1.5">
                           <User className="h-3 w-3 text-gray-400" />
                           {selectedOrder.shipping?.name || selectedOrder.name || "Customer"}

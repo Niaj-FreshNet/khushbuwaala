@@ -9,16 +9,16 @@ export const metadata: Metadata = {
 
 export default function RefundPolicy() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="bg-gray-50 py-8 sm:py-12">
       <div className="container mx-auto px-4 max-w-4xl">
         <Card className="border-gray-100 shadow-sm">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold">
+            <CardTitle role="heading" aria-level={1} className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
               Refund &amp; Exchange Policy
             </CardTitle>
           </CardHeader>
 
-          <CardContent className="prose prose-lg max-w-none text-gray-700 space-y-6">
+          <CardContent className="kw-prose">
             <p>
               At <strong>Khushbuwaala</strong>, customer satisfaction is our top priority.
               If you face any issue with your order, we are here to help. Please read

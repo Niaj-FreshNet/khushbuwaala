@@ -9,15 +9,15 @@ export const metadata: Metadata = {
 
 export default function TermsConditions() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="bg-gray-50 py-8 sm:py-12">
       <div className="container mx-auto px-4 max-w-4xl">
         <Card className="border-gray-100 shadow-sm">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold">Terms & Conditions — Khushbuwaala</CardTitle>
+            <CardTitle role="heading" aria-level={1} className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">Terms & Conditions — Khushbuwaala</CardTitle>
             <p className="text-sm text-gray-500 mt-2">Last updated: November 02, 2025</p>
           </CardHeader>
 
-          <CardContent className="prose prose-lg max-w-none text-gray-700 space-y-6">
+          <CardContent className="kw-prose">
             <p>
               Welcome to <strong>Khushbuwaala</strong>. By accessing or using our website{" "}
               <strong>khushbuwaala.com</strong>, you agree to be bound by the following Terms &amp;

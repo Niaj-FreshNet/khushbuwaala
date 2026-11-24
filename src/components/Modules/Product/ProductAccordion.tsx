@@ -173,7 +173,7 @@ const AccordionItem = ({
           {badge && (
             <Badge
               variant="secondary"
-              className="text-[10px] font-medium px-1.5 py-0 bg-emerald-50 text-emerald-700 border border-emerald-100/80"
+              className="text-[11px] font-medium px-1.5 py-0 bg-emerald-50 text-emerald-700 border border-emerald-100/80"
             >
               {badge}
             </Badge>
@@ -476,7 +476,7 @@ export default function ProductAccordion({
           {/* Quick Specs Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 pt-0.5">
             <div className="p-2.5 rounded-xl bg-gray-50/80 border border-gray-100">
-              <span className="text-[10px] uppercase font-bold text-gray-500 block tracking-wide">Brand</span>
+              <span className="text-[11px] uppercase font-bold text-gray-500 block tracking-wide">Brand</span>
               <span className="text-xs sm:text-sm font-semibold text-gray-900 block mt-0.5 truncate">
                 {(product.brand || "Khushbuwaala")
                   .toLowerCase()
@@ -486,7 +486,7 @@ export default function ProductAccordion({
 
             {product.origin && product.origin.trim().toUpperCase() !== "N/A" && (
             <div className="p-2.5 rounded-xl bg-gray-50/80 border border-gray-100">
-              <span className="text-[10px] uppercase font-bold text-gray-500 block tracking-wide">Origin</span>
+              <span className="text-[11px] uppercase font-bold text-gray-500 block tracking-wide">Origin</span>
               <span className="text-xs sm:text-sm font-semibold text-gray-900 block mt-0.5 truncate">
                 {product.origin}
               </span>
@@ -494,14 +494,14 @@ export default function ProductAccordion({
             )}
 
             <div className="p-2.5 rounded-xl bg-gray-50/80 border border-gray-100">
-              <span className="text-[10px] uppercase font-bold text-gray-500 block tracking-wide">Gender</span>
+              <span className="text-[11px] uppercase font-bold text-gray-500 block tracking-wide">Gender</span>
               <span className="text-xs sm:text-sm font-semibold text-gray-900 capitalize block mt-0.5 truncate">
                 {(product.gender || "Unisex").toLowerCase().replace(/^./, (char) => char.toUpperCase())}
               </span>
             </div>
 
             <div className="p-2.5 rounded-xl bg-gray-50/80 border border-gray-100">
-              <span className="text-[10px] uppercase font-bold text-gray-500 block tracking-wide mb-1">
+              <span className="text-[11px] uppercase font-bold text-gray-500 block tracking-wide mb-1">
                 Best For
               </span>
               <div className="flex flex-wrap gap-1">
@@ -510,7 +510,7 @@ export default function ProductAccordion({
                     <Badge
                       key={i}
                       variant="outline"
-                      className="text-[10px] px-1.5 py-0 bg-white font-medium text-gray-700 border-gray-200"
+                      className="text-[11px] px-1.5 py-0 bg-white font-medium text-gray-700 border-gray-200"
                     >
                       {item}
                     </Badge>
@@ -566,7 +566,7 @@ export default function ProductAccordion({
                 <p className="text-[11px] font-bold text-gray-900 leading-tight mt-0.5">
                   {reviews.length > 0 ? `${reviews.length} ${reviews.length === 1 ? "review" : "reviews"}` : "No reviews yet"}
                 </p>
-                <p className="text-[10px] text-gray-500 leading-tight">
+                <p className="text-[11px] text-gray-500 leading-tight">
                   {reviews.length > 0 ? "From customers of this perfume" : "Be the first to share how it wears"}
                 </p>
               </div>
@@ -577,7 +577,7 @@ export default function ProductAccordion({
               {[5, 4, 3, 2, 1].map((star) => {
                 const pct = getStarPercentage(star);
                 return (
-                  <div key={star} className="flex items-center gap-1.5 text-[10px] leading-none">
+                  <div key={star} className="flex items-center gap-1.5 text-[11px] leading-none">
                     <span className="w-2 font-medium text-gray-600 text-right">{star}</span>
                     <Star className="w-2.5 h-2.5 text-amber-500 fill-amber-500 shrink-0" />
                     <div className="flex-1 bg-amber-200/50 rounded-full h-1 overflow-hidden">
@@ -586,7 +586,7 @@ export default function ProductAccordion({
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <span className="w-6 text-right font-medium text-gray-500 text-[9px]">
+                    <span className="w-6 text-right font-medium text-gray-500 text-[11px]">
                       {pct}%
                     </span>
                   </div>
@@ -845,7 +845,7 @@ export default function ProductAccordion({
                               </span>
                             )}
                           </div>
-                          <span className="text-[10px] text-gray-500 font-medium">
+                          <span className="text-[11px] text-gray-500 font-medium">
                             {formattedDate}
                           </span>
                         </div>

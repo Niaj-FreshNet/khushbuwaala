@@ -375,7 +375,7 @@ export default function ThankYouPage() {
                       <div className="text-gray-900 font-bold mt-0.5">{formatBDT(p.lineDiscounted)}</div>
                     </div>
                     {p.hasDiscount && (
-                      <div className="text-right text-[10px]">
+                      <div className="text-right text-[11px]">
                         <span className="line-through text-gray-400 block">{formatBDT(p.lineOriginal)}</span>
                         <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-bold">
                           Save {formatBDT(p.save)}
@@ -524,8 +524,8 @@ export default function ThankYouPage() {
                       </div>
                       {p.hasDiscount && (
                         <div className="text-right">
-                          <span className="text-[10px] line-through text-gray-400 block">{formatBDT(p.lineOriginal)}</span>
-                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded">
+                          <span className="text-[11px] line-through text-gray-400 block">{formatBDT(p.lineOriginal)}</span>
+                          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded">
                             Save {formatBDT(p.save)}
                           </span>
                         </div>

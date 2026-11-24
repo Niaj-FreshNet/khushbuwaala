@@ -52,7 +52,7 @@ export default function BlogListClient({ initialData }: BlogListClientProps) {
 
         {/* Editorial Section Header */}
         <header className="mb-12 sm:mb-16">
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-neutral-900 mb-3">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 mb-3">
             The Khushbuwaala Blog
           </h1>
           <p className="text-sm sm:text-base text-neutral-500 max-w-xl font-normal leading-relaxed">

@@ -107,7 +107,7 @@ export default function MyOrders() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-5xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">My Orders</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">My Orders</h1>
         <p className="text-gray-600 mt-1">
           You have {orders.length} order{orders.length > 1 ? "s" : ""}
         </p>

@@ -265,7 +265,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                           </div>
                           <div className="flex items-center space-x-1.5">
                             {item.badge && (
-                              <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-emerald-100 text-emerald-800">
+                              <Badge variant="secondary" className="text-[11px] py-0 px-1.5 bg-emerald-100 text-emerald-800">
                                 {item.badge}
                               </Badge>
                             )}
@@ -300,7 +300,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                                     {child.label}
                                   </span>
                                   {child.description && (
-                                    <span className={cn("text-[10px]", active ? "text-emerald-700" : "text-gray-500 group-hover:text-emerald-700")}>
+                                    <span className={cn("text-[11px]", active ? "text-emerald-700" : "text-gray-500 group-hover:text-emerald-700")}>
                                       {child.description}
                                     </span>
                                   )}
@@ -342,7 +342,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                           <div className="flex items-center space-x-2">
                             <span className="text-sm font-semibold">{item.label}</span>
                             {item.badge && (
-                              <Badge variant="secondary" className="text-[10px] py-0 px-1.5 bg-emerald-100 text-emerald-800">
+                              <Badge variant="secondary" className="text-[11px] py-0 px-1.5 bg-emerald-100 text-emerald-800">
                                 {item.badge}
                               </Badge>
                             )}
@@ -430,7 +430,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
             </button>
           </div>
 
-          <div className="pt-2 text-center text-[10px] text-gray-400">
+          <div className="pt-2 text-center text-[11px] text-gray-400">
             © {new Date().getFullYear()} Khushbuwaala. All rights reserved.
           </div>
         </div>

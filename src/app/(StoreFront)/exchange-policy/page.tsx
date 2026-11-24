@@ -10,17 +10,17 @@ export const metadata: Metadata = {
 
 export default function ExchangePolicy() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="bg-gray-50 py-8 sm:py-12">
       <div className="container mx-auto px-4 max-w-4xl">
         <Card className="border-gray-100 shadow-sm">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold">Return &amp; Exchange Policy</CardTitle>
+            <CardTitle role="heading" aria-level={1} className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">Return &amp; Exchange Policy</CardTitle>
             <Badge variant="secondary" className="mt-2">
               7-Day Window
             </Badge>
           </CardHeader>
 
-          <CardContent className="prose prose-lg max-w-none text-gray-700 space-y-6">
+          <CardContent className="kw-prose">
             <p>
               You may apply for exchange or return within <strong>7 days</strong> of receiving the
               product.

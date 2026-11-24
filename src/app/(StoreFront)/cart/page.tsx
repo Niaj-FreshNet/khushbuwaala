@@ -322,7 +322,7 @@ export default function CartPage() {
                 <ArrowLeft className="w-4 h-4 text-gray-700" />
               </Button>
               <div>
-                <h1 className="text-lg sm:text-xl font-black tracking-tight text-gray-900">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">
                   Shopping Cart
                 </h1>
                 <p className="text-[11px] sm:text-xs text-gray-500">
@@ -399,7 +399,7 @@ export default function CartPage() {
                         <BadgeCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                         Authentic Perfumes
                       </div>
-                      <p className="mt-0.5 text-[10px] text-gray-500 leading-tight">
+                      <p className="mt-0.5 text-[11px] text-gray-500 leading-tight">
                         Pure organic & synthetic blends.
                       </p>
                     </div>
@@ -409,7 +409,7 @@ export default function CartPage() {
                         <Sparkles className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                         Best Sellers
                       </div>
-                      <p className="mt-0.5 text-[10px] text-gray-500 leading-tight">
+                      <p className="mt-0.5 text-[11px] text-gray-500 leading-tight">
                         Popular choices loved nationwide.
                       </p>
                     </div>
@@ -419,7 +419,7 @@ export default function CartPage() {
                         <Truck className="h-3.5 w-3.5 text-green-600 shrink-0" />
                         Fast Delivery
                       </div>
-                      <p className="mt-0.5 text-[10px] text-gray-500 leading-tight">
+                      <p className="mt-0.5 text-[11px] text-gray-500 leading-tight">
                         Quick dispatch across Bangladesh.
                       </p>
                     </div>
@@ -593,7 +593,7 @@ export default function CartPage() {
                     )}
                   </Button>
 
-                  <p className="text-[10px] text-gray-400 text-center flex items-center justify-center gap-1">
+                  <p className="text-[11px] text-gray-400 text-center flex items-center justify-center gap-1">
                     <ShieldCheck className="h-3 w-3 text-emerald-600" />
                     Secure checkout powered by SSL encryption
                   </p>

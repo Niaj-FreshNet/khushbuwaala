@@ -48,11 +48,11 @@ export default function ManifestoPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-white to-amber-50 py-12">
+    <div className="min-h-screen bg-linear-to-b from-white to-amber-50 py-8 sm:py-12">
       <div className="container mx-auto px-4 max-w-5xl">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Our Values</h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 mb-3">Our Values</h1>
+          <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto">
             At <strong>Khushbuwaala</strong>, fragrance is more than a product — it is an identity, a
             memory, and a quiet statement of who you are.
           </p>
@@ -68,11 +68,11 @@ export default function ManifestoPage() {
                 <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 border border-amber-100">
                   {value.icon}
                 </div>
-                <CardTitle className="text-xl">{value.title}</CardTitle>
+                <CardTitle className="text-lg">{value.title}</CardTitle>
               </CardHeader>
 
               <CardContent>
-                <p className="text-gray-700 text-center leading-relaxed">{value.description}</p>
+                <p className="text-sm sm:text-base text-gray-700 text-center leading-relaxed">{value.description}</p>
               </CardContent>
             </Card>
           ))}

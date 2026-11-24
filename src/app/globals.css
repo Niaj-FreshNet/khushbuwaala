@@ -825,3 +825,57 @@
     }
   }
 }
+/* Long reading text (policy pages). These pages were written for a typography plug-in that is
+   not installed, so their headings and lists came out as plain text. */
+.kw-prose {
+  color: #374151;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+}
+.kw-prose > * + * {
+  margin-top: 0.875rem;
+}
+.kw-prose h2 {
+  margin-top: 1.75rem;
+  font-size: 1.125rem;
+  line-height: 1.35;
+  font-weight: 600;
+  color: #111827;
+}
+.kw-prose h3 {
+  margin-top: 1.25rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: #111827;
+}
+.kw-prose ul,
+.kw-prose ol {
+  padding-left: 1.25rem;
+}
+.kw-prose ul {
+  list-style: disc;
+}
+.kw-prose ol {
+  list-style: decimal;
+}
+.kw-prose li + li {
+  margin-top: 0.25rem;
+}
+.kw-prose a {
+  color: #047857;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.kw-prose strong {
+  color: #111827;
+}
+@media (min-width: 640px) {
+  .kw-prose {
+    font-size: 1rem;
+  }
+  .kw-prose h2 {
+    font-size: 1.25rem;
+  }
+}

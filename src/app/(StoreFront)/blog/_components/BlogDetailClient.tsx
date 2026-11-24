@@ -120,7 +120,7 @@ export default function BlogDetailClient({ initialData }: { slug: string; initia
                         </span>
 
                         {/* Article Headline */}
-                        <h1 className="text-2xl sm:text-4xl lg:text-[40px] font-bold text-neutral-900 mt-2 mb-4 leading-tight tracking-tight">
+                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 mt-2 mb-4 leading-tight tracking-tight">
                             {blog.title}
                         </h1>
 
@@ -154,7 +154,7 @@ export default function BlogDetailClient({ initialData }: { slug: string; initia
 
                         {/* Rendered Prose Content */}
                         <div
-                            className="prose prose-neutral max-w-none 
+                            className="kw-prose prose prose-neutral max-w-none 
                 prose-headings:text-neutral-900 prose-headings:font-bold prose-headings:tracking-tight
                 prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
                 prose-h3:text-lg prose-h3:mt-8 prose-h3:mb-3

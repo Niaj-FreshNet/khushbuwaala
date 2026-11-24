@@ -77,7 +77,7 @@ export default function ContactPage() {
           <div className="flex items-start gap-3">
             <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" aria-hidden />
             <div>
-              <h2 className="font-semibold text-gray-900">Visit the showroom</h2>
+              <h2 className="text-base font-semibold text-gray-900">Visit the showroom</h2>
               <p className="mt-1 text-sm text-gray-700">
                 Shop-G/138, Eastern Banabithi Shopping Complex, South Banasree, Khilgaon, Dhaka-1219
               </p>
@@ -92,7 +92,7 @@ export default function ContactPage() {
           <div className="flex items-start gap-3">
             <PackageSearch className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" aria-hidden />
             <div>
-              <h2 className="font-semibold text-gray-900">Already ordered?</h2>
+              <h2 className="text-base font-semibold text-gray-900">Already ordered?</h2>
               <p className="mt-1 text-sm text-gray-700">Check where your parcel is with your order ID or phone number.</p>
               <Link href="/track-order" className="mt-2 inline-block text-sm font-semibold text-emerald-700 underline underline-offset-2">
                 Track your order

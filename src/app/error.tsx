@@ -25,7 +25,7 @@ export default function Error({
         </div>
 
         {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-semibold">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
           Something went wrong
         </h1>
 

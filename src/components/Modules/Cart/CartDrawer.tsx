@@ -341,7 +341,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
                     </span>
                   )}
                 </span>
-                <span className="font-bold text-[10px] text-gray-500">
+                <span className="font-bold text-[11px] text-gray-500">
                   {freeShippingProgress}%
                 </span>
               </div>
@@ -507,7 +507,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
                   <span>Shipping</span>
                   <span className="font-semibold text-gray-900">
                     {subtotal >= FREE_SHIPPING_THRESHOLD ? (
-                      <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded text-[10px]">
+                      <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded text-[11px]">
                         FREE
                       </span>
                     ) : (
@@ -547,7 +547,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
               </div>
 
               {/* Trust Badges */}
-              <div className="flex items-center justify-around pt-0.5 text-[10px] font-semibold text-gray-500">
+              <div className="flex items-center justify-around pt-0.5 text-[11px] font-semibold text-gray-500">
                 <span className="flex items-center gap-1">
                   <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> Genuine Products
                 </span>

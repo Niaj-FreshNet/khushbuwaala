@@ -526,7 +526,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                               aria-pressed={selectedSize === size}
                             >
                               {hasDiscount && (
-                                <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                                <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full">
                                   {vDiscount!.type === "percentage"
                                     ? `-${Math.round(vDiscount!.value)}%`
                                     : `-৳${vDiscount!.value}`}

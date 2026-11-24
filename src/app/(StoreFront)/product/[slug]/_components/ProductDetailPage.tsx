@@ -148,7 +148,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                                 {/* <div className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg">
                                     <Info className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                                 </div> */}
-                                <h2 className="text-base sm:text-lg font-bold text-gray-900">
+                                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
                                     Product Details
                                 </h2>
                             </div>
@@ -176,7 +176,7 @@ export default function ProductDetailPage({ product }: IProductResponseProps) {
                         {/* ✅ reduced padding + reduced heading gap */}
                         <div className="relative max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
                             {/* <div className="text-center mb-3 sm:mb-6 mt-2 sm:mt-4">
-                                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">
+                                <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">
                                     Why Choose Khushbuwaala?
                                 </h2>
                                 <p className="text-sm sm:text-base text-gray-600 max-w-3xl mx-auto">

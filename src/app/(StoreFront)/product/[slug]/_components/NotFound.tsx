@@ -7,7 +7,7 @@ export default function NotFound() {
         <div className="w-24 h-24 mx-auto mb-6 bg-linear-to-br from-red-100 to-pink-100 rounded-full flex items-center justify-center">
           <span className="text-4xl">🔍</span>
         </div>
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 mb-3">
           Product Not Found
         </h1>
         <p className="text-lg text-gray-600 mb-8 leading-relaxed">

@@ -183,7 +183,7 @@ export default function ProductDetailsUI({
 
         {/* Product Name */}
         <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight tracking-tight">
             {product.name}
           </h1>
           <div className="w-20 h-0.5 sm:h-1 bg-emerald-600 rounded-full"></div>
@@ -318,7 +318,7 @@ export default function ProductDetailsUI({
               >
                 {/* Per-variant discount pill badge */}
                 {/* {hasDiscount && (
-                  <div className="absolute -top-2 -right-1.5 bg-emerald-600 text-white text-[9px] sm:text-[10px] font-semibold px-1.5 py-0.2 rounded-full shadow-2xs">
+                  <div className="absolute -top-2 -right-1.5 bg-emerald-600 text-white text-[11px] sm:text-[11px] font-semibold px-1.5 py-0.2 rounded-full shadow-2xs">
                     {vDiscount.type === "percentage"
                       ? `-${Math.round(vDiscount.value)}%`
                       : `-৳${Math.round(vDiscount.value)}`}
@@ -379,7 +379,7 @@ export default function ProductDetailsUI({
             </button>
 
             <div className="min-w-12 sm:min-w-22.5 h-9 sm:h-12 bg-white border-x border-gray-200 flex items-center justify-center">
-              <span className="font-bold text-gray-900 text-base sm:text-xl">
+              <span className="font-bold text-gray-900 text-base sm:text-lg">
                 {quantity}
               </span>
             </div>
@@ -400,7 +400,7 @@ export default function ProductDetailsUI({
             <div className="text-[11px] sm:text-sm text-gray-500 font-medium">
               Total
             </div>
-            <div className="text-lg sm:text-2xl font-bold text-gray-900">
+            <div className="text-lg sm:text-xl font-bold text-gray-900">
               ৳{(discountedPrice * quantity).toLocaleString("en-US")}
             </div>
           </div>
@@ -411,7 +411,7 @@ export default function ProductDetailsUI({
       <div id="action-buttons" className="flex flex-col sm:flex-row gap-1.5 sm:gap-2 mt-2 sm:mt-3 w-full">
         <Button
           className={cn(
-            "flex-1 h-12 sm:h-14 text-sm sm:text-lg font-bold rounded-xl transition-all duration-300 active:scale-[0.99] sm:hover:scale-[1.01] cursor-pointer",
+            "flex-1 h-12 sm:h-13 text-sm sm:text-base font-bold rounded-xl transition-all duration-300 active:scale-[0.99] sm:hover:scale-[1.01] cursor-pointer",
             isAddingToCart
               ? "bg-gray-400 cursor-not-allowed text-white"
               : "bg-emerald-700 hover:bg-emerald-800 text-white shadow-xs sm:shadow-sm"
@@ -434,7 +434,7 @@ export default function ProductDetailsUI({
 
         <Button
           className={cn(
-            "flex-1 h-12 sm:h-14 text-md sm:text-xl font-bold rounded-xl transition-all duration-300 active:scale-[0.99] sm:hover:scale-[1.01] cursor-pointer",
+            "flex-1 h-12 sm:h-13 text-sm sm:text-base font-bold rounded-xl transition-all duration-300 active:scale-[0.99] sm:hover:scale-[1.01] cursor-pointer",
             isBuyingNow
               ? "bg-gray-400 cursor-not-allowed text-white"
               : "bg-red-600 bg-linear-to-r from-orange-600 via-red-600 to-rose-600 hover:from-orange-700 hover:via-red-700 hover:to-rose-700 text-white shadow-xs sm:shadow-sm"
@@ -489,7 +489,7 @@ export default function ProductDetailsUI({
           </div>
           <div>
             <div className="font-semibold text-emerald-800 text-xs sm:text-sm leading-tight">Pure and Authentic</div>
-            <div className="text-[10px] sm:text-xs text-emerald-600">Best Qualtity Certified</div>
+            <div className="text-[11px] sm:text-xs text-emerald-600">Best Qualtity Certified</div>
           </div>
         </div>
 
@@ -499,7 +499,7 @@ export default function ProductDetailsUI({
           </div>
           <div>
             <div className="font-semibold text-blue-800 text-xs sm:text-sm leading-tight">Fast Delivery</div>
-            <div className="text-[10px] sm:text-xs text-blue-600">Nationwide Shipping</div>
+            <div className="text-[11px] sm:text-xs text-blue-600">Nationwide Shipping</div>
           </div>
         </div>
       </div> */}

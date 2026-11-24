@@ -170,7 +170,7 @@ export const Footer = () => {
                               )}
                               <span>{link.label}</span>
                               {link.badge && (
-                                <Badge variant="secondary" className="text-[10px] h-4 px-1.5 bg-red-50 text-red-700 font-semibold border-none">
+                                <Badge variant="secondary" className="text-[11px] h-4 px-1.5 bg-red-50 text-red-700 font-semibold border-none">
                                   {link.badge}
                                 </Badge>
                               )}
@@ -187,7 +187,7 @@ export const Footer = () => {
                               )}
                               <span>{link.label}</span>
                               {link.badge && (
-                                <Badge variant="secondary" className="text-[10px] h-4 px-1.5 bg-red-50 text-red-700 font-semibold border-none">
+                                <Badge variant="secondary" className="text-[11px] h-4 px-1.5 bg-red-50 text-red-700 font-semibold border-none">
                                   {link.badge}
                                 </Badge>
                               )}

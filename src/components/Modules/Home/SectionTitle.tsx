@@ -19,7 +19,7 @@ interface SectionTitleProps {
 export function SectionTitle({ title, subtitle, className, icon }: SectionTitleProps) {
   return (
     <div className={cn("px-2 pb-3 pt-1 text-center sm:pb-4", className)}>
-      <h2 className="text-[22px] font-bold leading-tight tracking-tight text-gray-900 sm:text-2xl md:text-3xl">
+      <h2 className="text-xl font-bold leading-tight tracking-tight text-gray-900 sm:text-2xl md:text-[28px]">
         {icon && <span className="mr-2 inline-flex items-center align-middle">{icon}</span>}
         {title}
       </h2>

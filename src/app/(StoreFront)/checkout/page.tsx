@@ -941,7 +941,7 @@ export default function CheckoutPage() {
           {/* Header & Trust Badge */}
           <div className="mb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-200 pb-3">
             <div>
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-gray-900">Complete Your Order</h1>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">Complete Your Order</h1>
             </div>
             {/* <div className="flex items-center gap-4 text-xs font-semibold text-gray-600">
               <span className="flex items-center gap-1"><Truck className="h-4 w-4 text-green-600" /> Nationwide Delivery</span>
@@ -986,7 +986,7 @@ export default function CheckoutPage() {
                         <div className="text-gray-900 font-bold mt-0.5">{formatBDT(lineFinal)}</div>
                       </div>
                       {hasDiscount && (
-                        <div className="text-right text-[10px]">
+                        <div className="text-right text-[11px]">
                           <span className="line-through text-gray-400 block">{formatBDT(lineOriginal)}</span>
                           <span className="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-bold">Save {formatBDT(save)}</span>
                         </div>
@@ -1462,8 +1462,8 @@ export default function CheckoutPage() {
                         </div>
                         {hasDiscount && (
                           <div className="text-right">
-                            <span className="text-[10px] line-through text-gray-400 block">{formatBDT(lineOriginal)}</span>
-                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded">
+                            <span className="text-[11px] line-through text-gray-400 block">{formatBDT(lineOriginal)}</span>
+                            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded">
                               Save {formatBDT(save)}
                             </span>
                           </div>
@@ -1574,7 +1574,7 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Trust mini-badge */}
-                <div className="hidden sm:flex items-center justify-around bg-gray-50 rounded-xl p-2.5 text-[10px] font-semibold text-gray-500 border border-gray-100">
+                <div className="hidden sm:flex items-center justify-around bg-gray-50 rounded-xl p-2.5 text-[11px] font-semibold text-gray-500 border border-gray-100">
                   <span className="flex items-center gap-1"><ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> Genuine Products</span>
                   <span className="flex items-center gap-1"><Truck className="h-3.5 w-3.5 text-green-600" /> Fast Delivery</span>
                 </div>
@@ -1612,7 +1612,7 @@ export default function CheckoutPage() {
       >
         <div className="flex items-center justify-between gap-3 sm:gap-6 max-w-md mx-auto">
           <div className="ml-4">
-            <span className="text-[10px] uppercase font-bold text-gray-400 block tracking-wider leading-tight">
+            <span className="text-[11px] uppercase font-bold text-gray-400 block tracking-wider leading-tight">
               Total
             </span>
             <span className="text-base font-black text-green-700 leading-none">
