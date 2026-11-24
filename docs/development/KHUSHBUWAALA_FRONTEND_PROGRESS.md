@@ -86,6 +86,23 @@ Owner's answers (2026-11-24): pickup is not offered, remove Click & Collect; the
 
 Nobody was overcharged by the quick view fault: for website orders the backend works out every price, the delivery charge and the total itself (`priceWebsiteOrder` in `order.service.ts`) and ignores what the browser sends. The fault was what the shopper saw (৳880 in quick view, cart and checkout summary), which could have put them off buying.
 
+### Pass 6, same day: banners managed from the admin panel (live: backend `0bc4e65`, admin `cd67859`, storefront `f5a2e9f`)
+Owner (2026-11-24): the "up to 30% off on all products" banner is NOT a running offer; he wants to change banners himself, uploading a picture from his device, and have it fit exactly on phones and computers.
+
+The upload screen already existed (admin → Home page content → Banners, built 2026-11-23); the owner had not been using it, and its size advice (1920 × 560 / 900 × 400) no longer matched the banner box. What changed:
+
+| Where | Change |
+| --- | --- |
+| Backend `storefront.settings.ts` | Each banner keeps the pixel size of its pictures (`imageWidth/Height`, `mobileWidth/Height`); empty button text now means no button |
+| Storefront `heroBoxShape` + `CaoruselSlider` | The banner box takes the shape of Banner 1's pictures, kept within 2:1–3.2:1 on computers and 4:5–2.4:1 on phones; without sizes it stays 2.2:1 / square. One `<picture>` per banner, so a phone no longer downloads the computer picture. The whole banner is a link; the button is optional |
+| Admin `/storefront` | Each picture is previewed in the shop's real box shape, with the advised size (1760 × 800 computers, 1080 × 1080 phones), the uploaded size, and "shown whole" or "about N% is cut from …". Phone picture can be removed. `src/lib/heroShape.ts` is a copy of the storefront rule: keep both in step |
+
+Checked on the local copy with framed test pictures: 1760 × 800 and 1080 × 1080 are shown whole at 360, 390, 768 and 1366 wide, no sideways scroll. Admin screen seen locally at 1280 and 390. Live home page seen at 390 after deploy (existing banners unchanged).
+
+Not checked: uploading a real picture from the live admin screen (it sends the file to Cloudinary; the size comes back from Cloudinary's reply); the live admin screen itself (needs the owner's sign-in); moving between banners in the test browser (its background tab does not run the slide animation).
+
+Still live until the owner removes it: the third banner with the 30% claim.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).

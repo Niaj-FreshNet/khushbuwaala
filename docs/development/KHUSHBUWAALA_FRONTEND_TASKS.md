@@ -208,7 +208,9 @@ Legend: `[x]` done and verified locally · `[~]` built, not fully verified · `[
 - [x] Owner's answers applied: Click & Collect and News removed, Careers without sample jobs, blog kept, hours and international delivery confirmed
 - [ ] Menu category sub-menu; look at the new Careers page; card "-38%" vs page "37.5% OFF"
 - [x] Backend recomputes every website order price, delivery charge and total itself, so the quick view fault overcharged nobody
-- [ ] Owner: a wide desktop banner (about 1760×800) would fill the new banner box with no cropping; confirm the "up to 30% off on all products" banner is a running offer
+- [x] Banners: box follows the uploaded picture's shape; admin screen previews the real shape (pass 6)
+- [ ] Owner: remove or replace the third banner ("up to 30% off on all products" is not a running offer) in admin → Home page content → Banners; new artwork at 1760 × 800 (computers) and 1080 × 1080 (phones)
+- [ ] After the owner's first upload: look at the live home page on phone and desktop
 - [ ] **Owner decisions (pages that promise things nobody has confirmed):**
   - Click & Collect: is pickup really offered? Checkout has no pickup choice. Keep and add it to checkout, or take the page and its footer link down
   - Careers: are Sales Associate and Marketing Executive really open? If not, remove the jobs and the "Hiring" badge
