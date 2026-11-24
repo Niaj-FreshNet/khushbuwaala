@@ -257,7 +257,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                             <div className="flex flex-col items-start">
                               <span className="text-sm font-semibold">{item.label}</span>
                               {item.description && (
-                                <span className="text-[11px] text-gray-500 group-hover:text-emerald-600">
+                                <span className="text-[10px] text-gray-400 group-hover:text-emerald-600">
                                   {item.description}
                                 </span>
                               )}
@@ -300,7 +300,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                                     {child.label}
                                   </span>
                                   {child.description && (
-                                    <span className={cn("text-[11px]", active ? "text-emerald-700" : "text-gray-500 group-hover:text-emerald-700")}>
+                                    <span className={cn("text-[10px]", active ? "text-emerald-700" : "text-gray-400 group-hover:text-emerald-700")}>
                                       {child.description}
                                     </span>
                                   )}
@@ -348,7 +348,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                             )}
                           </div>
                           {item.description && (
-                            <span className="text-[11px] text-gray-500 group-hover:text-gray-600">
+                            <span className="text-[10px] text-gray-400 group-hover:text-gray-600">
                               {item.description}
                             </span>
                           )}
@@ -363,7 +363,7 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
         </ScrollArea>
 
         {/* 3. Bottom Section: Account, About, Contact & Messenger */}
-        <div className="p-3 border-t bg-gray-50/90 space-y-1">
+        <div className="p-3 border-t bg-gray-50/90 space-y-0">
           {/* Account / Login Toggle */}
           {user ? (
             <Button

@@ -5,7 +5,7 @@ import { siteConfig } from "@/config/site"
 // 8+ years of working with fragrance. No counts, awards or badges.
 export function BrandStory() {
   return (
-    <section aria-labelledby="story-heading" className="mx-auto mb-8 w-full max-w-7xl px-3 sm:mb-10 sm:px-6 lg:px-8">
+    <section aria-labelledby="story-heading" className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8 mb-8 sm:mb-10">
       <div className="grid gap-5 rounded-3xl bg-emerald-950 px-5 py-7 text-emerald-50 sm:px-10 sm:py-10 md:grid-cols-[1.2fr_1fr] md:items-center md:gap-10">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-emerald-300">8+ years in fragrance</p>

@@ -54,14 +54,14 @@ export function CarouselSlider({ slides }: { slides: HeroSlide[] }) {
         setApi={setApi}
         plugins={single ? [] : [plugin.current]}
         opts={{ loop: !single }}
-        className="mx-auto w-full max-w-7xl md:px-4 lg:px-6"
+        className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] md:px-4 lg:px-6 2xl:px-8"
       >
         <CarouselContent>
           {slides.map((slide, index) => {
             const first = index === 0
             // One <picture>: the browser downloads only the file for its own screen width
             // (two separate images used to make phones fetch the computer picture as well).
-            const common = { alt: slide.alt, fill: true as const, sizes: "(min-width: 1280px) 1232px, 100vw" }
+            const common = { alt: slide.alt, fill: true as const, sizes: "(min-width: 1536px) 1472px, (min-width: 1280px) 1232px, 100vw" }
             const wide = getImageProps({ ...common, src: slide.image }).props
             const { srcSet: phoneSrcSet, ...img } = getImageProps({
               ...common,

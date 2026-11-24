@@ -47,7 +47,7 @@ export function ProductCarouselClient({
   const wrapRef = useRef<HTMLDivElement | null>(null)
 
   return (
-    <section ref={wrapRef} className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 mb-8 sm:mb-10 lg:mb-12">
+    <section ref={wrapRef} className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8 mb-8 sm:mb-10 lg:mb-12">
       <SectionTitle
         title={title}
         subtitle={titleSubtitle}

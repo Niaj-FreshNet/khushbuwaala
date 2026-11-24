@@ -30,7 +30,7 @@ export function ServicesSection() {
 
   return (
     <section
-      className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-6 lg:px-8"
+      className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8"
       aria-labelledby="services-heading"
     >
       <SectionTitle

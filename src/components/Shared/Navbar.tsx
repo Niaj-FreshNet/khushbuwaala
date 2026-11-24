@@ -139,7 +139,7 @@ export function Navbar({ notices = defaultNotices, noticeInterval = 4000 }: Navb
 
             {/* NAV: Responsive width system */}
             <nav
-              className="mx-auto w-full max-w-7xl 2xl:max-w-[1536px] 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8"
+              className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8"
               aria-label="Main navigation"
             >
               {/* Mobile / Tablet (< lg) */}

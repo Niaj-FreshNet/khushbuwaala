@@ -113,7 +113,7 @@ export const Footer = () => {
         )}
         role="contentinfo"
       >
-        <div className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3.5 sm:px-6 lg:px-8 pt-4 sm:pt-6 md:pt-8 pb-3 sm:pb-4">
+        <div className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8 pt-4 sm:pt-6 md:pt-8 pb-3 sm:pb-4">
 
           {/* Top Brand Tagline Row */}
           <div className="flex flex-col sm:flex-row items-center justify-between pb-3 sm:pb-4 mb-3 sm:mb-4 border-b border-gray-100 gap-1.5 sm:gap-3 text-center sm:text-left">
@@ -236,7 +236,7 @@ export const Footer = () => {
         )}
         role="contentinfo"
       >
-        <div className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-4 sm:px-6 lg:px-8 text-center text-[11px] sm:text-xs">
+        <div className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8 text-center text-[11px] sm:text-xs">
           © {new Date().getFullYear()} Khushbuwaala Perfumes. All rights reserved.
         </div>
       </div>

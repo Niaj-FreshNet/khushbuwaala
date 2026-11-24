@@ -40,7 +40,7 @@ const GROUPS: { title: string; items: { label: string; href: string }[] }[] = [
 
 export function HomeDiscovery() {
   return (
-    <section aria-labelledby="discover-heading" className="mx-auto mb-8 w-full max-w-7xl px-3 sm:mb-10 sm:px-6 lg:px-8">
+    <section aria-labelledby="discover-heading" className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8 mb-8 sm:mb-10">
       <div className="rounded-3xl border border-stone-200 bg-stone-50/70 px-4 py-5 sm:px-8 sm:py-7">
         <h2 id="discover-heading" className="text-xl font-bold tracking-tight text-stone-900 sm:text-2xl">
           Not sure which perfume? Start with what you like.
