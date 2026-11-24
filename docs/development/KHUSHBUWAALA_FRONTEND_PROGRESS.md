@@ -227,6 +227,29 @@ Interactive states looked at (live, browser simulation):
 After the change, measured at 360: h1 24 on /shop, product, about, stores, values, privacy; 20 on tracking; h2 20 on home, 18 on product and policy pages; smallest text 11px (one 10.5px label left on tracking); no page scrolls sideways.
 Not looked at: checkout and thank-you with the new sizes (no order placed), blog article page (no articles exist), order invoice, zoom lightbox, account page on a phone. Nothing in this pass was seen on a real phone.
 
+### Pass 17, 2026-11-25: owner's second Honor report + blog (live: storefront `cb771d1`, `3a37b9b`, `a680942`; admin `1649323`)
+Reported from the phone, and what was done:
+
+| Reported | Cause | Fix |
+| --- | --- | --- |
+| Drawers close only with the cross | Tap on the dimmed area relied on the library's touch handling, which worked with a mouse and in simulation but not on his phone (not reproduced). The flick from pass 15 only read the end of the touch | `ui/sheet.tsx`: the dimmed area closes the drawer directly; a side drawer follows the finger (`touch-pan-y`) and closes when dragged past a third of its width or flicked, otherwise springs back |
+| Menu not scrollable with Categories open | The scroll area was a flex child without `min-h-0`, so it grew instead of scrolling | `min-h-0` on the menu scroll area |
+| Home banner placeholder wrong height | The placeholder still had the old banner shape | Same box as the real banner (square on phones, 2.2:1 on computers) |
+| Placeholders must match the content | Home cards were 4:5 with different rows; shop and the ten collection pages each had their own older placeholder | One `ShopListingSkeleton` (title, intro, filter bar, filter column, cards) used by shop and every collection page; home cards use the same card shape |
+| Text on the product photo cropped | Some photos are taller than square (3:4, 4:5); the frame was square with the photo centred | Product page frame takes the photo's shape (square to 3:4); cards use a square frame with the photo anchored to its top |
+| Heart covers the name on the photo | Heart top-right, sale badge top-left, name printed at the top of every photo | Both moved to the bottom of the photo (product page: heart bottom-left) |
+
+Checked on the live shop at 360 wide (browser simulation): shop cards show the whole name on the photo; menu with Categories open scrolls to the end (content 568px in a 453px area); a short drag moves the drawer 70px and it springs back, a long drag closes it; the Vampire Blood photo (3:4) shows whole with its name. The drags were touch events sent by script, not a finger.
+Not checked: the placeholders themselves while a page loads (too brief to capture), cart drawer and filter sheet with the new drag, a real phone.
+
+Blog (owner asked for articles, pictures and a test of the section):
+- Three articles written and published through the real admin editor (Blogs → add), each with a cover picture drawn for it (1200 × 630, in `_dev/blog-covers/`), search title and description, keywords, tags and one question/answer:
+  `/blog/attar-or-perfume-spray-what-is-the-difference`, `/blog/how-to-choose-a-perfume-for-bangladeshs-heat-and-humidity`, `/blog/how-to-apply-attar-so-it-lasts-all-day`. General fragrance guidance only; no claims about the business. The owner should read them once.
+- Found while testing and fixed: the cover was cut at the sides on a phone (frame 16:10 → 1200:630); the article page never showed the questions and answers the editor saves (now shown under the article, with FAQ markup); browser tab titles doubled the brand ("… | Khushbuwaala | Khushbuwaala") on the blog, cart, checkout, tracking and policy pages; the admin editor showed stray "[cite: 3]" marks in its labels and now states the cover size.
+- Checked live: /blog lists 3 articles, an article page at 360 has 24px title, 18px headings, bullets, working links, no sideways scroll; the questions block and FAQ markup are in the page HTML; cart tab title reads "Shopping Cart | Khushbuwaala".
+- The sitemap caches for an hour, so the three articles appear there after the next refresh (not seen yet).
+- An uncommitted one-word change in the admin menu ("Home page content" → "Homepage content") was in the working folder and went out with the admin commit.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
