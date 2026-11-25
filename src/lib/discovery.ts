@@ -224,7 +224,14 @@ export function slimItem(item: DiscoveryItem): DiscoveryItem {
     primaryImage: item.primaryImage,
     otherImages: item.otherImages.slice(0, 1),
     accords: item.accords.slice(0, 6), // shown in the desktop quick view
-    variants: item.variants.map((v) => ({ id: v.id, unit: v.unit, size: v.size, price: v.price })),
+    // `isDefault` is kept (only where it is set, to save space): it decides the card's price
+    variants: item.variants.map((v) => ({
+      id: v.id,
+      unit: v.unit,
+      size: v.size,
+      price: v.price,
+      ...(v.isDefault === true ? { isDefault: true } : {}),
+    })),
     minPrice: item.minPrice,
     maxPrice: item.maxPrice,
     inStock: item.inStock,
