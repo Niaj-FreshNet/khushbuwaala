@@ -1,136 +1,140 @@
 import { Skeleton } from "@/components/ui/skeleton"
+import { ProductCardSkeleton } from "@/components/Modules/Shop/ShopListingSkeleton"
 
-export default function StoreFrontLoading() {
+// The placeholder shown for a moment while the home page loads. It follows the real page section
+// by section (see page.tsx), with the same widths, grids and heights, so nothing jumps when the
+// content arrives. When a section of the home page changes, change its twin here.
+//
+//   banner → first product row → "Not sure which perfume?" box → categories →
+//   the other product rows → brand story → "Why choose us" cards
+
+// The page width every home section uses (same string as in the sections themselves).
+const WIDTH = "mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8"
+
+export default function HomeLoading() {
   return (
-    <div className="w-full mx-auto">
-      {/* 1. Banner: the box the real banner uses (see heroBoxShape) */}
+    <div className="w-full mx-auto" aria-busy="true" aria-label="Loading the home page">
+      {/* Banner: square on phones, wide and short on computers (see heroBoxShape) */}
       <section className="w-full overflow-hidden relative mt-1 sm:mt-2 mb-2 sm:mb-4">
-        <div className="mx-auto w-full max-w-7xl md:px-4 lg:px-6">
+        <div className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] md:px-4 lg:px-6 2xl:px-8">
           <Skeleton className="w-full aspect-square md:aspect-[2.9] rounded-none md:rounded-2xl" />
         </div>
       </section>
 
-      {/* Shared Section Shell Generator */}
-      {/* 2. Best Sellers */}
-      <ProductSectionSkeleton />
+      <ProductRowSkeleton />
 
-      {/* 3. Category Banner Skeleton (6 cards in grid) */}
-      <section className="pt-2 sm:pt-4 pb-2">
-        <div className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-6 lg:px-8">
-          {/* Section Title */}
-          <div className="flex flex-col items-center mb-4 sm:mb-6">
-            <Skeleton className="h-6 sm:h-7 w-44 sm:w-56 mb-2 rounded-md" />
-            <Skeleton className="h-0.5 w-10 rounded-full" />
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4">
-            {[...Array(6)].map((_, i) => (
-              <Skeleton key={i} className="w-full h-40 sm:h-48 md:h-52 rounded-xl sm:rounded-2xl" />
+      {/* "Not sure which perfume? Start with what you like." */}
+      <section className={`${WIDTH} mb-8 sm:mb-10`}>
+        <div className="h-[730px] min-[400px]:h-[600px] sm:h-[504px] md:h-[404px] xl:h-[312px] overflow-hidden rounded-3xl border border-stone-200 bg-stone-50/70 px-4 py-5 sm:px-8 sm:py-7">
+          <Skeleton className="h-7 w-11/12 max-w-md rounded-md sm:h-8" />
+          <Skeleton className="mt-2 h-4 w-full max-w-2xl rounded-md" />
+          <Skeleton className="mt-1.5 h-4 w-2/3 max-w-xl rounded-md" />
+          <div className="mt-5 grid gap-4 md:grid-cols-3 md:gap-6">
+            {[0, 1, 2].map((group) => (
+              <div key={group}>
+                <Skeleton className="h-4 w-32 rounded-md" />
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {["w-28", "w-20", "w-20", "w-24", "w-32", "w-28"].map((width, i) => (
+                    <Skeleton key={i} className={`h-10 ${width} rounded-full`} />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 4. Arabian Attar Section */}
-      <ProductSectionSkeleton />
-
-      {/* 5. Artificial Oud Section */}
-      <ProductSectionSkeleton />
-
-      {/* 6. Inspired Perfume Oils Section */}
-      <ProductSectionSkeleton />
-
-      {/* 7. Services Section Skeleton */}
-      <section className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-6 lg:px-8 pt-4 pb-6">
-        <div className="flex flex-col items-center mb-4 sm:mb-6">
-          <Skeleton className="h-6 sm:h-7 w-48 sm:w-60 mb-2 rounded-md" />
-          <Skeleton className="h-0.5 w-10 rounded-full" />
+      {/* Shop by Categories: six pictures edge to edge, two per row on phones */}
+      <section className={`${WIDTH} mb-8 sm:mb-10 lg:mb-12`}>
+        <TitleSkeleton />
+        <div className="grid grid-cols-2 sm:grid-cols-6">
+          {[...Array(6)].map((_, i) => (
+            <Skeleton key={i} className="h-60 w-full rounded-none border border-white sm:h-56 md:h-60 lg:h-64" />
+          ))}
         </div>
+      </section>
 
-        <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="p-4 sm:p-5 rounded-2xl border border-gray-100 bg-white">
-              <div className="flex items-start gap-3 sm:gap-4">
-                <Skeleton className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl shrink-0" />
-                <div className="space-y-2 flex-1">
-                  <Skeleton className="h-4 w-28 sm:w-32" />
-                  <Skeleton className="h-3 w-full" />
-                  <Skeleton className="h-3 w-4/5" />
-                </div>
+      {[...Array(4)].map((_, i) => (
+        <ProductRowSkeleton key={i} />
+      ))}
+
+      {/* Brand story: the dark green box */}
+      <section className={`${WIDTH} mb-8 sm:mb-10`}>
+        <div className="h-[819px] min-[400px]:h-[657px] md:h-[472px] lg:h-[372px] overflow-hidden rounded-3xl bg-emerald-950 px-5 py-7 sm:px-10 sm:py-10">
+          <div className="grid gap-5 md:grid-cols-[1.2fr_1fr] md:items-center md:gap-10">
+            <div>
+              <div className="h-3.5 w-40 rounded-md bg-white/15" />
+              <div className="mt-3 h-7 w-full max-w-lg rounded-md bg-white/15" />
+              <div className="mt-2 h-7 w-3/4 max-w-md rounded-md bg-white/15" />
+              <div className="mt-4 h-4 w-full max-w-xl rounded-md bg-white/10" />
+              <div className="mt-2 h-4 w-full max-w-xl rounded-md bg-white/10" />
+              <div className="mt-2 h-4 w-2/3 max-w-md rounded-md bg-white/10" />
+              <div className="mt-5 flex flex-wrap gap-2">
+                <div className="h-11 w-28 rounded-full bg-white/20" />
+                <div className="h-11 w-52 rounded-full bg-white/10" />
               </div>
-              <Skeleton className="h-px w-full mt-4 mb-3" />
-              <Skeleton className="h-2.5 w-3/4" />
+            </div>
+            <div className="space-y-3">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-16 rounded-2xl bg-white/5" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Khushbuwaala: four small cards, two per row on phones */}
+      <section className={WIDTH}>
+        <TitleSkeleton className="mt-6 sm:mt-8 lg:mt-10 mb-2 sm:mb-4" />
+        <div className="grid w-full grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="flex h-[160px] flex-col items-center rounded-xl border border-emerald-200/80 bg-white p-3 sm:h-[151px] sm:items-start sm:p-4">
+              <Skeleton className="mb-2 h-9 w-9 rounded-xl sm:mb-3 sm:h-11 sm:w-11" />
+              <Skeleton className="h-4 w-3/4 rounded-md" />
+              <Skeleton className="mt-2 h-3 w-full rounded-md" />
+              <Skeleton className="mt-1.5 h-3 w-2/3 rounded-md" />
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* 8. Reviews Section Skeleton */}
-      <section className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-6 lg:px-8 py-6">
-        <div className="flex flex-col items-center mb-6">
-          <Skeleton className="h-6 sm:h-7 w-36 mb-2 rounded-md" />
-          <Skeleton className="h-0.5 w-10 rounded-full" />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} className="w-full h-36 rounded-2xl" />
-          ))}
-        </div>
-      </section>
-
-      {/* 9. Subscribe Section Skeleton */}
-      <section className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-xl mx-auto flex flex-col items-center text-center space-y-3">
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-3.5 w-72" />
-          <div className="flex w-full gap-2 pt-2">
-            <Skeleton className="h-10 flex-1 rounded-xl" />
-            <Skeleton className="h-10 w-28 rounded-xl" />
-          </div>
         </div>
       </section>
     </div>
   )
 }
 
-function ProductSectionSkeleton() {
+// A section heading: one line of text and the short green rule under it (see SectionTitle).
+function TitleSkeleton({ className = "" }: { className?: string }) {
   return (
-    <section className="mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-6 lg:px-8 pt-4 pb-2">
-      {/* Title */}
-      <div className="flex flex-col items-center px-2 pt-1 pb-3 sm:pb-4">
-        <Skeleton className="h-6 sm:h-8 w-36 sm:w-44 rounded-md" />
-        <Skeleton className="mt-2 h-0.5 w-10 rounded-full" />
-      </div>
+    <div className={`flex flex-col items-center px-2 pb-3 pt-1 sm:pb-4 ${className}`}>
+      <Skeleton className="h-[25px] w-44 rounded-md sm:h-[30px] sm:w-56 md:h-[35px]" />
+      <Skeleton className="mt-2 h-0.5 w-10 rounded-full" />
+    </div>
+  )
+}
 
-      {/* Carousel items mimicking pl-2 md:pl-3 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 2xl:basis-1/6 */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3">
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className={`flex flex-col rounded-xl sm:rounded-2xl border border-gray-100 bg-white p-0 overflow-hidden ${i === 5 ? "hidden 2xl:flex" : i === 4 ? "hidden lg:flex" : i === 3 ? "hidden md:flex" : i === 2 ? "hidden sm:flex" : "flex"
-              }`}
-          >
-            {/* Photo: square, like the card */}
-            <Skeleton className="aspect-square w-full rounded-none" />
-
-            {/* Info Area */}
-            <div className="px-2 pt-2 flex flex-col items-center">
-              <Skeleton className="h-4 w-3/4 rounded-md" />
-              <Skeleton className="mt-1.5 h-4 w-1/3 rounded-md" />
-              <div className="flex gap-1 mt-1.5">
-                <Skeleton className="h-5 w-12 rounded-md" />
-                <Skeleton className="h-5 w-12 rounded-md" />
+// One row of products: heading, the sliding row of cards (a little over two fit on a phone,
+// six on a wide screen), and the "see all" button under it. See ProductCarouselClient and
+// HomeProductRow.
+function ProductRowSkeleton() {
+  return (
+    <div>
+      <section className={`${WIDTH} mb-8 sm:mb-10 lg:mb-12`}>
+        <TitleSkeleton />
+        <div className="overflow-hidden">
+          <div className="-ml-2 flex items-start md:-ml-3">
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="min-w-0 shrink-0 grow-0 basis-1/2 pl-2 min-[360px]:basis-[46%] sm:basis-1/3 md:basis-1/4 md:pl-3 lg:basis-1/5 2xl:basis-1/6"
+              >
+                <ProductCardSkeleton />
               </div>
-            </div>
-
-            {/* Buy Now + cart button */}
-            <div className="p-2 flex items-center gap-1.5">
-              <Skeleton className="h-10 flex-1 rounded-lg" />
-              <Skeleton className="h-10 w-9 min-[360px]:w-10 rounded-lg shrink-0" />
-            </div>
+            ))}
           </div>
-        ))}
+        </div>
+      </section>
+      <div className="-mt-5 mb-8 text-center sm:-mt-6 sm:mb-10">
+        <Skeleton className="inline-block h-10 w-36 rounded-full align-top" />
       </div>
-    </section>
+    </div>
   )
 }
