@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/apiFetch";
 // Shop search + filters: shared types and URL helpers (used on the server and in the browser).
 // The address bar is the single source of truth for what the shop shows, so a filtered view can be
 // shared, bookmarked, indexed and restored with the back button.
@@ -151,7 +152,7 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 export async function fetchDiscovery(state: ShopState, limit = 24): Promise<DiscoveryResponse | null> {
   const qs = toQueryString(state);
   try {
-    const res = await fetch(`${API}/discover?${qs}${qs ? "&" : ""}limit=${limit}`, { next: { revalidate: 60 } });
+    const res = await apiFetch(`${API}/discover?${qs}${qs ? "&" : ""}limit=${limit}`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     const body = await res.json();
     if (!body?.success || !Array.isArray(body.data)) return null;
@@ -181,7 +182,7 @@ export type SearchSuggestions = {
 /** Browser-side: suggestions while typing. */
 export async function fetchSuggestions(q: string, signal?: AbortSignal): Promise<SearchSuggestions | null> {
   try {
-    const res = await fetch(`${API}/discover/suggest?q=${encodeURIComponent(q)}`, { signal });
+    const res = await apiFetch(`${API}/discover/suggest?q=${encodeURIComponent(q)}`, { signal });
     if (!res.ok) return null;
     const body = await res.json();
     return body?.data ?? null;
@@ -198,7 +199,7 @@ export const suggestionHref = (s: SearchSuggestions["filters"][number]): string 
 
 export async function fetchSimilar(slug: string, limit = 8): Promise<DiscoveryItem[]> {
   try {
-    const res = await fetch(`${API}/discover/similar/${encodeURIComponent(slug)}?limit=${limit}`, { next: { revalidate: 300 } });
+    const res = await apiFetch(`${API}/discover/similar/${encodeURIComponent(slug)}?limit=${limit}`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
     const body = await res.json();
     return Array.isArray(body?.data) ? body.data : [];

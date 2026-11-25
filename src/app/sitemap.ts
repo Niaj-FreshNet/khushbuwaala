@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { collections } from "@/config/collections";
 import { FAMILY_PAGES, NOTE_PAGES } from "@/config/scentPages";
 import { siteConfig } from "@/config/site";
+import { apiFetch } from "@/lib/apiFetch";
 
 const BASE_URL = siteConfig.url;
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -13,7 +14,7 @@ type SitemapProduct = { slug: string; updatedAt?: string | null };
 /** Every published product. Uses the discovery list; falls back to the paged product list. */
 async function getProducts(): Promise<SitemapProduct[]> {
   try {
-    const res = await fetch(`${API}/discover/sitemap`, { next: { revalidate: 3600 } });
+    const res = await apiFetch(`${API}/discover/sitemap`, { next: { revalidate: 3600 } });
     if (res.ok) {
       const body = await res.json();
       if (Array.isArray(body?.data?.products)) return body.data.products;
@@ -25,7 +26,7 @@ async function getProducts(): Promise<SitemapProduct[]> {
   const products: SitemapProduct[] = [];
   try {
     for (let page = 1; page <= 50; page++) {
-      const res = await fetch(`${API}/products/get-all-products?limit=100&page=${page}`, { next: { revalidate: 3600 } });
+      const res = await apiFetch(`${API}/products/get-all-products?limit=100&page=${page}`, { next: { revalidate: 3600 } });
       if (!res.ok) break;
       const body = await res.json();
       const rows: SitemapProduct[] = Array.isArray(body?.data) ? body.data : [];
@@ -40,7 +41,7 @@ async function getProducts(): Promise<SitemapProduct[]> {
 
 async function getBlogSlugs(): Promise<SitemapProduct[]> {
   try {
-    const res = await fetch(`${API}/blog/get-all-blogs?limit=200`, { next: { revalidate: 3600 } });
+    const res = await apiFetch(`${API}/blog/get-all-blogs?limit=200`, { next: { revalidate: 3600 } });
     if (!res.ok) return [];
     const body = await res.json();
     const rows = Array.isArray(body?.data?.data) ? body.data.data : Array.isArray(body?.data) ? body.data : [];
@@ -55,7 +56,7 @@ async function getBlogSlugs(): Promise<SitemapProduct[]> {
 /** Collection pages that currently have products (empty ones are left out until they are stocked). */
 async function getLiveCategoryIds(): Promise<Set<string> | null> {
   try {
-    const res = await fetch(`${API}/discover/sitemap`, { next: { revalidate: 3600 } });
+    const res = await apiFetch(`${API}/discover/sitemap`, { next: { revalidate: 3600 } });
     if (!res.ok) return null;
     const body = await res.json();
     const categories: { id: string }[] = body?.data?.categories ?? [];

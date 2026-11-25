@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import BlogDetailClient from '../_components/BlogDetailClient';
+import { apiFetch } from "@/lib/apiFetch";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -8,7 +9,7 @@ interface Props {
 
 async function fetchBlog(slug: string) {
   try {
-    const response = await fetch(
+    const response = await apiFetch(
       `${process.env.NEXT_PUBLIC_API_URL}/blog/get-blog/${slug}`,
       { cache: 'no-store' }
     );

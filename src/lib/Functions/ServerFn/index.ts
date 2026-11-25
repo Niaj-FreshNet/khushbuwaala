@@ -1,10 +1,11 @@
 import { cache } from "react";
 import { IProductResponse } from "@/types/product.types";
+import { apiFetch } from "@/lib/apiFetch";
 
 // ✅ Dedupes fetch between generateMetadata + page render in same request
 export const getProductBySlug = cache(async (slug: string): Promise<IProductResponse | null> => {
   try {
-    const res = await fetch(
+    const res = await apiFetch(
       `${process.env.NEXT_PUBLIC_API_URL}/products/get-product-by-slug/${slug}`,
       {
         // ✅ ISR cache

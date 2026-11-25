@@ -5,6 +5,7 @@ import ProductDetailPage from "./_components/ProductDetailPage";
 import { siteConfig } from "@/config/site";
 import { htmlToText, toSummary } from "@/lib/text";
 import type { IProductResponse } from "@/types/product.types";
+import { apiFetch } from "@/lib/apiFetch";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -125,7 +126,7 @@ export const revalidate = 300;
 // A product added later is built on its first visit.
 export async function generateStaticParams() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/discover/sitemap`, { next: { revalidate: 300 } });
+    const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL}/discover/sitemap`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
     const body = await res.json();
     const products: { slug: string }[] = body?.data?.products ?? [];

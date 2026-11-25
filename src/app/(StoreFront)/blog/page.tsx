@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import BlogListClient from "./_components/BlogListClient";
+import { apiFetch } from "@/lib/apiFetch";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function getBlogsData() {
   try {
-    const res = await fetch(
+    const res = await apiFetch(
       `${process.env.NEXT_PUBLIC_API_URL}/blog/get-all-blogs?page=1&limit=9`,
       { cache: "no-store" }
     );

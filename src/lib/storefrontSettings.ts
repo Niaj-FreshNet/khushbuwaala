@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/apiFetch";
 // Content the shop owner edits in the admin panel (Storefront → Home page content): the
 // announcement bar, the hero banners and the product rows on the home page.
 // Read on the server and refreshed every minute. If the API cannot be reached, the built-in
@@ -65,7 +66,7 @@ export const DEFAULT_STOREFRONT_SETTINGS: StorefrontSettings = {
 
 export async function getStorefrontSettings(): Promise<StorefrontSettings> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/storefront/settings`, {
+    const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL}/storefront/settings`, {
       next: { revalidate: 60, tags: ["storefront-settings"] },
     });
     if (!res.ok) return DEFAULT_STOREFRONT_SETTINGS;
