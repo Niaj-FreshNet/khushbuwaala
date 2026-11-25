@@ -88,7 +88,7 @@ export default function HomeLoading() {
         <TitleSkeleton className="mt-6 sm:mt-8 lg:mt-10 mb-2 sm:mb-4" />
         <div className="grid w-full grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="flex h-[160px] flex-col items-center rounded-xl border border-emerald-200/80 bg-white p-3 sm:h-[151px] sm:items-start sm:p-4">
+            <div key={i} className="flex h-[150px] flex-col items-center rounded-xl border border-emerald-200/80 bg-white p-3 min-[400px]:h-[138px] sm:h-[151px] sm:items-start sm:p-4 md:h-[142px] lg:h-[169px] xl:h-[151px]">
               <Skeleton className="mb-2 h-9 w-9 rounded-xl sm:mb-3 sm:h-11 sm:w-11" />
               <Skeleton className="h-4 w-3/4 rounded-md" />
               <Skeleton className="mt-2 h-3 w-full rounded-md" />
