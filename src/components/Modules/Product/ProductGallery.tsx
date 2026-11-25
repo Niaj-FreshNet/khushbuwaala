@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect, useCallback } from "react";
+import React, { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import {
   ChevronLeft,
@@ -10,22 +10,54 @@ import {
 } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { IProduct } from "@/types/product.types";
+import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
+import { pickStartingVariant, sortVariantsBySize } from "@/lib/productPricing";
+
+type GalleryVariant = { id?: string; size?: number | string; price?: number; isDefault?: boolean; images?: string[] };
 
 interface ProductGalleryProps {
-  product: Pick<IProduct, "id" | "name" | "primaryImage" | "otherImages">;
+  product: Pick<IProduct, "id" | "name" | "primaryImage" | "otherImages"> & { variants?: GalleryVariant[] };
   /** A small control drawn in the bottom-left corner of the photo (the save button). */
   corner?: React.ReactNode;
 }
 
 export default function ProductGallery({ product, corner }: ProductGalleryProps) {
+  const variants = product.variants;
+
+  // Every picture of the product, once each: the main picture, the extra pictures, then each
+  // size's own pictures (smallest size first).
   const images = useMemo(() => {
-    const list = [product.primaryImage, ...(product.otherImages ?? [])]
-      .filter(Boolean)
-      .map((x) => String(x));
+    const sizePictures = sortVariantsBySize(variants ?? []).flatMap((v) => v.images ?? []);
+    const list: string[] = [];
+    for (const x of [product.primaryImage, ...(product.otherImages ?? []), ...sizePictures]) {
+      const src = x ? String(x) : "";
+      if (src && !list.includes(src)) list.push(src);
+    }
     return list.length ? list : ["/default-product-image.jpg"];
-  }, [product.primaryImage, product.otherImages]);
+  }, [product.primaryImage, product.otherImages, variants]);
 
   const [activeIdx, setActiveIdx] = useState(0);
+
+  // The picture follows the chosen size: a size with its own picture shows that picture; the
+  // default size (and a size without a picture) shows the main picture. The page opens on the
+  // main picture, so nothing moves until the customer picks another size.
+  const selectedVariantId = useProductSelectionOptional()?.selectedVariant?.id;
+  const startingVariantId = useMemo(() => pickStartingVariant(variants ?? [])?.id, [variants]);
+  const lastVariantId = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!selectedVariantId) return;
+    if (lastVariantId.current === undefined) {
+      lastVariantId.current = selectedVariantId;
+      return;
+    }
+    if (lastVariantId.current === selectedVariantId) return;
+    lastVariantId.current = selectedVariantId;
+
+    setIsRotating(false);
+    const own = (variants ?? []).find((v) => v.id === selectedVariantId)?.images?.[0];
+    const ownIdx = own && selectedVariantId !== startingVariantId ? images.indexOf(String(own)) : -1;
+    setActiveIdx(ownIdx >= 0 ? ownIdx : 0);
+  }, [selectedVariantId, startingVariantId, variants, images]);
   // The frame takes the shape of the photo (square up to 3:4 tall), so a tall photo is not cut
   // at the top where its name is written.
   const [frame, setFrame] = useState(1);

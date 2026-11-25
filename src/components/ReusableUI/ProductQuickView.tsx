@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import type { ListDiscount, ProductCardProduct } from "@/types/product.types"
-import { activeAutoDiscount } from "@/lib/productPricing"
+import { activeAutoDiscount, offeredVariants, pickStartingVariant } from "@/lib/productPricing"
 
 type QuickViewVariant = NonNullable<ProductCardProduct["variants"]>[number]
 
@@ -73,7 +73,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
   }, [product.variants])
 
   // ✅ Like ProductDetailsClient: show only first 4 variants in UI
-  const availableVariants = React.useMemo(() => sortedVariants.slice(0, 4), [sortedVariants])
+  const availableVariants = React.useMemo(() => offeredVariants(sortedVariants), [sortedVariants])
 
   // ✅ Build labels ONLY from availableVariants (so it won't show all)
   const sizeOptions = React.useMemo(() => {
@@ -99,7 +99,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
     if (sortedVariants.length) {
       // Same starting size as the product card and the product page (the second size up), so the
       // price in this window matches the price on the card that opened it.
-      const first = sortedVariants[1] ?? sortedVariants[0]
+      const first = pickStartingVariant(sortedVariants) ?? sortedVariants[0]
       setSelectedSize(`${first.size} ${String(first.unit || "").toLowerCase()}`)
     } else {
       setSelectedSize("3 ml")

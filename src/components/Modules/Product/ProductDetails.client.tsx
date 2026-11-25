@@ -5,7 +5,7 @@ import { useCart } from "@/context/CartContext";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
 import { IProduct, IProductVariant } from "@/types/product.types";
 import { isCartProduct } from "@/types/cart.types";
-import { activeAutoDiscount, sortVariantsBySize } from "@/lib/productPricing";
+import { activeAutoDiscount, offeredVariants, pickStartingVariant, sortVariantsBySize } from "@/lib/productPricing";
 import { useRouter } from "next/navigation";
 import ProductDetailsUI from "./ProductDetailsUI.server";
 import flyToCart from "./FlyToCart";
@@ -28,12 +28,12 @@ export default function ProductDetailsClient({
 
   const sortedVariants = useMemo(() => sortVariantsBySize(product.variants ?? []), [product.variants]);
 
-  const availableVariants = useMemo(() => sortedVariants.slice(0, 4), [sortedVariants]);
+  const availableVariants = useMemo(() => offeredVariants(sortedVariants), [sortedVariants]);
 
   const safeUnit = (unit: unknown) => String(unit || "").trim().toLowerCase();
 
-  // The size shown first: the second smallest (the smallest when there is only one).
-  const lowestPriceVariant: IProductVariant | null = sortedVariants[1] ?? sortedVariants[0] ?? null;
+  // The size shown first: the product's default size (see pickStartingVariant).
+  const lowestPriceVariant: IProductVariant | null = pickStartingVariant(sortedVariants);
 
   const [fallbackSelected, setFallbackSelected] = useState<IProductVariant | null>(null);
 

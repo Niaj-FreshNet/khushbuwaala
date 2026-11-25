@@ -20,6 +20,34 @@ export function sortVariantsBySize<V extends Sized>(variants: readonly V[] | nul
   });
 }
 
+/**
+ * The size a product starts on, everywhere: product cards, quick view and the product page.
+ * It is the size marked "default" in the admin; when none is marked, the second smallest
+ * (the smallest when there is only one). One rule, so the price on a card is always the price
+ * the product page opens with.
+ */
+export function pickStartingVariant<V extends Sized & { isDefault?: boolean }>(
+  variants: readonly V[] | null | undefined
+): V | null {
+  const sorted = sortVariantsBySize(variants);
+  return sorted.find((v) => v.isDefault === true) ?? sorted[1] ?? sorted[0] ?? null;
+}
+
+/**
+ * The sizes offered as buttons: the first few by size, always including the starting size
+ * (a default size further down the list must not be missing from its own page).
+ */
+export function offeredVariants<V extends Sized & { isDefault?: boolean }>(
+  variants: readonly V[] | null | undefined,
+  max = 4
+): V[] {
+  const sorted = sortVariantsBySize(variants);
+  const shown = sorted.slice(0, max);
+  const start = pickStartingVariant(sorted);
+  if (start && !shown.includes(start)) shown[shown.length - 1] = start;
+  return shown;
+}
+
 /** A sale that applies by itself and is running now (coupon codes are never shown as sales). */
 function isRunningSale(discount: IDiscount | null | undefined, now: Date): discount is IDiscount {
   if (!discount) return false;

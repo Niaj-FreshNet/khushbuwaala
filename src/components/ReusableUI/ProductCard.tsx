@@ -12,16 +12,15 @@ import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import type { ListDiscount, ProductCardProduct } from "@/types/product.types";
-import { activeAutoDiscount, sortVariantsBySize } from "@/lib/productPricing";
+import { activeAutoDiscount, pickStartingVariant } from "@/lib/productPricing";
 import flyToCart from "../Modules/Product/FlyToCart";
 import { kwPushAddToCart, kwPushBeginCheckout, kwCategoryName } from "@/lib/Analytics/kwEcom";
 
 type CardVariant = NonNullable<ProductCardProduct["variants"]>[number];
 
-// The size a card shows and sells: the second smallest (the smallest when there is only one).
+// The size a card shows and sells: the product's default size (see pickStartingVariant).
 function pickCardVariant(product: ProductCardProduct): CardVariant | null {
-  const sorted = sortVariantsBySize(product.variants);
-  return sorted[1] ?? sorted[0] ?? null;
+  return pickStartingVariant(product.variants);
 }
 
 function variantLabel(v: CardVariant) {

@@ -23,6 +23,10 @@ export interface IProductVariant {
   price: number;
   stock?: number;
   discounts?: IDiscount[]; // variant-level discounts
+  /** The size the shop shows first (set in the admin's product editor). */
+  isDefault?: boolean;
+  /** Pictures of this size (its own bottle). */
+  images?: string[];
 
   createdAt?: string;
   updatedAt?: string;
@@ -184,6 +188,8 @@ export interface IProductVariantResponse {
   price: number;
   stock?: number;
   discounts?: IDiscount[];
+  isDefault?: boolean;
+  images?: string[];
   productId?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -221,6 +227,8 @@ export type ProductCardProduct = {
     unit?: string;
     price: number;
     discounts?: IDiscount[];
+    isDefault?: boolean;
+    images?: string[];
   }[];
   discount?: ListDiscount | null;
   discounts?: IDiscount[];

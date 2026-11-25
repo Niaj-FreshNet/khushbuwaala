@@ -32,6 +32,7 @@ export type DiscoveryVariant = {
   price: number;
   stock?: number;
   isDefault?: boolean;
+  images?: string[];
   compareAtPrice?: number | null;
 };
 

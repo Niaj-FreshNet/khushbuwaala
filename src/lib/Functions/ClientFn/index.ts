@@ -65,6 +65,8 @@ export default function mapProductResponseToProduct(
       size: v.size,
       price: v.price,
       stock: v.stock,
+      isDefault: v.isDefault === true,
+      images: Array.isArray(v.images) ? v.images.filter(Boolean) : [],
       createdAt: formatDate(v.createdAt),
       updatedAt: formatDate(v.updatedAt),
     })),
