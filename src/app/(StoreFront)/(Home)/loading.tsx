@@ -6,7 +6,7 @@ import { ProductCardSkeleton } from "@/components/Modules/Shop/ShopListingSkelet
 // content arrives. When a section of the home page changes, change its twin here.
 //
 //   banner → first product row → "Not sure which perfume?" box → categories →
-//   the other product rows → brand story → "Why choose us" cards
+//   the other product rows → brand story → "Why choose us" cards → customer reviews
 
 // The page width every home section uses (same string as in the sections themselves).
 const WIDTH = "mx-auto w-full max-w-7xl 2xl:max-w-384 3xl:max-w-[1800px] px-3 sm:px-4 lg:px-6 2xl:px-8"
@@ -95,6 +95,37 @@ export default function HomeLoading() {
               <Skeleton className="mt-1.5 h-3 w-2/3 rounded-md" />
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* What our customers say: review cards, a little over one on a phone, three on a computer */}
+      <section className={`${WIDTH} mt-8 sm:mt-10 lg:mt-12 mb-8 sm:mb-10`}>
+        <TitleSkeleton className="mb-1 sm:mb-2" />
+        <div className="overflow-hidden">
+          <div className="-ml-3 flex">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="min-w-0 shrink-0 grow-0 basis-[88%] pl-3 sm:basis-1/2 lg:basis-1/3">
+                <div className="h-[262px] rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
+                  <Skeleton className="h-4 w-24 rounded-md" />
+                  <Skeleton className="mt-4 h-4 w-full rounded-md" />
+                  <Skeleton className="mt-2 h-4 w-full rounded-md" />
+                  <Skeleton className="mt-2 h-4 w-2/3 rounded-md" />
+                  <div className="mt-10 flex items-center gap-3 border-t border-stone-100 pt-4">
+                    <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+                    <div className="flex-1">
+                      <Skeleton className="h-4 w-28 rounded-md" />
+                      <Skeleton className="mt-1.5 h-3 w-40 rounded-md" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mt-4 flex justify-center gap-1.5">
+          <Skeleton className="h-2 w-6 rounded-full" />
+          <Skeleton className="h-2 w-2 rounded-full" />
+          <Skeleton className="h-2 w-2 rounded-full" />
         </div>
       </section>
     </div>

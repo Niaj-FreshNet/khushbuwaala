@@ -5,6 +5,7 @@ import { ServicesSection } from "@/components/Modules/Home/ServiceSection"
 import { HomeProductRow } from "@/components/Modules/Home/HomeProductRow"
 import { HomeDiscovery } from "@/components/Modules/Home/HomeDiscovery"
 import { BrandStory } from "@/components/Modules/Home/BrandStory"
+import { HomeReviews } from "@/components/Modules/Home/HomeReviews"
 import { getStorefrontSettings } from "@/lib/storefrontSettings"
 import { siteConfig } from "@/config/site"
 
@@ -49,6 +50,9 @@ export default async function HomePage() {
       <BrandStory />
 
       <ServicesSection />
+
+      {/* Chosen in the admin (Reviews page); left out when there is nothing to show */}
+      <HomeReviews />
     </div>
   )
 }
