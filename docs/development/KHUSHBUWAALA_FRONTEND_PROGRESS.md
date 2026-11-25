@@ -372,6 +372,14 @@ Owner asked for a clean, error-free codebase (and had switched off "ignore type 
 - `slimItem` (the trimmed product that lists hand to cards) must keep `isDefault`: the first deploy dropped it and cards kept the old price.
 - Checked on live (browser simulation at 375px, not a real phone): Silver Crown opens on 12 ml ৳320 with the main picture and 5 thumbnails; 6 ml shows the 6 ml picture and ৳280; back to 12 ml shows the main picture. Cards: Kathgolap ৳990 (default 12 ml), Silver Crown ৳320, Hawas Ice ৳360 (no default, unchanged), Super Combo ৳550 / ৳880.
 
+### Pass 27, 2026-11-25: default sizes for the catalogue, card size hint, new quick view (storefront `c6fbb59`)
+- **Data (live database):** default size set on 116 of 137 products with the owner's rule: 12 ml/gm under ৳1,000 → 12; 12 over ৳1,300 → 6; 6 over ৳1,300 too → 3; a product with one size → that size. Script: `~/kw-scripts/set-defaults.js` on the server (dry run by default, `--apply` writes; run from the backend folder with `NODE_PATH=$PWD/node_modules node -r dotenv/config`). Snapshot of every size's old value: `~/deploy-backups/data-variant-defaults-before-2026-11-25T01-53-44-045Z.json`.
+- **Not covered by the rule, left as they were (21):** 16 products whose 12 ml costs ৳1,000–1,300, and 5 brand perfumes with no 12 ml size (6 / 10 / 15 / 100 ml). They keep the old fallback (second smallest size) until the owner decides.
+- **Card:** the price is followed by its size ("৳990 / 12 ml") when the product has more than one size. The card's buttons add that size.
+- **Gallery:** choosing any size, the default too, shows that size's own picture (pass 26 showed the main picture for the default size; the owner changed this). The page still opens on the main picture.
+- **Quick view rebuilt** (`ProductQuickView.tsx`, 750 → 330 lines): full picture, sizes with prices, quantity with a running total, wishlist + Add to Cart + Buy Now in one row that stays in view, sale shown once, nothing on the top of the photo. Removed: the second zoom window, the dot row, the 450 ms fake wait, the "navigating" toast.
+- Checked on live in the owner's desktop Chrome (real desktop browser): cards show "/ 12 ml"; quick view opens on the default size, 6 ml × 2 added as ৳650 × 2; card button added Hawas Ice 12 ml ৳520; sale product shows ৳550, ৳880 struck, "Save ৳330"; on the product page 6 ml and then 12 ml each show their own picture. Test lines removed from the cart. Not checked on a real phone (the quick view button is not shown on phones).
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
