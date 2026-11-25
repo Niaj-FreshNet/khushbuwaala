@@ -365,6 +365,13 @@ Owner asked for a clean, error-free codebase (and had switched off "ignore type 
 - **Deploy script:** `~/deploy-storefront.sh` now clears the running version's generated type files before building. Without that, removing a page fails the build (the old files still describe it).
 - **Checked on live (browser simulation at 375px, not a real phone):** home, shop, product page add to cart (saved on the server, `view_item` and `add_to_cart` sent), quick view, cart, checkout with a sale item (৳880 → ৳550, "Save ৳330", totals right), order tracking with the phone lock, `/orders` redirect. **Not checked:** placing an order, the signed-in pages (account, invoice, sign-in, password change) and sending a review.
 
+### Pass 26, 2026-11-25: default size and size pictures (storefront `bdf3a58`, `77060c1`, `7a22440`)
+- **Build could hang** (`bdf3a58`): page data requests had no time limit, so an API that accepts a call but never answers froze every page and failed the build (the owner's local `.env` pointed at a local backend that cannot reach the database). `lib/apiFetch.ts` gives up after 8 seconds and the page's own fallback is used. Use `apiFetch`, not `fetch`, for page data.
+- **One starting-size rule** (`pickStartingVariant` in `lib/productPricing.ts`): the size marked default in the admin, else the second smallest as before. Used by product cards, quick view and the product page, so a card's price is the price its page opens with. Only 2 of 136 products have a default set today (Kathgolap, Silver Crown Crystal Attar Bottle); the rest look the same as before.
+- **Gallery** (`ProductGallery.tsx`): thumbnails list every picture (main, extra, then each size's own). Choosing a size shows that size's picture; the default size, or a size without a picture, shows the main picture.
+- `slimItem` (the trimmed product that lists hand to cards) must keep `isDefault`: the first deploy dropped it and cards kept the old price.
+- Checked on live (browser simulation at 375px, not a real phone): Silver Crown opens on 12 ml ৳320 with the main picture and 5 thumbnails; 6 ml shows the 6 ml picture and ৳280; back to 12 ml shows the main picture. Cards: Kathgolap ৳990 (default 12 ml), Silver Crown ৳320, Hawas Ice ৳360 (no default, unchanged), Super Combo ৳550 / ৳880.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
