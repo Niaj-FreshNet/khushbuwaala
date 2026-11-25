@@ -100,17 +100,17 @@ export default function HomeLoading() {
 
       {/* What our customers say: review cards, a little over one on a phone, three on a computer */}
       <section className={`${WIDTH} mt-8 sm:mt-10 lg:mt-12 mb-8 sm:mb-10`}>
-        <TitleSkeleton className="mb-1 sm:mb-2" />
+        <TitleSkeleton subtitle className="mb-1 sm:mb-2" />
         <div className="overflow-hidden">
           <div className="-ml-3 flex">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="min-w-0 shrink-0 grow-0 basis-[88%] pl-3 sm:basis-1/2 lg:basis-1/3">
-                <div className="h-[262px] rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
+                <div className="h-[294px] rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
                   <Skeleton className="h-4 w-24 rounded-md" />
                   <Skeleton className="mt-4 h-4 w-full rounded-md" />
                   <Skeleton className="mt-2 h-4 w-full rounded-md" />
                   <Skeleton className="mt-2 h-4 w-2/3 rounded-md" />
-                  <div className="mt-10 flex items-center gap-3 border-t border-stone-100 pt-4">
+                  <div className="mt-[72px] flex items-center gap-3 border-t border-stone-100 pt-4">
                     <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
                     <div className="flex-1">
                       <Skeleton className="h-4 w-28 rounded-md" />
@@ -132,11 +132,13 @@ export default function HomeLoading() {
   )
 }
 
-// A section heading: one line of text and the short green rule under it (see SectionTitle).
-function TitleSkeleton({ className = "" }: { className?: string }) {
+// A section heading: one line of text, sometimes a smaller line under it, and the short green
+// rule (see SectionTitle).
+function TitleSkeleton({ className = "", subtitle = false }: { className?: string; subtitle?: boolean }) {
   return (
     <div className={`flex flex-col items-center px-2 pb-3 pt-1 sm:pb-4 ${className}`}>
       <Skeleton className="h-[25px] w-44 rounded-md sm:h-[30px] sm:w-56 md:h-[35px]" />
+      {subtitle && <Skeleton className="mt-1 h-5 w-64 max-w-full rounded-md md:h-6" />}
       <Skeleton className="mt-2 h-0.5 w-10 rounded-full" />
     </div>
   )
