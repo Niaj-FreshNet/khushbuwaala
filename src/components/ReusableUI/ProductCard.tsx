@@ -126,6 +126,8 @@ export function ProductCard({
     return label ?? "6 ml";
   }, [selectedVariant]);
 
+  const showSizeHint = Boolean(selectedVariant) && (product.variants?.length ?? 0) > 1;
+
   const accords = useMemo(() => {
     const families = product.families;
     const list: (string | { name?: string })[] =
@@ -333,7 +335,8 @@ export function ProductCard({
             {product.name}
           </h3>
 
-          <div className="flex items-baseline justify-center gap-1.5 mt-0.5">
+          {/* Price, then the size it is for. A product with one size needs no size hint. */}
+          <div className="flex items-baseline justify-center gap-1.5 mt-0.5 max-w-full whitespace-nowrap">
             <span className="text-sm font-bold text-gray-900">
               {formatPriceBDT(discountedPrice)}
             </span>
@@ -341,6 +344,9 @@ export function ProductCard({
               <span className="text-xs text-gray-500 line-through">
                 {formatPriceBDT(basePrice)}
               </span>
+            )}
+            {showSizeHint && (
+              <span className="text-xs text-gray-500">/ {selectedSizeLabel}</span>
             )}
           </div>
 

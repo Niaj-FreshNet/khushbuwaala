@@ -350,7 +350,6 @@ export default function ProductAccordion({
   ]
     .map((l) => ({ ...l, notes: (Array.isArray(l.notes) ? l.notes : []).map((n) => String(n).trim()).filter((n) => n && n.toUpperCase() !== "N/A") }))
     .filter((l) => l.notes.length > 0);
-  const bestForList = parseStringList(product.bestFor);
   const accordsList = parseStringList(product.accords);
 
   const getStarPercentage = (starCount: number) => {
@@ -477,7 +476,7 @@ export default function ProductAccordion({
           )}
 
           {/* Quick Specs Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 pt-0.5">
+          <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 gap-2 pt-0.5">
             <div className="p-2.5 rounded-xl bg-gray-50/80 border border-gray-100">
               <span className="text-[11px] uppercase font-bold text-gray-500 block tracking-wide">Brand</span>
               <span className="text-xs sm:text-sm font-semibold text-gray-900 block mt-0.5 truncate">
@@ -503,7 +502,7 @@ export default function ProductAccordion({
               </span>
             </div>
 
-            <div className="p-2.5 rounded-xl bg-gray-50/80 border border-gray-100">
+            {/* <div className="p-2.5 rounded-xl bg-gray-50/80 border border-gray-100">
               <span className="text-[11px] uppercase font-bold text-gray-500 block tracking-wide mb-1">
                 Best For
               </span>
@@ -522,7 +521,7 @@ export default function ProductAccordion({
                   <span className="text-xs text-gray-500">Not specified</span>
                 )}
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </AccordionItem>
