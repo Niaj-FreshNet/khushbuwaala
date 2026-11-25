@@ -10,6 +10,7 @@ import {
     useResendOtpMutation,
 } from '@/redux/store/api/auth/authApi';
 import { toast } from 'sonner';
+import { apiErrorMessage } from '@/lib/apiError';
 import Link from 'next/link';
 import { Loader2, CheckCircle2, RotateCw } from 'lucide-react';
 import AuthLayout from '@/components/Layout/AuthLayout/AuthLayout';
@@ -82,10 +83,8 @@ export default function VerifyEmailClient() {
 
             toast.success('Email verified successfully!');
             router.push(redirect || '/');
-        } catch (error: any) {
-            toast.error(
-                error?.data?.message || 'OTP verification failed.'
-            );
+        } catch (error) {
+            toast.error(apiErrorMessage(error, 'OTP verification failed.'));
         }
     };
 
@@ -99,10 +98,8 @@ export default function VerifyEmailClient() {
             setResendCooldown(30);
 
             toast.success('New OTP sent successfully!');
-        } catch (error: any) {
-            toast.error(
-                error?.data?.message || 'Failed to resend OTP.'
-            );
+        } catch (error) {
+            toast.error(apiErrorMessage(error, 'Failed to resend OTP.'));
         }
     };
 

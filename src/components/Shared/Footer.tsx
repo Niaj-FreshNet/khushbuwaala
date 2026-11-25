@@ -98,7 +98,7 @@ export const Footer = () => {
         { label: "Track Your Order", href: "/track-order" },
         { label: "My Wishlist", href: "/wishlist" },
         { label: "Shopping Cart", href: "/cart" },
-        { label: "Order History", href: "/orders" },
+        { label: "Order History", href: "/my-account#purchase-history" },
       ],
     },
   ]

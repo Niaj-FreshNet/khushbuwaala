@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { IProductResponse } from '@/types/product.types'
-import { CartItem } from '@/types/cart.types'
+
+import type { CartItem, CartProduct } from '@/types/cart.types'
 
 export interface CartState {
   items: CartItem[]
@@ -19,17 +19,6 @@ const initialState: CartState = {
   error: null,
   appliedCouponCode: null,
 }
-
-// Helper function to load cart from localStorage
-// const loadCartFromStorage = (): CartItem[] => {
-//   if (typeof window === 'undefined') return []
-//   try {
-//     const savedCart = localStorage.getItem('cartItems')
-//     return savedCart ? JSON.parse(savedCart) : []
-//   } catch {
-//     return []
-//   }
-// }
 
 type CartStorageShape =
   | CartItem[] // old format (backward compatible)
@@ -70,16 +59,6 @@ const saveCartToStorage = (items: CartItem[], appliedCouponCode: string | null) 
   }
 }
 
-// Helper function to save cart to localStorage
-// const saveCartToStorage = (items: CartItem[]) => {
-//   if (typeof window === 'undefined') return
-//   try {
-//     localStorage.setItem('cartItems', JSON.stringify(items))
-//   } catch (error) {
-//     console.error('Failed to save cart to localStorage:', error)
-//   }
-// }
-
 const hydrated = loadCartFromStorage()
 
 const cartSlice = createSlice({
@@ -94,7 +73,7 @@ const cartSlice = createSlice({
     addToCart: (
       state,
       action: PayloadAction<{
-        product: IProductResponse
+        product: CartProduct
         quantity: number
         selectedSize: string
         selectedPrice: number
@@ -117,7 +96,6 @@ const cartSlice = createSlice({
           selectedPrice
         })
       }
-      // console.log(state.items, 'cartItem')
       saveCartToStorage(state.items, state.appliedCouponCode)
     },
 
@@ -132,7 +110,6 @@ const cartSlice = createSlice({
       }>
     ) => {
       const { productId, selectedSize, quantity, cartItemId } = action.payload
-      // console.log('cartItemId', cartItemId)
       const itemIndex = state.items.findIndex(
         (item) => item.product.id === productId && item.selectedSize === selectedSize
       )
@@ -142,11 +119,6 @@ const cartSlice = createSlice({
         state.items[itemIndex].cartItemId = cartItemId
         saveCartToStorage(state.items, state.appliedCouponCode)
       }
-
-      // ✅ If backend cart item ID is provided, store it locally
-      // if (cartItemId) {
-      //   console.log('cartItemId provided', cartItemId)
-      // }
     },
 
     // Remember which server cart row belongs to a line, without touching its quantity
@@ -185,7 +157,7 @@ const cartSlice = createSlice({
     setCheckoutOnlyItem: (
       state,
       action: PayloadAction<{
-        product: IProductResponse
+        product: CartProduct
         quantity: number
         selectedSize: string
         selectedPrice: number
@@ -205,23 +177,6 @@ const cartSlice = createSlice({
     proceedToCartCheckout: (state) => {
       state.checkoutMode = false
       state.checkoutItem = null
-    },
-
-    // Set loading state
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.isLoading = action.payload
-    },
-
-    // Set error state
-    setError: (state, action: PayloadAction<string | null>) => {
-      state.error = action.payload
-    },
-
-    // Initialize cart from localStorage (for hydration)
-    initializeCart: (state) => {
-      const hydrated = loadCartFromStorage()
-      state.items = hydrated.items
-      state.appliedCouponCode = hydrated.appliedCouponCode
     },
 
     setAppliedCouponCode: (state, action: PayloadAction<string | null>) => {
@@ -245,9 +200,6 @@ export const {
   clearCart,
   setCheckoutOnlyItem,
   proceedToCartCheckout,
-  setLoading,
-  setError,
-  initializeCart,
   setAppliedCouponCode,
   clearAppliedCouponCode,
 } = cartSlice.actions
@@ -256,24 +208,6 @@ export default cartSlice.reducer
 
 // Selectors
 export const selectCartItems = (state: { cart: CartState }) => state.cart.items
-
-export const selectCartItemsCount = (state: { cart: CartState }) =>
-  state.cart.items.reduce((total, item) => total + item.quantity, 0)
-
-export const selectCartSubtotal = (state: { cart: CartState }) =>
-  state.cart.items.reduce((total, item) => {
-    const price =
-      item.product.variants?.find((v) => v.size === Number(item.selectedSize))?.price ||
-      item.product.minPrice ||
-      0
-    return total + price * item.quantity
-  }, 0)
-
-export const selectCartTotal = (state: { cart: CartState }) => {
-  const subtotal = selectCartSubtotal(state)
-  const taxes = subtotal * 0.0 // No taxes for now
-  return subtotal + taxes
-}
 
 export const selectAppliedCouponCode = (state: { cart: CartState }) =>
   state.cart.appliedCouponCode

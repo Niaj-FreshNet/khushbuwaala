@@ -5,9 +5,6 @@ import Image from "next/image";
 import {
   ChevronLeft,
   ChevronRight,
-  Maximize2,
-  Sparkles,
-  Search,
   X,
   Shuffle,
 } from "lucide-react";
@@ -35,7 +32,8 @@ export default function ProductGallery({ product, corner }: ProductGalleryProps)
   const [lightbox, setLightbox] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
 
-  const [zoomEnabled, setZoomEnabled] = useState(false);
+  // Hover zoom is switched off (photos open in the full-screen viewer instead).
+  const zoomEnabled = false;
   const [isHovering, setIsHovering] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
 

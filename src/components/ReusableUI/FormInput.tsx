@@ -96,13 +96,14 @@ export default function FormInput({
     });
   };
 
-  const hasError = Boolean((errors as any)?.[name]);
-  const errorMsg = (errors as any)?.[name]?.message as string | undefined;
+  const fieldError = errors[name];
+  const hasError = Boolean(fieldError);
+  const errorMsg = typeof fieldError?.message === 'string' ? fieldError.message : undefined;
 
   return (
     <FormField
       control={control}
-      name={name as any}
+      name={name}
       render={({ field }) => {
         const currentLen =
           typeof field.value === 'string' ? field.value.length : 0;
@@ -231,7 +232,7 @@ export default function FormInput({
                   type={type}
                   placeholder={placeholder}
                   // ✅ keep controlled, but allow external value override (your old behavior)
-                  value={(value ?? field.value ?? '') as any}
+                  value={value ?? field.value ?? ''}
                   disabled={disabled}
                   onChange={(e) => {
                     field.onChange(e); // ✅ ALWAYS update RHF

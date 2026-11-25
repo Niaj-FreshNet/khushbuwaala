@@ -8,7 +8,6 @@ import { useWishlist } from "@/context/WishlistContext";
 import { ProductCard } from "@/components/ReusableUI/ProductCard";
 import { ShopProductsSkeletonGrid } from "@/components/Modules/Shop/ShopProductsSkeletonGrid";
 import type { DiscoveryItem } from "@/lib/discovery";
-import type { IProductResponse } from "@/types/product.types";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 const GRID = "grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
@@ -109,7 +108,7 @@ export default function WishlistPage() {
             <ul className={`grid ${GRID} gap-2 sm:gap-3`}>
               {available.map((i, index) => (
                 <li key={i.product.id}>
-                  <ProductCard product={fresh!.get(i.product.id) as unknown as IProductResponse} priority={index < 4} />
+                  <ProductCard product={fresh!.get(i.product.id)!} priority={index < 4} />
                 </li>
               ))}
             </ul>

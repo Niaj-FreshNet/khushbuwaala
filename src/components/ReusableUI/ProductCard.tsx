@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Image from "next/image";
@@ -7,42 +6,27 @@ import { useState, useMemo, useRef, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Heart, ShoppingBag, Eye, Zap, ShoppingCart } from "lucide-react";
+import { Heart, Eye, Zap, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
-import type { IProductResponse } from "@/types/product.types";
+import type { ListDiscount, ProductCardProduct } from "@/types/product.types";
+import { activeAutoDiscount, sortVariantsBySize } from "@/lib/productPricing";
 import flyToCart from "../Modules/Product/FlyToCart";
 import { kwPushAddToCart, kwPushBeginCheckout, kwCategoryName } from "@/lib/Analytics/kwEcom";
 
-function getNumericSize(v: any) {
-  const raw = v?.size ?? v?.title ?? v?.name ?? "";
-  const parsed = parseFloat(String(raw).replace(/[^0-9.]/g, ""));
-  return Number.isFinite(parsed) ? parsed : Infinity;
+type CardVariant = NonNullable<ProductCardProduct["variants"]>[number];
+
+// The size a card shows and sells: the second smallest (the smallest when there is only one).
+function pickCardVariant(product: ProductCardProduct): CardVariant | null {
+  const sorted = sortVariantsBySize(product.variants);
+  return sorted[1] ?? sorted[0] ?? null;
 }
 
-function pickSecondLowestPriceVariant(product: any) {
-  const rawVariants = Array.isArray(product?.variants) ? product.variants : [];
-  if (!rawVariants.length) return null;
-
-  const sortedVariants = [...rawVariants].sort((a: any, b: any) => {
-    const sA = getNumericSize(a);
-    const sB = getNumericSize(b);
-    if (sA !== sB) return sA - sB;
-    return Number(a?.price ?? 0) - Number(b?.price ?? 0);
-  });
-
-  return sortedVariants[1] ?? sortedVariants[0] ?? null;
-}
-
-function safeUnit(unit: any) {
-  return String(unit || "").trim().toLowerCase();
-}
-
-function variantLabel(v: any) {
+function variantLabel(v: CardVariant) {
   const size = Number(v?.size);
-  const unit = safeUnit(v?.unit);
+  const unit = String(v?.unit || "").trim().toLowerCase();
   if (!size || !unit) return null;
   return `${size} ${unit}`;
 }
@@ -50,25 +34,14 @@ function variantLabel(v: any) {
 // The sign is written by hand: Safari puts it after the number when Intl formats BDT.
 const formatPriceBDT = (price: number) => "৳" + Math.round(Number(price) || 0).toLocaleString("en-US");
 
-function getActiveDiscount(product: any, variant?: any) {
-  if (product?.discount && typeof product.discount === "object") {
-    return product.discount;
-  }
-
-  const now = new Date();
-  const isActiveAuto = (d: any) => {
-    if (!d || (d.code && String(d.code).trim() !== "")) return false;
-    const start = d.startDate ?? d.start ?? d.from;
-    const end = d.endDate ?? d.end ?? d.to;
-    return (!start || new Date(start) <= now) && (!end || new Date(end) >= now);
-  };
-
-  const variantAuto = (variant?.discounts ?? []).find(isActiveAuto) || null;
-  const productAuto = (product?.discounts ?? []).find(isActiveAuto) || null;
-  return variantAuto || productAuto || null;
+// Product lists send the running sale as one `discount`; the product page's own data sends
+// `discounts` (possibly per size). Both are understood.
+function getActiveDiscount(product: ProductCardProduct, variant: CardVariant | null): ListDiscount | null {
+  if (product.discount && typeof product.discount === "object") return product.discount;
+  return activeAutoDiscount(product, variant);
 }
 
-function computeDiscountedPrice(basePrice: number, discount: any) {
+function computeDiscountedPrice(basePrice: number, discount: ListDiscount | null) {
   if (!discount) return basePrice;
   if (discount.type === "percentage" && typeof discount.value === "number") {
     return Math.max(0, Math.round(basePrice * (1 - discount.value / 100)));
@@ -81,7 +54,7 @@ function computeDiscountedPrice(basePrice: number, discount: any) {
 }
 
 interface ProductCardProps {
-  product: IProductResponse;
+  product: ProductCardProduct;
   className?: string;
   onQuickView?: () => void;
   /** First row of a page: load the picture straight away */
@@ -131,11 +104,11 @@ export function ProductCard({
     touchStart.current = null;
   };
 
-  const productId = (product as any).id ?? (product as any)._id ?? product.slug ?? product.name;
-  const selectedVariant = useMemo(() => pickSecondLowestPriceVariant(product as any), [product]);
-  const activeDiscount = useMemo(() => getActiveDiscount(product as any, selectedVariant), [product, selectedVariant]);
+  const productId = product.id ?? product.slug ?? product.name;
+  const selectedVariant = useMemo(() => pickCardVariant(product), [product]);
+  const activeDiscount = useMemo(() => getActiveDiscount(product, selectedVariant), [product, selectedVariant]);
 
-  const basePrice = selectedVariant?.price ?? (product as any).minPrice ?? (product as any).price ?? 0;
+  const basePrice = selectedVariant?.price ?? product.minPrice ?? product.price ?? 0;
   const discountedPrice = activeDiscount ? computeDiscountedPrice(basePrice, activeDiscount) : basePrice;
 
   const discountPercentLabel = useMemo(() => {
@@ -151,26 +124,16 @@ export function ProductCard({
 
   const selectedSizeLabel = useMemo(() => {
     const label = selectedVariant ? variantLabel(selectedVariant) : null;
-    if (label) return label;
-    const vp = (product as any).variantPrices;
-    if (vp && typeof vp === "object") {
-      const keys = Object.keys(vp);
-      if (keys.length) return keys[0];
-    }
-    return "6 ml";
-  }, [selectedVariant, product]);
+    return label ?? "6 ml";
+  }, [selectedVariant]);
 
   const accords = useMemo(() => {
-    const families = (product as any)?.families;
-    const arr = Array.isArray(families) && families.length && typeof families[0] === "string"
-      ? families
-      : (product as any)?.accords ?? (product as any)?.fragrances ?? [];
-    if (Array.isArray(arr) && arr.length) {
-      return arr
-        .map((item: any) => (typeof item === "string" ? item : item?.name))
-        .filter(Boolean);
-    }
-    return [];
+    const families = product.families;
+    const list: (string | { name?: string })[] =
+      Array.isArray(families) && families.length ? families : product.accords ?? product.fragrances ?? [];
+    return list
+      .map((item) => (typeof item === "string" ? item : item?.name))
+      .filter((name): name is string => Boolean(name));
   }, [product]);
 
   const isWishlisted = wishlist?.isInWishlist?.(productId) ?? false;
@@ -184,7 +147,7 @@ export function ProductCard({
     setIsAddingToCart(true);
 
     try {
-      cart?.addToCart?.(product as any, 1, selectedSizeLabel, discountedPrice);
+      cart.addToCart(product, 1, selectedSizeLabel, discountedPrice);
 
       kwPushAddToCart({
         currency: "BDT",
@@ -193,7 +156,7 @@ export function ProductCard({
           {
             item_id: String(productId),
             item_name: product.name,
-            item_brand: (product as any).brand || "Khushbuwaala",
+            item_brand: product.brand || "Khushbuwaala",
             item_category: kwCategoryName(product),
             item_variant: selectedSizeLabel,
             price: discountedPrice,
@@ -203,7 +166,7 @@ export function ProductCard({
       });
 
       if (fromEl) {
-        flyToCart(fromEl, (product as any).primaryImage);
+        flyToCart(fromEl, product.primaryImage);
       } else {
         window.dispatchEvent(new CustomEvent("kw:open-cart"));
       }
@@ -223,7 +186,7 @@ export function ProductCard({
 
       setIsBuyingNow(true);
       try {
-        cart?.addToCart?.(product as any, 1, selectedSizeLabel, discountedPrice);
+        cart.addToCart(product, 1, selectedSizeLabel, discountedPrice);
 
         kwPushBeginCheckout({
           currency: "BDT",
@@ -232,7 +195,7 @@ export function ProductCard({
             {
               item_id: String(productId),
               item_name: product.name,
-              item_brand: (product as any).brand || "Khushbuwaala",
+              item_brand: product.brand || "Khushbuwaala",
               item_category: kwCategoryName(product),
               item_variant: selectedSizeLabel,
               price: discountedPrice,
@@ -262,11 +225,11 @@ export function ProductCard({
     if (isWishlisted) {
       wishlist.removeFromWishlist?.(productId);
     } else {
-      wishlist.addToWishlist?.(product as any);
+      wishlist.addToWishlist?.(product);
     }
   };
 
-  const productSlug = (product as any).slug ?? (product as any).name?.toLowerCase().replace(/ /g, "-") ?? productId;
+  const productSlug = product.slug ?? product.name?.toLowerCase().replace(/ /g, "-") ?? productId;
   const productLink = `/product/${productSlug}`;
 
   return (

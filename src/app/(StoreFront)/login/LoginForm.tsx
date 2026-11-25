@@ -16,6 +16,7 @@ import { TUser } from '@/types/auth.types';
 import AuthLayout from '@/components/Layout/AuthLayout/AuthLayout';
 import FormInput from '@/components/ReusableUI/FormInput';
 import { useLogInMutation } from '@/redux/store/api/auth/authApi';
+import { apiErrorMessage } from '@/lib/apiError';
 import { setUser } from '@/redux/store/features/auth/authSlice';
 
 export default function LoginForm() {
@@ -55,12 +56,8 @@ export default function LoginForm() {
 
             router.refresh();
             router.push(redirect || '/my-account');
-        } catch (error: any) {
-            toast.error(
-                error?.data?.message ||
-                error?.message ||
-                'Login failed. Please check your credentials.'
-            );
+        } catch (error) {
+            toast.error(apiErrorMessage(error, 'Login failed. Please check your credentials.'));
         }
     };
 

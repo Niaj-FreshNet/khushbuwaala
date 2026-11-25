@@ -20,8 +20,8 @@ export default function mapProductResponseToProduct(
     tags: product.tags || [],
     
     origin: product.origin,
-    fragrances: product.fragrances?.map((f: any) => f?.name).filter(Boolean) || [],
-    materials: product.materials?.map((f: any) => f?.name).filter(Boolean) || [],
+    fragrances: product.fragrances || [],
+    materials: product.materials || [],
     brand: product.brand,
     gender: product.gender,
     perfumeNotes: product.perfumeNotes,
@@ -33,9 +33,14 @@ export default function mapProductResponseToProduct(
     bestFor: product.bestFor || [],
     
     categoryId: product.categoryId,
-    // readable category for analytics and breadcrumbs (the id alone means nothing in reports)
-    ...({ category: product.category } as object),
+    category: product.category,
     published: product.published,
+
+    materialIds: product.materialIds || [],
+    fragranceIds: product.fragranceIds || [],
+    reviews: product.reviews || [],
+    averageRating: product.averageRating ?? 0,
+    reviewCount: product.reviewCount ?? 0,
     
     supplier: product.supplier,
     stock: product.stock || 0,

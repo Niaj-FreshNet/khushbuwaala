@@ -3,7 +3,6 @@ import ProductAccordion from "@/components/Modules/Product/ProductAccordion";
 import Breadcrumbs, { BreadcrumbItem } from "@/components/Shared/Breadcrumbs";
 import TrustSignals from "@/components/Modules/Product/TrustSignals";
 import StickyCartObserver from "@/components/Modules/Product/StickyCartObserver";
-import { Info } from "lucide-react";
 import ProductDetailSection from "@/components/Modules/Product/ProductDetailSection";
 import { ProductSelectionProvider } from "@/context/ProductSelectionContext";
 import { IProduct, IProductResponse } from "@/types/product.types";

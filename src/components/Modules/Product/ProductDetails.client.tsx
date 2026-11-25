@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useMemo, useState, useTransition, useCallback, useEffect } from "react";
+import React, { useMemo, useState, useTransition, useCallback } from "react";
 import { useCart } from "@/context/CartContext";
 import { useProductSelectionOptional } from "@/context/ProductSelectionContext";
-import { IDiscount, IProduct, IProductVariant } from "@/types/product.types";
+import { IProduct, IProductVariant } from "@/types/product.types";
+import { isCartProduct } from "@/types/cart.types";
+import { activeAutoDiscount, sortVariantsBySize } from "@/lib/productPricing";
 import { useRouter } from "next/navigation";
 import ProductDetailsUI from "./ProductDetailsUI.server";
 import flyToCart from "./FlyToCart";
@@ -24,37 +26,14 @@ export default function ProductDetailsClient({
   // keep your selection context support
   const selection = useProductSelectionOptional();
 
-  // Safe numeric extractor for sizes (handles 6, "6", "6ml", "100", etc.)
-  const getNumericSize = (v: any) => {
-    const raw = v?.size ?? v?.title ?? v?.name ?? "";
-    const parsed = parseFloat(String(raw).replace(/[^0-9.]/g, ""));
-    return Number.isFinite(parsed) ? parsed : Infinity;
-  };
-
-  const sortedVariants = useMemo(() => {
-    return [...(product.variants ?? [])].sort((a: any, b: any) => {
-      const sA = getNumericSize(a);
-      const sB = getNumericSize(b);
-      if (sA !== sB) return sA - sB;
-      return Number(a?.price ?? 0) - Number(b?.price ?? 0);
-    });
-  }, [product.variants]);
+  const sortedVariants = useMemo(() => sortVariantsBySize(product.variants ?? []), [product.variants]);
 
   const availableVariants = useMemo(() => sortedVariants.slice(0, 4), [sortedVariants]);
 
-  function pickLowestPriceVariant(product: any) {
-    if (!sortedVariants.length) return null;
-    // Pick 2nd lowest variant (index 1), fallback to index 0
-    return sortedVariants[1] ?? sortedVariants[0] ?? null;
-  }
+  const safeUnit = (unit: unknown) => String(unit || "").trim().toLowerCase();
 
-  function safeUnit(unit: any) {
-    return String(unit || "").trim().toLowerCase();
-  }
-
-  const lowestPriceVariant = useMemo(() => {
-    return pickLowestPriceVariant(product as any) as IProductVariant | null;
-  }, [product, sortedVariants]);
+  // The size shown first: the second smallest (the smallest when there is only one).
+  const lowestPriceVariant: IProductVariant | null = sortedVariants[1] ?? sortedVariants[0] ?? null;
 
   const [fallbackSelected, setFallbackSelected] = useState<IProductVariant | null>(null);
 
@@ -77,28 +56,7 @@ export default function ProductDetailsClient({
   const currentPrice = effectiveVariant?.price ?? product.minPrice ?? 0;
 
   const { discount, discountedPrice } = useMemo(() => {
-    const now = new Date();
-
-    const productDiscounts: IDiscount[] =
-      ((product as any)?.discounts as IDiscount[]) ??
-      ((product as any)?.Discounts as IDiscount[]) ??
-      ((product as any)?.productDiscounts as IDiscount[]) ??
-      [];
-
-    const variantDiscounts: IDiscount[] =
-      ((effectiveVariant as any)?.discounts as IDiscount[]) ??
-      ((effectiveVariant as any)?.Discounts as IDiscount[]) ??
-      [];
-
-    const isActiveAuto = (d: any) => {
-      if (!d) return false;
-      if (d.code && String(d.code).trim() !== "") return false; // hide coupon discounts
-      const startOk = !d.startDate || new Date(d.startDate) <= now;
-      const endOk = !d.endDate || new Date(d.endDate) >= now;
-      return startOk && endOk;
-    };
-
-    const active = variantDiscounts.find(isActiveAuto) || productDiscounts.find(isActiveAuto) || null;
+    const active = activeAutoDiscount(product, effectiveVariant);
 
     let final = currentPrice;
 
@@ -108,11 +66,10 @@ export default function ProductDetailsClient({
     }
 
     final = Math.max(0, Math.round(final));
-    return { discount: active as IDiscount | null, discountedPrice: final };
+    return { discount: active, discountedPrice: final };
   }, [product, effectiveVariant, currentPrice]);
 
-  // const isOutOfStock = (product.totalStock ?? 0) <= 0;
-  const isOutOfStock = false; // OUT OF STOCK - disabled
+  // Out-of-stock blocking is switched off: every product can be ordered.
 
   const onSelectVariant = useCallback(
     (variant: IProductVariant) => {
@@ -152,15 +109,16 @@ export default function ProductDetailsClient({
 
   const onAddToCart = useCallback(
     async (e: React.MouseEvent<HTMLButtonElement>) => {
-      if (/* isOutOfStock || */ isAddingToCart || isBuyingNow) return;
+      if (isAddingToCart || isBuyingNow) return;
 
       setIsAddingToCart(true);
       try {
         // ✅ fly animation first (from button → cart icon)
-        flyToCart(e.currentTarget, (product as any)?.primaryImage);
+        if (!isCartProduct(product)) return;
+        flyToCart(e.currentTarget, product.primaryImage);
 
         // If addToCart is sync, this still gives user feedback for a moment
-        cart?.addToCart?.(product as any, quantity, selectedSizeLabel, discountedPrice);
+        cart.addToCart(product, quantity, selectedSizeLabel, discountedPrice);
 
         // ✅ TRACK: add_to_cart (GA4 + Meta via GTM)
         kwPushAddToCart({
@@ -168,9 +126,9 @@ export default function ProductDetailsClient({
           value: discountedPrice * quantity,
           items: [
             {
-              item_id: String((product as any).id || (product as any).slug),
-              item_name: String((product as any).name || ""),
-              item_brand: String((product as any).brand || "Khushbuwaala"),
+              item_id: String(product.id || product.slug),
+              item_name: String(product.name || ""),
+              item_brand: String(product.brand || "Khushbuwaala"),
               item_category: kwCategoryName(product),
               item_variant: selectedSizeLabel, // ✅ variant
               price: discountedPrice,
@@ -188,14 +146,15 @@ export default function ProductDetailsClient({
       } finally {
         setIsAddingToCart(false);
       }
-    }, [cart, product, quantity, selectedSizeLabel, discountedPrice, /* isOutOfStock, */ isAddingToCart, isBuyingNow]);
+    }, [cart, product, quantity, selectedSizeLabel, discountedPrice, isAddingToCart, isBuyingNow]);
 
   const onBuyNow = useCallback(async () => {
-    if (/* isOutOfStock || */ isBuyingNow || isAddingToCart) return;
+    if (isBuyingNow || isAddingToCart) return;
 
     setIsBuyingNow(true);
     try {
-      cart?.addToCart?.(product as any, quantity, selectedSizeLabel, discountedPrice);
+      if (!isCartProduct(product)) return;
+      cart.addToCart(product, quantity, selectedSizeLabel, discountedPrice);
 
       // ✅ TRACK begin_checkout from Buy Now (single-item checkout intent)
       kwPushBeginCheckout({
@@ -203,9 +162,9 @@ export default function ProductDetailsClient({
         value: discountedPrice * quantity,
         items: [
           {
-            item_id: String((product as any).id || (product as any).slug),
-            item_name: String((product as any).name || ""),
-            item_brand: String((product as any).brand || "Khushbuwaala"),
+            item_id: String(product.id || product.slug),
+            item_name: String(product.name || ""),
+            item_brand: String(product.brand || "Khushbuwaala"),
             item_category: kwCategoryName(product),
             item_variant: selectedSizeLabel,
             price: discountedPrice,
@@ -219,39 +178,7 @@ export default function ProductDetailsClient({
     } finally {
       setIsBuyingNow(false);
     }
-  }, [cart, product, quantity, selectedSizeLabel, discountedPrice, router, startTransition, /* isOutOfStock, */ isBuyingNow, isAddingToCart]);
-
-  const getActiveAutoDiscountForVariant = useCallback(
-    (variant?: IProductVariant): IDiscount | null => {
-      const now = new Date();
-
-      const productDiscounts: IDiscount[] =
-        ((product as any)?.discounts as IDiscount[]) ??
-        ((product as any)?.Discounts as IDiscount[]) ??
-        ((product as any)?.productDiscounts as IDiscount[]) ??
-        [];
-
-      const variantDiscounts: IDiscount[] =
-        ((variant as any)?.discounts as IDiscount[]) ??
-        ((variant as any)?.Discounts as IDiscount[]) ??
-        [];
-
-      const isActiveAuto = (d: any) => {
-        if (!d) return false;
-
-        // ❌ promo-code discounts are hidden (coupon only)
-        if (d.code && String(d.code).trim() !== "") return false;
-
-        const startOk = !d.startDate || new Date(d.startDate) <= now;
-        const endOk = !d.endDate || new Date(d.endDate) >= now;
-        return startOk && endOk;
-      };
-
-      // ✅ variant auto > product auto
-      return (variantDiscounts.find(isActiveAuto) || productDiscounts.find(isActiveAuto) || null) as IDiscount | null;
-    },
-    [product]
-  );
+  }, [cart, product, quantity, selectedSizeLabel, discountedPrice, router, startTransition, isBuyingNow, isAddingToCart]);
 
   return (
     <ProductDetailsUI
@@ -261,10 +188,8 @@ export default function ProductDetailsClient({
       discountedPrice={discountedPrice}
       currentPrice={currentPrice}
       quantity={quantity}
-      isOutOfStock={isOutOfStock}
       selectedSizeLabel={selectedSizeLabel}
       availableVariants={availableVariants}
-      getVariantDiscount={getActiveAutoDiscountForVariant}
       onReadMore={onReadMore}
       onSelectVariant={onSelectVariant}
       onQtyDec={onQtyDec}

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { fetchSimilar, slimItem } from "@/lib/discovery";
 import { FAMILY_PAGES } from "@/config/scentPages";
 import { ProductCard } from "@/components/ReusableUI/ProductCard";
-import type { IProductResponse } from "@/types/product.types";
 
 // Perfumes that smell alike (shared notes and scent families, in stock), from the discovery API.
 // Rendered on the server so the links are part of the page. Shows nothing if there are none.
@@ -28,7 +27,7 @@ export default async function SimilarScents({ slug, name, familyId }: { slug: st
       <ul className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
         {items.map((item) => (
           <li key={item.id}>
-            <ProductCard product={item as unknown as IProductResponse} />
+            <ProductCard product={item} />
           </li>
         ))}
       </ul>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useEffect } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight, MessageCircle, Send, Link2 } from "lucide-react";

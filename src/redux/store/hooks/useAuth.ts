@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '@/redux/store/hooks';
 import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
 import { TUser } from '@/types/auth.types';
@@ -10,11 +10,16 @@ import { setUser, setAccessToken, logout as logoutSlice } from '@/redux/store/fe
 import { toast } from 'sonner';
 
 export const useAuth = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   // 1️⃣ Pull current auth state from Redux
-  const reduxUser = useSelector((state: any) => state.auth?.user);
-  const reduxToken = useSelector((state: any) => state.auth?.accessToken);
+  const reduxUser = useAppSelector((state) => state.auth?.user);
+  const reduxToken = useAppSelector((state) => state.auth?.accessToken);
+
+  // The newest values, for the two effects below. They must not run again every time the
+  // customer's details change (the first one writes those details itself).
+  const latest = useRef({ user: reduxUser, token: reduxToken });
+  latest.current = { user: reduxUser, token: reduxToken };
 
   const [isLoading, setIsLoading] = useState(true);
   const isRefreshing = useRef(false);
@@ -25,7 +30,7 @@ export const useAuth = () => {
       : null;
 
   // 2️⃣ Fetch fresh user profile details from backend
-  const { data: userData, isSuccess, isError, refetch } = useGetMeUserQuery(undefined, {
+  const { data: userData, isSuccess, refetch } = useGetMeUserQuery(undefined, {
     skip: !storedToken && !reduxToken,
     refetchOnMountOrArgChange: true,
   });
@@ -37,8 +42,8 @@ export const useAuth = () => {
     if (isSuccess && userData?.data) {
       dispatch(
         setUser({
-          user: { ...reduxUser, ...userData.data },
-          accessToken: localStorage.getItem('accessToken') || reduxToken || '',
+          user: { ...latest.current.user, ...userData.data },
+          accessToken: localStorage.getItem('accessToken') || latest.current.token || '',
         })
       );
     }
@@ -59,7 +64,7 @@ export const useAuth = () => {
         localStorage.setItem('refreshToken', refresh);
       }
 
-      if (token && !reduxUser) {
+      if (token && !latest.current.user) {
         try {
           const decoded = jwtDecode<TUser>(token);
           dispatch(setUser({ user: decoded, accessToken: token }));
@@ -73,9 +78,10 @@ export const useAuth = () => {
         isRefreshing.current = true;
         try {
           const result = await refreshTokenApi().unwrap();
-          if (result?.accessToken) {
-            localStorage.setItem('accessToken', result.accessToken);
-            dispatch(setAccessToken(result.accessToken));
+          const fresh = result?.data?.accessToken || result?.accessToken;
+          if (fresh) {
+            localStorage.setItem('accessToken', fresh);
+            dispatch(setAccessToken(fresh));
             refetch();
           }
         } catch (err) {

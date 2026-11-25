@@ -11,7 +11,6 @@ import {
   ChevronDown,
   Navigation,
   User,
-  LogIn,
   Star,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"

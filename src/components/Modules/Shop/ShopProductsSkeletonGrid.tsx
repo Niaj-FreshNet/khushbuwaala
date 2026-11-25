@@ -3,7 +3,7 @@
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function LiveSkeleton({
+function LiveSkeleton({
   className = "",
   delayMs = 0,
   speedMs = 1400,
@@ -19,8 +19,8 @@ export function LiveSkeleton({
       className={`skel-live ${className}`}
       style={
         {
-          ["--skel-delay" as any]: `${delayMs}ms`,
-          ["--skel-speed" as any]: `${speedMs}ms`,
+          "--skel-delay": `${delayMs}ms`,
+          "--skel-speed": `${speedMs}ms`,
         } as React.CSSProperties
       }
     >

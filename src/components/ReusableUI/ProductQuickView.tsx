@@ -1,7 +1,10 @@
 "use client"
 
 import * as React from "react"
-import type { IProductResponse, IDiscount, IProductVariant } from "@/types/product.types"
+import type { ListDiscount, ProductCardProduct } from "@/types/product.types"
+import { activeAutoDiscount } from "@/lib/productPricing"
+
+type QuickViewVariant = NonNullable<ProductCardProduct["variants"]>[number]
 
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -34,7 +37,7 @@ import { useWishlist } from "@/context/WishlistContext"
 import { kwPushAddToCart, kwPushBeginCheckout, kwCategoryName } from "@/lib/Analytics/kwEcom"
 
 interface ProductQuickViewProps {
-  product: IProductResponse
+  product: ProductCardProduct
   trigger?: React.ReactNode
   open?: boolean
   onOpenChange?: (open: boolean) => void
@@ -105,7 +108,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
 
   const isWishlisted = wishlist?.isInWishlist?.(product.id) ?? false
 
-  const getCurrentVariant = React.useCallback((): IProductVariant | undefined => {
+  const getCurrentVariant = React.useCallback((): QuickViewVariant | undefined => {
     return sortedVariants.find((v) => `${v.size} ${String(v.unit || "").toLowerCase()}` === selectedSize)
   }, [sortedVariants, selectedSize])
 
@@ -118,28 +121,15 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
 
   // ✅ Pricing logic aligned with Product Details page (variant discounts first + product discounts)
   // ✅ Pricing logic: ONLY auto discounts (code must be empty)
-  const listDiscount = React.useMemo(() => {
-    const d = (product as any)?.discount;
-    return d && typeof d === "object" ? (d as IDiscount) : null;
+  const listDiscount = React.useMemo<ListDiscount | null>(() => {
+    const d = product.discount;
+    return d && typeof d === "object" ? d : null;
   }, [product]);
 
   const { discount, discountedPrice } = React.useMemo(() => {
-    const now = new Date();
-
-    const allDiscounts: IDiscount[] = [
-      ...(currentVariant?.discounts ?? []),
-      ...(product.discounts ?? []),
-    ];
-
-    const active =
-      allDiscounts.find((d) => {
-        // ❌ hide promo-code discounts
-        if (d.code && String(d.code).trim() !== "") return false;
-
-        const startOk = !d.startDate || new Date(d.startDate) <= now;
-        const endOk = !d.endDate || new Date(d.endDate) >= now;
-        return startOk && endOk;
-      }) ||
+    // Sales that apply by themselves only (a coupon code is never shown as a sale).
+    const active: ListDiscount | null =
+      activeAutoDiscount(product, currentVariant) ||
       // Product lists (shop, home rows) carry the running sale as one ready-made `discount`
       // instead of the full `discounts` list. Without this the quick view showed and charged the
       // full price for products that were on sale everywhere else.
@@ -149,20 +139,20 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
     let final = originalPrice;
 
     if (active) {
+      const value = Number(active.value ?? 0);
       if (active.type === "percentage") {
-        final = originalPrice - (originalPrice * active.value) / 100;
+        final = originalPrice - (originalPrice * value) / 100;
       } else if (active.type === "fixed") {
-        final = originalPrice - active.value;
+        final = originalPrice - value;
       }
     }
 
     final = Math.max(0, Math.round(final)); // ✅ no decimals + no negative
-    return { discount: (active as IDiscount | null), discountedPrice: Number(final) };
-  }, [product.discounts, currentVariant, originalPrice, listDiscount]);
+    return { discount: active, discountedPrice: Number(final) };
+  }, [product, currentVariant, originalPrice, listDiscount]);
 
   const currentPrice = discountedPrice // ✅ final price for UI + cart
   const savings = Math.max(0, originalPrice - discountedPrice)
-  const selectedPrice = currentPrice
 
   // const isOutOfStock = (product.totalStock ?? 0) <= 0
 
@@ -172,7 +162,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
     if (!wishlist) return
 
     if (isWishlisted) wishlist.removeFromWishlist?.(product.id)
-    else wishlist.addToWishlist?.(product as any)
+    else wishlist.addToWishlist?.(product)
   }
 
   const handleViewFullDetails = () => {
@@ -189,29 +179,9 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
 
   // ✅ Discount badge helper (badge only) - ONLY auto discounts (no code)
   const getActiveDiscountForVariant = React.useCallback(
-    (variant?: IProductVariant): IDiscount | null => {
-      const now = new Date();
-
-      const allDiscounts: IDiscount[] = [
-        ...(variant?.discounts ?? []),
-        ...(product.discounts ?? []),
-      ];
-
-      const active =
-        allDiscounts.find((d) => {
-          // ❌ hide promo-code discounts from badge too
-          if (d.code && String(d.code).trim() !== "") return false;
-
-          const startOk = !d.startDate || new Date(d.startDate) <= now;
-          const endOk = !d.endDate || new Date(d.endDate) >= now;
-          return startOk && endOk;
-        }) ||
-        listDiscount ||
-        null;
-
-      return active as IDiscount | null;
-    },
-    [product.discounts, listDiscount]
+    (variant?: QuickViewVariant): ListDiscount | null =>
+      activeAutoDiscount(product, variant) || listDiscount || null,
+    [product, listDiscount]
   );
 
   const handleAddToCart = async () => {
@@ -233,9 +203,9 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
         value: discountedPrice * 1,
         items: [
           {
-            item_id: String((product as any).id || (product as any).slug || product.name),
+            item_id: String(product.id || product.slug || product.name),
             item_name: product.name,
-            item_brand: (product as any).brand || "Khushbuwaala",
+            item_brand: product.brand || "Khushbuwaala",
             item_category: kwCategoryName(product),
             item_variant: selectedSize || "3 ml",
             price: discountedPrice,
@@ -267,9 +237,9 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
         value: discountedPrice * quantity,
         items: [
           {
-            item_id: String((product as any).id || (product as any).slug || product.name),
+            item_id: String(product.id || product.slug || product.name),
             item_name: product.name,
-            item_brand: (product as any).brand || "Khushbuwaala",
+            item_brand: product.brand || "Khushbuwaala",
             item_category: kwCategoryName(product),
             item_variant: selectedSize || "3 ml",
             price: discountedPrice,
@@ -327,7 +297,7 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                       <div className="absolute top-3 left-3 z-10">
                         <Badge className="bg-white text-green-700 border-0 shadow-lg font-bold">
                           <Tag className="h-3 w-3 mr-1" />
-                          {discount.type === "percentage" ? `${Math.round(discount.value)}% OFF` : `৳${discount.value} OFF`}
+                          {discount.type === "percentage" ? `${Math.round(discount.value ?? 0)}% OFF` : `৳${discount.value ?? 0} OFF`}
                         </Badge>
                       </div>
                     )}
@@ -478,8 +448,8 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                           <div className="text-xs sm:text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
                             🎉 Offer applied:{" "}
                             {discount.type === "percentage"
-                              ? `${discount.value}% off`
-                              : `${formatPrice(discount.value)} off`}
+                              ? `${discount.value ?? 0}% off`
+                              : `${formatPrice(discount.value ?? 0)} off`}
                           </div>
                         )}
 
@@ -530,9 +500,9 @@ export function ProductQuickView({ product, trigger, open, onOpenChange }: Produ
                             >
                               {hasDiscount && (
                                 <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full">
-                                  {vDiscount!.type === "percentage"
-                                    ? `-${Math.round(vDiscount!.value)}%`
-                                    : `-৳${vDiscount!.value}`}
+                                  {vDiscount?.type === "percentage"
+                                    ? `-${Math.round(vDiscount.value ?? 0)}%`
+                                    : `-৳${vDiscount?.value ?? 0}`}
                                 </div>
                               )}
                               <div className="text-center">{size}</div>

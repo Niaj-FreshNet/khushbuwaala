@@ -12,11 +12,12 @@ import AuthLayout from '@/components/Layout/AuthLayout/AuthLayout';
 import FormWrapper from '@/components/ReusableUI/FormWrapper';
 import FormInput from '@/components/ReusableUI/FormInput';
 import { useResetPasswordMutation } from '@/redux/store/api/auth/authApi';
+import { apiErrorMessage } from '@/lib/apiError';
 
 export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [resetPassword, { isLoading }] = useResetPasswordMutation();
+  const [resetPassword] = useResetPasswordMutation();
   const router = useRouter();
   const { token } = useParams();
 
@@ -25,8 +26,8 @@ export default function ResetPassword() {
       await resetPassword({ token: token as string, password: data.password }).unwrap();
       toast.success('Password reset successfully! Please log in.');
       router.push('/login');
-    } catch (error: any) {
-      toast.error(error?.data?.message || 'Failed to reset password.');
+    } catch (error) {
+      toast.error(apiErrorMessage(error, 'Failed to reset password.'));
     }
   };
 
@@ -38,7 +39,6 @@ export default function ResetPassword() {
       <FormWrapper
         resolver={zodResolver(resetPasswordSchema)}
         onSubmit={handleSubmit}
-        successMessage="Password reset successfully!"
         className="space-y-4"
       >
         <div className="relative">

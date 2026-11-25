@@ -15,15 +15,6 @@ export interface IDiscount {
   updatedAt: string;
 }
 
-export interface StockLog {
-  id: string;
-  productId: string;
-  change: number;
-  reason: string;
-  createdAt: string;
-  product: { name: string };
-}
-
 export interface IProductVariant {
   id?: string;
   sku: string;
@@ -35,14 +26,6 @@ export interface IProductVariant {
 
   createdAt?: string;
   updatedAt?: string;
-}
-
-export interface VariantForForm extends Omit<IProductVariant, "size"> {
-  size: string; // force size to be string here
-  price: number;
-  stock?: number;
-  unit: string;
-  sku: string;
 }
 
 // Product Creation Interface
@@ -73,6 +56,11 @@ export interface IProduct {
   bestFor: string[];
 
   categoryId: string;
+  /** Readable category, for breadcrumbs and reports (the id alone means nothing there). */
+  category?: {
+    categoryName: string;
+    imageUrl: string;
+  };
   published: boolean;
 
   materialIds: string[];
@@ -85,7 +73,7 @@ export interface IProduct {
     id: string;
     name: string;
   }[];
-  
+
   reviews: IReview[];
   averageRating: number;
   reviewCount: number;
@@ -104,61 +92,6 @@ export interface IProduct {
 
   createdAt: string;
   updatedAt: string;
-}
-
-// Product Update Interface
-export interface IUpdateProduct {
-  name?: string;
-  description?: string;
-  primaryImage?: string;
-  otherImages?: string[];
-  videoUrl?: string;
-  tags?: string[];
-
-  // Perfume specifications
-  origin?: string;
-  brand?: string;
-  gender?: string;
-  perfumeNotes?: {
-    top: string[];
-    middle: string[];
-    base: string[];
-  };
-  accords?: string[];
-  performance?: string;
-  longevity?: string;
-  projection?: string;
-  sillage?: string;
-  bestFor?: string[];
-
-  categoryId?: string;
-  published?: boolean;
-
-  // Image handling
-  imagesToKeep?: string[];
-  newImages?: string[];
-
-  stock?: number;
-  variants?: IProductVariant[];
-}
-
-// Query Interfaces
-export interface IProductQuery {
-  search?: string;
-  categories: { id: string; name: string }[]; // update here
-  brand?: string;
-  gender?: string;
-  origin?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  tags?: string;
-  accords?: string;
-  bestFor?: string;
-  stock?: 'in' | 'out';
-  sortBy?: 'name' | 'price_asc' | 'price_desc' | 'newest' | 'oldest' | 'popularity';
-  page?: number;
-  limit?: number;
-  [key: string]: unknown;
 }
 
 export interface IReview {
@@ -256,84 +189,42 @@ export interface IProductVariantResponse {
   updatedAt: Date;
 }
 
-// Analytics Interfaces
-export interface IProductAnalytics {
-  totalProducts: number;
-  publishedProducts: number;
-  unpublishedProducts: number;
-  totalVariants: number;
-  lowStockProducts: number;
-  outOfStockProducts: number;
-  totalValue: number;
-  averagePrice: number;
-  topCategories: Array<{
-    categoryName: string;
-    productCount: number;
-    percentage: number;
-  }>;
-  topBrands: Array<{
-    brand: string;
-    productCount: number;
-    percentage: number;
-  }>;
-}
+// ── Product cards ────────────────────────────────────────────────────────────────────────────
+// A sale as product lists send it: one object per product (the product page sends `discounts`).
+export type ListDiscount = {
+  type?: string;
+  value?: number;
+  /** Some lists send the final price instead of a rule. */
+  price?: number;
+  code?: string | null;
+  startDate?: string | Date;
+  endDate?: string | Date;
+};
 
-// Stock Update Interface
-export interface IStockUpdate {
-  productId: string;
-  variantId: string;
-  newStock: number;
-  reason?: string;
-}
-
-// Search Result Interface
-export interface IProductSearchResult {
-  data: IProductResponse[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-  filters: {
-    brands: string[];
-    categories: { id: string; name: string }[];
-    priceRange: {
-      min: number;
-      max: number;
-    };
-    origins: string[];
-    accords: string[];
-  };
-}
-
-// Trending Product Interface
-export interface ITrendingProduct extends IProductResponse {
-  totalSold: number;
-  trendingScore: number;
-}
-
-// Related Products Interface
-export interface IRelatedProductsResponse {
-  data: {
-    sameBrand: IProductResponse[];
-    sameCategory: IProductResponse[];
-    similarAccords: IProductResponse[];
-    recentlyViewed?: IProductResponse[];
-  }
-}
-
-export interface LowStockProduct {
+// What a product card needs. Shop search results, home page rows, similar scents and the
+// wishlist each send a slightly different product; all of them fit this.
+export type ProductCardProduct = {
   id: string;
   name: string;
-  category: string;
-  stock: number;
-  variants: Array<{
-    id: string;
-    sku: string;
-    size: number;
-    // unit: Unit;
-    unit: string;
+  slug: string;
+  description?: string;
+  primaryImage: string;
+  otherImages?: string[];
+  brand?: string | null;
+  category?: { label?: string; categoryName?: string } | null;
+  minPrice?: number;
+  price?: number;
+  variants?: {
+    id?: string;
+    sku?: string;
+    size?: number;
+    unit?: string;
     price: number;
-  }>;
-}
+    discounts?: IDiscount[];
+  }[];
+  discount?: ListDiscount | null;
+  discounts?: IDiscount[];
+  families?: string[];
+  accords?: string[];
+  fragrances?: { id: string; name: string }[];
+};

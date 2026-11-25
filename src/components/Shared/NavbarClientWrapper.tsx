@@ -61,12 +61,7 @@ export function NavbarClientWrapper({ children }: NavbarClientWrapperProps) {
       ? cartItems.reduce((acc, item) => acc + (item?.quantity || 1), 0)
       : 0
 
-    // Handles numeric wishlist count or array wishlist count
-    const totalWishlistQty = typeof wishlistCount === "number"
-      ? wishlistCount
-      : Array.isArray(wishlistCount)
-        ? (wishlistCount as any[]).reduce((acc, item) => acc + (item?.quantity || 1), 0)
-        : 0
+    const totalWishlistQty = typeof wishlistCount === "number" ? wishlistCount : 0
 
     return {
       cart: totalCartQty,

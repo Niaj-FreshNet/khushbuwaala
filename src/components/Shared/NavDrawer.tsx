@@ -20,19 +20,15 @@ import {
   ChevronRight,
   Sparkles,
   Star,
-  Droplets,
-  Globe,
-  Flame,
-  Leaf,
   Search,
   User,
   LogIn,
   Info,
   PhoneCall,
-  SendHorizontal,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/redux/store/hooks/useAuth"
+import { RiBloggerFill } from "react-icons/ri"
 
 interface NavDrawerProps {
   open: boolean
@@ -56,16 +52,6 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
 
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
   const [trackQuery, setTrackQuery] = useState("")
-
-  const categoryIconMap: Record<string, React.ReactNode> = {
-    "natural-attar": <Leaf className="h-4 w-4" />,
-    "artificial-oud": <Flame className="h-4 w-4" />,
-    "inspired-perfume-oil": <Sparkles className="h-4 w-4" />,
-    "oriental-attar": <Globe className="h-4 w-4" />,
-    "brand-perfumes": <Gift className="h-4 w-4" />,
-    "niche-perfumes": <Package className="h-4 w-4" />,
-    "accessories": <Droplets className="h-4 w-4" />,
-  }
 
   const isActive = (href?: string) =>
     !!href && (pathname === href || pathname.startsWith(href + "/"))
@@ -281,7 +267,6 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
                       <CollapsibleContent className="mt-1 pl-3 space-y-1">
                         {item.children.map((child) => {
                           const active = isActive(child.href)
-                          const icon = categoryIconMap[child.key] ?? <Droplets className="h-4 w-4" />
 
                           return (
                             <Button
@@ -388,6 +373,18 @@ export default function NavDrawer({ open, onClose }: NavDrawerProps) {
               <span className="font-semibold text-xs">Log In / Register</span>
             </Button>
           )}
+
+          {/* Blog */}
+          <Button
+            variant="ghost"
+            className="w-full justify-start h-10 px-2.5 text-sm font-medium hover:bg-white text-gray-700 hover:text-red-600 rounded-xl"
+            onClick={() => handleNavigation("/blog")}
+          >
+            <div className="p-1.5 rounded-lg bg-white border border-gray-200 mr-2.5 text-gray-600">
+              <RiBloggerFill className="h-4 w-4" />
+            </div>
+            <span className="font-semibold text-xs">Blogs</span>
+          </Button>
 
           {/* About Us */}
           <Button

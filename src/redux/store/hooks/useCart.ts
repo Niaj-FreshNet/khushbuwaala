@@ -17,7 +17,7 @@ import {
   setAppliedCouponCode as setAppliedCouponCodeAction,
   clearAppliedCouponCode as clearAppliedCouponCodeAction,
 } from '../features/cart/cartSlice'
-import type { IProductResponse } from '@/types/product.types'
+import type { CartProduct } from '@/types/cart.types'
 import { useAddToCartMutation, useUpdateCartItemMutation, useRemoveCartItemMutation } from '@/redux/store/api/cart/cartApi'
 import { useRouter } from 'next/navigation'
 import { kwTrackRemoveFromCart } from '@/lib/Analytics/kwEcom'
@@ -41,7 +41,7 @@ export const useCart = () => {
 
   // -------------------- CART ACTIONS --------------------
   const addToCart = useCallback(
-    async (product: IProductResponse, quantity: number, selectedSize: string, selectedPrice: number) => {
+    async (product: CartProduct, quantity: number, selectedSize: string, selectedPrice: number) => {
       // 1. Optimistic UI update
       dispatch(addToCartAction({ product, quantity, selectedSize, selectedPrice }));
 
@@ -57,7 +57,7 @@ export const useCart = () => {
         const existingLine = cartItems.find((item) => item.product?.id === product.id && item.selectedSize === selectedSize)
         const signedIn = typeof window !== 'undefined' && Boolean(localStorage.getItem('accessToken'))
 
-        const response: any = await addToCartApi({
+        const response = await addToCartApi({
           productId: product.id,
           variantId: variant?.id || null,
           size: variant?.size ? Number(variant.size) : null,
@@ -141,7 +141,7 @@ export const useCart = () => {
 
   // -------------------- CHECKOUT / CLEAR --------------------
   const setCheckoutOnlyItem = useCallback(
-    (product: IProductResponse, quantity: number, selectedSize: string, selectedPrice: number) => {
+    (product: CartProduct, quantity: number, selectedSize: string, selectedPrice: number) => {
       const existing = cartItems.find(
         (item) => item.product?.id === product.id && item.selectedSize === selectedSize
       );

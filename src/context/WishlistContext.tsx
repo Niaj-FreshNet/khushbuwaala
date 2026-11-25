@@ -1,21 +1,5 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
-import { useWishlist as useReduxWishlist } from "@/redux/store/hooks/useWishlist";
-
-const WishlistContext = createContext<ReturnType<typeof useReduxWishlist> | null>(null);
-
-export const WishlistProvider = ({ children }: { children: ReactNode }) => {
-  const wishlist = useReduxWishlist();
-
-  return (
-    <WishlistContext.Provider value={wishlist}>
-      {children}
-    </WishlistContext.Provider>
-  );
-};
-
-export const useWishlist = () => {
-  const context = useContext(WishlistContext);
-  return context || useReduxWishlist();
-};
+// The wishlist lives in the shop's store. This file keeps the older import path working:
+// `useWishlist` from "@/context/WishlistContext" and from the store hook are the same thing.
+export { useWishlist } from "@/redux/store/hooks/useWishlist";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
 import {
   Sheet,
   SheetContent,
@@ -46,7 +45,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
   const totalItems = useMemo(() => {
     return Array.isArray(cartItems)
       ? cartItems.reduce(
-        (sum: number, item: any) => sum + (Number(item?.quantity) || 0),
+        (sum, item) => sum + (Number(item?.quantity) || 0),
         0
       )
       : 0;
@@ -70,7 +69,6 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
 
   const subtotalRef = useRef<HTMLDivElement | null>(null);
   const checkoutBtnRef = useRef<HTMLButtonElement | null>(null);
-  const [checkoutNudge, setCheckoutNudge] = useState(false);
 
   // Red curved arrow & traveling spark animation for clear direction
   const drawCheckoutGuide = () => {
@@ -250,13 +248,10 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
 
     const runGuide = () => {
       if (!visible) return;
-      setCheckoutNudge(true);
 
       window.setTimeout(() => {
         drawCheckoutGuide();
       }, 120);
-
-      window.setTimeout(() => setCheckoutNudge(false), 1200);
     };
 
     window.addEventListener("kw:cart-opened", runGuide);
@@ -272,11 +267,11 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
 
   // view_cart: each time the drawer opens with items in it
   useEffect(() => {
-    if (visible) kwTrackViewCart(cartItems as any[]);
+    if (visible) kwTrackViewCart(cartItems);
   }, [visible, cartItems]);
 
   const handleCheckout = () => {
-    const items = kwCartItems(cartItems as any[]);
+    const items = kwCartItems(cartItems);
 
     kwPushBeginCheckout({
       currency: "BDT",
@@ -360,8 +355,8 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
           <ScrollArea className="flex-1 px-3 sm:px-4 py-2.5 overflow-y-auto">
             {totalItems > 0 ? (
               <div className="space-y-2 pb-1">
-                {cartItems.map((item: any, idx: number) => {
-                  const product = item?.product || {};
+                {cartItems.map((item, idx) => {
+                  const product = item?.product;
                   const size = item?.selectedSize || "";
                   const itemPrice = Number(item?.selectedPrice || 0);
                   const linePrice = itemPrice * Number(item?.quantity || 1);

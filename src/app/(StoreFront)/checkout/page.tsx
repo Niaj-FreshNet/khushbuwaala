@@ -11,14 +11,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   ShieldCheck,
   Truck,
-  CreditCard,
-  Phone,
   Loader2,
   ChevronDown,
   ChevronsUpDown,
   Check,
   Tag,
-  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -44,6 +41,10 @@ import { districtAliases, districts } from "./_components/districts";
 const districtsDhakaFirst = [...districts].sort((a, b) => (a.en === "Dhaka" ? -1 : b.en === "Dhaka" ? 1 : 0));
 import { useAuth } from "@/redux/store/hooks/useAuth";
 import { useGetUserProfileQuery } from "@/redux/store/api/user/userApi";
+import { type CartItem, findCartVariant } from "@/types/cart.types";
+import type { ApiEnvelope, DiscountCheck } from "@/types/order.types";
+import type { CreateOrderPayload } from "@/redux/store/api/order/ordersApi";
+import { apiErrorMessage } from "@/lib/apiError";
 import Link from "next/link";
 import { MdArrowOutward } from "react-icons/md";
 
@@ -57,17 +58,13 @@ type DiscountLabel =
 
 type DistrictSource = "auto" | "manual" | null;
 
-function normalizeLines(p: any) {
-  const productDoc = p?.product || p;
-  const [sizeValue, sizeUnit] = String(p?.selectedSize || "").split(" ");
+// One cart line with its prices worked out: the regular price of the chosen size, the price the
+// customer was shown (sale already taken off), and what the line saves.
+function normalizeLines(p: CartItem) {
+  const productDoc = p?.product;
+  const matchedVariant = findCartVariant(p);
 
-  const matchedVariant = productDoc?.variants?.find(
-    (v: any) =>
-      Number(v.size) === Number(sizeValue) &&
-      String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
-  );
-
-  const originalUnit = Number(matchedVariant?.price ?? p?.price ?? 0);
+  const originalUnit = Number(matchedVariant?.price ?? 0);
   const finalUnit = Number(p?.selectedPrice ?? originalUnit);
   const qty = Math.max(1, Number(p?.quantity || 1));
 
@@ -187,7 +184,7 @@ export default function CheckoutPage() {
   const userInteractedRef = useRef<Record<string, boolean>>({});
 
   useEffect(() => {
-    const profile = (profileData as any)?.data || profileData;
+    const profile = profileData;
     const userToApply = profile || authUser;
 
     if (!userToApply || hasHydratedRef.current) return;
@@ -291,20 +288,12 @@ export default function CheckoutPage() {
   useEffect(() => setMounted(true), []);
 
   const itemsToDisplay = useMemo(() => {
-    if (checkoutMode && checkoutItem) {
-      const item = checkoutItem as any;
-      return [
-        {
-          ...item,
-          cartItemId: item.cartItemId ?? item.id ?? item._id ?? item.productId,
-        },
-      ];
-    }
-    return (Array.isArray(cartItems) ? cartItems : []).map((it: any) => ({
-      ...it,
-      cartItemId: it.cartItemId ?? it.id ?? it._id ?? it.productId,
-    }));
+    if (checkoutMode && checkoutItem) return [checkoutItem];
+    return Array.isArray(cartItems) ? cartItems : [];
   }, [checkoutMode, checkoutItem, cartItems]);
+
+  const itemCount = itemsToDisplay.reduce((acc, it) => acc + (it?.quantity || 1), 0);
+  const itemCountLabel = `${itemCount} ${itemCount === 1 ? "item" : "items"}`;
 
   useEffect(() => {
     if (districtSource === "manual") return;
@@ -322,6 +311,9 @@ export default function CheckoutPage() {
       setDistrictSource(null);
       setDistrictQuery("");
     }
+    // Only when the address text changes: this guesses the district from what was typed, and
+    // must not run again (and undo the customer's own choice) when the district itself changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address]);
 
   useEffect(() => {
@@ -389,34 +381,25 @@ export default function CheckoutPage() {
 
   const analyticsItems = useMemo(() => {
     return itemsToDisplay
-      .map((product: any) => {
-        const p = product?.product || product;
-        const productId =
-          product?.product?.id ||
-          product?.product?._id ||
-          product?.productId ||
-          product?.product?.productId;
+      .flatMap((product) => {
+        const p = product?.product;
+        const productId = p?.id;
 
-        const productName = p?.name || product?.name || "Product";
+        const productName = p?.name || "Product";
         const brand = p?.brand || "Khushbuwaala";
         const category = kwCategoryName(p);
         const variant = product?.selectedSize
           ? String(product.selectedSize).trim().toUpperCase()
           : undefined;
 
-        const [sizeValue, sizeUnit] = String(product?.selectedSize || "").split(" ");
-        const matchedVariant = product?.product?.variants?.find(
-          (v: any) =>
-            Number(v.size) === Number(sizeValue) &&
-            String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
-        );
+        const matchedVariant = findCartVariant(product);
 
-        const price = Number(product?.selectedPrice ?? matchedVariant?.price ?? product?.price ?? 0);
+        const price = Number(product?.selectedPrice ?? matchedVariant?.price ?? 0);
         const quantity = Math.max(1, Number(product?.quantity || 1));
 
-        if (!productId) return null;
+        if (!productId) return [];
 
-        return {
+        return [{
           item_id: String(productId),
           item_name: String(productName),
           item_brand: String(brand),
@@ -424,9 +407,8 @@ export default function CheckoutPage() {
           item_variant: variant ? String(variant) : undefined,
           price,
           quantity,
-        };
-      })
-      .filter(Boolean) as any[];
+        }];
+      });
   }, [itemsToDisplay]);
 
   const nameRef = useRef<HTMLInputElement | null>(null);
@@ -531,21 +513,13 @@ export default function CheckoutPage() {
   };
 
   const buildDiscountItems = () => {
-    return itemsToDisplay.map((product: any) => {
-      const productDoc = product?.product || product;
-      const [sizeValue, sizeUnit] = String(product?.selectedSize || "").split(" ");
+    return itemsToDisplay.map((product) => {
+      const matchedVariant = findCartVariant(product);
 
-      const matchedVariant = productDoc?.variants?.find(
-        (v: any) =>
-          Number(v.size) === Number(sizeValue) &&
-          String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
-      );
-
-      const originalUnitPrice = Number(matchedVariant?.price ?? product?.price ?? 0);
+      const originalUnitPrice = Number(matchedVariant?.price ?? 0);
       const qty = Math.max(1, Number(product?.quantity || 1));
-      const productId = productDoc?.id || productDoc?._id || product?.productId;
-      const variantId =
-        product?.variantId || product?.selectedVariantId || matchedVariant?.id || matchedVariant?._id;
+      const productId = product?.product?.id;
+      const variantId = matchedVariant?.id;
 
       return {
         productId,
@@ -556,8 +530,8 @@ export default function CheckoutPage() {
     });
   };
 
-  const pickDiscountAmount = (res: any) => {
-    const root = res?.data ?? res;
+  const pickDiscountAmount = (res: ApiEnvelope<DiscountCheck>) => {
+    const root = res?.data;
     // Coupon part only: item prices here already include automatic sale discounts, so using the
     // combined `discountAmount` subtracted the sale twice. (Older API: fall back below.)
     if (root?.couponDiscountAmount !== undefined && root?.couponDiscountAmount !== null) {
@@ -570,21 +544,21 @@ export default function CheckoutPage() {
     return orderPart;
   };
 
-  const pickDiscountInfo = (res: any): DiscountLabel => {
-    const root = res?.data ?? res;
+  const pickDiscountInfo = (res: ApiEnvelope<DiscountCheck>): DiscountLabel => {
+    const root = res?.data;
     const od = root?.orderDiscount;
     if (od?.type && typeof od?.value === "number") {
       return { type: od.type, value: Number(od.value) };
     }
     const items = root?.items ?? [];
     for (const it of items) {
-      const promo = (it?.appliedDiscounts ?? []).find((d: any) => d?.code);
+      const promo = (it?.appliedDiscounts ?? []).find((d) => d?.code);
       if (promo?.type && typeof promo?.value === "number") {
         return { type: promo.type, value: Number(promo.value) };
       }
     }
     for (const it of items) {
-      const auto = (it?.appliedDiscounts ?? []).find((d: any) => !d?.code);
+      const auto = (it?.appliedDiscounts ?? []).find((d) => !d?.code);
       if (auto?.type && typeof auto?.value === "number") {
         return { type: auto.type, value: Number(auto.value) };
       }
@@ -634,9 +608,8 @@ export default function CheckoutPage() {
       setCouponDiscount(discountAmount);
       setDiscountInfo(info);
       toast.success(`Promo applied: -${formatBDT(discountAmount)}`);
-    } catch (e: any) {
-      const msg = e?.data?.message || e?.error || "Failed to apply coupon. Please try again.";
-      toast.error(msg);
+    } catch (e) {
+      toast.error(apiErrorMessage(e, "Failed to apply coupon. Please try again."));
     }
   };
 
@@ -655,6 +628,9 @@ export default function CheckoutPage() {
       }
     };
     revalidate();
+    // Runs when the items or the coupon change. The helpers used inside are made again on every
+    // render, so listing them here would repeat the check without end.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemsToDisplay, appliedPromoCode]);
 
   const handleSubmit = async () => {
@@ -684,26 +660,20 @@ export default function CheckoutPage() {
       // Only create in DB if this order was not already created in this session
       if (!orderId || !payToken) {
         const cartItemIds = itemsToDisplay
-          .map((item: any) => item.cartItemId)
-          .filter(Boolean) as string[];
+          .map((item) => item.cartItemId)
+          .filter((id): id is string => Boolean(id));
 
-        const items = itemsToDisplay.map((item: any) => {
-          const productDoc = item?.product || item;
-          const [sizeValue, sizeUnit] = String(item?.selectedSize || "").split(" ");
+        const items = itemsToDisplay.map((item) => {
+          const productDoc = item?.product;
+          const matchedVariant = findCartVariant(item);
 
-          const matchedVariant = productDoc?.variants?.find(
-            (v: any) =>
-              Number(v.size) === Number(sizeValue) &&
-              String(v.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
-          );
-
-          const originalPrice = Number(matchedVariant?.price ?? productDoc?.price ?? item?.price ?? 0);
+          const originalPrice = Number(matchedVariant?.price ?? productDoc?.price ?? 0);
           const selectedPrice = Number(item?.selectedPrice ?? originalPrice);
 
           return {
-            cartItemId: item?.cartItemId || item?.id || undefined,
-            productId: productDoc?.id || productDoc?._id || item?.productId,
-            variantId: item?.variantId || matchedVariant?.id || undefined,
+            cartItemId: item?.cartItemId || undefined,
+            productId: productDoc?.id,
+            variantId: matchedVariant?.id || undefined,
             quantity: Math.max(1, Number(item?.quantity || 1)),
             price: selectedPrice,
             originalPrice: originalPrice,
@@ -718,7 +688,7 @@ export default function CheckoutPage() {
       };
 
       // Inside payload object definition:
-      const payload: any = {
+      const payload: CreateOrderPayload = {
         cartItemIds,
         items,
         amount: total,
@@ -747,11 +717,11 @@ export default function CheckoutPage() {
             },
         };
 
-        const res: any = await handleCreateOrder(payload);
+        const res = await handleCreateOrder(payload);
         proceedToCartCheckout();
 
-        orderId = res?.data?.id || res?.id;
-        payToken = res?.data?.payToken || res?.payToken;
+        orderId = res?.data?.id;
+        payToken = res?.data?.payToken;
 
         if (orderId && payToken && paymentMethod === "online") {
           pendingOrderRef.current = { orderId, payToken };
@@ -804,10 +774,10 @@ export default function CheckoutPage() {
         window.location.href = paymentRes.paymentUrl;
         return;
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Order Submission Error:", err);
       setSubmitStep("error");
-      toast.error(err?.data?.message || err?.message || "Failed to place order. Please try again.");
+      toast.error(apiErrorMessage(err, "Failed to place order. Please try again."));
     } finally {
       isSubmittingRef.current = false;
       if (submitStepRef.current !== "redirecting" && submitStepRef.current !== "done") {
@@ -830,7 +800,7 @@ export default function CheckoutPage() {
   function scrollToField(el: HTMLElement | null) {
     if (!el) return;
     el.scrollIntoView({ behavior: "smooth", block: "center" });
-    setTimeout(() => (el as any)?.focus?.(), 300);
+    setTimeout(() => el.focus?.(), 300);
   }
 
   // True once the real form is on the page (not the placeholder, not the empty-cart message)
@@ -962,7 +932,7 @@ export default function CheckoutPage() {
               <div className="flex items-center gap-2 text-left">
                 <span className="text-xs font-semibold text-gray-700">Order Items & Summary</span>
                 <span className="text-xs bg-gray-100 text-gray-700 font-semibold px-2 py-0.5 rounded-full">
-                  {(() => { const n = itemsToDisplay.reduce((acc: number, it: any) => acc + (it?.quantity || 1), 0); return `${n} ${n === 1 ? "item" : "items"}`; })()}
+                  {itemCountLabel}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -973,12 +943,12 @@ export default function CheckoutPage() {
 
             {isMobileSummaryOpen && (
               <div className="mt-1 sm:mt-2 p-2.5 sm:p-3.5 bg-white rounded-xl border border-gray-200 space-y-3 animate-in fade-in-50 duration-150">
-                {itemsToDisplay.map((product: any, idx: number) => {
-                  const { productDoc, qty, finalUnit, lineFinal, lineOriginal, save, hasDiscount } = normalizeLines(product);
+                {itemsToDisplay.map((product, idx) => {
+                  const { productDoc, qty, lineFinal, lineOriginal, save, hasDiscount } = normalizeLines(product);
                   return (
                     <div key={`${productDoc?.id}-${idx}`} className="flex gap-3 items-center">
                       <div className="relative w-12 h-14 rounded-md overflow-hidden bg-gray-100 shrink-0 border">
-                        <Image src={productDoc?.primaryImage} alt={productDoc?.name || "product"} fill className="object-cover" />
+                        <Image src={productDoc?.primaryImage || "/placeholder.png"} alt={productDoc?.name || "product"} fill className="object-cover" />
                       </div>
                       <div className="flex-1 min-w-0 text-xs">
                         <p className="font-semibold text-gray-800 truncate">{productDoc?.name}</p>
@@ -1442,18 +1412,18 @@ export default function CheckoutPage() {
                 <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                   <h3 className="text-sm font-bold text-gray-900">Order Summary</h3>
                   <span className="text-xs bg-gray-100 text-gray-700 font-semibold px-2 py-0.5 rounded-full">
-                    {(() => { const n = itemsToDisplay.reduce((acc: number, it: any) => acc + (it?.quantity || 1), 0); return `${n} ${n === 1 ? "item" : "items"}`; })()}
+                    {itemCountLabel}
                   </span>
                 </div>
 
                 {/* Items preview list */}
                 <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
-                  {itemsToDisplay.map((product: any, idx: number) => {
+                  {itemsToDisplay.map((product, idx) => {
                     const { productDoc, qty, lineFinal, lineOriginal, save, hasDiscount } = normalizeLines(product);
                     return (
                       <div key={`${productDoc?.id}-${idx}`} className="flex gap-3 items-center">
                         <div className="relative w-12 h-14 rounded-lg overflow-hidden bg-gray-50 border shrink-0">
-                          <Image src={productDoc?.primaryImage} alt={productDoc?.name} fill className="object-cover" />
+                          <Image src={productDoc?.primaryImage || "/placeholder.png"} alt={productDoc?.name || "product"} fill className="object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-semibold text-gray-900 truncate">{productDoc?.name}</p>

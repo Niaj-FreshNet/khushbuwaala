@@ -6,8 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   ShoppingCart,
   Tag,
-  Shield,
-  Truck,
   Minus,
   Plus,
   Zap,
@@ -16,7 +14,6 @@ import {
   Share2,
   Copy,
   Check,
-  Leaf,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { IProduct, IProductVariant, IDiscount } from "@/types/product.types";
@@ -31,10 +28,8 @@ type Props = {
   discountedPrice: number;
   currentPrice: number;
   quantity: number;
-  isOutOfStock?: boolean;
   selectedSizeLabel: string;
   availableVariants: IProductVariant[];
-  getVariantDiscount: (variant?: IProductVariant) => IDiscount | null;
 
   // handlers (from client)
   onReadMore?: () => void;
@@ -56,10 +51,8 @@ export default function ProductDetailsUI({
   discountedPrice,
   currentPrice,
   quantity,
-  isOutOfStock,
   selectedSizeLabel,
   availableVariants,
-  getVariantDiscount,
   onReadMore,
   onSelectVariant,
   onQtyDec,
@@ -221,7 +214,7 @@ export default function ProductDetailsUI({
                     You save ৳{(currentPrice - discountedPrice).toLocaleString("en-US")}
                   </div>
                   <div className="text-xs text-green-700 leading-tight mt-0.5">
-                    That's {discount.type === "percentage" ? `${Math.round(discount.value)}%` : `৳${discount.value.toLocaleString("en-US")}`} off!
+                    That&apos;s {discount.type === "percentage" ? `${Math.round(discount.value)}%` : `৳${discount.value.toLocaleString("en-US")}`} off!
                   </div>
                 </div>
               </div>
@@ -294,15 +287,6 @@ export default function ProductDetailsUI({
           {availableVariants.map((variant) => {
             const label = `${variant.size} ${variant.unit.toLowerCase()}`;
             const isSelected = selectedVariantId ? variant.id === selectedVariantId : selectedSizeLabel === label;
-
-            const vDiscount = getVariantDiscount(variant);
-            const hasDiscount = !!vDiscount;
-
-            const variantFinalPrice = hasDiscount
-              ? vDiscount.type === "percentage"
-                ? Math.round(variant.price * (1 - vDiscount.value / 100))
-                : Math.max(0, Math.round(variant.price - vDiscount.value))
-              : variant.price;
 
             return (
               <button

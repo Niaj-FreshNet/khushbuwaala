@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { kwDataLayerPush } from "./dataLayerGate";
+import type { CartItem } from "@/types/cart.types";
 
 export type KwEcomItem = {
     item_id: string;
@@ -10,12 +10,6 @@ export type KwEcomItem = {
     price?: number;
     quantity?: number;
 };
-
-declare global {
-    interface Window {
-        dataLayer?: any[];
-    }
-}
 
 function kwEventId() {
     return `${Date.now()}.${Math.random().toString(16).slice(2)}`;
@@ -77,7 +71,7 @@ type KWBeginCheckoutPayload = {
     user_data?: KWUserData
 }
 
-const safeNum = (n: any) => {
+const safeNum = (n: unknown) => {
     const x = Number(n)
     return Number.isFinite(x) ? x : 0
 }
@@ -239,7 +233,7 @@ const metaContents = (items: ReturnType<typeof normalizeItems>) => ({
     num_items: items.reduce((s, i) => s + (i.quantity || 1), 0),
 })
 
-const dlPush = (obj: any) => {
+const dlPush = (obj: Record<string, unknown>) => {
     kwDataLayerPush(obj)
 }
 
@@ -585,9 +579,10 @@ export function kwPushViewCart(payload: { value: number; items: KWItem[] }) {
 }
 
 /** A product's category as a readable name for reports (never the database id). */
-export function kwCategoryName(product: any): string | undefined {
-  const c = product?.category
-  const name = typeof c === "string" ? c : c?.label || c?.categoryName
+export function kwCategoryName(product: unknown): string | undefined {
+  const c = (product as { category?: unknown } | null | undefined)?.category
+  const named = c && typeof c === "object" ? (c as { label?: string; categoryName?: string }) : null
+  const name = typeof c === "string" ? c : named?.label || named?.categoryName
   if (!name) return undefined
   // the admin stores names in capitals ("ORIENTAL ATTAR"); reports read better as "Oriental Attar",
   // and every event then uses the same spelling
@@ -595,9 +590,9 @@ export function kwCategoryName(product: any): string | undefined {
 }
 
 /** Cart lines → analytics items (one place, so every cart event describes items the same way). */
-export function kwCartItems(cartItems: any[]): KWItem[] {
+export function kwCartItems(cartItems: CartItem[]): KWItem[] {
   return (Array.isArray(cartItems) ? cartItems : [])
-    .map((item: any) => ({
+    .map((item) => ({
       item_id: String(item?.product?.id || item?.product?.slug || ""),
       item_name: String(item?.product?.name || ""),
       item_brand: String(item?.product?.brand || "Khushbuwaala"),
@@ -613,7 +608,7 @@ const cartValue = (items: KWItem[]) => items.reduce((s, i) => s + safeNum(i.pric
 
 /** view_cart for the current cart, at most once per cart content per page view. */
 let lastViewCartKey = ""
-export function kwTrackViewCart(cartItems: any[]) {
+export function kwTrackViewCart(cartItems: CartItem[]) {
   const items = kwCartItems(cartItems)
   if (!items.length) return
   const key = items.map((i) => `${i.item_id}|${i.item_variant}|${i.quantity}`).sort().join("~")
@@ -623,7 +618,7 @@ export function kwTrackViewCart(cartItems: any[]) {
 }
 
 /** remove_from_cart for one cart line. */
-export function kwTrackRemoveFromCart(cartItem: any) {
+export function kwTrackRemoveFromCart(cartItem: CartItem) {
   const items = kwCartItems([cartItem])
   if (items.length) kwPushRemoveFromCart({ value: cartValue(items), items })
 }

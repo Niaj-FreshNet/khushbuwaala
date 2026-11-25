@@ -1,6 +1,5 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { CartItem } from "@/types/cart.types"
@@ -14,7 +13,7 @@ interface CartItemCardProps {
 }
 
 export const CartItemCard = ({ item }: CartItemCardProps) => {
-  const { updateQuantity, removeFromCart, calculateTotal } = useCart()
+  const { updateQuantity, removeFromCart } = useCart()
   const [isUpdating, setIsUpdating] = useState(false)
 
   const subtotalPrice = item.selectedPrice * item.quantity

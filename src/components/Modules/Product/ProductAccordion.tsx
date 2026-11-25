@@ -14,7 +14,6 @@ import {
   RotateCcw,
   Send,
   Wind,
-  Layers,
   ShieldCheck,
   Camera,
   X,
@@ -33,8 +32,12 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/redux/store/hooks/useAuth";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { apiErrorMessage } from "@/lib/apiError";
+import { PlainImage } from "@/components/ui/plain-image";
 
-interface ExtendedReview extends IReview {
+// A review as the product page shows it: the reviewer may have no account, and the picture of
+// the reviewer has had three different field names over time.
+type ExtendedReview = Omit<IReview, "title" | "user"> & {
   title?: string;
   imageUrl?: string;
   user?: {
@@ -44,7 +47,7 @@ interface ExtendedReview extends IReview {
     image?: string;
     avatar?: string;
   } | null;
-}
+};
 
 interface ProductAccordionProps {
   product: Partial<IProduct> & {
@@ -228,7 +231,7 @@ export default function ProductAccordion({
 
   const { user } = useAuth();
 
-  const { data, isLoading: loadingReviews, refetch } = useGetProductReviewsQuery(product?.id, {
+  const { data, isLoading: loadingReviews, refetch } = useGetProductReviewsQuery(product?.id ?? "", {
     skip: !product?.id,
   });
 
@@ -325,14 +328,14 @@ export default function ProductAccordion({
         userId: user?.id || null,
         imageUrl: reviewImage || undefined,
         email: !user && newReview.email.trim() ? newReview.email.trim() : undefined,
-      } as any).unwrap();
+      }).unwrap();
 
       setNewReview({ rating: 5, name: "", email: "", comment: "" });
       setReviewImage("");
       toast.success("Thank you! Review submitted successfully.");
       await refetch();
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to submit review.");
+    } catch (err) {
+      toast.error(apiErrorMessage(err, "Failed to submit review."));
     } finally {
       setSubmitting(false);
     }
@@ -719,7 +722,7 @@ export default function ProductAccordion({
 
                 {reviewImage ? (
                   <div className="relative group inline-block">
-                    <img
+                    <PlainImage
                       src={reviewImage}
                       alt="Review preview"
                       className="w-12 h-12 rounded-lg object-cover border border-gray-200"
@@ -813,7 +816,7 @@ export default function ProductAccordion({
                     <div className="flex items-start gap-3">
                       <div className="shrink-0">
                         {hasRealCustomAvatar ? (
-                          <img
+                          <PlainImage
                             src={rawImageUrl}
                             alt={displayName}
                             className="w-9 h-9 rounded-full object-cover border border-emerald-100 shadow-2xs"
@@ -875,7 +878,7 @@ export default function ProductAccordion({
                               onClick={() => setPreviewImage(rev.imageUrl!)}
                               className="group relative block overflow-hidden rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
                             >
-                              <img
+                              <PlainImage
                                 src={rev.imageUrl}
                                 alt="Review attachment"
                                 className="h-16 w-16 sm:h-20 sm:w-20 object-cover transition-transform duration-200 group-hover:scale-105 cursor-zoom-in"

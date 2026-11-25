@@ -23,7 +23,9 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import StoreContainer from "@/components/Layout/StoreContainer";
 import { useCart } from "@/redux/store/hooks/useCart";
-import { CartItem } from "@/types/cart.types";
+import { type CartItem, findCartVariant } from "@/types/cart.types";
+import type { ApiEnvelope, DiscountCheck } from "@/types/order.types";
+import { apiErrorMessage, serverMessage } from "@/lib/apiError";
 import { CartItemCard } from "@/components/Modules/Home/CartItemCard";
 import { DesktopCartTable } from "@/components/Modules/Cart/DesktopCartTable";
 import { kwPushBeginCheckout, kwCartItems, kwTrackViewCart } from "@/lib/Analytics/kwEcom";
@@ -110,7 +112,7 @@ export default function CartPage() {
   const subtotal = useMemo(() => {
     if (!Array.isArray(cartItems) || cartItems.length === 0) return 0;
 
-    return cartItems.reduce((sum: number, item: any) => {
+    return cartItems.reduce((sum, item) => {
       const direct = Number(item?.selectedPrice);
       const priceFromSelected = Number.isFinite(direct) ? direct : null;
 
@@ -118,75 +120,58 @@ export default function CartPage() {
         return sum + priceFromSelected * (Number(item?.quantity) || 1);
       }
 
-      const [sizeValue, sizeUnit] = String(item?.selectedSize || "").split(" ");
-      const matchedVariant = item?.product?.variants?.find(
-        (v: any) =>
-          Number(v?.size) === Number(sizeValue) &&
-          String(v?.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
-      );
-
-      const selectedPrice = Number(matchedVariant?.price) || 0;
+      const selectedPrice = Number(findCartVariant(item)?.price) || 0;
       return sum + selectedPrice * (Number(item?.quantity) || 1);
     }, 0);
   }, [cartItems]);
 
   // view_cart: when the cart page shows items
   useEffect(() => {
-    kwTrackViewCart(cartItems as any[]);
+    kwTrackViewCart(cartItems);
   }, [cartItems]);
 
   const totalItems = useMemo(() => {
     if (!Array.isArray(cartItems)) return 0;
     return cartItems.reduce(
-      (sum: number, item: any) => sum + (Number(item?.quantity) || 0),
+      (sum, item) => sum + (Number(item?.quantity) || 0),
       0
     );
   }, [cartItems]);
 
   const buildDiscountItems = () => {
-    return (cartItems || []).map((item: any) => {
-      const [sizeValue, sizeUnit] = String(item?.selectedSize || "").split(" ");
-
-      const matchedVariant = item?.product?.variants?.find(
-        (v: any) =>
-          Number(v?.size) === Number(sizeValue) &&
-          String(v?.unit || "").toLowerCase() === String(sizeUnit || "").toLowerCase()
-      );
+    return (cartItems || []).map((item) => {
+      const matchedVariant = findCartVariant(item);
 
       // Regular size price: the coupon check applies the automatic sale itself (selectedPrice is
       // already the sale price, so sending it took the sale off twice).
       const price = Number(matchedVariant?.price ?? item?.selectedPrice ?? 0);
       const qty = Number(item?.quantity || 1);
-      const productId = item?.product?.id || item?.product?._id || item?.productId;
-      const variantId =
-        item?.variantId ||
-        item?.selectedVariantId ||
-        matchedVariant?.id ||
-        matchedVariant?._id;
+      const productId = item?.product?.id;
+      const variantId = matchedVariant?.id;
 
       return { productId, variantId, price, qty };
     });
   };
 
   // Coupon part only: the subtotal already uses sale prices. (Older API: total discount.)
-  const pickDiscountAmount = (res: any) => {
-    const root = res?.data ?? res;
+  const pickDiscountAmount = (res: ApiEnvelope<DiscountCheck>) => {
+    const root = res?.data;
     if (root?.couponDiscountAmount !== undefined && root?.couponDiscountAmount !== null) {
       return Math.max(0, Number(root.couponDiscountAmount) || 0);
     }
     return Number(root?.discountAmount ?? 0);
   };
 
-  const pickDiscountInfo = (res: any): DiscountLabel => {
-    const items = res?.data?.items ?? res?.items ?? [];
+  const pickDiscountInfo = (res: ApiEnvelope<DiscountCheck>): DiscountLabel => {
+    const items = res?.data?.items ?? [];
     for (const it of items) {
-      const promo = (it?.appliedDiscounts ?? []).find((d: any) => d?.code);
+      const promo = (it?.appliedDiscounts ?? []).find((d) => d?.code);
       if (promo?.type && typeof promo?.value === "number") {
         return { type: promo.type, value: Number(promo.value) };
       }
     }
     for (const it of items) {
-      const auto = (it?.appliedDiscounts ?? []).find((d: any) => !d?.code);
+      const auto = (it?.appliedDiscounts ?? []).find((d) => !d?.code);
       if (auto?.type && typeof auto?.value === "number") {
         return { type: auto.type, value: Number(auto.value) };
       }
@@ -238,9 +223,8 @@ export default function CartPage() {
       setDiscountInfo(info);
       setCouponCode("");
       toast.success(`Coupon applied: -${formatBDT(discountAmount)}`);
-    } catch (e: any) {
-      const msg = e?.data?.message || e?.error || "Failed to apply coupon.";
-      toast.error(msg);
+    } catch (e) {
+      toast.error(apiErrorMessage(e, "Failed to apply coupon."));
     }
   };
 
@@ -273,16 +257,18 @@ export default function CartPage() {
         }).unwrap();
         setDiscount(pickDiscountAmount(res));
         setDiscountInfo(pickDiscountInfo(res));
-      } catch (e: any) {
+      } catch (e) {
         // Drop the coupon only when the shop says it no longer applies, not when the
         // connection failed for a moment.
         setDiscount(0);
         setDiscountInfo(null);
-        if (e?.data?.message) clearAppliedCouponCode();
+        if (serverMessage(e)) clearAppliedCouponCode();
       }
     };
 
     revalidate();
+    // Runs when the cart or the coupon changes. The helpers used inside are made again on every
+    // render, so listing them here would repeat the check without end.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted, cartItems, appliedCouponCode]);
 
@@ -290,7 +276,7 @@ export default function CartPage() {
     if (checkoutClicked) return;
     setCheckoutClicked(true);
 
-    const items = kwCartItems(cartItems as any[]);
+    const items = kwCartItems(cartItems);
 
     kwPushBeginCheckout({
       currency: "BDT",

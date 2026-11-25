@@ -1,10 +1,11 @@
 "use client";
 
 import React, { forwardRef, useMemo } from "react";
+import type { DiscountCheck, Order } from "@/types/order.types";
 
 type Props = {
-  order: any;
-  discountBreakdown?: any;
+  order: Order;
+  discountBreakdown?: DiscountCheck | null;
 };
 
 const formatBDT = (n: number) =>
@@ -35,16 +36,12 @@ const InvoiceDocument = forwardRef<HTMLDivElement, Props>(
     const totalOrderDiscount = Math.max(0, Number(order?.discountAmount || 0));
 
     const lines = useMemo(() => {
-      const items = order?.orderItems ?? order?.cartItems ?? [];
+      const items = order?.orderItems ?? [];
 
-      return items.map((it: any, idx: number) => {
+      return items.map((it, idx) => {
         const qty = Math.max(1, Number(it.quantity || 1));
-        const productId = String(
-          it.productId || it.product?.id || it.product?._id || ""
-        );
-        const variantId = String(
-          it.variantId || it.variant?.id || it.variant?._id || ""
-        );
+        const productId = String(it.productId || it.product?.id || "");
+        const variantId = String(it.variantId || it.variant?.id || "");
 
         const key = `${productId}__${variantId}`;
         const itemDiscountInfo = breakdownItemMap.get(key);
@@ -71,15 +68,12 @@ const InvoiceDocument = forwardRef<HTMLDivElement, Props>(
         const sizeLabel =
           size && unit
             ? `${size} ${String(unit).toUpperCase()}`
-            : it.selectedSize || "N/A";
+            : "N/A";
 
         return {
           id: it.id || `${productId}-${variantId}-${idx}`,
           name: it.product?.name || it.name || "Product",
-          image:
-            it.product?.primaryImage ||
-            it.product?.imageUrl ||
-            "/placeholder.png",
+          image: it.product?.primaryImage || "/placeholder.png",
           sizeLabel,
           qty,
           unitOriginal,
@@ -228,6 +222,8 @@ const InvoiceDocument = forwardRef<HTMLDivElement, Props>(
                   >
                     <td className="py-3 px-3">
                       <div className="flex items-center gap-3">
+                        {/* A plain <img>: the PDF maker copies this page and needs the picture itself,
+                            with crossOrigin, which the shop's optimised image component does not give. */}
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={x.image}

@@ -36,15 +36,9 @@ function Badge({
 
   // When asChild is true, we can't pass event handlers to Client Components
   if (asChild) {
-    // Extract event handlers from props to avoid passing them to Slot
-    const { 
-      onClick, 
-      onMouseEnter, 
-      onMouseLeave, 
-      onFocus, 
-      onBlur,
-      ...restProps 
-    } = props
+    // Event handlers are left out: they cannot be handed through Slot to a Client Component
+    const dropped = new Set(["onClick", "onMouseEnter", "onMouseLeave", "onFocus", "onBlur"])
+    const restProps = Object.fromEntries(Object.entries(props).filter(([key]) => !dropped.has(key)))
     return (
       <Comp
         data-slot="badge"

@@ -5,7 +5,7 @@ import { useState, useRef } from "react"
 import type React from "react"
 import { SectionTitle } from "./SectionTitle"
 import { ProductCard } from "@/components/ReusableUI/ProductCard"
-import { IProductResponse } from "@/types/product.types"
+import type { ProductCardProduct } from "@/types/product.types"
 
 import dynamic from "next/dynamic"
 // REMOVE: import { motion, useInView, Variants, useReducedMotion } from "framer-motion"
@@ -21,25 +21,23 @@ export function ProductCarouselClient({
   titleVariant = "default",
   titleSubtitle,
   titleIcon,
-  titleUnderlineWidth,
   titleAnimated = true,
   titleShowDecorations = true,
   titleUnderlineVariant = "default",
 }: {
-  products: IProductResponse[]
+  products: ProductCardProduct[]
   title: string
   titleVariant?: "default" | "gradient" | "elegant" | "modern" | "premium"
   titleSubtitle?: string
   titleIcon?: React.ReactNode
-  titleUnderlineWidth?: string
   titleAnimated?: boolean
   titleShowDecorations?: boolean
   titleUnderlineVariant?: "default" | "wide" | "full"
 }) {
-  const [quickViewProduct, setQuickViewProduct] = useState<IProductResponse | null>(null)
+  const [quickViewProduct, setQuickViewProduct] = useState<ProductCardProduct | null>(null)
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false)
 
-  const handleQuickView = (product: IProductResponse) => {
+  const handleQuickView = (product: ProductCardProduct) => {
     setQuickViewProduct(product)
     setIsQuickViewOpen(true)
   }

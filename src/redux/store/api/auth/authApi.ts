@@ -1,9 +1,13 @@
-import { RefreshResponse } from "@/types/auth.types";
+import type { TUser } from "@/types/auth.types";
+import type { ApiEnvelope } from "@/types/order.types";
 import baseApi from "../baseApi";
+
+// The sign-in pass. Most routes send it inside `data`; an older answer had it at the top level.
+type TokenAnswer = ApiEnvelope<{ accessToken?: string; refreshToken?: string } | null> & { accessToken?: string };
 
 const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    logIn: builder.mutation({
+    logIn: builder.mutation<TokenAnswer, { email: string; password: string }>({
       query: ({ email, password }) => ({
         url: '/auth/login',
         method: 'POST',
@@ -12,7 +16,7 @@ const authApi = baseApi.injectEndpoints({
       invalidatesTags: ['Auth'],
     }),
 
-    register: builder.mutation({
+    register: builder.mutation<ApiEnvelope<unknown>, { name: string; email: string; password: string }>({
       query: (formData) => ({
         url: '/auth/register',
         method: 'POST',
@@ -21,7 +25,7 @@ const authApi = baseApi.injectEndpoints({
       invalidatesTags: ['Auth'],
     }),
 
-    forgotPassword: builder.mutation({
+    forgotPassword: builder.mutation<ApiEnvelope<unknown>, { email: string }>({
       query: ({ email }) => ({
         url: '/auth/forgot-password',
         method: 'POST',
@@ -29,7 +33,7 @@ const authApi = baseApi.injectEndpoints({
       }),
     }),
 
-    resetPassword: builder.mutation({
+    resetPassword: builder.mutation<ApiEnvelope<unknown>, { token: string; password: string }>({
       query: ({ token, password }) => ({
         url: `/auth/reset-password/${token}`,
         method: 'POST',
@@ -38,7 +42,7 @@ const authApi = baseApi.injectEndpoints({
       invalidatesTags: ['Auth'],
     }),
 
-    getMeUser: builder.query({
+    getMeUser: builder.query<ApiEnvelope<TUser | null>, void>({
       query: () => ({
         url: '/auth/get-me',
         method: 'GET',
@@ -47,25 +51,16 @@ const authApi = baseApi.injectEndpoints({
       providesTags: ['Auth', 'User'],
     }),
 
-    changePassword: builder.mutation({
-      query: (data) => ({
-        url: '/auth/change-password',
-        method: 'POST',
-        body: data,
-      }),
-      invalidatesTags: ['Auth', 'User'],
-    }),
-
-    refreshToken: builder.mutation<RefreshResponse, void>({
+    refreshToken: builder.mutation<TokenAnswer, void>({
       query: () => ({
         url: "/auth/refresh-token",
         method: "POST",
-        credentials: "include", // if using httpOnly cookies
+        credentials: "include", // the long-lived sign-in cookie
       }),
       invalidatesTags: ['Auth'],
     }),
 
-    userVerification: builder.mutation({
+    userVerification: builder.mutation<TokenAnswer, { email: string; token: string }>({
       query: ({ email, token }) => ({
         url: '/auth/verify-email',
         method: 'POST',
@@ -74,7 +69,7 @@ const authApi = baseApi.injectEndpoints({
       invalidatesTags: ['Auth', 'User'],
     }),
 
-    resendOtp: builder.mutation({
+    resendOtp: builder.mutation<ApiEnvelope<unknown>, { email: string }>({
       query: ({ email }) => ({
         url: '/auth/resend-verify-email-token',
         method: 'POST',
@@ -83,29 +78,11 @@ const authApi = baseApi.injectEndpoints({
       invalidatesTags: ['Auth'],
     }),
 
-    makeAdmin: builder.mutation({
-      query: (payload: { name: string; email: string; password: string }) => ({
-        url: '/auth/make-admin',
-        method: 'POST',
-        body: payload,
-      }),
-      invalidatesTags: ['User'],
-    }),
-
-    makeSalesman: builder.mutation({
-      query: (payload: { name: string; email: string; password: string }) => ({
-        url: '/auth/make-salesman',
-        method: 'POST',
-        body: payload,
-      }),
-      invalidatesTags: ['User'],
-    }),
-
-    logout: builder.mutation({
+    logout: builder.mutation<ApiEnvelope<unknown>, void>({
       query: () => ({
         url: '/auth/logout',
         method: 'POST',
-        credentials: 'include', // needed to clear httpOnly cookie
+        credentials: 'include', // needed to clear the sign-in cookie
       }),
       invalidatesTags: ['Auth', 'User'],
     }),
@@ -118,13 +95,10 @@ export const {
   useRegisterMutation,
   useForgotPasswordMutation,
   useGetMeUserQuery,
-  useChangePasswordMutation,
   useResetPasswordMutation,
   useRefreshTokenMutation,
   useUserVerificationMutation,
   useResendOtpMutation,
-  useMakeAdminMutation,
-  useMakeSalesmanMutation,
   useLogoutMutation,
 } = authApi;
 

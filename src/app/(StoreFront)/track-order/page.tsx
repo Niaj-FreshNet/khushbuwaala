@@ -36,6 +36,7 @@ import {
   Hash,
 } from "lucide-react";
 import { useLazyTrackOrdersQuery } from "@/redux/store/api/order/ordersApi";
+import type { Order } from "@/types/order.types";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const STATUS_STEPS = [
@@ -79,7 +80,7 @@ function TrackOrderContent() {
     }
   };
 
-  const orders: any[] = data?.data || [];
+  const orders: Order[] = data?.data || [];
   const selectedOrder = orders[selectedIndex] || orders[0] || null;
 
   // Update URL param; the useEffect triggers data fetching
@@ -239,7 +240,7 @@ function TrackOrderContent() {
                 <div>
                   <h3 className="font-semibold text-amber-900 text-xs sm:text-sm">No orders found</h3>
                   <p className="text-xs text-amber-700 mt-0.5">
-                    No orders match <span className="font-semibold text-amber-900">"{searchQuery}"</span>. Please
+                    No orders match <span className="font-semibold text-amber-900">&ldquo;{searchQuery}&rdquo;</span>. Please
                     check for typos or search using your mobile number.
                   </p>
                 </div>
@@ -440,11 +441,11 @@ function TrackOrderContent() {
                       <CardTitle className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
                         <Package className="h-3.5 w-3.5 text-emerald-600" />
                         Items (
-                        {selectedOrder.orderItems?.reduce((a: number, b: any) => a + (b.quantity || 1), 0) || 0})
+                        {selectedOrder.orderItems?.reduce((a, b) => a + (b.quantity || 1), 0) || 0})
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-2.5 sm:p-3 divide-y divide-gray-100">
-                      {(selectedOrder.orderItems || []).map((item: any) => {
+                      {(selectedOrder.orderItems || []).map((item) => {
                         const sizePart = item.size || item.variant?.size;
                         const unitPart = item.unit || item.variant?.unit;
                         return (
@@ -509,10 +510,10 @@ function TrackOrderContent() {
                           <span>Delivery Fee</span>
                           <span className="text-gray-900">{formatBDT(selectedOrder.shippingCost || 0)}</span>
                         </div>
-                        {selectedOrder.discountAmount > 0 && (
+                        {(selectedOrder.discountAmount ?? 0) > 0 && (
                           <div className="flex justify-between text-emerald-600 font-medium">
                             <span>Discount</span>
-                            <span>-{formatBDT(selectedOrder.discountAmount)}</span>
+                            <span>-{formatBDT(selectedOrder.discountAmount ?? 0)}</span>
                           </div>
                         )}
                         <Separator />

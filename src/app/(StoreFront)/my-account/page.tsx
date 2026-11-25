@@ -6,7 +6,6 @@ import {
     Package,
     User,
     Lock,
-    MapPin,
     Phone,
     Mail,
     Calendar,
@@ -49,6 +48,9 @@ import Link from "next/link";
 import StoreContainer from "@/components/Layout/StoreContainer";
 import { districtAliases, districts } from "../checkout/_components/districts";
 import { useLogoutMutation } from "@/redux/store/api/auth/authApi";
+import { PlainImage } from "@/components/ui/plain-image";
+import { apiErrorMessage } from "@/lib/apiError";
+import type { Order } from "@/types/order.types";
 
 type TabType = "current-orders" | "purchase-history" | "edit";
 
@@ -118,7 +120,6 @@ export default function ProfileClient() {
     const {
         data: profileData,
         isLoading: loadingProfile,
-        isFetching: fetchingProfile,
         refetch: refetchProfile,
     } = useGetUserProfileQuery(undefined, {
         skip: !authUser,
@@ -157,23 +158,20 @@ export default function ProfileClient() {
         }
     }, [authUser, authLoading, router]);
 
-    const currentUser = (profileData as any)?.data || profileData || authUser;
+    const currentUser = profileData || authUser;
 
-    const orderPayload = (myOrdersResponse as any)?.data;
-    const orders: any[] = Array.isArray(orderPayload?.data)
-        ? orderPayload.data
-        : Array.isArray((myOrdersResponse as any)?.data)
-            ? (myOrdersResponse as any).data
-            : Array.isArray(myOrdersResponse)
-                ? (myOrdersResponse as any)
-                : [];
+    const orderPayload = myOrdersResponse?.data;
+    const orders = useMemo<Order[]>(
+        () => (Array.isArray(orderPayload?.data) ? orderPayload.data : []),
+        [orderPayload]
+    );
 
-    const totalOrders = orderPayload?.totalOrders ?? (myOrdersResponse as any)?.totalOrders ?? orders.length;
+    const totalOrders = orderPayload?.totalOrders ?? orders.length;
 
     // Filter orders & points calculation
     const { currentOrders, purchaseHistory, totalRewardPoints } = useMemo(() => {
-        const current: any[] = [];
-        const history: any[] = [];
+        const current: Order[] = [];
+        const history: Order[] = [];
         let completedSpend = 0;
 
         orders.forEach((order) => {
@@ -244,7 +242,7 @@ export default function ProfileClient() {
 
     const handleLogout = async () => {
         try {
-            await logoutApi({}).unwrap();
+            await logoutApi().unwrap();
         } catch (error) {
             console.error("Logout API failed:", error);
         } finally {
@@ -335,13 +333,13 @@ export default function ProfileClient() {
                     address: profileForm.address.trim(),
                     district: profileForm.district,
                     imageUrl: profileForm.imageUrl || null,
-                } as any,
+                },
             }).unwrap();
 
             toast.success("Profile updated successfully!");
             refetchProfile();
-        } catch (err: any) {
-            toast.error(err?.data?.message || "Failed to update profile.");
+        } catch (err) {
+            toast.error(apiErrorMessage(err, "Failed to update profile."));
         }
     };
 
@@ -393,8 +391,8 @@ export default function ProfileClient() {
             setPasswordErrors({ oldPassword: "", newPassword: "", confirmPassword: "" });
             toast.success("Password changed successfully!");
             setIsPasswordOpen(false);
-        } catch (err: any) {
-            const msg = err?.data?.message || "Failed to update password.";
+        } catch (err) {
+            const msg = apiErrorMessage(err, "Failed to update password.");
             if (msg.toLowerCase().includes("current") || msg.toLowerCase().includes("incorrect")) {
                 setPasswordErrors((prev) => ({ ...prev, oldPassword: msg }));
             } else if (msg.toLowerCase().includes("new")) {
@@ -423,7 +421,7 @@ export default function ProfileClient() {
     };
 
     const renderOrderList = (
-        orderList: any[],
+        orderList: Order[],
         emptyTitle: string,
         emptyDesc: string,
         currentPage: number,
@@ -453,7 +451,7 @@ export default function ProfileClient() {
 
         return (
             <div className="space-y-2.5">
-                {orderList.map((order: any) => {
+                {orderList.map((order) => {
                     const queryParam = order.invoice || order.id;
 
                     return (
@@ -483,7 +481,7 @@ export default function ProfileClient() {
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs text-gray-400 flex items-center gap-1">
                                         <Calendar className="w-3 h-3" />
-                                        {new Date(order.orderTime || order.createdAt).toLocaleDateString("en-GB", {
+                                        {new Date(order.orderTime || order.createdAt || Date.now()).toLocaleDateString("en-GB", {
                                             day: "numeric",
                                             month: "short",
                                             year: "numeric",
@@ -504,11 +502,11 @@ export default function ProfileClient() {
                             </div>
 
                             <div className="divide-y divide-gray-100">
-                                {(order.orderItems || []).map((item: any) => (
+                                {(order.orderItems || []).map((item) => (
                                     <div key={item.id} className="py-1.5 flex items-center justify-between gap-2 text-xs">
                                         <div className="flex items-center gap-2 min-w-0">
                                             {item.product?.primaryImage ? (
-                                                <img
+                                                <PlainImage
                                                     src={item.product.primaryImage}
                                                     alt={item.product?.name}
                                                     className="w-8 h-8 rounded-md object-cover border border-gray-100 shrink-0"
@@ -540,7 +538,7 @@ export default function ProfileClient() {
                                     {/* Without this line the items and delivery did not add up to the total on a coupon order */}
                                     {(() => {
                                         const lines = (order.orderItems || []).reduce(
-                                            (sum: number, it: any) => sum + Number(it.price || 0) * Number(it.quantity || 0),
+                                            (sum, it) => sum + Number(it.price || 0) * Number(it.quantity || 0),
                                             0
                                         );
                                         const saved = Math.round(lines + Number(order.shippingCost || 0) - Number(order.amount || 0));
@@ -611,7 +609,7 @@ export default function ProfileClient() {
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             {currentUser?.imageUrl ? (
-                                <img
+                                <PlainImage
                                     src={currentUser.imageUrl}
                                     alt={currentUser?.name || "Customer"}
                                     className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover border border-emerald-200 shadow-2xs shrink-0"
@@ -824,7 +822,7 @@ export default function ProfileClient() {
                                                     }}
                                                 />
                                                 {profileForm.imageUrl ? (
-                                                    <img
+                                                    <PlainImage
                                                         src={profileForm.imageUrl}
                                                         alt="Avatar"
                                                         className="w-full h-full object-cover"

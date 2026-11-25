@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { fetchDiscovery, parseShopState, slimItem } from "@/lib/discovery"
-import type { IProductResponse } from "@/types/product.types"
 import { ProductCarouselClient } from "./ProductCarouselClient"
 
 // One row of products on the home page, fetched on the server so the products (and their links)
@@ -27,7 +26,7 @@ export async function HomeProductRow({
 
   return (
     <div>
-      <ProductCarouselClient products={products as unknown as IProductResponse[]} title={title} titleVariant="premium" />
+      <ProductCarouselClient products={products} title={title} titleVariant="premium" />
       <div className="-mt-5 mb-8 text-center sm:-mt-6 sm:mb-10">
         <Link
           href={href}

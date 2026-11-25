@@ -1,80 +1,20 @@
-import { TUser } from "@/types/auth.types";
-import baseApi from "../baseApi";;
-
-export interface TMeta {
-    page: number;
-    limit: number;
-    total: number;
-    totalPage: number;
-}
-
-export interface TUserResponse {
-    data: TUser[];
-    meta: TMeta;
-}
+import type { TUser } from "@/types/auth.types";
+import type { ApiEnvelope } from "@/types/order.types";
+import baseApi from "../baseApi";
 
 const userApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
-        getAllUsers: builder.query<TUserResponse, Record<string, any> | void>({
-            query: (params) => ({
-                url: '/user/get-all-users',
-                method: 'GET',
-                params: params || undefined,
-            }),
-            transformResponse: (response: any) => {
-                // Case 1: Backend returns { meta, data: [...] } at the root of response
-                if (response?.meta && Array.isArray(response?.data)) {
-                    return {
-                        data: response.data,
-                        meta: response.meta,
-                    };
-                }
-
-                // Case 2: Backend returns { data: { data: [...], meta: {...} } }
-                if (response?.data?.meta && Array.isArray(response?.data?.data)) {
-                    return {
-                        data: response.data.data,
-                        meta: response.data.meta,
-                    };
-                }
-
-                // Fallback for direct array responses
-                const data = Array.isArray(response?.data) ? response.data : [];
-                return {
-                    data,
-                    meta: {
-                        page: 1,
-                        limit: data.length,
-                        total: data.length,
-                        totalPage: 1,
-                    },
-                };
-            },
-            providesTags: ['User'],
-        }),
-
-        getUserProfile: builder.query({
+        // The signed-in customer's own details.
+        getUserProfile: builder.query<TUser, void>({
             query: () => ({
                 url: '/user/profile',
                 method: 'GET',
             }),
-            transformResponse: (response: { success: boolean; data: any }) => response.data,
+            transformResponse: (response: ApiEnvelope<TUser>) => response.data,
             providesTags: ['User'],
         }),
 
-        getUserById: builder.query<any, string>({
-            query: (id) => ({
-                url: `/user/get-user-by-id/${id}`,
-                method: 'GET',
-            }),
-            transformResponse: (response: any) => response?.data,
-            providesTags: ['User'],
-        }),
-
-        updateUserProfile: builder.mutation<
-            TUser, // response type
-            { id: string; updates: Partial<TUser> } // request type
-        >({
+        updateUserProfile: builder.mutation<ApiEnvelope<TUser>, { id: string; updates: Partial<TUser> }>({
             query: ({ id, updates }) => ({
                 url: `/user/update-profile/${id}`,
                 method: "PATCH",
@@ -83,7 +23,7 @@ const userApi = baseApi.injectEndpoints({
             invalidatesTags: ["User"],
         }),
 
-        changePassword: builder.mutation({
+        changePassword: builder.mutation<ApiEnvelope<unknown>, { oldPassword: string; newPassword: string }>({
             query: (data) => ({
                 url: '/user/change-password',
                 method: 'PATCH',
@@ -96,10 +36,7 @@ const userApi = baseApi.injectEndpoints({
 });
 
 export const {
-    useGetAllUsersQuery,
     useGetUserProfileQuery,
-    useGetUserByIdQuery,
-    useLazyGetUserByIdQuery,
     useUpdateUserProfileMutation,
     useChangePasswordMutation,
 } = userApi;

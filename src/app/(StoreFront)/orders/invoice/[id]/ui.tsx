@@ -8,9 +8,6 @@ import {
     Download,
     ArrowLeft,
     ShoppingBag,
-    CheckCircle2,
-    Clock,
-    Truck,
     Loader2,
 } from "lucide-react";
 import { useGetOrderByIdQuery } from "@/redux/store/api/order/ordersApi";
@@ -18,6 +15,7 @@ import { useApplyDiscountMutation } from "@/redux/store/api/discount/discountApi
 import InvoiceDocument from "@/components/Modules/Orders/InvoiceDocument";
 import StoreContainer from "@/components/Layout/StoreContainer";
 import { useRouter } from "next/navigation";
+import type { DiscountCheck } from "@/types/order.types";
 
 export default function InvoicePageClient({ orderId }: { orderId: string }) {
   const router = useRouter();
@@ -25,7 +23,7 @@ export default function InvoicePageClient({ orderId }: { orderId: string }) {
     const order = data?.data;
 
     const [applyDiscount] = useApplyDiscountMutation();
-    const [discountBreakdown, setDiscountBreakdown] = useState<any>(null);
+    const [discountBreakdown, setDiscountBreakdown] = useState<DiscountCheck | null>(null);
 
     const invoiceRef = useRef<HTMLDivElement>(null);
     const [isDownloading, setIsDownloading] = useState(false);
@@ -43,21 +41,20 @@ export default function InvoicePageClient({ orderId }: { orderId: string }) {
             if (!order?.orderItems?.length) return;
 
             const code = order?.coupon ? String(order.coupon) : undefined;
-            const items = order.orderItems.map((it: any) => ({
-                productId: it.productId || it.product?.id,
-                variantId: it.variantId || it.variant?.id,
+            const items = order.orderItems.map((it) => ({
+                productId: it.productId || it.product?.id || "",
+                variantId: it.variantId || it.variant?.id || undefined,
                 // Regular size price: the discount check applies the sale itself (it.price already has it).
                 price: Number(it.variant?.price ?? it.price ?? 0),
                 qty: Math.max(1, Number(it.quantity || 1)),
             }));
 
-            if (items.some((x: any) => !x.productId || !x.price || x.price <= 0))
+            if (items.some((x) => !x.productId || !x.price || x.price <= 0))
                 return;
 
             try {
                 const res = await applyDiscount({ code, items }).unwrap();
-                const root = (res as any)?.data ?? res;
-                setDiscountBreakdown(root);
+                setDiscountBreakdown(res?.data ?? null);
             } catch {
                 setDiscountBreakdown(null);
             }
@@ -98,11 +95,12 @@ export default function InvoicePageClient({ orderId }: { orderId: string }) {
 
             await new Promise((r) => setTimeout(r, 200));
 
-            await html2pdf()
-                .set({
-                    margin: [10, 10, 10, 10],
+            // Built first and passed as a whole: the library's own types do not list "pagebreak",
+            // which it does support.
+            const pdfOptions = {
+                    margin: [10, 10, 10, 10] as [number, number, number, number],
                     filename: `Invoice-${invoiceNo}.pdf`,
-                    image: { type: "jpeg", quality: 0.95 },
+                    image: { type: "jpeg" as const, quality: 0.95 },
                     html2canvas: {
                         scale: 1.5,
                         useCORS: true,
@@ -111,11 +109,11 @@ export default function InvoicePageClient({ orderId }: { orderId: string }) {
                         logging: false,
                         windowWidth: 794,
                     },
-                    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+                    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" as const },
                     pagebreak: { mode: ["css", "legacy"] },
-                })
-                .from(node)
-                .save();
+            };
+
+            await html2pdf().set(pdfOptions).from(node).save();
 
             document.body.removeChild(wrap);
         } catch (e) {
@@ -145,7 +143,7 @@ export default function InvoicePageClient({ orderId }: { orderId: string }) {
                     </div>
                     <h2 className="text-xl font-bold text-gray-900 mb-1">Invoice Not Found</h2>
                     <p className="text-sm text-gray-500 mb-6">
-                        We couldn't retrieve the details for this order invoice.
+                        We could not retrieve the details for this order invoice.
                     </p>
                     <Button asChild className="bg-green-500 hover:bg-green-600 rounded-xl">
                         <Link href="/shop">Continue Shopping</Link>
@@ -154,8 +152,6 @@ export default function InvoicePageClient({ orderId }: { orderId: string }) {
             </StoreContainer>
         );
     }
-
-    const isDelivered = String(order?.status).toLowerCase() === "delivered";
 
     return (
         <StoreContainer>

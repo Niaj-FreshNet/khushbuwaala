@@ -20,7 +20,6 @@ import {
   type ShopState,
 } from "@/lib/discovery";
 import { kwPushSearch, kwPushSelectItem, kwPushViewItemList } from "@/lib/Analytics/kwEcom";
-import type { IProductResponse } from "@/types/product.types";
 import { siteConfig } from "@/config/site";
 import { FilterPanel } from "./FilterPanel";
 
@@ -34,7 +33,6 @@ type Props = {
   result: DiscoveryResponse | null;
 };
 
-const asProduct = (item: DiscoveryItem) => item as unknown as IProductResponse;
 
 export function ShopView({ basePath, listName, state, locked = {}, result }: Props) {
   const router = useRouter();
@@ -361,7 +359,7 @@ export function ShopView({ basePath, listName, state, locked = {}, result }: Pro
                       }
                     }}
                   >
-                    <ProductCard product={asProduct(item)} onQuickView={() => setQuickView(item)} priority={index < 4} />
+                    <ProductCard product={item} onQuickView={() => setQuickView(item)} priority={index < 4} />
                   </li>
                 ))}
               </ul>
@@ -429,7 +427,7 @@ export function ShopView({ basePath, listName, state, locked = {}, result }: Pro
 
       {quickView && (
         <ProductQuickView
-          product={asProduct(quickView)}
+          product={quickView}
           open={!!quickView}
           onOpenChange={(open: boolean) => {
             if (!open) setQuickView(null);

@@ -3,10 +3,10 @@
 import type React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, ShoppingBag, Heart, MessageCircle, User, LogIn } from "lucide-react"
+import { Home, ShoppingBag, Heart, MessageCircle, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import SearchDrawer from "../Modules/Search/SearchDrawer"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useAuth } from "@/redux/store/hooks/useAuth"
 
 type NavItem = {
@@ -92,8 +92,7 @@ export default function BottomBar() {
   const profileLabel = user ? "Profile" : "Login"
   const profileIcon = user ? <User className="h-5 w-5" /> : <User className="h-5 w-5" />
 
-  const navItems: NavItem[] = useMemo(
-    () => [
+  const navItems: NavItem[] = [
       { key: "home", label: "Home", path: "/", ariaLabel: "Go to homepage", icon: <Home className="h-5 w-5" /> },
       { key: "shop", label: "Shop", path: "/shop", ariaLabel: "Go to shop page", icon: <ShoppingBag className="h-5 w-5" /> },
       { key: "wishlist", label: "Wishlist", path: "/wishlist", ariaLabel: "View wishlist", icon: <Heart className="h-5 w-5" /> },
@@ -105,9 +104,7 @@ export default function BottomBar() {
         ariaLabel: user ? "View profile" : "Log in to your account",
         icon: profileIcon,
       },
-    ],
-    [pathname, isMobileDevice, user, profilePath, profileLabel, profileIcon]
-  )
+  ]
 
   // Product and checkout pages have their own bottom action bar. This check sits after every hook
   // so the number of hooks never changes between pages.

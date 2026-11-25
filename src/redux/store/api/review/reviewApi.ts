@@ -1,18 +1,21 @@
-import { IReview } from "@/types/product.types";
+import type { IReview } from "@/types/product.types";
+import type { ApiEnvelope } from "@/types/order.types";
 import baseApi from "../baseApi";
 
-interface ApiResponse<T> {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  data: T;
-}
+// What the review form sends. A guest may leave an email; a signed-in customer's id is added.
+export type NewReview = {
+  rating: number;
+  title: string;
+  comment: string;
+  productId: string;
+  userId?: string | null;
+  imageUrl?: string;
+  email?: string;
+};
 
-// Define the review API slice
 export const reviewApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // ✅ Create Review (User)
-    createReview: builder.mutation<IReview, Partial<IReview>>({
+    createReview: builder.mutation<ApiEnvelope<IReview>, NewReview>({
       query: (review) => ({
         url: "/review/create-review",
         method: "POST",
@@ -21,53 +24,14 @@ export const reviewApi = baseApi.injectEndpoints({
       invalidatesTags: ["Review"],
     }),
 
-    // ✅ Get All Reviews (Public)
-    getAllReviews: builder.query<IReview[], void>({
-      query: () => "/review/get-all-reviews",
-      providesTags: ["Review"],
-    }),
-
-    // ✅ Get All Reviews (Admin / Super Admin)
-    getAllReviewsAdmin: builder.query<IReview[], void>({
-      query: () => "/review/get-all-reviews/admin",
-      providesTags: ["Review"],
-    }),
-
-    // ✅ Get Product Reviews
-    getProductReviews: builder.query<IReview[], string>({
+    getProductReviews: builder.query<ApiEnvelope<IReview[]>, string>({
       query: (productId) => `/review/get-product-reviews/${productId}`,
       providesTags: (result, error, productId) => [{ type: "Review", id: productId }],
-    }),
-
-    // ✅ Approve / Publish Review (Admin)
-    publishReview: builder.mutation<IReview[], string>({
-      query: (id) => ({
-        url: `/review/publish-review/${id}`,
-        method: "PATCH",
-      }),
-      invalidatesTags: ["Review"],
-    }),
-
-// ✅ Delete Review (Admin)
-    deleteReview: builder.mutation<{ id: string }, string>({
-      query: (id) => ({
-        url: `/review/delete-review/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Review"],
     }),
   }),
   overrideExisting: false,
 });
 
-// ✅ Export hooks for use in components
-export const {
-  useCreateReviewMutation,
-  useGetAllReviewsQuery,
-  useGetAllReviewsAdminQuery,
-  useGetProductReviewsQuery,
-  usePublishReviewMutation,
-  useDeleteReviewMutation,
-} = reviewApi;
+export const { useCreateReviewMutation, useGetProductReviewsQuery } = reviewApi;
 
 export default reviewApi;

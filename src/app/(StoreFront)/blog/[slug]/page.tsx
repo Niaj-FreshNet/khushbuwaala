@@ -16,7 +16,7 @@ async function fetchBlog(slug: string) {
     if (!response.ok) return null;
     const json = await response.json();
     return json?.data || null; // Extracts { blog, relatedBlogs }
-  } catch (error) {
+  } catch {
     return null;
   }
 }

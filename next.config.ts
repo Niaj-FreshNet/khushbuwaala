@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  typescript: { ignoreBuildErrors: true },
+  // typescript: { ignoreBuildErrors: true },
 
   // Deploys build into a side folder (NEXT_DIST_DIR=.next-build) and swap it in when ready, so
   // the running shop keeps its files while the new version is being built.
@@ -33,6 +33,8 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       { source: "/products/:slug", destination: "/product/:slug", permanent: true },
+      // The old order list page: orders are shown in the customer's account.
+      { source: "/orders", destination: "/my-account", permanent: false },
       // Pages taken down on 2026-11-24 (sample content, never real): old links go somewhere useful.
       { source: "/click-collect", destination: "/stores", permanent: false },
       { source: "/news", destination: "/blog", permanent: false },

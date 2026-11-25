@@ -1,23 +1,6 @@
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-function Shimmer({
-  className = "",
-  delay = 0,
-}: {
-  className?: string;
-  delay?: number;
-}) {
-  return (
-    <div
-      className={`animate-pulse ${className}`}
-      style={{ animationDelay: `${delay}ms`, animationDuration: "1350ms" }}
-    >
-      <Skeleton className="w-full h-full" />
-    </div>
-  );
-}
-
 export default function ProductPageLoading() {
   return (
     <>

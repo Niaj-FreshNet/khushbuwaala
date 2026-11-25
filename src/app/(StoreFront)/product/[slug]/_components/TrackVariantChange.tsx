@@ -2,16 +2,11 @@
 
 import { useEffect, useRef } from "react";
 import { kwCategoryName } from "@/lib/Analytics/kwEcom";
+import { kwDataLayerPush } from "@/lib/Analytics/dataLayerGate";
 import { useProductSelection } from "@/context/ProductSelectionContext";
-import type { IProduct } from "@/types/product.types";
+import type { IProduct, IProductVariant } from "@/types/product.types";
 
-declare global {
-  interface Window {
-    dataLayer?: any[];
-  }
-}
-
-function formatVariantLabel(v: any) {
+function formatVariantLabel(v: IProductVariant) {
   if (v?.size != null && v?.unit) return `${v.size}${v.unit}`;
   if (v?.sku) return v.sku;
   if (v?.id) return v.id;
@@ -48,12 +43,10 @@ export default function TrackVariantChange({
 
     const category = kwCategoryName(product);
 
-    window.dataLayer = window.dataLayer || [];
+    // Sent through the shop's gate, so an event made before Tag Manager has started is not lost.
+    kwDataLayerPush({ ecommerce: null });
 
-    // ----- GA4 (your existing push) -----
-    window.dataLayer.push({ ecommerce: null });
-
-    window.dataLayer.push({
+    kwDataLayerPush({
       event: "select_item",
       ecommerce: {
         currency,
@@ -73,9 +66,8 @@ export default function TrackVariantChange({
       },
     });
 
-    // ----- META (NEW) -----
-    // Dedicated event name to trigger Meta tag in GTM
-    window.dataLayer.push({
+    // Meta: its own event name, which the Meta tag in Tag Manager listens for
+    kwDataLayerPush({
       event: "fb_select_variant",
 
       // Meta-friendly params
@@ -100,19 +92,7 @@ export default function TrackVariantChange({
       sku: selectedVariant.sku,
       category: category,
     });
-  }, [
-    selectedVariant?.id,
-    selectedVariant?.price,
-    selectedVariant?.sku,
-    selectedVariant?.size,
-    selectedVariant?.unit,
-    product?.slug,
-    product?.id,
-    product?.name,
-    product?.brand,
-    product?.categoryId,
-    product?.minPrice,
-  ]);
+  }, [selectedVariant, product]);
 
   return null;
 }

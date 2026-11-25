@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Head from "next/head";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Clock, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";

@@ -9,6 +9,7 @@ import React, {
   type ReactNode,
 } from "react";
 import { IProduct, IProductVariant } from "@/types/product.types";
+import { sortVariantsBySize } from "@/lib/productPricing";
 
 interface ProductSelectionContextValue {
   selectedVariant: IProductVariant | null;
@@ -29,19 +30,7 @@ function getDefaultVariant(product: IProduct): IProductVariant | null {
   const variants = Array.isArray(product?.variants) ? product.variants : [];
   if (!variants.length) return null;
 
-  const getNumericSize = (v: any) => {
-    const raw = v?.size ?? v?.title ?? v?.name ?? "";
-    const parsed = parseFloat(String(raw).replace(/[^0-9.]/g, ""));
-    return Number.isFinite(parsed) ? parsed : Infinity;
-  };
-
-  // Sort ascending by numeric size (fallback to price)
-  const sorted = [...variants].sort((a: any, b: any) => {
-    const sA = getNumericSize(a);
-    const sB = getNumericSize(b);
-    if (sA !== sB) return sA - sB;
-    return Number(a?.price ?? 0) - Number(b?.price ?? 0);
-  });
+  const sorted = sortVariantsBySize(variants);
 
   // Pick the 2nd lowest variant (index 1), fallback to index 0 if only 1 exists
   return sorted[1] ?? sorted[0] ?? null;

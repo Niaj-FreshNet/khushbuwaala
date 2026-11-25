@@ -11,6 +11,8 @@ import { z } from 'zod';
 
 import { signUpSchema } from '@/schemas/auth.schema';
 import { useRegisterMutation } from '@/redux/store/api/auth/authApi';
+import { apiErrorMessage } from '@/lib/apiError';
+import type { FieldErrors } from 'react-hook-form';
 import AuthLayout from '@/components/Layout/AuthLayout/AuthLayout';
 import FormInput from '@/components/ReusableUI/FormInput';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -46,20 +48,15 @@ export default function SignUp() {
       await registerUser({ name, email, password }).unwrap();
       toast.success('Account created successfully! Please verify your email.');
       router.push(`/verify-email?email=${encodeURIComponent(email)}`);
-    } catch (error: any) {
-      toast.error(
-        error?.data?.message ||
-        error?.message ||
-        'Sign-up failed. Please try again.'
-      );
+    } catch (error) {
+      toast.error(apiErrorMessage(error, 'Sign-up failed. Please try again.'));
     }
   };
 
-  const onInvalid = (formErrors: any) => {
-    console.error('Validation errors:', formErrors);
-    const firstError = Object.values(formErrors)[0] as any;
+  const onInvalid = (formErrors: FieldErrors<z.infer<typeof signUpSchema>>) => {
+    const firstError = Object.values(formErrors)[0];
     if (firstError?.message) {
-      toast.error(firstError.message);
+      toast.error(String(firstError.message));
     }
   };
 

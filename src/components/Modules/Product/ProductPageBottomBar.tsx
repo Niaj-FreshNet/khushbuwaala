@@ -159,9 +159,9 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
             if (busy) return;
             setIsAdding(true);
             try {
-                flyToCart(e.currentTarget, (product as any)?.primaryImage);
-                cart?.addToCart?.(
-                    product as any,
+                flyToCart(e.currentTarget, product.primaryImage);
+                cart.addToCart(
+                    product,
                     quantity,
                     selectedSize,
                     selectedPrice
@@ -173,10 +173,10 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                     items: [
                         {
                             item_id: String(
-                                (product as any).id || (product as any).slug || product.name
+                                product.id || product.slug || product.name
                             ),
                             item_name: product.name,
-                            item_brand: (product as any).brand || "Khushbuwaala",
+                            item_brand: product.brand || "Khushbuwaala",
                             item_category: kwCategoryName(product),
                             item_variant: selectedSize || undefined,
                             price: Math.round(selectedPrice),
@@ -201,8 +201,8 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
         if (busy) return;
         setIsBuying(true);
         try {
-            cart?.addToCart?.(
-                product as any,
+            cart.addToCart(
+                product,
                 quantity,
                 selectedSize,
                 selectedPrice
@@ -214,10 +214,10 @@ export default function ProductPageBottomBar({ product }: { product: IProduct })
                 items: [
                     {
                         item_id: String(
-                            (product as any).id || (product as any).slug || product.name
+                            product.id || product.slug || product.name
                         ),
                         item_name: product.name,
-                        item_brand: (product as any).brand || "Khushbuwaala",
+                        item_brand: product.brand || "Khushbuwaala",
                         item_category: kwCategoryName(product),
                         item_variant: selectedSize || undefined,
                         price: Math.round(selectedPrice),

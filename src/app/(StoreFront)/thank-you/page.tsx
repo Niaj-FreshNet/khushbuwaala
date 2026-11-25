@@ -25,21 +25,22 @@ import { cn } from "@/lib/utils";
 import StoreContainer from "@/components/Layout/StoreContainer";
 import { kwPushPurchase } from "@/lib/Analytics/kwEcom";
 import { useApplyDiscountMutation } from "@/redux/store/api/discount/discountApi";
+import type { DiscountCheck, Order } from "@/types/order.types";
 
 function formatBDT(amount: number) {
   return ("৳" + (Math.max(0, Math.round(Number(amount || 0)))).toLocaleString("en-US"));
 }
 
-function upper(v: any) {
+function upper(v: unknown) {
   return String(v ?? "").trim().toUpperCase();
 }
 
-function safeStr(v: any, fallback = "N/A") {
+function safeStr(v: unknown, fallback = "N/A") {
   const s = String(v ?? "").trim();
   return s ? s : fallback;
 }
 
-function orderPaymentLabel(method: any) {
+function orderPaymentLabel(method: unknown) {
   const m = String(method ?? "").toLowerCase().replace(/[\s_-]/g, "");
   if (m === "bkash") return "bKash Online Payment";
   if (m.includes("cashondelivery") || m === "cod") return "Cash on Delivery";
@@ -55,8 +56,8 @@ export default function ThankYouPage() {
 
   // The order just placed is kept for this browser tab, so refreshing the page (people often do,
   // or take a screenshot later) still shows it. It is cleared when the tab is closed.
-  const [keptOrder, setKeptOrder] = useState<any>(null);
-  const liveOrder = (orderById as any)?.data || (lastOrder as any)?.data;
+  const [keptOrder, setKeptOrder] = useState<Order | null>(null);
+  const liveOrder: Order | undefined = orderById?.data || lastOrder?.data;
   useEffect(() => {
     try {
       if (liveOrder?.id) {
@@ -64,7 +65,7 @@ export default function ThankYouPage() {
         return;
       }
       const raw = sessionStorage.getItem("kw_last_order");
-      const saved = raw ? JSON.parse(raw) : null;
+      const saved: Order | null = raw ? JSON.parse(raw) : null;
       if (saved?.id && (!queryOrderId || saved.id === queryOrderId)) setKeptOrder(saved);
     } catch {
       // private mode: the page simply shows nothing after a refresh, as before
@@ -74,7 +75,7 @@ export default function ThankYouPage() {
   // Prefer query order > last order > the copy kept for this tab
   const order = liveOrder || keptOrder;
 
-  const [discountBreakdown, setDiscountBreakdown] = useState<any>(null);
+  const [discountBreakdown, setDiscountBreakdown] = useState<DiscountCheck | null>(null);
   const [applyDiscount] = useApplyDiscountMutation();
 
   const [isMobileSummaryOpen, setIsMobileSummaryOpen] = useState(false);
@@ -91,14 +92,14 @@ export default function ThankYouPage() {
 
       const code = order?.coupon ? String(order.coupon) : undefined;
       const items = order.orderItems
-        .map((it: any) => ({
-          productId: it.productId || it.product?.id,
-          variantId: it.variantId || it.variant?.id,
+        .map((it) => ({
+          productId: it.productId || it.product?.id || "",
+          variantId: it.variantId || it.variant?.id || undefined,
           // Regular size price: the discount check applies the sale itself (it.price already has it).
           price: Number(it.variant?.price ?? it.price ?? 0),
           qty: Math.max(1, Number(it.quantity || 1)),
         }))
-        .filter((x: any) => x.productId && x.price > 0 && x.qty > 0);
+        .filter((x) => x.productId && x.price > 0 && x.qty > 0);
 
       if (!items.length) {
         setDiscountBreakdown(null);
@@ -107,14 +108,15 @@ export default function ThankYouPage() {
 
       try {
         const res = await applyDiscount({ code, items }).unwrap();
-        const root = (res as any)?.data ?? res;
-        setDiscountBreakdown(root);
+        setDiscountBreakdown(res?.data ?? null);
       } catch {
         setDiscountBreakdown(null);
       }
     };
 
     run();
+    // Only when the order itself changes: `order` is a new object on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [order?.id, order?.coupon, applyDiscount]);
 
   const breakdownItemMap = useMemo(() => {
@@ -137,7 +139,7 @@ export default function ThankYouPage() {
   const cartItems = useMemo(() => {
     if (!order?.orderItems?.length) return [];
 
-    return order.orderItems.map((item: any) => {
+    return order.orderItems.map((item) => {
       const productId = item.productId || item.product?.id || "";
       const variantId = item.variantId || item.variant?.id || "";
       const key = `${productId}__${variantId}`;
@@ -145,7 +147,7 @@ export default function ThankYouPage() {
       const itemDiscountInfo = breakdownItemMap.get(key);
 
       // 1. Declare originalUnit and discountedUnit
-      let originalUnit = Number(
+      const originalUnit = Number(
         item.originalPrice ?? itemDiscountInfo?.originalPrice ?? item.variant?.price ?? item.price ?? 0
       );
 
@@ -191,6 +193,9 @@ export default function ThankYouPage() {
     });
   }, [order, breakdownItemMap, totalOrderDiscount]);
 
+  const itemCount = cartItems.reduce((acc, it) => acc + (it?.quantity || 1), 0);
+  const itemCountLabel = `${itemCount} ${itemCount === 1 ? "item" : "items"}`;
+
   const totals = useMemo(() => {
     const subtotalOriginal = cartItems.reduce((sum, p) => sum + p.lineOriginal, 0);
     const itemDiscountsSum = cartItems.reduce((sum, p) => sum + p.save, 0);
@@ -233,22 +238,21 @@ export default function ThankYouPage() {
   const purchaseItems = useMemo(() => {
     if (!order?.orderItems?.length) return [];
     return order.orderItems
-      .map((it: any) => {
+      .flatMap((it) => {
         const productId = it?.productId || it?.product?.id;
-        if (!productId) return null;
+        if (!productId) return [];
         const unit = it?.unit || it?.variant?.unit;
         const size = it?.size ?? it?.variant?.size;
         const variantLabel = size && unit ? `${size} ${upper(unit)}` : undefined;
-        return {
+        return [{
           item_id: String(productId),
           item_name: String(it?.product?.name || "Product"),
           item_brand: "Khushbuwaala",
           item_variant: variantLabel,
           price: Number(it?.price ?? 0),
           quantity: Math.max(1, Number(it?.quantity || 1)),
-        };
-      })
-      .filter(Boolean) as any[];
+        }];
+      });
   }, [order]);
 
   useEffect(() => {
@@ -278,10 +282,10 @@ export default function ThankYouPage() {
       coupon: order.coupon ?? undefined,
       user_data: purchaseUserData,
       shipping_data: {
-        email: order.shipping?.email,
-        phone: order.shipping?.phone,
-        name: order.shipping?.name,
-        district: order.shipping?.district,
+        email: order.shipping?.email ?? undefined,
+        phone: order.shipping?.phone ?? undefined,
+        name: order.shipping?.name ?? undefined,
+        district: order.shipping?.district ?? undefined,
       },
       items: purchaseItems,
     });
@@ -357,7 +361,7 @@ export default function ThankYouPage() {
               <div className="flex items-center gap-2 text-left">
                 <span className="text-xs font-semibold text-gray-700">Order Items & Summary</span>
                 <span className="text-xs bg-gray-100 text-gray-700 font-semibold px-2 py-0.5 rounded-full">
-                  {(() => { const n = cartItems.reduce((acc: number, it: any) => acc + (it?.quantity || 1), 0); return `${n} ${n === 1 ? "item" : "items"}`; })()}
+                  {itemCountLabel}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -511,7 +515,7 @@ export default function ThankYouPage() {
                 <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                   <h3 className="text-sm font-bold text-gray-900">Order Summary</h3>
                   <span className="text-xs bg-gray-100 text-gray-700 font-semibold px-2 py-0.5 rounded-full">
-                    {(() => { const n = cartItems.reduce((acc: number, it: any) => acc + (it?.quantity || 1), 0); return `${n} ${n === 1 ? "item" : "items"}`; })()}
+                    {itemCountLabel}
                   </span>
                 </div>
 

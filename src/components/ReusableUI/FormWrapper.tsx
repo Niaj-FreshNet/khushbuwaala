@@ -1,15 +1,17 @@
 'use client';
 
 import { ReactNode, useState } from 'react';
-import { FormProvider, useForm, SubmitHandler } from 'react-hook-form';
+import { FormProvider, useForm, type DefaultValues, type FieldValues, type Resolver } from 'react-hook-form';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { apiErrorMessage } from '@/lib/apiError';
 
-interface FormWrapperProps {
+interface FormWrapperProps<T extends FieldValues> {
   children: ReactNode;
-  onSubmit: SubmitHandler<any>;
+  /** Return `false` to say the submit did not succeed (the form is then not cleared). */
+  onSubmit: (data: T) => unknown | Promise<unknown>;
   onReset?: () => void;
   className?: string;
   submitButtonText?: string;
@@ -17,14 +19,13 @@ interface FormWrapperProps {
   showResetButton?: boolean;
   resetButtonText?: string;
   resetButtonClassName?: string;
-  defaultValues?: Record<string, any>;
-  resolver?: any;
-  successMessage?: string;
+  defaultValues?: DefaultValues<T>;
+  resolver?: Resolver<T>;
   errorMessage?: string;
   resetOnSuccess?: boolean;
 }
 
-export default function FormWrapper({
+export default function FormWrapper<T extends FieldValues = FieldValues>({
   children,
   onSubmit,
   onReset,
@@ -36,27 +37,19 @@ export default function FormWrapper({
   showResetButton = true,
   resetButtonText = 'Reset',
   resetButtonClassName,
-  successMessage = 'Form submitted successfully!',
   errorMessage = 'Failed to submit the form. Please try again.',
   resetOnSuccess = false,
-}: FormWrapperProps) {
+}: FormWrapperProps<T>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const methods = useForm({ defaultValues, resolver });
+  const methods = useForm<T>({ defaultValues, resolver });
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: T) => {
     setIsSubmitting(true);
     try {
       const result = await onSubmit(data);
-      if (result !== false) {
-        // toast.success(successMessage);
-        if (resetOnSuccess) methods.reset();
-      }
-    } catch (error: any) {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        errorMessage;
-      toast.error(message);
+      if (result !== false && resetOnSuccess) methods.reset();
+    } catch (error) {
+      toast.error(apiErrorMessage(error, errorMessage));
       console.error('Form submission failed:', error);
     } finally {
       setIsSubmitting(false);

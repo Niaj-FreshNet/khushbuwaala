@@ -6,6 +6,7 @@ import * as React from "react"
 import Autoplay from "embla-carousel-autoplay"
 import {
   Carousel,
+  type CarouselApi,
   CarouselContent,
   CarouselItem,
   CarouselNext,
@@ -27,7 +28,7 @@ export function CarouselSlider({ slides }: { slides: HeroSlide[] }) {
   const shape = heroBoxShape(slides)
   const single = slides.length < 2
 
-  const [api, setApi] = React.useState<any>(null)
+  const [api, setApi] = React.useState<CarouselApi | null>(null)
   const [active, setActive] = React.useState(0)
   const [snapCount, setSnapCount] = React.useState(slides.length)
 

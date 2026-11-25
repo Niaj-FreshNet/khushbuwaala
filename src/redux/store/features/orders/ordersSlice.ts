@@ -1,54 +1,17 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import type { RootState } from '../../store'
-import type { Product } from '@/lib/Data/data'
-import { IOrderResponse, orderApi } from '../../api/order/ordersApi'
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { RootState } from "../../store";
+import type { ApiEnvelope, Order } from "@/types/order.types";
+import { orderApi } from "../../api/order/ordersApi";
 
-// ✅ Define a cart-like item (local order content)
-export interface CartLikeItem extends Product {
-  quantity: number
-  size: string
-  variantPrices?: { [key: string]: number }
-}
+// The order the customer has just placed, kept so the thank-you page can show it straight away.
+// Orders are stored the way the server answered (`{ data: order }`).
+type PlacedOrder = ApiEnvelope<Order>;
 
-// ✅ Define local Order type for checkout
-export interface Order {
-  orderId: string
-  cartItems: CartLikeItem[]
-  subtotal: number
-  discount?: number
-  shippingCost: number
-  estimatedTaxes: number
-  total: number
-  paymentMethod: 'cashOnDelivery' | 'sslCommerz'
-  shippingMethod: 'insideDhaka' | 'outsideDhaka'
-  postStatus: string
-  paymentStatus: string
-  notes?: string
-  promoCode?: string | null
-  contactInfo: { email?: string }
-  shippingAddress: {
-    name: string
-    address: string
-    district: string
-    thana?: string
-    contactNumber: string
-  }
-  billingAddress: {
-    name: string
-    address: string
-    district: string
-    thana?: string
-    contactNumber: string
-  }
-  createdAt?: string
-}
-
-// ✅ Slice state
 interface OrdersState {
-  lastOrder?: Order | IOrderResponse
-  byId: Record<string, Order | IOrderResponse>
-  loading: boolean
-  error?: string
+  lastOrder?: PlacedOrder;
+  byId: Record<string, PlacedOrder>;
+  loading: boolean;
+  error?: string;
 }
 
 const initialState: OrdersState = {
@@ -56,64 +19,46 @@ const initialState: OrdersState = {
   byId: {},
   loading: false,
   error: undefined,
-}
+};
+
+const remember = (state: OrdersState, placed: PlacedOrder) => {
+  state.lastOrder = placed;
+  const id = placed?.data?.id;
+  if (id) state.byId[id] = placed;
+};
 
 const ordersSlice = createSlice({
-  name: 'orders',
+  name: "orders",
   initialState,
   reducers: {
-    setOrder: (state, action: PayloadAction<Order | IOrderResponse>) => {
-      const order = action.payload
-      state.lastOrder = order
-      state.byId[(order as any).orderId || (order as any).id] = order
-    },
-    clearLastOrder: (state) => {
-      state.lastOrder = undefined
+    setOrder: (state, action: PayloadAction<PlacedOrder>) => {
+      remember(state, action.payload);
     },
   },
   extraReducers: (builder) => {
-    // ✅ Create order
     builder
       .addMatcher(orderApi.endpoints.createOrder.matchPending, (state) => {
-        state.loading = true
-        state.error = undefined
+        state.loading = true;
+        state.error = undefined;
       })
       .addMatcher(orderApi.endpoints.createOrder.matchFulfilled, (state, { payload }) => {
-        state.loading = false
-        state.lastOrder = payload
-        state.byId[payload.id] = payload
+        state.loading = false;
+        remember(state, payload);
       })
       .addMatcher(orderApi.endpoints.createOrder.matchRejected, (state, { error }) => {
-        state.loading = false
-        state.error = error?.message || 'Failed to create order'
-      })
-
-    // ✅ Get my orders
-    // builder
-    //   .addMatcher(orderApi.endpoints.getMyOrders.matchFulfilled, (state, { payload }) => {
-    //     payload.forEach((order) => {
-    //       state.byId[order.id] = order
-    //     })
-    //   })
-    builder
-      .addMatcher(orderApi.endpoints.getMyOrders.matchFulfilled, (state, { payload }) => {
-        const ordersArray = payload?.data?.data || [];
-        ordersArray.forEach((order) => {
-          state.byId[order.id] = order;
-        });
+        state.loading = false;
+        state.error = error?.message || "Failed to create order";
       });
   },
-})
+});
 
-export const { setOrder, clearLastOrder } = ordersSlice.actions
+export const { setOrder } = ordersSlice.actions;
 
-// ✅ Selectors
-export const selectLastOrder = (state: RootState) => state.orders.lastOrder
+export const selectLastOrder = (state: RootState) => state.orders.lastOrder;
 export const selectOrderById =
   (orderId: string) =>
-    (state: RootState): Order | IOrderResponse | undefined =>
-      state.orders.byId[orderId]
-export const selectOrderLoading = (state: RootState) => state.orders.loading
-export const selectOrderError = (state: RootState) => state.orders.error
+  (state: RootState): PlacedOrder | undefined =>
+    state.orders.byId[orderId];
+export const selectOrderLoading = (state: RootState) => state.orders.loading;
 
-export default ordersSlice.reducer
+export default ordersSlice.reducer;

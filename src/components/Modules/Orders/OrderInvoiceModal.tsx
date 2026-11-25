@@ -8,12 +8,13 @@ import Link from "next/link";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import type { DiscountCheck, Order } from "@/types/order.types";
 
 interface OrderInvoiceModalProps {
-  order: any;
+  order: Order;
   isInvoiceOpen?: boolean | null;
   setIsInvoiceOpen?: (open: boolean) => void;
-  discountBreakdown?: any;
+  discountBreakdown?: DiscountCheck | null;
 }
 
 export default function OrderInvoiceModal({
@@ -74,7 +75,7 @@ export default function OrderInvoiceModal({
 
   const lines = useMemo(() => {
     const items = order?.orderItems ?? [];
-    return items.map((it: any, idx: number) => {
+    return items.map((it, idx) => {
       const qty = Math.max(1, Number(it.quantity || 1));
       const productId = it.productId || it.product?.id || "";
       const variantId = it.variantId || it.variant?.id || "";
@@ -82,7 +83,7 @@ export default function OrderInvoiceModal({
 
       const itemDiscountInfo = breakdownItemMap.get(key);
 
-      let unitOriginal = Number(
+      const unitOriginal = Number(
         it.originalPrice ?? itemDiscountInfo?.originalPrice ?? it.variant?.price ?? it.price ?? 0
       );
 
@@ -330,7 +331,7 @@ export default function OrderInvoiceModal({
                 <div className="flex justify-end gap-2 items-center">
                   <span className="text-gray-500">Order Status:</span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-                    {formatText(order.status as any)}
+                    {formatText(order.status)}
                   </span>
                 </div>
                 <div className="flex justify-end gap-2 items-center">
@@ -364,6 +365,8 @@ export default function OrderInvoiceModal({
                     <tr key={item.id} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
                       <td className="py-1.5 px-3">
                         <div className="flex items-center gap-2">
+                          {/* A plain <img>: the PDF maker copies this box and needs the picture itself,
+                              with crossOrigin, which the shop's optimised image component does not give. */}
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={item.image}

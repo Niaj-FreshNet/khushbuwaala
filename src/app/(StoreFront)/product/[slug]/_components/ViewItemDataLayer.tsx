@@ -2,21 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import { useProductSelection } from "@/context/ProductSelectionContext";
-import type { IProduct } from "@/types/product.types";
+import type { IProduct, IProductVariant } from "@/types/product.types";
 import { kwDataLayerPush } from "@/lib/Analytics/dataLayerGate";
-
-declare global {
-    interface Window {
-        dataLayer?: any[];
-        __kw_last_view_item?: { key: string; t: number };
-    }
-}
 
 function eventId() {
     return `${Date.now()}.${Math.random().toString(16).slice(2)}`;
 }
 
-function formatVariantLabel(v: any) {
+function formatVariantLabel(v: IProductVariant | null | undefined) {
     // e.g. 6 + ml => "6ml"
     if (v?.size != null && v?.unit) return `${v.size}${v.unit}`;
     if (v?.sku) return v.sku;
@@ -84,7 +77,9 @@ export default function ViewItemDataLayer({
                 ],
             },
         });
-    }, [product.slug]); // intentionally only once per product view
+        // Once per product view on purpose: choosing another size must not send "viewed" again.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [product.slug]);
 
     return null;
 }
