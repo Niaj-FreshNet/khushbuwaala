@@ -371,7 +371,7 @@ export default function CartDrawer({ visible, onClose }: CartDrawerProps) {
                         <Image
                           src={
                             product?.primaryImage ||
-                            "/placeholder.svg?height=64&width=56"
+                            "/placeholder.png"
                           }
                           alt={product?.name || "Product"}
                           fill

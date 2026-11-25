@@ -250,7 +250,7 @@ export function ProductCard({
         {/* Visual Box: aspect-[1/1.05] crops out the redundant bottom white strip from the bottle photo */}
         <div className="relative aspect-square w-full overflow-hidden bg-gray-50/80 shrink-0">
           <Image
-            src={!imageError ? product.primaryImage : "/placeholder.svg?height=256&width=200&text=No+Image"}
+            src={!imageError ? product.primaryImage : "/placeholder.png"}
             alt={product.name}
             fill
             sizes="(max-width:640px) 50vw, (max-width:1200px) 33vw, 20vw"

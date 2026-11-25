@@ -33,7 +33,7 @@ export default function ProductGallery({ product, corner }: ProductGalleryProps)
       const src = x ? String(x) : "";
       if (src && !list.includes(src)) list.push(src);
     }
-    return list.length ? list : ["/default-product-image.jpg"];
+    return list.length ? list : ["/placeholder.png"];
   }, [product.primaryImage, product.otherImages, variants]);
 
   const [activeIdx, setActiveIdx] = useState(0);

@@ -38,7 +38,7 @@ export const CartItemCard = ({ item }: CartItemCardProps) => {
           <div className="relative">
             <div className="w-20 h-24 md:w-24 md:h-28 rounded-lg overflow-hidden bg-gray-100 group-hover:shadow-lg transition-shadow duration-300">
               <Image
-                src={item.product?.primaryImage || "/placeholder.svg?height=96&width=80"}
+                src={item.product?.primaryImage || "/placeholder.png"}
                 alt={item.product?.name}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"

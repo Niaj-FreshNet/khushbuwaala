@@ -68,7 +68,7 @@ export const DesktopCartTable = ({ items }: DesktopCartTableProps) => {
                 <div className="col-span-5 flex items-center gap-3 min-w-0">
                   <div className="relative w-14 h-16 sm:w-16 sm:h-20 shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-100">
                     <Image
-                      src={item.product?.primaryImage || "/placeholder.svg?height=96&width=80"}
+                      src={item.product?.primaryImage || "/placeholder.png"}
                       alt={item.product?.name || "Product Image"}
                       fill
                       className="object-cover"

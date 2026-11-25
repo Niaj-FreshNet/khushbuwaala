@@ -29,7 +29,7 @@ export function CategoryCard({
       <div className="relative w-full h-60 sm:h-56 md:h-60 lg:h-64">
         {/* Image */}
         <Image
-          src={CategoryImage || "/placeholder.svg"}
+          src={CategoryImage || "/placeholder.png"}
           alt={CategoryName}
           fill
           sizes="(max-width: 640px) 50vw, 17vw"

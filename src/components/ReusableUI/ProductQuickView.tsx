@@ -24,7 +24,7 @@ interface ProductQuickViewProps {
 }
 
 const MAX_QUANTITY = 10
-const NO_IMAGE = "/placeholder.svg?height=800&width=800&text=No+Image"
+const NO_IMAGE = "/placeholder.png"
 
 // The sign is written by hand: Safari puts it after the number when Intl formats BDT.
 const formatPrice = (price: number) => "৳" + Math.round(Number(price) || 0).toLocaleString("en-US")
