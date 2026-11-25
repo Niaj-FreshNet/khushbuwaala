@@ -347,6 +347,24 @@ Owner's screenshot: with the banner at full page width it was about 660px tall o
 - Measured live in the owner's Chrome, 1920 × 945 window: banner 508px tall, first product picture starts at 662, so 283px of the product row is on the first screen (pictures, names and prices).
 - The three default banner pictures are 3:2 (1177 × 785), so about half their height is trimmed in this box; on the third one the "GET UPTO" line touches the top edge. New artwork at 1920 × 680 with the text in the middle band fits whole.
 
+### Pass 25, 2026-11-25: codebase clean-up (storefront `ab546d7`)
+Owner asked for a clean, error-free codebase (and had switched off "ignore type errors" in `next.config.ts`).
+
+| Check | Before | After |
+| --- | --- | --- |
+| `npm run typecheck` (`tsc --noEmit`) | 36 errors | 0 |
+| `npm run lint` | 206 errors, 71 warnings | 0 (now fails on any warning) |
+| Untyped values (`any`) | about 190, plus two files with the rule switched off | 0 |
+| Files no page reaches | 20 | 0 |
+
+- **Rules from now on:** the build stops on a type error, so run `npm run typecheck` and `npm run lint` before every deploy. No `any`; a lint rule may be switched off for one line only with a comment saying why (8 such lines today: 5 effect dependency lists, 3 plain `<img>`).
+- **Shared types:** `types/order.types.ts` (orders, the discount check, `ApiEnvelope`), `types/cart.types.ts` (`CartProduct`, `findCartVariant`), `ProductCardProduct` in `types/product.types.ts` (what a card or quick view needs; shop results, home rows, similar scents and the wishlist all fit it without casts), `types/global.d.ts` (`window.dataLayer`).
+- **Shared helpers:** `lib/apiError.ts` (`apiErrorMessage(err, fallback)`: the server's reason or the plain fallback, never a technical message), `lib/productPricing.ts` (size order, the running sale for a size), `components/ui/plain-image.tsx` (the one place a plain `<img>` is allowed outside the invoices).
+- **Removed:** the old `/orders` page (its "View details" link led to a page that does not exist; `/orders` now sends to `/my-account`), unused UI parts, sample data, the unused product API and admin-only API calls, unused store actions, the unused cart and wishlist providers (the hooks always used the store directly).
+- **Behaviour that changed on purpose:** the size-change event on the product page now goes through `kwDataLayerPush` (it pushed to `window.dataLayer` directly, which loses early events for Meta); a failed sign-in shows the plain message instead of "Token missing"; the sign-in pass renewal in `useAuth` reads the answer where the server really puts it.
+- **Deploy script:** `~/deploy-storefront.sh` now clears the running version's generated type files before building. Without that, removing a page fails the build (the old files still describe it).
+- **Checked on live (browser simulation at 375px, not a real phone):** home, shop, product page add to cart (saved on the server, `view_item` and `add_to_cart` sent), quick view, cart, checkout with a sale item (৳880 → ৳550, "Save ৳330", totals right), order tracking with the phone lock, `/orders` redirect. **Not checked:** placing an order, the signed-in pages (account, invoice, sign-in, password change) and sending a review.
+
 ### How it was checked
 - Looked at on the local test copy at 320px and 390px (home, shop, product) and at 1440px scaled down (home, product). Not on real phones.
 - Not yet inspected: cart, checkout, thank-you and every other route (see the checklist).
